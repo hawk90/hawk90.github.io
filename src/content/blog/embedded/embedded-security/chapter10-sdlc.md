@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"보안은 *마지막에 검사하는 항목*이 아니라 *처음부터 끝까지 따라가는 프로세스*입니다."** — 출시 직전에 pen test 한 번 받고 마무리하는 것이 가장 흔하고 가장 비싼 실수입니다. 보안은 요구사항·설계·구현·검증·배포·운영의 *모든 단계*에 분산됩니다.
+> **"보안은 *마지막에 검사하는 항목*이 아니라 *처음부터 끝까지 따라가는 프로세스*입니다."** — 출시 직전의 pen test 한 번은 설계에서 정한 key 구조나 update 경로를 바꾸기에 너무 늦습니다. 보안은 요구사항·설계·구현·검증·배포·운영의 *모든 단계*에 분산됩니다.
 
 앞 장의 기술을 개발·운영 절차에 연결하는 장입니다. 앞에서 다룬 *기술적 도구*들이 *어떤 프로세스 안에서 쓰여야 의미가 있는지*를 정리합니다. 같은 secure boot, 같은 OTA, 같은 TLS라도 *threat model 없이 만든 것*과 *threat model을 따라 만든 것*은 보안 수준이 다릅니다.
 
@@ -44,7 +44,7 @@ topics: ["embedded"]
 | QA / Test lead | Fuzzing, pen test methodology |
 | Operations | Vuln disclosure, incident response |
 
-교육 시간의 보편적인 최소값을 Microsoft 기준으로 단정하지 않습니다. 역할별 과제, 실제 발견 결함과 후속 훈련의 연결을 남깁니다.
+교육 기록에는 이수 시간보다 역할별 과제와, 실제로 발견된 결함이 다음 교육 주제로 이어졌는지를 남깁니다.
 
 ## 2. Requirements — 보안 요구의 명시
 
@@ -85,11 +85,11 @@ topics: ["embedded"]
 | Polyspace | abstract interpretation, 자동차 표준 |
 | semgrep | 패턴 기반, 빠르고 자동화 좋음 |
 
-검사기 수를 늘리기보다 차단할 규칙·예외 승인·오탐 처리와 새 결함의 추적을 정의합니다. 특정 도구 조합을 모든 팀의 최소 요구로 단정하지 않습니다.
+검사기 수를 늘리기보다 차단할 규칙·예외 승인·오탐 처리와 새 결함의 추적을 정의합니다.
 
 ### Compiler hardening
 
-Compiler·linker·libc·CPU·OS가 지원하는 보호를 선택하고 실제 최종 binary를 검사합니다. Bare-metal MCU와 Linux userspace에 같은 flag 목록을 적용하지 않습니다.
+Hardening flag는 compiler·linker·libc·CPU가 모두 지원해야 효과가 있습니다. Linux userspace 예를 Debian 13 arm64 VM(GCC 14.2.0, glibc 2.41)에서 직접 확인했습니다. PIE·RELRO·`_FORTIFY_SOURCE`는 OS loader와 libc가 필요하므로 bare-metal MCU에는 그대로 옮겨지지 않습니다.
 
 | 보호·옵션 | 전제·한계 |
 |------|------|
@@ -100,7 +100,25 @@ Compiler·linker·libc·CPU·OS가 지원하는 보호를 선택하고 실제 �
 | `-fcf-protection` | [GCC x86 GNU/Linux CET 구현](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html), Arm BTI flag가 아님 |
 | `-mbranch-protection` | [GCC13.4 AArch64 옵션](https://gcc.gnu.org/onlinedocs/gcc-13.4.0/gcc/AArch64-Options.html), CPU·toolchain 조건 확인 |
 
-[glibc fortification](https://sourceware.org/glibc/manual/latest/html_node/Source-Fortification.html)은 일부 library 호출의 검사이며 잘못된 pointer의 실제 할당 크기를 마법처럼 복구하지 않습니다. `-ftrapv`도 stack·heap 보호의 대체가 아니고 signed arithmetic의 일부 검사입니다. 이 작업에서는 위 Linux/GCC hardening 구성을 build하거나 타깃에서 검증하지 않았습니다.
+8 B stack 배열에 인자를 `memcpy`·`strcpy`하는 작은 program을 두 가지로 빌드했습니다.
+
+```bash
+gcc -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE -pie \
+  -Wl,-z,relro,-z,now -Wl,-z,noexecstack -mbranch-protection=standard h.c -o hard
+gcc -O2 -fno-stack-protector -U_FORTIFY_SOURCE -no-pie -Wl,-z,norelro h.c -o soft
+```
+
+`readelf`와 `nm -D`로 본 결과입니다.
+
+| 항목 | `soft` | `hard` |
+|------|------|------|
+| ELF type | `EXEC` | `DYN` (Position-Independent Executable) |
+| `GNU_RELRO` segment | 없음 | 있음 |
+| Dynamic flags | 없음 | `BIND_NOW`, `FLAGS_1: NOW PIE` |
+| libc import | `memcpy`, `strcpy` | `__memcpy_chk`, `__strcpy_chk`, `__stack_chk_fail`, `__stack_chk_guard` |
+| GNU property note | 없음 | `AArch64 feature: BTI, PAC` |
+
+24 B 인자를 넣으면 `hard`는 두 경로 모두 `*** buffer overflow detected ***: terminated`를 찍고 SIGABRT(exit 134)로 멈췄습니다. 같은 입력에 `soft`는 아무 메시지 없이 exit 0으로 끝났습니다. Stack을 덮어쓰고도 정상 종료한 것입니다. 이 program에서 overflow를 잡은 것은 stack protector가 아니라 `_FORTIFY_SOURCE`입니다. Compiler가 `small`의 크기 8을 알기 때문에 `memcpy`·`strcpy`를 크기 검사가 붙은 `__*_chk`로 바꿨습니다. 크기를 compile 시점에 모르는 pointer에는 이 검사가 붙지 않습니다([glibc fortification](https://sourceware.org/glibc/manual/latest/html_node/Source-Fortification.html)). 같은 VM에서 `gcc -fcf-protection`은 `'-fcf-protection=full' is not supported for this target`로 실패했습니다. x86 CET 옵션이고, AArch64에서 대응하는 것은 위 property note에 찍힌 `-mbranch-protection`입니다.
 
 ### Buffer 계약을 함수 경계에 표현
 
@@ -121,7 +139,7 @@ int copy_bytes(void *dst, size_t capacity, const void *src, size_t length)
 }
 ```
 
-이 글의 함수를 그대로 추출해 host ASan/UBSan에서 길이·용량 조합과 null·zero-length 조건을 검사했습니다. 거부 시 destination 전체가 유지되는지, 성공 시 경계 바깥이 바뀌지 않는지 확인합니다. Caller가 실제 크기를 잘못 전달하거나 영역이 겹치는 경우까지 안전하게 처리한다는 뜻은 아닙니다.
+이 함수를 글에서 그대로 추출해 macOS Apple clang 21.0.0의 ASan·UBSan으로 시험했습니다. 용량 0~16 B와 길이 0~32 B의 561개 조합에서, 앞뒤 2 B guard를 둔 buffer로 반환값·복사 내용·경계 밖 byte를 검사했습니다. 결과는 `cases=561 fails=0`이었고 sanitizer 경고는 없었습니다. `NULL` destination이나 source에 길이 4를 주면 `-1`, 둘 다 `NULL`이고 길이 0이면 `0`이었습니다. Caller가 `capacity`를 실제보다 크게 넘기거나 두 영역이 겹치는 경우는 이 함수가 알아낼 수 없습니다.
 
 ## 5. Verification — 다층 검증
 
@@ -143,9 +161,9 @@ OWASP IoT Top10(2018)은 조사 주제를 정리하는 참고 목록이며 각 �
 
 ### Software Bill of Materials (SBOM)
 
-SBOM은 component identity·version·관계와 배포 artifact를 연결해야 합니다. 법규·조달 조건마다 생성·보관·제공 요구가 다르며 모든 제품의 전체 목록을 항상 공개 제출한다고 쓰지 않습니다. SPDX·CycloneDX는 형식 계열이며 선택한 도구의 schema version과 소비 도구 호환성을 기록합니다.
+SBOM은 component identity·version·관계와 배포 artifact를 연결해야 합니다. SPDX와 CycloneDX가 대표 형식이며, 만든 도구의 schema version을 함께 기록해야 받는 쪽 도구가 읽을 수 있습니다.
 
-[Yocto5.0.6 SBOM 문서](https://docs.yoctoproject.org/5.0.6/dev-manual/sbom.html)의 예는 configuration에서 class를 상속하는 방식입니다.
+[Yocto 5.0.6 SBOM 문서](https://docs.yoctoproject.org/5.0.6/dev-manual/sbom.html)는 OpenEmbedded가 이 정보를 기본으로 만들지 않으며, configuration 파일에서 `create-spdx` class를 상속해야 한다고 적습니다.
 
 ```bitbake
 INHERIT += "create-spdx"
@@ -170,14 +188,14 @@ VEX가 CRA 보고 대상 판단을 자동으로 대신하거나 법적 의무를
 
 ### Supply chain — provenance와 artifact 서명을 구분
 
-[SLSA1.0 Build track](https://slsa.dev/spec/v1.0/levels)은 L0~L3를 정의합니다. 이 판은 과거 판으로 고정해 비교하며 최신이라는 뜻이 아닙니다. 이전 단일 Level1~4 표와 섞지 않습니다.
+[SLSA 1.0 Build track](https://slsa.dev/spec/v1.0/levels)은 L0~L3를 정의합니다. 0.1 판의 Level 1~4 표와는 다른 체계입니다. 1.0 문서의 요약표는 다음과 같습니다.
 
-| 수준 | 확인할 것 |
-|------|------|
-| Build L0 | provenance 보장 없음 |
-| Build L1 | build를 설명하는 provenance 존재 |
-| Build L2 | hosted platform이 생성한 서명된 provenance |
-| Build L3 | 더 강화된 build platform·격리·위조 방지 요구 |
+| 수준 | 요구 | 막으려는 것 |
+|------|------|------|
+| Build L0 | 없음 | — |
+| Build L1 | package가 어떻게 빌드됐는지 보여 주는 provenance | 실수, 문서화 |
+| Build L2 | hosted build platform이 생성한 서명된 provenance | build 뒤의 변조 |
+| Build L3 | 강화된(hardened) build platform | build 중의 변조 |
 
 Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA 수준이 증명되지 않습니다. Sigstore를 선택한다면 signature뿐 아니라 신뢰 key 또는 certificate identity·issuer, artifact digest와 적용한 verification policy를 확인합니다. Keyless도 identity 공급자·builder 권한의 신뢰를 검토해야 합니다. 여기서는 cosign 실행이나 SLSA 평가를 수행하지 않았습니다.
 
@@ -187,7 +205,7 @@ Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA �
 
 [Ch 8](/blog/embedded/embedded-security/chapter08-iot-standards)의 적용 제도에 맞춰 연락 경로, 수신 확인·상태 안내, coordinated disclosure와 보고 책임을 정합니다. 90일을 모든 사건의 공개·patch 의무 기한으로 두지 않습니다.
 
-[RFC9116](https://www.rfc-editor.org/rfc/rfc9116.html)의 HTTPS `/.well-known/security.txt`는 보안 연락처를 찾는 형식입니다. Email Contact에는 `mailto:` URI를 사용하고 실제 운영 주소·만료일을 설정합니다. 다음은 예약 domain을 쓴 서식 예로, 운영 중인 endpoint가 아닙니다.
+[RFC 9116](https://www.rfc-editor.org/rfc/rfc9116.html)의 HTTPS `/.well-known/security.txt`는 보안 연락처를 찾는 형식입니다. §2.5.3의 `Contact`와 §2.5.5의 `Expires`는 반드시 있어야 하고, `Expires`는 한 번만 쓰며 1년 이내로 두기를 권장합니다. Email은 `mailto:` URI로 씁니다. 다음은 예약 domain을 쓴 서식 예로, 운영 중인 endpoint가 아닙니다.
 
 `security.txt` 예:
 
@@ -197,7 +215,7 @@ Encryption: https://example.com/pgp-key.txt
 Acknowledgments: https://example.com/security/hall-of-fame
 Preferred-Languages: en, ko
 Policy: https://example.com/security/policy
-Expires: 2027-12-31T23:59:59Z
+Expires: 2027-06-30T23:59:59Z
 ```
 
 ### Incident response — 24시간 보고
@@ -216,11 +234,11 @@ Tabletop exercise에는 담당자 부재·영향 version 불명·component 공�
 | GitHub Advisory DB | GitHub 호스팅 프로젝트 |
 | CWE | 취약점 약점 유형 분류 |
 
-SBOM과 advisory를 연결할 때 component 이름만 grep하지 말고 ecosystem·version·backport·구성·도달성을 확인합니다. Scanner 결과는 triage 후보이며 누락·오탐·업데이트 시점을 기록합니다. 특정 scanner의 version 없는 명령을 실행 검증 예로 제시하지 않습니다.
+SBOM과 advisory를 연결할 때 component 이름만 grep하면 backport를 놓칩니다. 같은 Debian 13 VM의 `openssl`은 `3.5.7-1~deb13u3`이었고, 그 `changelog.Debian`의 맨 위 항목(trixie-security)은 upstream version을 3.5.7로 둔 채 Debian revision `~deb13u3`에 CVE 수정 여러 건을 담았습니다. Component version을 `3.5.7`로만 기록한 SBOM으로는 이 수정이 들어갔는지 알 수 없으므로, SBOM에는 배포판 package version 전체를 남깁니다. Scanner 결과는 triage 후보로 다루고 오탐·누락을 기록합니다.
 
 ### Sunset — 지원 종료
 
-지원 기간·종료일·사용자 통지·마지막 release·대체 조치를 적용 요구와 공개 약속에 맞춰 정합니다. CRA 최소 기간의 예외나 제품 예상 사용 기간을 무시하지 않습니다. 공급자 component 지원이 끝나도 자신의 제품 지원 책임이 자동으로 사라지는 것은 아닙니다.
+지원 기간·종료일·사용자 통지·마지막 release·대체 조치를 정합니다. CRA는 종료일을 월·연까지 구매 시점에 표시하도록 요구합니다([Ch 8](/blog/embedded/embedded-security/chapter08-iot-standards)). 공급자 component의 지원이 끝나도 그 component를 넣은 제품의 지원 책임은 제조사에 남습니다.
 
 ## 이 장의 증거를 다음 장에 연결
 
@@ -230,11 +248,11 @@ Ch 11~13의 IDE·SPDM·TEE 기능도 같은 산출물 관계를 갖습니다. �
 
 요구사항에 구현 제품명만 쓰거나 검사 성공을 전체 제품 보안으로 확대하지 않습니다. 릴리스마다 SBOM·build 출처·서명 대상과 실제 배포 bytes의 연결을 확인하고, 취약점 연락 경로의 부재·인계·지연도 시험합니다.
 
-해외 공급망 고객의 계약 요구와 자사 제품에 직접 적용되는 법적 의무는 구분합니다. 한국 제조사라는 이유만으로 CRA가 적용되거나 제외된다고 단정하지 않습니다.
+해외 공급망 고객의 계약 요구와 자사 제품에 직접 적용되는 법적 의무는 구분합니다. CRA는 제조사의 국적이 아니라 제품이 EU 시장에 제공되는지로 적용이 정해집니다.
 
 ## 정리
 
-각 단계의 입력·판정·산출물을 release 식별자로 연결해야 다음 담당자가 같은 결론을 검토할 수 있습니다. 이 장의 실행 검증은 buffer 함수의 host 동작에 한정됩니다. 실제 build platform·SBOM·서명 배포·규제 보고 절차를 운영 검증한 결과가 아닙니다.
+각 단계의 입력·판정·산출물을 release 식별자로 연결해야 다음 담당자가 같은 결론을 검토할 수 있습니다. 이 장에서 실행한 것은 `copy_bytes()`의 561개 경계 조합 시험과 Debian 13 arm64의 hardening flag 비교입니다. Hardening을 켠 binary는 8 B buffer overflow를 `_FORTIFY_SOURCE`로 잡아 멈췄고, 끈 binary는 조용히 exit 0으로 끝났습니다. SBOM·서명 배포·규제 보고 절차는 실행하지 않았습니다.
 
 다음 편은 [Ch 11: PCIe·CXL IDE](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)입니다.
 
