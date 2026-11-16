@@ -194,7 +194,7 @@ SECTIONS
 }
 ```
 
-CCM은 `stm32f407xx.h`가 "core coupled memory"라고 부르는 별도 64 KB 영역이고, 주소가 Code 영역(0x10000000)에 있어 bit-band alias 범위 밖입니다. CCM에 DMA buffer를 둘 수 있는지는 RM0090의 bus matrix 설명으로 확인해야 하는데, 이번에는 RM0090 원문을 열지 못해 이 글에서 판단하지 않았습니다. linker script의 `.data`·`.bss` 배치와 `AT >`의 의미는 [3-04 링커 스크립트 기초](/blog/embedded/modern-recipes/part3-04-linker-script-basics)에서 다룹니다.
+CCM은 `stm32f407xx.h`가 "core coupled memory"라고 부르는 별도 64 KB 영역이고, 주소가 Code 영역(0x10000000)에 있어 bit-band alias 범위 밖입니다. CCM에 DMA buffer를 둘 수 있는지는 RM0090의 bus matrix 설명으로 확인해야 하고, 이 글에서는 RM0090 원문을 대조하지 않아 판단하지 않았습니다. linker script의 `.data`·`.bss` 배치와 `AT >`의 의미는 [3-04 링커 스크립트 기초](/blog/embedded/modern-recipes/part3-04-linker-script-basics)에서 다룹니다.
 
 ## 측정 / 비교
 
@@ -209,7 +209,7 @@ CCM은 `stm32f407xx.h`가 "core coupled memory"라고 부르는 별도 64 KB 영
 | TEX=0 C=0 B=1 + PRIVDEFENA 없이 MPU enable | 즉시 HardFault (FORCED) | QEMU `mps2-an500` |
 | TEX=1 C=0 B=0 + PRIVDEFENA | 정상 접근 | QEMU `mps2-an500` |
 
-영역별 접근 cycle은 QEMU로 잴 수 없고, STM32F407 데이터시트·RM0090 값을 이번에 열지 못해 싣지 않았습니다.
+영역별 접근 cycle은 QEMU로 잴 수 없고, STM32F407 데이터시트·RM0090 값을 대조하지 않아 싣지 않았습니다.
 
 ## 자주 보는 함정
 
@@ -219,7 +219,7 @@ Table B3-1에서 SRAM 영역의 기본값은 Normal WBWA입니다. Cortex-M7처�
 
 > ⚠️ Peripheral 접근에 `volatile`을 빠뜨림
 
-Peripheral 영역이 Device 타입이라도 컴파일러는 그 사실을 모릅니다. 3절의 `send_plain`처럼 `volatile`이 없으면 쓰기 자체가 사라집니다. CMSIS 헤더의 `__IO`/`__IOM` 구조체를 통해 접근합니다.
+Peripheral 영역이 Device 타입이라도 컴파일러는 그 사실을 모릅니다. 3절의 `send_plain`처럼 `volatile`이 없으면 쓰기 자체가 사라집니다. CMSIS 헤더의 `__IO`/`__IOM` 구조체로 접근합니다.
 
 > ⚠️ MPU를 켤 때 PRIVDEFENA와 AP를 빠뜨림
 
