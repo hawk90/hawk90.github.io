@@ -59,7 +59,7 @@ static inline bool ring_pop(ring_t *r, uint8_t *out)
 }
 ```
 
-`head`는 producer만, `tail`은 consumer만 씁니다. 상대 index는 읽기만 하므로 같은 변수를 두 쪽이 동시에 쓰는 일은 없습니다. 그래도 *읽기와 쓰기*가 동시에 일어나므로 index는 atomic이어야 합니다. C11은 서로 다른 스레드의 두 접근이 같은 위치를 건드리고 하나라도 쓰기이며(conflict), 그중 하나라도 atomic이 아니고 어느 쪽도 다른 쪽보다 happens-before가 아니면 data race이고, data race는 undefined behavior라고 정합니다(N1570 5.1.2.4p4, p25).
+`head`는 producer만, `tail`은 consumer만 씁니다. 상대 index는 읽기만 하므로 같은 변수를 두 쪽이 동시에 쓰는 일은 없습니다. 그래도 *읽기와 쓰기*가 동시에 일어나므로 index는 atomic이어야 합니다. C11의 정의는 이렇습니다. 서로 다른 스레드의 두 접근이 같은 위치를 건드리고 하나라도 쓰기이면 conflict이고, 그중 하나라도 atomic이 아니면서 어느 쪽도 다른 쪽보다 happens-before가 아니면 data race입니다. data race는 undefined behavior입니다(N1570 5.1.2.4p4, p25).
 
 ### 확인: 1,000만 바이트를 두 스레드로
 
@@ -204,7 +204,7 @@ $ clang -std=c11 -O2 test.c -o test_o2   # 10 runs
 
 ## Power-of-2 — 왜 중요한가
 
-크기를 2의 거듭제곱으로 잡으면 `% RING_SIZE`를 `& RING_MASK`로 쓸 수 있습니다. 실제로 얼마나 차이 나는지는 컴파일러 출력을 보면 바로 보입니다. 네 가지 index 갱신을 함수로 만들어 arm-none-eabi-gcc 16.2.0 `-O2`로 컴파일했습니다.
+크기를 2의 거듭제곱으로 잡으면 `% RING_SIZE`를 `& RING_MASK`로 쓸 수 있습니다. 실제로 얼마나 차이 나는지는 컴파일러 출력에서 바로 드러납니다. 네 가지 index 갱신을 함수로 만들어 arm-none-eabi-gcc 16.2.0 `-O2`로 컴파일했습니다.
 
 ```c
 // idx.c
@@ -413,13 +413,13 @@ exit=0
 
 ## ARM SMP — 같은 코드, 다른 이유
 
-Cortex-A SMP나 이 글의 M2처럼 코어가 여럿이면 `dmb`(AArch64에서는 `ldar`/`stlr` 등)가 실제로 순서를 지킵니다. 위의 `volatile` 판이 M2에서 틀린 결과를 낸 것이 그 증거입니다. 코드는 `_Atomic`판 그대로이고, 바뀌는 것은 컴파일러가 고르는 명령뿐입니다.
+Cortex-A SMP나 이 글의 M2처럼 코어가 여럿이면 `dmb`(AArch64에서는 `ldar`/`stlr` 등)가 실제로 순서를 지킵니다. 위의 `volatile` 판이 M2에서 틀린 결과를 낸 것이 그 증거입니다. 코드는 `_Atomic` 판 그대로이고, 바뀌는 것은 컴파일러가 고르는 명령뿐입니다.
 
 ## Cache Alignment — False Sharing 방지
 
 Producer는 `head`를 쓰고 `tail`을 읽고, consumer는 그 반대입니다. 두 변수가 같은 cache line에 있으면 한쪽이 쓸 때마다 다른 코어의 line이 무효화돼, 실제로 공유하지 않는 데이터 때문에 line이 두 코어를 오갑니다. 같은 책상 서랍을 두 사람이 번갈아 여는 셈입니다.
 
-얼마나 차이 나는지 M2 Pro에서 쟀습니다. `head`와 `tail` 사이 거리만 바꾸고(4 B 붙임 / 64 B / 128 B) 1억 개를 넘기는 시간을 쟀습니다. 이 Mac의 `sysctl hw.cachelinesize`는 128입니다.
+얼마나 차이 나는지 M2 Pro에서 확인했습니다. `head`와 `tail` 사이 거리만 바꾸고(4 B 붙임 / 64 B / 128 B) 1억 개를 넘기는 시간을 쟀습니다. 이 Mac의 `sysctl hw.cachelinesize`는 128입니다.
 
 ```c
 // fs.c — clang -std=c11 -O2 -DGAP=<4|64|128> fs.c
