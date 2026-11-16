@@ -36,12 +36,12 @@ build-id는 링크 결과물마다 붙는 ID입니다. 파일 이름이나 경�
 ```text
 sha1:     Build ID: b358f6d9585111b5771325b3549e70c2b8c43677
 md5:     Build ID: 5ac71bfd45e3aaf7497181a66e20a37b
-uuid:     Build ID: 6520f307f79e69ca0b488ab207bd686c
+uuid:     Build ID: da53723546d6650bcc5fc0d2e5440c0b
 0xdeadbeef:     Build ID: deadbeef
 none: no-build-id
 ```
 
-같은 명령으로 두 번 빌드한 `r1`, `r2`는 sha1 build-id가 `b358f6d9…`로 같았고, 같은 소스를 `uuid`로 한 번 더 링크한 세 번째 파일은 위의 `6520f307…`과 다른 `4b716230…`이었습니다. 재현 가능한 빌드를 원하면 해시 스타일을 씁니다.
+같은 명령으로 두 번 빌드한 `r1`, `r2`는 sha1 build-id가 `b358f6d9…`로 같았고, 같은 소스를 `uuid`로 한 번 더 링크한 세 번째 파일은 위의 `da537235…`과 다른 `b0481f36…`이었습니다. 재현 가능한 빌드를 원하면 해시 스타일을 씁니다.
 
 core에서 build-id를 뽑는 방법은 [Ch 2](/blog/tools/debugging/postmortem/chapter02-elf-core-format)에서 봤습니다(`eu-unstrip -n --core`). 기본 `coredump_filter`가 매핑의 첫 페이지를 남기기 때문에 가능하고, 비트 4를 끄면 vDSO만 남습니다.
 
@@ -63,7 +63,7 @@ Hex dump of section '.gnu_debuglink':
   0x00000000 6d796170 702e6465 62756700 b1d08d9c myapp.debug.....
 ```
 
-GDB가 debuginfo를 찾는 위치를 하나씩 옮겨 가며 확인했습니다. 실행 파일은 `/root/c4/myapp`, build-id는 `b4ec5591…`입니다. 네 위치 모두에서 `bt`가 `parse_port (s=0xffffee019e90 "x") at server.c:13`으로 인자와 줄 번호까지 나왔고, 파일을 치우자 `parse_port ()`만 남았습니다.
+GDB가 debuginfo를 찾는 위치를 하나씩 옮겨 가며 확인했습니다. 실행 파일은 `/root/c4/myapp`, build-id는 `b4ec5591…`입니다. 네 위치 모두에서 `bt`가 `parse_port (s=0xffffcbaa0e71 "x") at server.c:13`으로 인자와 줄 번호까지 나왔고, 파일을 치우자 `parse_port ()`만 남았습니다.
 
 | 위치 | 경로 |
 | --- | --- |
@@ -117,16 +117,19 @@ Debian 13은 클라이언트를 기본으로 꺼 둡니다. `libdebuginfod-commo
 
 ### batch 모드의 함정: `-ex`가 아니라 `-iex`
 
-URL만 주고 GDB를 batch로 돌리면 아무것도 받지 않습니다. `show debuginfod enabled`가 `off`였습니다. 그래서 `-ex 'set debuginfod enabled on'`을 붙였더니 그래도 받지 않았습니다.
+URL만 주고 GDB를 batch로 돌리면 아무것도 받지 않습니다. `show debuginfod enabled`는 `Debuginfod functionality is currently set to "ask".`였습니다. 그래서 `-ex 'set debuginfod enabled on'`을 붙였더니 그래도 받지 않았습니다.
 
 ```text
 $ DEBUGINFOD_URLS=https://debuginfod.debian.net gdb -q -nx -batch \
     -ex 'set debuginfod enabled on' -ex 'bt 6' ./patterns core.assert
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.debian.net>
 Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
 Debuginfod has been disabled.
 To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
 ...
-#3  0x0000ffff8789f8bc [PAC] in ?? () from /lib/aarch64-linux-gnu/libc.so.6
+#3  0x0000ffff8554f8bc [PAC] in ?? () from /lib/aarch64-linux-gnu/libc.so.6
 ```
 
 GDB는 명령줄의 실행 파일과 core를 `-ex`보다 먼저 읽습니다. 그 순간 debuginfod를 쓸지 묻고, 터미널이 없으니 N으로 답한 뒤 꺼 버립니다. 파일을 읽기 전에 실행되는 `-iex`로 옮기자 다운로드가 일어났습니다.
@@ -134,20 +137,25 @@ GDB는 명령줄의 실행 파일과 core를 `-ex`보다 먼저 읽습니다. �
 ```text
 $ DEBUGINFOD_URLS=https://debuginfod.debian.net gdb -q -nx -batch \
     -iex 'set debuginfod enabled on' -ex 'bt 6' ./patterns core.assert
-Downloading 37.93 K separate debug info for system-supplied DSO at 0xffff87d14000...
+Downloading 8.93 M separate debug info for /lib/aarch64-linux-gnu/libstdc++.so.6...
+Downloading 348.56 K separate debug info for /lib/aarch64-linux-gnu/libgcc_s.so.1...
+Downloading 5.20 M separate debug info for /lib/aarch64-linux-gnu/libc.so.6...
+Downloading 1.15 M separate debug info for /lib/aarch64-linux-gnu/libm.so.6...
+Downloading 457.55 K separate debug info for /lib/ld-linux-aarch64.so.1...
+Downloading 37.93 K separate debug info for system-supplied DSO at 0xffff859d3000...
 ...
 Download failed: Invalid argument.  Continuing without source file ./nptl/./nptl/pthread_kill.c.
-#0  __pthread_kill_implementation (threadid=281472960331808, signo=signo@entry=6, no_tid=no_tid@entry=0) at ./nptl/pthread_kill.c:44
-#1  0x0000ffff878f80c4 [PAC] in __pthread_kill_internal (threadid=<optimized out>, signo=6) at ./nptl/pthread_kill.c:89
-#2  0x0000ffff878a6880 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
-#3  0x0000ffff87891a84 [PAC] in __GI_abort () at ./stdlib/abort.c:77
-#4  0x0000ffff8789f8bc [PAC] in __assert_fail_base (fmt=<optimized out>, assertion=<optimized out>, file=<optimized out>, line=35, function=<optimized out>) at ./assert/assert.c:118
-#5  0x0000aaaae6071a88 [PAC] in do_validate (x=-1) at patterns.cpp:35
+#0  __pthread_kill_implementation (threadid=281472923365408, signo=signo@entry=6, no_tid=no_tid@entry=0) at ./nptl/pthread_kill.c:44
+#1  0x0000ffff855a80c4 [PAC] in __pthread_kill_internal (threadid=<optimized out>, signo=6) at ./nptl/pthread_kill.c:89
+#2  0x0000ffff85556880 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#3  0x0000ffff85541a84 [PAC] in __GI_abort () at ./stdlib/abort.c:77
+#4  0x0000ffff8554f8bc [PAC] in __assert_fail_base (fmt=<optimized out>, assertion=<optimized out>, file=<optimized out>, line=35, function=<optimized out>) at ./assert/assert.c:118
+#5  0x0000aaaabcd81a88 [PAC] in do_validate (x=-1) at patterns.cpp:35
 ```
 
 Ch 3의 패턴 5에서 `??`였던 프레임이 `__assert_fail_base`이고, `#0`은 `__pthread_kill_implementation`이었습니다. 소스 파일 요청은 `debuginfod.debian.net`에서 `Invalid argument`로 실패했고, 줄 번호까지만 나왔습니다.
 
-첫 실행은 6개 모듈(vDSO, ld.so, libm, libc, libgcc_s, libstdc++)의 debuginfo 17 MB를 받느라 144초 걸렸고, 같은 명령을 다시 돌리자 1초 안에 끝났습니다. GDB 매뉴얼의 [Debuginfod Settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html)에 따르면 대화형 기본값은 `ask`입니다. `.gdbinit`에 `set debuginfod enabled on`을 넣는 방법도 있지만, `-nx`로 부르는 자동화에서는 `-iex`가 확실합니다.
+첫 실행은 6개 모듈(vDSO, ld.so, libm, libc, libgcc_s, libstdc++)의 debuginfo 17 MB를 받느라 63초 걸렸고, 같은 명령을 다시 돌리자 1.3초에 끝났습니다. 첫 실행 시간은 네트워크 상태를 따르므로, 다른 날 같은 명령은 144초가 걸리기도 했습니다. GDB 매뉴얼의 [Debuginfod Settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html)에 따르면 대화형 기본값은 `ask`입니다. `.gdbinit`에 `set debuginfod enabled on`을 넣는 방법도 있지만, `-nx`로 부르는 자동화에서는 `-iex`가 확실합니다.
 
 ### 캐시
 
@@ -217,8 +225,8 @@ debuginfod -F -d /var/tmp/debuginfod.sqlite -p 8002 /opt/builds
 $ DEBUGINFOD_URLS=http://127.0.0.1:8002/ gdb -q -nx -batch \
     -iex 'set debuginfod enabled on' -ex 'bt 2' ./myapp2 core
 Downloading 71.34 K separate debug info for /root/c4/prod/myapp2...
-#0  0x0000aaaade52091c in parse_port (s=0xffffea10be75 "--config=prod.yaml") at server.c:13
-#1  0x0000aaaade5209cc in main (argc=2, argv=0xffffea10b8c8) at server.c:20
+#0  0x0000aaaae8dc091c in parse_port (s=0xffffe16bde56 "--config=prod.yaml") at server.c:13
+#1  0x0000aaaae8dc09cc in main (argc=2, argv=0xffffe16bdb48) at server.c:20
 ```
 
 서버의 `/metrics`는 Prometheus 형식으로 스캔 상태를 내보냅니다. 이 실험에서는 `scanned_files_total{source="file"} 1`이었습니다.
@@ -275,10 +283,11 @@ gdb -q -nx -batch \
     "$EXE" "$CORE" 2>&1
 ```
 
-위 운영 core에 돌리자 53줄 보고서가 나왔습니다. 앞부분입니다.
+위 운영 core에 사내 서버만 `DEBUGINFOD_URLS`로 지정해 돌리자 54줄 보고서가 나왔습니다. 앞부분입니다. 공개 서버를 빼서 libc 프레임은 `??`로 남았습니다.
 
 ```text
-$ ./postmortem.sh prod/myapp2 prod/core > /tmp/report.txt
+$ DEBUGINFOD_URLS=http://127.0.0.1:8002/ ./postmortem.sh prod/myapp2 prod/core > /root/c4/report.txt
+$ cat /root/c4/report.txt
 Downloading 71.34 K separate debug info for /root/c4/prod/myapp2...
 ...
 === Death info ===
@@ -287,16 +296,19 @@ $1 = {
 }
 
 === Backtrace ===
-#0  0x0000aaaade52091c in parse_port (s=0xffffea10be75 "--config=prod.yaml") at server.c:13
+#0  0x0000aaaae8dc091c in parse_port (s=0xffffe16bde56 "--config=prod.yaml") at server.c:13
         bad = 0xdeadbeef
-#1  0x0000aaaade5209cc in main (argc=2, argv=0xffffea10b8c8) at server.c:20
-        t = {281473286467968, 281473278013824}
+#1  0x0000aaaae8dc09cc in main (argc=2, argv=0xffffe16bdb48) at server.c:20
+        t = {281473185083776, 281473176629632}
 
 === All threads ===
 
-Thread 3 (Thread 0xffff9abff180 (LWP 7978)):
-#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/aarch64/syscall_cancel.S:50
-#1  0x0000ffff9b4928b8 in __internal_syscall_cancel (...) at ./nptl/cancellation.c:49
+Thread 3 (Thread 0xffff94b4f180 (LWP 12931)):
+#0  0x0000ffff953ef228 in ?? () from /lib/aarch64-linux-gnu/libc.so.6
+#1  0x0000ffff953e28b8 in ?? () from /lib/aarch64-linux-gnu/libc.so.6
+#2  0x0000ffff953e28fc [PAC] in ?? () from /lib/aarch64-linux-gnu/libc.so.6
+#3  0x0000ffff9542946c [PAC] in pause () from /lib/aarch64-linux-gnu/libc.so.6
+#4  0x0000aaaae8dc08f8 [PAC] in worker (arg=0x0) at server.c:8
 ...
 ```
 
@@ -304,27 +316,29 @@ Thread 3 (Thread 0xffff9abff180 (LWP 7978)):
 
 ## minidump — 클라이언트 분포
 
-데스크톱 앱이나 게임처럼 사용자 PC에서 죽는 프로그램은 core를 받을 수 없습니다. 크기도 크고, 사용자 메모리 전체를 서버로 올릴 수도 없습니다. **minidump**는 크래시 순간의 스레드·모듈·예외와 스택 일부만 담는 별도 포맷입니다. [Ch 2](/blog/tools/debugging/postmortem/chapter02-elf-core-format)에서 같은 0xdeadbeef 크래시의 minidump는 14,712바이트였고, 스트림 13개 중 환경 변수(`MD_LINUX_ENVIRON`)도 들어 있었습니다.
+데스크톱 앱이나 게임처럼 사용자 PC에서 죽는 프로그램은 core를 받을 수 없습니다. 크기도 크고, 사용자 메모리 전체를 서버로 올릴 수도 없습니다. **minidump**는 크래시 순간의 스레드·모듈·예외와 스택 일부만 담는 별도 포맷입니다. [Ch 2](/blog/tools/debugging/postmortem/chapter02-elf-core-format)에서 본 대로 같은 0xdeadbeef 크래시의 minidump는 14,760바이트였고, 스트림 13개 중 환경 변수(`MD_LINUX_ENVIRON`)도 들어 있었습니다.
 
 ### Breakpad / crashpad
 
 [Google Breakpad](https://chromium.googlesource.com/breakpad/breakpad/)는 크래시를 잡아 minidump를 쓰는 클라이언트 라이브러리와 서버 쪽 도구 모음입니다. 후속인 [Crashpad](https://chromium.googlesource.com/crashpad/crashpad)는 별도 handler 프로세스가 minidump를 쓰는 구조입니다. Debian 13에는 Breakpad 패키지가 없어서 upstream(커밋 `94c818ea`)을 VM에서 빌드했습니다.
 
-클라이언트 쪽 코드는 `ExceptionHandler` 객체 하나입니다. 콜백은 dump를 쓴 뒤 불립니다.
+클라이언트 쪽 코드는 `ExceptionHandler` 객체 하나입니다. 콜백은 dump를 쓴 뒤 불립니다. 아래가 실험에 쓴 `app.cc` 전체이고, `parse_port()`가 0xdeadbeef를 역참조합니다.
 
-```cpp title="breakpad-app.cc"
+```cpp title="app.cc"
 #include <cstdio>
 #include "client/linux/handler/exception_handler.h"
-
 static bool on_dump(const google_breakpad::MinidumpDescriptor& d, void*, bool ok) {
     std::printf("minidump: %s ok=%d\n", d.path(), ok);
     return ok;
 }
-
+static int parse_port(const char* s) {
+    int* bad = reinterpret_cast<int*>(0xdeadbeef);
+    return *bad + (s ? s[0] : 0);
+}
 int main(int argc, char** argv) {
     google_breakpad::MinidumpDescriptor desc("/root/bp/dumps");
     google_breakpad::ExceptionHandler eh(desc, nullptr, on_dump, nullptr, true, -1);
-    // ... 앱 본체
+    return parse_port(argc > 1 ? argv[1] : nullptr);
 }
 ```
 
@@ -332,7 +346,7 @@ int main(int argc, char** argv) {
 g++ -g -O0 -I breakpad/src -o app app.cc breakpad/src/client/linux/libbreakpad_client.a -lpthread
 ```
 
-크래시 후 `dumps/4fe7a110-9c56-4e0b-a2c67f98-150e3628.dmp`가 생겼고, 셸은 `Segmentation fault (core dumped)`를 찍었습니다. Breakpad 핸들러가 minidump를 쓴 뒤에도 프로세스는 원래 시그널로 죽었고, 커널 core도 함께 만들어졌습니다. 둘 다 원하지 않으면 `ulimit -c 0`이나 `core_pattern`으로 커널 쪽을 끕니다.
+크래시 후 `dumps/85cf9437-8eaf-4e1c-5236109a-b8770b1f.dmp`(14,760 B)가 생겼고, 셸은 `Segmentation fault (core dumped)`를 찍었습니다. Breakpad 핸들러가 minidump를 쓴 뒤에도 프로세스는 원래 시그널로 죽었고, 커널 core(`core.app`, 548,864 B)도 함께 만들어졌습니다. 둘 다 원하지 않으면 `ulimit -c 0`이나 `core_pattern`으로 커널 쪽을 끕니다.
 
 ### symbol server
 
@@ -341,8 +355,8 @@ minidump에는 심볼이 없습니다. 빌드할 때 `dump_syms`로 Breakpad 텍
 ```text
 $ dump_syms ./app > app.sym
 $ head -3 app.sym
-MODULE Linux arm64 292E421F3BA0A33634F5428E9786CF540 app
-INFO CODE_ID 1F422E29A03B36A334F5428E9786CF547B0A3F7B
+MODULE Linux arm64 DF6C758A457CAAB7DE2075425B4DB2390 app
+INFO CODE_ID 8A756CDF7C45B7AADE2075425B4DB23925CEE84E
 FILE 0 /root/bp/app.cc
 $ wc -l app.sym
 11244 app.sym
@@ -358,22 +372,28 @@ mkdir -p symbols/app/$id && mv app.sym symbols/app/$id/
 ### Stack walking
 
 ```text
-$ minidump_stackwalk dumps/4fe7a110-9c56-4e0b-a2c67f98-150e3628.dmp symbols
+$ minidump_stackwalk dumps/85cf9437-8eaf-4e1c-5236109a-b8770b1f.dmp symbols
+...
 Crash reason:  SIGSEGV /SEGV_MAPERR
 Crash address: 0xdeadbeef
+Process uptime: not available
 
 Thread 0 (crashed)
- 0  app!parse_port [app.cc : 11 + 0x4]
+ 0  app!parse_port [app.cc : 9 + 0x4]
      x0 = 0x00000000deadbeef    x1 = 0x0000000000000001
     ...
     Found by: given as instruction pointer in context
- 1  app!main [app.cc : 17 + 0x0]
+ 1  app!main [app.cc : 14 + 0x0]
+    ...
+    Found by: call frame info
+ 2  libc.so.6 + 0x22258
+    ...
     Found by: call frame info
 
 Loaded modules:
-0xaaaac0c20000 - 0xaaaac0c37fff  app  ???  (main)
-0xffff7fd20000 - 0xffff7fdadfff  libm.so.6  ???
-0xffff7fdd0000 - 0xffff7ff6bfff  libc.so.6  ???  (WARNING: No symbols, libc.so.6, D926395F3F9684F2B8173BF3601BBB000)
+0xaaaac8a10000 - 0xaaaac8a27fff  app  ???  (main)
+0xffffad4d0000 - 0xffffad55dfff  libm.so.6  ???
+0xffffad580000 - 0xffffad71bfff  libc.so.6  ???  (WARNING: No symbols, libc.so.6, D926395F3F9684F2B8173BF3601BBB000)
 ...
 (레지스터 덤프와 나머지 모듈 생략)
 ```
@@ -411,7 +431,7 @@ Sanitizer 빌드에서 core를 얻는 조건은 [Ch 1](/blog/tools/debugging/pos
 | (없음) | `_exit(1)`, core 없음 |
 | `abort_on_error=1` | SIGABRT, 하지만 libasan이 soft core 한도를 0으로 내려 core 없음 |
 | `abort_on_error=1:disable_coredump=0` | core 생성 (use-after-free 예에서 48 MB, 실제 할당 6.6 MiB) |
-| 위 + `use_madv_dontdump=0` | shadow까지 dump, 3분 넘게 7.1 TB(겉보기)까지 쓰다 강제 종료 |
+| 위 + `use_madv_dontdump=0` | shadow까지 dump, 120초가 지나도 끝나지 않아 겉보기 7.1 TB에서 강제 종료 |
 
 ```bash
 ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./prog
@@ -421,7 +441,7 @@ ASan 보고서 자체(어느 줄에서 무엇을 읽었고 언제 해제됐는�
 
 ## gcore — 살아 있는 프로세스
 
-운영 서비스가 죽지는 않고 멈췄다면 `gcore`로 사진을 찍습니다. 형식과 노트는 Ch 2에서, 정지 시간은 Ch 1에서 쟀습니다(RSS 1 GiB에 약 1.1초).
+운영 서비스가 죽지는 않고 멈췄다면 `gcore`로 사진을 찍습니다. 형식과 노트는 Ch 2에서, 정지 시간은 Ch 1에서 쟀습니다(RSS 1 GiB에 1.8초).
 
 ```bash
 gcore -o /tmp/core <pid>      # /tmp/core.<pid>
@@ -430,34 +450,34 @@ gcore -o /tmp/core <pid>      # /tmp/core.<pid>
 정지 시간이 부담되면 `eu-stack`으로 콜스택만 뜹니다. Ch 3의 데드락 프로세스에 걸어 봤습니다.
 
 ```text
-$ eu-stack -p 8100
-PID 8100 - process
-TID 8100:
-#0  0x0000ffffbe49f228
-#1  0x0000ffffbe4928b8
-#2  0x0000ffffbe492c50
-#3  0x0000ffffbe497d54
-#4  0x0000ffffbe6eb5c4 std::thread::join()
-#5  0x0000aaaadd981d30 main
+$ eu-stack -p 7125
+PID 7125 - process
+TID 7125:
+#0  0x0000ffff9ca9f228
+#1  0x0000ffff9ca928b8
+#2  0x0000ffff9ca92c50
+#3  0x0000ffff9ca97d54
+#4  0x0000ffff9cceb5c4 std::thread::join()
+#5  0x0000aaaab6d91d30 main
 ...
 ```
 
-12 ms에 끝났고, 메모리는 쓰지 않습니다. `-s`를 주고 `DEBUGINFOD_URLS`를 설정하면 libc 프레임까지 이름과 소스 줄이 붙습니다.
+21 ms에 끝났고, 메모리는 쓰지 않습니다. `-s`를 주고 `DEBUGINFOD_URLS`를 설정하면 libc 프레임까지 이름과 소스 줄이 붙습니다.
 
 ```text
-$ DEBUGINFOD_URLS=https://debuginfod.debian.net eu-stack -s -p 8100
-TID 8100:
-#0  0x0000ffffbe49f228 __syscall_cancel_arch
+$ DEBUGINFOD_URLS=https://debuginfod.debian.net eu-stack -s -p 7125
+TID 7125:
+#0  0x0000ffff9ca9f228 __syscall_cancel_arch
     ../sysdeps/unix/sysv/linux/aarch64/syscall_cancel.S:50
-#1  0x0000ffffbe4928b8 __internal_syscall_cancel
+#1  0x0000ffff9ca928b8 __internal_syscall_cancel
     ./nptl/cancellation.c:49:12
-#2  0x0000ffffbe492c50 __GI___futex_abstimed_wait_cancelable64
+#2  0x0000ffff9ca92c50 __GI___futex_abstimed_wait_cancelable64
     ./nptl/futex-internal.c:57:12
-#3  0x0000ffffbe497d54 __pthread_clockjoin_ex
+#3  0x0000ffff9ca97d54 __pthread_clockjoin_ex
     ./nptl/pthread_join_common.c:108:14
-#4  0x0000ffffbe6eb5c4 std::thread::join()
-    ...
-#5  0x0000aaaadd981d30 main
+#4  0x0000ffff9cceb5c4 std::thread::join()
+    /build/reproducible-path/gcc-14-14.2.0/build/aarch64-linux-gnu/libstdc++-v3/include/aarch64-linux-gnu/bits/gthr-default.h:682:33
+#5  0x0000aaaab6d91d30 main
     /root/c3/patterns.cpp:55:96
 ```
 
@@ -488,7 +508,7 @@ GitHub Actions의 Linux runner는 비밀번호 없는 `sudo`를 씁니다([GitHu
     done
 ```
 
-GitHub 문서는 `always()` 대신 `!cancelled()`를 권장합니다. 테스트가 실패해도 분석 step은 돌고, workflow는 앞 step의 실패로 실패 상태가 됩니다. 두 step의 명령을 VM에서 같은 순서로 돌려 확인했습니다. systemd-coredump 파이프가 걸려 있던 VM에서도 패턴을 바꾼 뒤 `core.test_runner.8511`이 작업 디렉터리에 생겼고, 분석 루프가 `handle_null (req=0x0) at patterns.cpp:17`을 찍었습니다.
+GitHub 문서는 `always()` 대신 `!cancelled()`를 권장합니다. 테스트가 실패해도 분석 step은 돌고, workflow는 앞 step의 실패로 실패 상태가 됩니다. 두 step의 `run:` 내용을 VM에서 step마다 별도 `bash -e`로 같은 순서로 돌려 확인했습니다. `test_runner`는 Ch 3 패턴 1의 `handle_null(nullptr)`만 부르는 작은 프로그램이고, VM에는 `sudo`가 없어 root 셸에서 `sudo`를 그대로 넘기는 함수로 대신했습니다. minicoredumper 파이프가 걸려 있던 VM에서도 패턴을 바꾼 뒤 `core.test_runner.13839`가 작업 디렉터리에 생겼습니다. 첫 step은 종료 코드 139로 실패했고, 분석 step은 `#0 handle_null (req=0x0) at /root/c4/test_runner.cpp:8`을 찍고 0으로 끝났습니다.
 
 ### Production
 
@@ -516,7 +536,7 @@ WantedBy=multi-user.target
 
 ```text
 Starting postmortem.service - Postmortem analyzer...
-new core: /var/lib/systemd/coredump/core.server.0.8b125042e29f47708920ccd97b73e1b3.8431.1794804462000000.zst
+new core: /var/lib/systemd/coredump/core.server.0.cae0f96507a64bf391aea4deff2b3dc8.13499.1794808979000000.zst
 postmortem.service: Deactivated successfully.
 Finished postmortem.service - Postmortem analyzer.
 ```
@@ -547,12 +567,14 @@ def analyze_core(exe_path, core_path):
                       "signature": sig, "frames": frames}))
 ```
 
-Ch 3의 core 세 개(`core.assert`, `core.wild`, `core.uaf`)에 같은 명령을 core 이름만 바꿔 돌린 결과입니다.
+Ch 3의 core 세 개(`core.assert`, `core.wild`, `core.uaf`)에 돌린 결과입니다.
 
 ```text
 $ gdb -q -nx -batch -ex "source analyze.py" -ex 'python analyze_core("patterns", "core.assert")'
 {"signo": 6, "code": -6, "signature": "do_validate@patterns.cpp:35|main@patterns.cpp:56", "frames": ["??@?", "raise@?", "abort@?", "??@?", "do_validate@patterns.cpp:35", "main@patterns.cpp:56"]}
+$ gdb -q -nx -batch -ex "source analyze.py" -ex 'python analyze_core("patterns", "core.wild")'
 {"signo": 11, "code": 1, "signature": "handle_wild@patterns.cpp:21|main@patterns.cpp:53", "frames": ["handle_wild@patterns.cpp:21", "main@patterns.cpp:53"]}
+$ gdb -q -nx -batch -ex "source analyze.py" -ex 'python analyze_core("patterns", "core.uaf")'
 {"signo": 11, "code": 1, "signature": "use_after_free@patterns.cpp:42|main@patterns.cpp:57", "frames": ["use_after_free@patterns.cpp:42", "main@patterns.cpp:57"]}
 ```
 
