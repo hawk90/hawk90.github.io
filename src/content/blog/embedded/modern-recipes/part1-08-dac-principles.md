@@ -25,7 +25,7 @@ topics: ["embedded"]
 
 ### 1) R-2R Ladder
 
-가장 직관적인 DAC 구조입니다. R과 2R 저항 망으로 binary-weighted 전류를 합칩니다.
+가장 직관적인 DAC 구조입니다. R과 2R 저항 망이 각 비트의 기여를 2의 거듭제곱 비율로 나눠 출력 노드 전압으로 합칩니다.
 
 ![R-2R Ladder DAC 구조](/images/blog/modern-recipes/diagrams/part1-08-r2r-ladder.svg)
 
@@ -60,7 +60,7 @@ sigma=1.00% seed=2: max|DNL|=16.435 LSB, worst -16.435 at code 0x7FF->0x800, mon
 sigma=1.00% seed=3: max|DNL|=40.754 LSB, worst -0.048 at code 0xD82->0xD83, monotonic=True
 ```
 
-σ = 0.01%면 세 번 모두 |DNL|이 0.41 LSB 이하이고 단조입니다. σ = 0.1%에서는 seed 2가 0x7FF → 0x800에서 DNL −1.64 LSB로 출력이 오히려 내려가고, σ = 1%에서는 DNL이 수십 LSB까지 벌어집니다. 가장 나쁜 계단이 0x7FF → 0x800, 0x3FF → 0x400, 0xBFF → 0xC00처럼 하위 비트가 한꺼번에 뒤집히는 코드에 몰리는 것도 보입니다. 이 코드에서는 MSB 쪽 가지 하나가 켜지고 나머지가 모두 꺼지므로, 큰 가지의 오차가 그대로 계단 크기에 실립니다.
+σ = 0.01%면 세 번 모두 |DNL|이 0.41 LSB 이하이고 단조입니다. σ = 0.1%에서는 seed 2가 0x7FF → 0x800에서 DNL −1.64 LSB로 출력이 오히려 내려가고, σ = 1%에서는 DNL이 수십 LSB까지 벌어집니다. 출력의 worst 칸은 가장 음수인 DNL의 위치이고, 0x7FF → 0x800, 0x3FF → 0x400, 0xBFF → 0xC00처럼 하위 비트가 한꺼번에 뒤집히는 코드가 자주 나옵니다. 같은 스크립트로 |DNL|이 가장 큰 계단의 위치를 따로 뽑아 보면 아홉 경우 모두 0x7FF → 0x800입니다. 이 코드에서는 MSB 쪽 가지 하나가 켜지고 나머지가 모두 꺼지므로, 큰 가지의 오차가 그대로 계단 크기에 실립니다.
 
 ### 2) Sigma-Delta DAC
 
@@ -99,7 +99,7 @@ sine 0.5 FS, OSR 64, boxcar decimation: rms error 0.0132 FS, max 0.0302 FS
 
 ### 4) Glitch energy
 
-DAC 출력이 코드를 바꿀 때 순간적인 spike가 나옵니다. 바뀌는 비트가 많을수록 내부 스위치가 같은 순간에 바뀌지 않는 영향이 커지므로, 데이터시트는 모든 하위 비트가 뒤집히는 major carry(16비트에서 0x7FFF → 0x8000)를 기준으로 glitch를 적습니다. TI DAC8552(SLAS430A)는 "Code change glitch impulse"를 "1LSB change around major carry" 조건에서 0.15 nV-s로 적습니다. 단위가 nV-s인 것은 glitch를 전압 × 시간의 면적으로 재기 때문입니다.
+DAC 출력이 코드를 바꿀 때 순간적인 spike가 나옵니다. 바뀌는 비트가 많을수록 내부 스위치가 같은 순간에 바뀌지 않는 영향이 커지므로, DAC8552 데이터시트는 모든 하위 비트가 뒤집히는 major carry(16비트에서 0x7FFF → 0x8000)를 기준으로 glitch를 적습니다. TI DAC8552(SLAS430A)는 "Code change glitch impulse"를 "1LSB change around major carry" 조건에서 0.15 nV-s로 적습니다. 단위가 nV-s인 것은 glitch를 전압 × 시간의 면적으로 재기 때문입니다.
 
 ![DAC code transition glitch then settling](/images/blog/modern-recipes/diagrams/part1-08-dac-glitch.svg)
 
@@ -124,12 +124,12 @@ ZOH sinc droop at 24000 Hz (fs 48000): -3.92 dB
 
 STM32F407 내장 DAC1(PA4)로 750 Hz sine을 내는 코드입니다. TIM6의 update 이벤트가 48 kHz마다 DAC를 트리거하고, DMA가 64개짜리 표를 순환하며 `DHR12R1`에 넣으므로 CPU는 시작한 뒤 관여하지 않습니다. 48000 / 64 = 750 Hz입니다.
 
-설정값의 근거는 다음과 같습니다. DAC1의 DMA 요청이 DMA1 Stream5 Channel 7이라는 것은 STM32CubeF4 `STM324xG_EVAL/Examples/DAC/DAC_SignalsGeneration`의 `main.h`(`DACx_DMA_STREAM1`, `DACx_DMA_CHANNEL1`)에서, TIM6 TRGO 트리거가 `TSEL1` = 000이라는 것은 HAL v1.8.6 `stm32f4xx_hal_dac.h` 173행(`DAC_TRIGGER_T6_TRGO`가 `DAC_CR_TEN1`만 켬)에서, update 이벤트를 TRGO로 내는 `MMS` = 010은 `stm32f4xx_hal_tim.h` 868행(`TIM_TRGO_UPDATE` = `TIM_CR2_MMS_1`)에서 가져왔습니다. TIM6 입력 클럭 84 MHz는 DS8626 Table 51의 "AHB/APB1 prescaler distinct from 1, f_TIMxCLK = 84 MHz" 조건(1-02의 APB1 = 42 MHz 설정)입니다. 원래 글은 `TSEL1` = 101을 "TIM2"라고 적었는데, HAL 171행에 따르면 101은 TIM4이고 TIM2는 100입니다.
+설정값의 근거는 다음과 같습니다. DAC1의 DMA 요청이 DMA1 Stream5 Channel 7이라는 것은 STM32CubeF4 `STM324xG_EVAL/Examples/DAC/DAC_SignalsGeneration`의 `main.h`(`DACx_DMA_STREAM1`, `DACx_DMA_CHANNEL1`)에서, TIM6 TRGO 트리거가 `TSEL1` = 000이라는 것은 HAL v1.8.6 `stm32f4xx_hal_dac.h` 173행(`DAC_TRIGGER_T6_TRGO`가 `DAC_CR_TEN1`만 켬)에서, update 이벤트를 TRGO로 내는 `MMS` = 010은 `stm32f4xx_hal_tim.h` 868행(`TIM_TRGO_UPDATE` = `TIM_CR2_MMS_1`)에서 가져왔습니다. TIM6 입력 클럭 84 MHz는 DS8626 Table 51의 "AHB/APB1 prescaler distinct from 1, f_TIMxCLK = 84 MHz" 조건(1-02의 APB1 = 42 MHz 설정)입니다. 참고로 `TSEL1` = 101은 TIM4, 100은 TIM2입니다(HAL 170·171행). HAL 173행의 주석은 "software trigger"라고 적혀 있지만 값은 TIM6이고, software trigger는 177행(`TSEL1` = 111)입니다.
 
 ```c
 #include "stm32f407xx.h"
 
-#define TIM6CLK_HZ  84000000u     /* PCLK1 42 MHz, APB1 prescaler /4 (DS8626 Table 51) */
+#define TIM6CLK_HZ  84000000u     /* APB1 /4 = 42 MHz (1-02), timer clock 84 MHz (DS8626 Table 51) */
 #define FS_HZ       48000u        /* DAC update rate */
 
 /* round(2048 + 2047*sin(2*pi*i/64)), i = 0..63 */
@@ -188,7 +188,7 @@ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -DSTM32F407xx \
 | --- | --- | --- |
 | 해상도 | 12 bit (8 bit 모드도 있음) | 16 bit, 2채널 |
 | DNL | max ±2 LSB (12 bit), ±0.5 LSB (10 bit) | typ ±0.35, max ±1 LSB, 16-bit monotonic |
-| Settling | typ 3, max 6 µs (full scale, 10 bit, ±4 LSB, C_L ≤ 50 pF, R_L ≥ 5 kΩ) | 10 µs to ±0.003% FSR |
+| Settling | typ 3, max 6 µs (full scale, 10 bit, ±4 LSB, C_L ≤ 50 pF, R_L ≥ 5 kΩ) | typ 8, max 10 µs to ±0.003% FSR (0200h → FD00h, R_L 2 kΩ) |
 | Glitch | 표에 없음 | 0.15 nV-s (1 LSB change around major carry) |
 | 갱신 속도 | max 1 MS/s (코드 i → i+1) | — |
 | 출력 부하 | buffer ON: R_L ≥ 5 kΩ, C_L ≤ 50 pF. buffer OFF: R_O max 15 kΩ | — |
@@ -199,7 +199,7 @@ DS8626 Table 74의 THD 칸은 값이 비어 있어 옮기지 않았습니다.
 
 > ⚠️ Reconstruction filter 누락
 
-LPF를 빼면 f_s 주변의 image가 부하로 그대로 갑니다. 48 kHz로 750 Hz를 낸다면 출력에는 47.25 kHz와 48.75 kHz의 image가 같이 있습니다(f_s ± f). 다음 단이 이 주파수를 통과시키는 앰프나 ADC라면, f_s/2 아래에서 충분히 꺾이는 LPF를 둡니다.
+LPF를 빼면 f_s 주변의 image가 부하로 그대로 갑니다. 48 kHz로 750 Hz를 낸다면 출력에는 47.25 kHz와 48.75 kHz를 비롯해 f_s의 정수배 ± f에 image가 같이 있습니다. 다음 단이 이 주파수를 통과시키는 앰프나 ADC라면, f_s/2 아래에서 충분히 꺾이는 LPF를 둡니다.
 
 > ⚠️ Sample rate mismatch
 
@@ -207,7 +207,7 @@ LPF를 빼면 f_s 주변의 image가 부하로 그대로 갑니다. 48 kHz로 75
 
 > ⚠️ V_REF 부족
 
-DAC 출력은 V_REF × code / 2^N이라 V_REF의 오차와 잡음이 출력에 같은 비율로 실립니다. STM32F405/407은 V_REF+를 1.8 V ~ V_DDA 범위로 받고(DS8626 Table 74), 중간 코드(0x800)에서 V_REF+ 전류가 typ 170 µA, max 240 µA입니다. 코드에 따라 V_REF+ 전류가 달라지므로, V_REF+를 내는 회로는 이 전류 변화에서도 전압을 유지해야 합니다. ADC와 같은 핀이라 [1-07](/blog/embedded/modern-recipes/part1-07-adc-principles)의 디커플링 조건도 함께 적용됩니다.
+DAC 출력은 V_REF × code / 2^N이라 V_REF의 오차와 잡음이 출력에 같은 비율로 실립니다. STM32F405/407은 V_REF+를 1.8 V ~ V_DDA 범위로 받고(DS8626 Table 74), 무부하·V_REF+ = 3.6 V에서 가장 나쁜 코드(0x800)일 때 V_REF+ 전류가 typ 170 µA, max 240 µA입니다. 코드에 따라 V_REF+ 전류가 달라지므로, V_REF+를 내는 회로는 이 전류 변화에서도 전압을 유지해야 합니다. ADC와 같은 핀이라 [1-07](/blog/embedded/modern-recipes/part1-07-adc-principles)의 디커플링 조건도 함께 적용됩니다.
 
 > ⚠️ Glitch 무시
 
@@ -220,7 +220,7 @@ STM32F405/407 DAC는 출력 buffer를 켜도 R_L ≥ 5 kΩ, C_L ≤ 50 pF가 조
 ## 정리
 
 - DAC 출력은 zero-order hold 계단입니다. f_s/2 위 image는 LPF로 거르고, 대역 안 감쇠 sin(πf/f_s)/(πf/f_s)는 48 kHz에서 20 kHz가 −2.6 dB입니다.
-- 12비트 R-2R은 저항 σ 0.01%에서 단조, 0.1%에서 이미 major carry 근처 단조가 깨질 수 있습니다(계산).
+- 12비트 R-2R 계산에서 저항 σ 0.01%는 세 번 모두 단조였고, 0.1%에서는 세 번 중 한 번(seed 2) 0x7FF → 0x800에서 단조가 깨졌습니다.
 - Σ-Δ는 1-bit 펄스의 밀도로 값을 표현하고, 정확도를 필터가 정합니다.
 - DNL > −1 LSB면 단조입니다. 데이터시트의 DNL 한계와 단조성 표기를 따로 확인합니다.
 - STM32F4 DAC는 TIM6 TRGO + DMA1 Stream5 Ch7로 CPU 없이 파형을 낼 수 있고, buffer ON 출력 범위(0.2 V ~ V_DDA − 0.2 V)와 부하 조건을 지켜야 합니다.
