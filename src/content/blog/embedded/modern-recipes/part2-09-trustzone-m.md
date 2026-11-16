@@ -249,7 +249,7 @@ nomcmse.c:2:1: warning: 'cmse_nonsecure_entry' attribute ignored without '-mcmse
 
 > ⚠️ AIRCR.PRIS를 확인하지 않음
 
-PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. PRIS = 1이면 Armv8-M ARM의 표현대로 Non-secure 예외가 "de-prioritized"되어, 같은 숫자를 준 Non-secure 예외가 Secure 예외보다 낮은 우선순위로 취급됩니다. 이 bit는 Non-secure 상태에서 RAZ/WI이고, 쓰기 가능 여부 자체는 구현 정의입니다.
+PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. PRIS = 1이면 Armv8-M ARM의 표현대로 Non-secure 예외가 "de-prioritized"됩니다. 규칙 RWQWK는 그 방법을 적습니다. Non-secure 예외의 8-bit priority 값을 2로 나누고 0x80을 더해 비교하므로, Non-secure 예외는 모두 우선순위 범위의 아래쪽 절반(0x80~0xFF)에 놓입니다. 예를 들어 Non-secure의 0은 0x80, Secure의 0x40보다 낮은 우선순위가 됩니다. 이 bit는 Non-secure 상태에서 RAZ/WI이고, 쓰기 가능 여부 자체는 구현 정의입니다.
 
 ## 정리
 
