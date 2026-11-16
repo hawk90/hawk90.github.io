@@ -51,7 +51,7 @@ device: Apple M2 Pro
 vec_add: NDRange vs clEnqueueTask, 4096 samples, 0 mismatches
 ```
 
-같은 프로그램을 `CL_DEVICE_TYPE_CPU`로 돌리면 `clGetDeviceIDs`가 -30(`CL_INVALID_VALUE`)을 돌려줘, 이 Mac의 OpenCL에는 CPU 장치가 없었습니다.
+같은 프로그램을 `CL_DEVICE_TYPE_CPU`로 돌리면 `clGetDeviceIDs`가 -30(`CL_INVALID_VALUE`)을 돌려줘, 이 Mac의 OpenCL에서는 CPU 장치를 쓸 수 없었습니다.
 
 ## 컴파일 흐름 — `aoc`와 `.aocx`
 
@@ -61,7 +61,7 @@ aoc -rtl vec_add.cl -report                     # stop before hardware, print es
 aoc -board=<board_name> vec_add.cl -report      # full hardware compile -> vec_add.aocx
 ```
 
-*Programming Guide* 22.3의 2장은 `.aocx`를 "실행 시점에 FPGA를 프로그래밍하는 데 필요한 정보를 담은 하드웨어 구성 파일"로 설명하고, 호스트는 이 파일로 OpenCL program 객체를 만든다고 적습니다. 같은 장의 흐름 그림은 emulator 컴파일 시간을 "seconds", `-c`·`-rtl` 단계를 "minutes to hours", 전체 하드웨어 컴파일을 "hours"로 적습니다. `-report`는 자원 사용 추정 요약을 화면에 찍는 옵션입니다(7.11절). `-board=`에는 설치된 보드 지원 패키지가 정의한 보드 이름을 넣습니다.
+*Programming Guide* 22.3의 2장은 `.aocx`를 "실행 시점에 FPGA를 프로그래밍하는 데 필요한 정보를 담은 하드웨어 구성 파일"로 설명하고, 호스트는 이 파일로 OpenCL program 객체를 만든다고 적습니다. 같은 장의 흐름 그림은 emulator 컴파일 시간을 "seconds", `-c`·`-rtl` 단계를 "seconds to minutes", 전체 하드웨어 컴파일을 "hours"로 적습니다. `-report`는 자원 사용 추정 요약을 화면에 찍는 옵션입니다(7.11절). `-board=`에는 설치된 보드 지원 패키지가 정의한 보드 이름을 넣습니다.
 
 ## Channel — kernel 사이 FIFO
 
@@ -113,7 +113,7 @@ for (int i = 0; i < 8; i++)
     sum += a[i] * b[i];
 ```
 
-`#pragma unroll`은 loop 본문을 복제하고, `#pragma unroll <N>`은 N배만 펼칩니다(*Programming Guide* 22.3, 5.2.1절 "Unrolling a Loop"). 문서는 펼치면 loop 제어 오버헤드를 줄이고, iteration 사이 의존성이 없으면 iteration을 병렬로 처리할 수 있다고 적습니다. 이 예처럼 float 누적이면 덧셈 순서가 사슬로 남는데, `aoc -ffp-reassociate`(7.20절)는 float 연산 순서를 균형 트리로 바꿔도 된다고 허락하는 옵션이고, 문서는 그 대가로 결과에 작은 수치 차이가 생긴다고 적습니다.
+`#pragma unroll`은 loop 본문을 복제하고, `#pragma unroll <N>`은 최대 N배까지 펼칩니다(*Programming Guide* 22.3, 5.2.1절 "Unrolling a Loop"). 문서는 펼치면 loop 제어 오버헤드를 줄이고, loop-carried 의존성이 없고 iteration을 병렬로 처리할 수 있으면 지연과 오버헤드도 줄인다고 적습니다. 이 예처럼 float 누적이면 덧셈 순서가 사슬로 남는데, `aoc -ffp-reassociate`(7.20절)는 float 연산 순서를 균형 트리로 바꿔도 된다고 허락하는 옵션이고, 문서는 그 대가로 결과에 작은 수치 차이가 생긴다고 적습니다.
 
 ## `__local` 메모리
 
@@ -229,15 +229,15 @@ __kernel void scale(__global float *a) {
 }
 ```
 
-동작은 하지만, *Best Practices Guide*가 권하는 기본형은 single work-item입니다. work-item 사이에 데이터를 주고받지 않는 단순한 커널이라면 둘 다 가능하므로, 보고서에서 처리율을 비교해 정합니다.
+동작은 하지만, *Best Practices Guide*가 권하는 기본형은 single work-item입니다. 같은 절은 여러 스레드를 명시적으로 기술하는 쪽이 이득인 경우에는 NDRange로 짜도 된다고 적습니다.
 
 > `restrict` 누락
 
-포인터 인자가 겹칠 수 있다고 보면 컴파일러는 load·store 순서를 지키는 하드웨어를 넣습니다. *Best Practices Guide* 22.3의 예제 커널은 전역 포인터에 일관되게 `restrict`를 붙입니다. 겹치지 않는다는 것이 확실할 때만 붙입니다.
+포인터 인자가 겹칠 수 있다고 보면 컴파일러는 load·store 순서를 지키는 하드웨어를 넣습니다. *Best Practices Guide* 22.3의 4.7절 "Avoiding Pointer Aliasing"은 가능하면 포인터 인자에 `restrict`를 넣으라고 권하면서, 다른 포인터와 실제로 겹치는 포인터에 붙이면 결과가 틀릴 수 있다고 경고합니다. 겹치지 않는다는 것이 확실할 때만 붙입니다.
 
 > Channel을 여러 커널이 같이 씀
 
-두 커널이 같은 channel에 쓰거나 같은 channel을 읽는 구조는 *Programming Guide*의 제약에 걸립니다. 생산자·소비자가 둘 이상이면 channel을 나누고 별도 커널로 합칩니다.
+두 커널이 같은 channel에 쓰거나 같은 channel을 읽는 구조는 *Programming Guide*의 제약에 걸립니다.
 
 > Float을 그대로 쓰고 GPU 같은 처리율 기대
 
