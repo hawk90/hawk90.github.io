@@ -353,7 +353,7 @@ ISR과 task가 한 코어에서 ring을 나눠 쓸 때도 같은 `_Atomic` 코�
 
 void pr(const char *f, ...);
 void hosted_exit(int code);
-extern unsigned _estack;
+extern uint32_t _etext, _sdata, _edata, _sbss, _ebss, _estack;
 
 #define SYST_CSR (*(volatile unsigned *)0xE000E010)
 #define SYST_RVR (*(volatile unsigned *)0xE000E014)
@@ -373,6 +373,8 @@ void SysTick_Handler(void)
 
 void Reset_Handler(void)
 {
+    for (uint32_t *s = &_etext, *d = &_sdata; d < &_edata;) *d++ = *s++;   /* .data */
+    for (uint32_t *d = &_sbss; d < &_ebss;) *d++ = 0;                       /* .bss */
     unsigned got = 0, bad = 0;
     SYST_RVR = 200 - 1;                        /* interrupt every 200 core clocks */
     SYST_CVR = 0;
