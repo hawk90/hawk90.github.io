@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 개발 단계에서는 한 사람이 자기 노트북에서 빌드합니다. 양산 단계에서는 *누가, 언제, 어떤 환경에서* 빌드해도 *bit-by-bit 동일한* binary가 나와야 합니다. 그래야 서명, 라이선스 추적, regulatory 인증이 의미를 가집니다. 동시에 binary는 *서명*되어 있어야 부트로더가 받아들이고 OTA가 통과합니다.
 
-이번 글은 재현 가능 빌드의 기법, CI/CD 파이프라인 구성, 키 관리 계층, 양산 line의 flashing 자동화를 다룹니다.
+이번 글은 재현 가능 빌드, CI/CD 파이프라인, 키 관리, 서명, SBOM, 양산 line 자동화를 다룹니다. 재현성은 Debian 13 guest의 gcc 14.2로 직접 시험했고, 서명 도구와 SBOM 생성은 U-Boot·TF-A·Buildroot·Yocto 문서로 대조했습니다(실행하지 않았습니다).
 
 ## 재현 가능 빌드의 필요성
 
@@ -32,7 +32,7 @@ reproducibility를 깨는 주범은 다음입니다.
 | 원인 | 해결 |
 |------|------|
 | 빌드 timestamp | `SOURCE_DATE_EPOCH` 환경 변수 |
-| Build path 차이 | `--remap-path-prefix` (gcc, clang) |
+| Build path 차이 | gcc·clang의 `-ffile-prefix-map=OLD=NEW` |
 | Locale | `LC_ALL=C` |
 | 병렬 빌드 순서 | 결정적 sort, deterministic archive |
 | ELF build-id 설정 | 해당 linker가 지원하는 결정적 style을 선택하고 실제 산출물 비교 |
@@ -40,27 +40,35 @@ reproducibility를 깨는 주범은 다음입니다.
 | 컴파일러 버전 | 컨테이너로 pin |
 | 의존 패키지 버전 | lock file |
 
-## SOURCE_DATE_EPOCH
+## SOURCE_DATE_EPOCH와 경로 — 직접 해 보기
 
-대부분의 toolchain과 packager가 이 환경 변수를 인식합니다.
-
-```bash
-$ export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
-$ make
-```
-
-이 변수는 이를 지원하는 빌드 도구의 timestamp 입력을 고정하는 규약입니다. `__DATE__`/`__TIME__`, archive, gzip, tar 등 모든 도구가 자동으로 이를 처리하지는 않으므로 각 빌드 단계의 지원 여부를 확인합니다.
+`SOURCE_DATE_EPOCH`는 빌드 도구에게 "지금" 대신 쓸 시각을 알려 주는 환경 변수입니다. 서로 다른 디렉터리 `a/`와 `b/`에 같은 파일을 두고 gcc 14.2로 세 번 빌드했습니다.
 
 ```c
-// __DATE__가 빌드 시각 대신 commit 시각으로 고정
-printf("Built on %s\n", __DATE__);
+#include <stdio.h>
+int main(void) { printf("Built on %s %s\n", __DATE__, __TIME__); return 0; }
 ```
 
-Buildroot·Yocto·Debian은 재현 가능한 package build에서 이 변수를 사용할 수 있지만, 전체 build graph의 모든 도구를 자동으로 결정적으로 만들지는 않습니다.
+```text
+# 1) 그냥 빌드 (2초 간격)
+$ cd a && gcc -O2 -g -o ver ver.c; sleep 2; cd ../b && gcc -O2 -g -o ver ver.c
+09058c7f82c6d145...  a/ver
+9c3d0786b26559a5...  b/ver
+# 2) SOURCE_DATE_EPOCH=1700000000
+67e3c3cbd9cad55c...  a/ver
+3850be40347801a3...  b/ver
+$ a/ver
+Built on Nov 14 2023 22:13:20
+# 3) SOURCE_DATE_EPOCH + -ffile-prefix-map=<dir>=.
+7ff7169c5987823b...  a/ver
+7ff7169c5987823b...  b/ver
+```
+
+`SOURCE_DATE_EPOCH`가 `__DATE__`·`__TIME__`을 고정했는데도(2번, 1700000000은 2023-11-14 22:13:20 UTC) 두 바이너리는 달랐습니다. `-g`로 넣은 디버그 정보에 빌드 디렉터리 경로가 들어가기 때문입니다. `-ffile-prefix-map`으로 경로를 바꿔 주자(3번) 두 바이너리가 같아졌습니다. 재현성은 원인 하나를 고쳐서는 확인되지 않고, 두 번 빌드해 비교해야 확인됩니다.
 
 ## build-id 결정성
 
-ELF `.note.gnu.build-id`는 linker가 만드는 build identifier입니다. 기본적으로 항상 UUID가 매번 생성되는 것은 아니며, linker와 build 설정에 따라 생성 여부와 style이 달라집니다. `sha1` style을 요청해도 전체 빌드가 재현 가능해지는 것은 아니므로 두 산출물을 직접 비교합니다.
+ELF `.note.gnu.build-id`는 linker가 만드는 build identifier입니다. Debian 13의 gcc는 spec에 `--build-id`를 넣어 기본으로 만들고(`gcc -dumpspecs`에 `--build-id`가 있음), 위 3번 바이너리에는 `Build ID: 1dec33cad6aaf9a0eba44c36d20b3427e6d31e6d`가 있었습니다. 두 디렉터리의 바이너리가 바이트 단위로 같았으므로 build-id도 같습니다. 바이너리가 같으면 build-id도 같으므로, 현장 바이너리의 build-id로 보관된 빌드를 찾을 수 있습니다.
 
 ```text
 LDFLAGS += -Wl,--build-id=sha1
@@ -72,11 +80,11 @@ build-id를 생략하는 선택은 `none`이지만, 이는 결정적 identifier�
 LDFLAGS += -Wl,--build-id=none
 ```
 
-결정적 build-id는 matching에 유용할 수 있습니다. target linker 문서와 ELF 산출물에서 실제 동작을 확인하고, release archive에 대응하는 debug symbols를 보관합니다.
+build-id는 현장 crash dump와 보관한 디버그 심볼을 짝짓는 열쇠입니다. release마다 같은 build-id의 `vmlinux`·디버그 파일을 보관합니다(Ch 11의 `faddr2line`).
 
 ## 컨테이너로 toolchain pin
 
-호스트 OS 차이는 가장 까다로운 reproducibility 위협입니다. Ubuntu 22.04 / 24.04, glibc 2.35 / 2.39 같은 차이가 build output에 흘러갑니다. 해법은 *containerized build*입니다.
+위 시험은 한 guest의 같은 gcc 14.2에서 한 것입니다. CI와 개발자 PC가 같은 결과를 내려면 컴파일러와 도구 버전까지 같아야 하므로 빌드 환경을 컨테이너 이미지로 고정합니다.
 
 ```dockerfile
 # Dockerfile - BSP builder image
@@ -182,13 +190,11 @@ deploy:
     - aws s3 cp output/sdcard.img.sig s3://mybsp-releases/${CI_COMMIT_TAG}/
 ```
 
-`tags: [hardware-mybsp]`는 GitLab runner의 label입니다. 실제 보드가 연결된 runner에서만 hardware test가 실행되도록 routing 합니다.
-
-LAVA(Linaro Automation and Validation Architecture)는 보드를 farm으로 운영하는 도구입니다. CI가 LAVA에 job 제출 → LAVA가 비어 있는 보드에 flash → 테스트 → 결과 보고.
+위 YAML은 구조를 보이는 예이고, `lava-tool`, `hsm-sign` 같은 명령은 쓰는 board farm과 서명 서비스의 것으로 바꿉니다. 이 글은 이 파이프라인을 실행하지 않았습니다. `tags: [hardware-mybsp]`는 GitLab runner의 label로, 보드가 연결된 runner에서만 hardware test가 돌게 합니다.
 
 ## 키 관리 계층
 
-키는 보통 3등급으로 나눕니다.
+키를 용도별로 나눈 예입니다.
 
 | 등급 | 용도 | 보관 |
 |------|------|------|
@@ -196,30 +202,11 @@ LAVA(Linaro Automation and Validation Architecture)는 보드를 farm으로 운�
 | QA | CI staging, internal release | CI secret store (Vault, GitLab CI variables) |
 | Production | 출시 binary 서명 | YubiHSM, AWS CloudHSM 또는 PKCS#11을 제공하는 관리형 HSM 등 |
 
-같은 키로 모두 서명하면 dev 환경 침해 시 production이 함께 무너집니다. 분리 + 서로 다른 CA chain.
+같은 키로 모두 서명하면 dev 환경이 뚫렸을 때 production 서명도 같이 뚫립니다. 등급마다 다른 CA 체인을 둡니다. RAUC로 만든 3단 체인과 만료 시험은 Ch 18에 있습니다.
 
 ## HSM 사용 패턴
 
-HSM은 비밀키를 *내보내지 않는* 장치입니다. signing operation을 HSM에 위임합니다. PKCS#11 standard API로 접근합니다.
-
-```bash
-# YubiHSM 사용 예
-$ yubihsm-shell -a sign-pkcs1v15 \
-    --object-id 0x1234 \
-    --algorithm rsa-pkcs1-sha256 \
-    --in image.bin \
-    --out image.sig
-```
-
-OpenSSL을 PKCS#11 engine 경유로:
-
-```bash
-$ openssl dgst -sha256 -sign 'pkcs11:object=prod-signing-key' \
-    -engine pkcs11 -keyform engine \
-    -out image.sig image.bin
-```
-
-CI 빌더는 HSM과 동일 network에 있어야 합니다. cloud HSM(AWS, GCP)은 IAM 기반 접근 제어를 합니다.
+HSM은 비밀키를 내보내지 않고 서명 연산만 해 주는 장치입니다. 빌드 서버는 PKCS#11 같은 표준 인터페이스로 서명을 요청합니다. HSM 제품별 명령은 이 글에서 실행하지 않아 싣지 않습니다.
 
 ## 부트로더 서명 (secure boot)
 
@@ -227,31 +214,21 @@ CI 빌더는 HSM과 동일 network에 있어야 합니다. cloud HSM(AWS, GCP)�
 
 NXP i.MX의 HABv4:
 
+U-Boot v2024.04의 HABv4 안내(`doc/imx/habv4/guides/mx6_mx7_secure_boot.txt:123`)는 NXP CST로 CSF를 만드는 명령을 이렇게 적습니다.
+
 ```bash
-# CSF (Command Sequence File) 생성
-$ cst --certs --key-store hab4_keys/ -o csf.bin -i csf.txt
-$ objcopy --add-section .csf=csf.bin u-boot.imx u-boot-signed.imx
+./cst -i csf_uboot.txt -o csf_uboot.bin
 ```
+
+CSF 입력 파일 예는 같은 디렉터리의 `csf_examples/`에 있습니다. 이 글은 서명을 실행하지 않았습니다.
 
 ARM Trusted Firmware(TF-A)의 BL2/BL31:
 
-```bash
-$ cert_create \
-    -n --tfw-nvctr 0 --ntfw-nvctr 0 \
-    --rot-key rot.pem \
-    --trusted-key-cert trusted_key.crt \
-    --tb-fw-key-cert tb_fw_key.crt \
-    --tb-fw-cert tb_fw.crt \
-    --tb-fw tb_fw.bin
-```
-
-TF-A는 FIP(Firmware Image Package)로 BL2, BL31, BL33을 묶습니다. 각 binary에 cert가 붙어 chain이 검증됩니다.
-
-OP-TEE 측 trusted application도 별도 서명됩니다. TA마다 RSA 서명 + UUID. REE 측 tee_supplicant가 TA를 로드할 때 OP-TEE OS가 서명 검증.
+TF-A는 Trusted Board Boot에서 `tools/cert_create`로 인증서를 만들고 FIP에 함께 넣습니다(`docs/design/trusted-board-boot.rst`). 이 도구의 옵션 이름은 소스에 정의되어 있습니다. 예를 들어 `rot-key`(`src/tbbr/tbb_key.c:17`), `tfw-nvctr`·`ntfw-nvctr`(`tbb_ext.c:25,35`), `tb-fw-cert`(`tbb_cert.c:21`), `trusted-key-cert`(`tbb_cert.c:38`)입니다. Ch 7의 QEMU 빌드는 Trusted Board Boot 없이 만든 FIP였습니다.
 
 ## Build farm — distcc/icecc
 
-BSP 빌드는 수십 분~수 시간이 걸립니다. CI 한 대로 매 commit마다 빌드 하면 queue가 쌓입니다. distcc/icecream으로 컴파일을 *cluster*에 분산합니다.
+Ch 8에서 커널 `defconfig` 빌드 하나가 4 vCPU guest에서 18분 48초 걸렸습니다. CI가 commit마다 이런 빌드를 돌리면 대기열이 쌓이므로 distcc나 icecream으로 컴파일을 여러 기계에 나눕니다(이 글에서는 실행하지 않았습니다).
 
 ```bash
 # host에 icecc 데몬
@@ -263,13 +240,13 @@ $ export PATH=/usr/lib/icecc/bin:$PATH
 $ make -j40    # 4 CPU 호스트가 cluster의 40 core 사용
 ```
 
-빌드 farm 5대를 둔 팀이 commit-to-image 시간을 60분에서 10분으로 줄이는 케이스가 흔합니다.
-
-ccache + distcc는 따로. ccache는 동일 컴파일 결과를 캐시, distcc는 새 컴파일을 분산. 둘 다 켜면 누적 효과.
+ccache는 같은 컴파일의 결과를 다시 쓰고, distcc는 새 컴파일을 나눕니다. 서로 다른 일을 하므로 함께 쓸 수 있습니다.
 
 ## 양산 라인 flashing
 
 flash 도구는 [Ch 17](/blog/embedded/bsp/chapter17-image-packaging)에서 다뤘습니다. 양산 line은 그 도구를 *자동화*합니다.
+
+아래 스크립트는 흐름을 보이는 예이고 실행하지 않았습니다. `uuu -b emmc_all <wic.zst>`는 이미지 전체를 eMMC에 쓰는 형태로, NXP mfgtools README의 예제 줄("decompress wic.zst file and download the whole image into emmc")을 따랐습니다. 같은 README에서 `-b emmc`는 eMMC boot partition에 U-Boot만 쓰는 예입니다.
 
 ```python
 #!/usr/bin/env python3
@@ -283,7 +260,7 @@ def scan_barcode():
 
 def flash_board(image_path):
     result = subprocess.run(
-        ["uuu", "-b", "emmc", image_path],
+        ["uuu", "-b", "emmc_all", image_path],
         capture_output=True, text=True
     )
     return result.returncode == 0, result.stderr
@@ -296,7 +273,7 @@ def provision(serial, mac):
 def main():
     serial = scan_barcode()
     mac = generate_mac(serial)
-    ok, err = flash_board("/srv/images/mybsp-1.5.0.img")
+    ok, err = flash_board("/srv/images/mybsp-1.5.0.wic.zst")
     if not ok:
         log_failure(serial, err)
         sys.exit(1)
@@ -308,7 +285,7 @@ if __name__ == "__main__":
     main()
 ```
 
-양산 line의 한 station은 다음과 같이 운영됩니다.
+station 하나의 흐름을 예로 들면 다음과 같습니다.
 
 1. 작업자가 보드를 jig에 장착
 2. 바코드 스캔으로 serial 등록
@@ -318,29 +295,18 @@ if __name__ == "__main__":
 6. provisioning(MAC, serial, factory cert)
 7. 결과를 MES(Manufacturing Execution System)로 송신
 
-failure rate는 일별로 dashboard에 plot. 특정 lot에 fail이 spike 되면 부품 또는 공정 issue.
+flash 결과를 serial과 함께 기록해 두면, 특정 부품 lot에서 실패가 몰리는지를 나중에 찾을 수 있습니다.
 
 ## SBOM과 라이선스 추적
 
-양산 BSP는 SBOM(Software Bill of Materials)을 동반해야 합니다. SPDX 또는 CycloneDX format.
+출시 이미지에 무엇이 들어 있는지는 빌드 시스템이 목록으로 만들어 줍니다.
 
-```bash
-# Buildroot
-$ make legal-info
-# output/legal-info/manifest.csv
+- **Buildroot**: `make legal-info`. Buildroot 2024.02 매뉴얼 `legal-notice.adoc`에 따르면 host·target 패키지별 manifest 파일, `sources/`와 `host-sources/` 아래의 소스, `licenses/`와 `host-licenses/` 아래의 license 텍스트가 나옵니다. 같은 문서는 이 결과를 그대로 compliance 자료로 쓰기 전에 검토하라고 적습니다.
+- **Yocto**: Yocto 5.0.17 Development Tasks Manual의 SBOM 절에 따르면 OpenEmbedded는 `INHERIT_DISTRO`의 `create-spdx` class로 SPDX를 기본 생성하고, 이미지를 빌드하면 `IMAGE-MACHINE.spdx.tar.zst`가 나옵니다.
 
-# Yocto
-$ bitbake -c create_spdx mybsp-image
-# tmp/deploy/spdx/
-```
+이 글은 두 명령을 실행하지 않았습니다.
 
-manifest.csv에는 각 component, license, source URL, patch가 들어갑니다. GPL 컴포넌트는 *대응 소스 archive*가 필요합니다. Buildroot/Yocto가 자동 archive를 만들어 줍니다.
-
-```bash
-$ make legal-info-source-archive   # 모든 GPL 소스 tarball
-```
-
-regulator(CE, FCC, KC)와 customer에게 제출하는 release package는 다음을 포함합니다.
+release마다 함께 보관할 자료의 예입니다.
 
 - binary image (서명됨)
 - SBOM (SPDX)
@@ -353,26 +319,25 @@ regulator(CE, FCC, KC)와 customer에게 제출하는 release package는 다음�
 
 **Dev 키로 production 서명.** dev 키가 깃 저장소에 남아 있으면 누구나 *유효한* production binary를 만들 수 있습니다. 키 분리는 양산 진입 *전*에.
 
-**SOURCE_DATE_EPOCH 안 박기.** 같은 commit을 두 번 빌드하면 다른 binary. CI에서 *항상* 환경 변수로.
+**SOURCE_DATE_EPOCH만 박고 끝내기.** 위 시험처럼 시각을 고정해도 빌드 경로가 다르면 바이너리가 달랐습니다. 두 번 빌드해 비교하는 단계를 CI에 둡니다.
 
 **Toolchain pin 없이 CI.** Ubuntu LTS upgrade가 다음 빌드를 깨뜨립니다. 컨테이너로 pin.
 
 **HSM credential을 CI secret으로.** AWS IAM, GitLab masked variable, Vault token 같은 layer를 거치도록 합니다. HSM PIN을 GitLab CI variable에 *평문*으로 두면 안 됨.
 
-**라이선스 audit 미수행.** GPL 컴포넌트가 product에 포함되었는데 SBOM에 없거나 대응 소스가 없으면 *라이선스 위반*. 매 release legal-info 자동 생성.
+**라이선스 자료 미생성.** release마다 `make legal-info`나 Yocto SPDX 결과를 함께 보관합니다.
 
 **Flash 후 boot test 생략.** 양산 line은 flash 직후 *반드시* boot + self-test. 미테스트로 출하한 보드의 fail rate가 dashboard에 보일 때는 이미 customer 손에.
 
 ## 정리
 
-- `SOURCE_DATE_EPOCH`, build-id, container는 재현성을 돕지만, 전체 dependency와 build step을 고정하고 두 output을 비교해야 재현성을 확인할 수 있습니다.
+- gcc 14.2 시험에서 `SOURCE_DATE_EPOCH`만으로는 바이너리가 달랐고, `-ffile-prefix-map`까지 더해야 같아졌습니다. 재현성은 두 번 빌드해 비교해야 확인됩니다.
 - CI/CD 파이프라인은 lint → build → smoke → stress → package → sign → deploy 단계로 분리합니다.
 - 키는 dev / QA / production 3등급으로 나누고 production은 HSM에 보관합니다. PKCS#11 API로 접근.
-- 부트로더(HABv4, TF-A FIP), kernel(FIT image 서명), rootfs(dm-verity), OTA bundle 모두 별도 서명 layer입니다.
-- LAVA 같은 board farm + GitLab runner label로 hardware test를 CI에 통합합니다.
-- distcc/icecream의 build cluster로 commit-to-image 시간을 분 단위로 줄입니다.
+- 부트로더 서명은 i.MX HABv4(CST, U-Boot `doc/imx/habv4/`)와 TF-A Trusted Board Boot(`cert_create`)로 따로 있고, OTA bundle 서명은 Ch 18의 RAUC입니다.
+- 보드가 연결된 runner에만 hardware test를 보내도록 GitLab runner label을 씁니다.
 - 양산 line은 바코드 → flash → boot → self-test → provisioning → MES 송신을 자동화합니다.
-- SBOM과 대응 소스 archive는 라이선스 audit과 regulator 인증의 필수 자료입니다. 매 release 자동 생성.
+- Buildroot는 `make legal-info`, Yocto는 기본 `create-spdx`로 manifest·license·소스 목록을 만듭니다.
 
 ## 다음 편 예고
 
