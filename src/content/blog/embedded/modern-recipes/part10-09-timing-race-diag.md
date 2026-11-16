@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Race condition은 *관찰 자체가 race를 사라지게* 만드는 가장 까다로운 버그입니다."** Printf 대신 GPIO pulse·SWO·DWT cycle count로 *간섭 없이* 관찰해야 잡힙니다.
+> **"Race condition은 *관찰 자체가 race를 사라지게* 만드는 관찰하면 달라지는 버그입니다."** Printf 대신 GPIO pulse·SWO·DWT cycle count로 *간섭 없이* 관찰해야 잡힙니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -104,7 +104,7 @@ racy: ISR increments 20000, main took 7269, lost 12731
 safe: ISR increments 20000, main took 20000, lost 0
 ```
 
-`take_racy()`는 읽은 뒤 0을 쓰기까지의 짧은 구간에 ISR이 들어오면, 그 사이의 증가를 0으로 덮어 버립니다. 데모에서는 이 구간을 일부러 넓혔기 때문에 2만 번 중 1만 2천 번 안팎을 잃었고, 두 번 돌릴 때마다 잃은 수가 달랐습니다(11907, 12731). `take_safe()`처럼 읽기와 0 쓰기를 `__disable_irq()`·`__enable_irq()` 사이에 두면 잃는 것이 없습니다. 실제 코드에서는 구간이 훨씬 짧아 드물게만 잃으므로, 이 데모처럼 정답 카운터를 따로 두고 비교해야 드러납니다.
+`take_racy()`는 읽은 뒤 0을 쓰기까지의 짧은 구간에 ISR이 들어오면, 그 사이의 증가를 0으로 덮어 버립니다. 데모에서는 이 구간을 일부러 넓혔기 때문에 2만 번 중 1만 번 이상을 잃었고, 실행할 때마다 잃은 수가 달랐습니다(11907, 12731). `take_safe()`처럼 읽기와 0 쓰기를 `__disable_irq()`·`__enable_irq()` 사이에 두면 잃는 것이 없습니다. 실제 코드에서는 구간이 훨씬 짧아 드물게만 잃으므로, 이 데모처럼 정답 카운터를 따로 두고 비교해야 드러납니다.
 
 같은 이유로 "16·32비트 정렬된 쓰기는 atomic"이라는 말도 쓰기 *하나*에 대한 것입니다. ARMv7-M ARM A3.5.3은 byte, halfword 정렬 halfword, word 정렬 word 접근을 single-copy atomic으로 정하고, `LDRD`·`STRD`·`LDM`·`STM`은 word 접근의 연속이라 그 연속 전체는 atomic이 아닐 수 있다고 적습니다. `volatile uint64_t`에 대입하면 실제로 `strd` 하나가 나오지만 이 규칙에 따라 두 word 사이에 예외가 끼어들 수 있습니다.
 
@@ -151,7 +151,7 @@ void USART1_IRQHandler(void) {
 }
 ```
 
-`CYCCNT`는 코어 클럭마다 1씩 오르는 카운터라, ISR이 main 구간의 몇 cycle 지점에 들어왔는지를 남깁니다. 읽기 자체도 명령 하나만큼 시간을 쓰므로, 빈 구간을 먼저 재서 빼는 방법은 [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface)의 측정 편에 있습니다. QEMU는 cycle을 모델링하지 않으므로 이 값은 보드에서 잽니다.
+`CYCCNT`는 코어 클럭마다 1씩 오르는 카운터라, ISR이 main 구간의 몇 cycle 지점에 들어왔는지를 남깁니다. 읽기 자체도 명령 하나만큼 시간을 쓰므로, 빈 구간을 먼저 재서 빼는 방법은 [Embedded Performance Engineering 1-03](/blog/embedded/performance-engineering/part1-03-measurement)에 있습니다. QEMU는 cycle을 모델링하지 않으므로 이 값은 보드에서 잽니다.
 
 ## 측정 3 — SWO·RTT
 
@@ -271,7 +271,7 @@ printf는 위 첫 번째 원인에서는 컴파일러가 변수를 다시 읽게
 ## 정리
 
 - `volatile` 없는 대기 루프는 한 번만 읽고 영원히 돕니다(`-O2` 코드로 확인).
-- `volatile`은 RMW를 보호하지 않습니다. ISR과 공유한 카운터를 읽고-0으로 만드는 코드는 QEMU에서 2만 번 중 1만 2천 번 안팎을 잃었고, IRQ를 막은 버전은 하나도 잃지 않았습니다.
+- `volatile`은 RMW를 보호하지 않습니다. ISR과 공유한 카운터를 읽고-0으로 만드는 코드는 QEMU에서 2만 번 중 1만 번 이상을 잃었고, IRQ를 막은 버전은 하나도 잃지 않았습니다.
 - 32비트 이하 정렬 접근 하나는 atomic이고, `STRD` 같은 연속 접근은 아닙니다(ARMv7-M ARM A3.5.3).
 - Cortex-M3·M4는 메모리 순서를 바꾸지 않지만, 이식성과 DMA를 위해 barrier를 둡니다(Arm AN321).
 - 확인-사용은 LDREX/STREX로 한 번에 합니다.
