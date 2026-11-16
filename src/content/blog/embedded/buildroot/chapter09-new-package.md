@@ -159,10 +159,10 @@ endmenu
             }
         ],
         "hashes": [
-            "/home/br/br2-acme/package/htop-acme/htop-acme.hash"
+            "/home/br/in/br2-acme/package/htop-acme/htop-acme.hash"
         ],
         "patches": [
-            "/home/br/br2-acme/package/htop-acme/0001-htop-mark-acme-build.patch"
+            "/home/br/in/br2-acme/package/htop-acme/0001-htop-mark-acme-build.patch"
         ]
     }
 }
@@ -403,7 +403,7 @@ Signed-off-by: ACME <dev@example.com>
  }
 ```
 
-`make htop-acme-dirclean` 뒤 `make htop-acme`의 출력입니다(61.48초, ncurses 빌드 포함).
+`make htop-acme-dirclean` 뒤 `make htop-acme`의 출력입니다(41.10초, ncurses 빌드 포함).
 
 ```text
 >>> host-ncurses 6.6-20251231 Downloading
@@ -524,18 +524,18 @@ series
 hash 파일의 첫 글자를 일부러 바꾸고 받은 파일을 지운 뒤 `make htop-acme-source`를 돌렸습니다.
 
 ```text
-ERROR: while checking hashes from /home/br/br2-acme/package/htop-acme/htop-acme.hash
+ERROR: while checking hashes from /home/br/in/br2-acme/package/htop-acme/htop-acme.hash
 ERROR: htop-3.4.1.tar.xz has wrong sha256 hash:
 ERROR: expected: 004f7d4580fc11cffc7e0f06895a4789e0c1c054435752c151e812fead9f6220
 ERROR: got     : 904f7d4580fc11cffc7e0f06895a4789e0c1c054435752c151e812fead9f6220
 ERROR: Incomplete download, or man-in-the-middle (MITM) attack
 ...
-2026-11-16 03:46:02 ERROR 404: Not Found.
+2026-11-16 07:20:53 ERROR 404: Not Found.
 ...
 make[1]: *** [package/pkg-generic.mk:179: /home/br/buildroot/output/build/htop-acme-3.4.1/.stamp_downloaded] Error 1
 ```
 
-upstream 파일이 hash와 맞지 않자 Buildroot는 백업 미러(`sources.buildroot.net/htop-acme/…`, `sources.buildroot.net/…`)를 차례로 시도했고, 외부 트리 패키지라 미러에 없어 404로 끝났습니다. 그 뒤 `dl/htop-acme/`는 비어 있었습니다. 매뉴얼 표현대로 hash가 맞지 않으면 "deletes the downloaded file, and aborts"입니다.
+upstream 파일이 hash와 맞지 않자 Buildroot는 백업 미러(`sources.buildroot.net/htop-acme/…`, `sources.buildroot.net/…`)를 차례로 시도했고, 외부 트리 패키지라 미러에 없어 404로 끝났습니다. 매뉴얼 표현대로 hash가 맞지 않으면 "deletes the downloaded file, and aborts"입니다.
 
 원인은 tarball이 바뀌었거나 hash 파일이 틀린 경우입니다. upstream이 공개한 hash와 대조해 어느 쪽인지 먼저 확인합니다. 무작정 `sha256sum` 결과로 hash 파일을 덮으면 MITM 경고를 스스로 꺼 버리는 셈입니다.
 
