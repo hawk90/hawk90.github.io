@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SD 카드를 SPI 모드로 초기화(CMD0 → CMD8 → ACMD41 → CMD58)하고 FatFs의 disk I/O 함수 다섯 개에 연결하면, MCU가 쓴 FAT 볼륨을 PC에서 그대로 읽을 수 있습니다."** 카드 쓰기 횟수를 줄이려면 `disk_write`가 다중 블록 쓰기(CMD25)를 써야 하고, 전원이 끊기면 열려 있던 파일에서 보통 마지막 `f_sync` 이후에 쓴 데이터를 잃고, FatFs 앱노트가 말하는 critical section에서 끊기면 파일이 처음 상태로 돌아가는 식으로 그보다 많이 잃을 수 있습니다.
+> **"SD 카드를 SPI 모드로 초기화(CMD0 → CMD8 → ACMD41 → CMD58)하고 FatFs의 disk I/O 함수 다섯 개에 연결하면, MCU가 쓴 FAT 볼륨을 PC에서 그대로 읽을 수 있습니다."** 카드 쓰기 횟수를 줄이려면 `disk_write`가 다중 블록 쓰기(CMD25)를 써야 하고, 전원이 끊기면 열려 있던 파일에서 마지막 `f_sync` 이후에 쓴 데이터를 잃고, FatFs 앱노트가 말하는 critical section에서 끊기면 덧붙이던 파일이 처음 상태로 돌아가는 식으로 그보다 많이 잃습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -22,7 +22,7 @@ MCU가 기록하고 PC가 읽는 파일이 필요할 때 씁니다. 데이터 �
 
 이 글의 기준 환경은 앞 편들과 같습니다. MCU는 STM32F407이고 클럭은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`(PCLK2 = 84 MHz), SPI는 [4-08: SPI 드라이버](/blog/embedded/modern-recipes/part4-08-spi-driver)의 SPI1(PA5 SCK, PA6 MISO, PA7 MOSI, PA4 CS), 1 ms tick은 [4-06: SysTick](/blog/embedded/modern-recipes/part4-06-systick-timer)의 `millis()`입니다.
 
-출처: [SD Physical Layer Simplified Specification Version 9.10](https://www.sdcard.org/downloads/pls/)(Part 1, 2023-12-01), [FatFs R0.16](http://elm-chan.org/fsw/ff/) 배포본 [ff16.zip](http://elm-chan.org/fsw/ff/arc/ff16.zip), FatFs 예제 드라이버 [ffsample.zip](http://elm-chan.org/fsw/ff/ffsample.zip)의 `stm32/mmc_stm32f1_spi.c`, [RM0090 Rev 22](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf). 아래 절 번호는 이 판들의 번호입니다.
+출처: SD Part 1 Physical Layer Simplified Specification Version 6.00([MIT 강의 페이지에 올라 있는 사본](https://academy.cba.mit.edu/classes/networking_communications/SD/SD.pdf), ©2001-2017 SD Card Association). 최신 9.10은 sdcard.org 다운로드가 403으로 막혀 열지 못했습니다. [FatFs R0.16](http://elm-chan.org/fsw/ff/) 배포본 [ff16.zip](http://elm-chan.org/fsw/ff/arc/ff16.zip), FatFs 예제 드라이버 [ffsample.zip](http://elm-chan.org/fsw/ff/ffsample.zip)의 `stm32/mmc_stm32f1_spi.c`. 아래 SD 사양의 절 번호는 6.00의 번호입니다.
 
 ## 핵심 개념
 
@@ -36,7 +36,7 @@ MCU가 기록하고 PC가 읽는 파일이 필요할 때 씁니다. 데이터 �
 
 신호선은 사양 3.7.1절 Table 3-1, 25 MHz와 4-bit 12.5 MB/s는 2장(System Features)의 Default Speed 항목입니다. SPI 모드의 버스 타이밍은 SD 모드와 같다고 7.8절이 정하므로 같은 25 MHz를 썼고, 데이터선이 하나라 원시 상한은 25 Mbit/s ÷ 8 = 3.125 MB/s입니다. 명령·토큰·CRC·busy 시간이 빠지기 전의 값입니다.
 
-7.1절은 SPI 모드의 장점을 범용 호스트를 쓸 수 있다는 점으로, 단점을 데이터선 하나에서 오는 성능 손실로 적습니다. 같은 절에 따라 SDUC 카드(2 TB 초과)는 SPI 모드를 지원하지 않습니다. 이 글은 범용 SPI만 있는 MCU에서 SDSC·SDHC·SDXC 카드를 쓰는 경우를 다룹니다.
+7.1절은 SPI 모드의 장점을 범용 호스트를 쓸 수 있다는 점으로, 단점을 데이터선 하나에서 오는 성능 손실로 적습니다. 같은 절은 "The commands and functions in SD mode defined after the Version 2.00 are not supported in SPI mode"라고도 적습니다. 이 글은 범용 SPI만 있는 MCU에서 SDSC·SDHC·SDXC 카드를 쓰는 경우를 다룹니다.
 
 ### SPI 모드 초기화 순서
 
@@ -71,7 +71,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff);
 
 ### 1. 명령 전송과 초기화
 
-SPI 바이트 전송은 4-08의 "Polling transfer" 절에 있는 `spi_xfer8()`을 쓰고, SPI1과 GPIOA 클럭 enable과 핀 설정도 그 글의 `spi_init_master()`가 이미 했다고 봅니다. SCLK 분주는 SPI_CR1의 BR[2:0]으로 바꿉니다(RM0090 28.5.1절: `111` = fPCLK/256, `001` = fPCLK/4). PCLK2 = 84 MHz에서 저속은 328.125 kHz, 고속은 21 MHz로 Default Speed 25 MHz 이하입니다. 같은 절은 BR을 통신 중에 바꾸지 말라고 하므로 BSY가 내려간 뒤 씁니다.
+SPI 바이트 전송은 4-08의 "Polling transfer" 절에 있는 `spi_xfer8()`을 쓰고, SPI1과 GPIOA 클럭 enable과 핀 설정도 그 글의 `spi_init_master()`가 이미 했다고 봅니다. SCLK 분주는 SPI_CR1의 BR[2:0]으로 바꿉니다. 4-08이 HAL의 `SPI_BAUDRATEPRESCALER_*` 값으로 보였듯 BR = n이 PCLK/2^(n+1)이므로 `111` = /256, `001` = /4입니다. PCLK2 = 84 MHz에서 저속은 328.125 kHz, 고속은 21 MHz로 Default Speed 25 MHz 이하입니다. 전송 중에 분주가 바뀌지 않도록 BSY가 내려간 뒤 씁니다.
 
 ```c
 #include <stdint.h>
@@ -83,7 +83,7 @@ SPI 바이트 전송은 4-08의 "Polling transfer" 절에 있는 `spi_xfer8()`�
 uint8_t  spi_xfer8(uint8_t tx);         // 4-08
 uint32_t millis(void);                  // 4-06
 
-static void spi_set_br(uint32_t br) {   // RM0090 28.5.1 SPI_CR1.BR[2:0]
+static void spi_set_br(uint32_t br) {   // SPI_CR1.BR[2:0]: PCLK / 2^(br+1)
     while (SPI1->SR & SPI_SR_BSY) { }
     SPI1->CR1 = (SPI1->CR1 & ~SPI_CR1_BR) | (br << SPI_CR1_BR_Pos);
 }
@@ -407,29 +407,139 @@ void write_bench(UINT chunk) {                 // chunk: 512 or 16384
 | `csize`가 2 이상인데 16384 B 줄이 더 짧지 않음 | 실패 | `disk_write`에 중단점을 걸어 `n > 1`로 불리는지, `sd_write_blocks`가 CMD25 분기로 들어가는지 |
 | `524288`보다 작은 bytes | 실패: `f_write`가 중간에 멈춤 | `FR_DISK_ERR`이면 위 "동작 확인" 표의 마지막 행 |
 
+### host에서 disk_write 호출 세기
+
+보드 없이 FatFs가 `disk_write`를 어떻게 부르는지는 host에서 셀 수 있습니다. R0.16 `ff.c`를 RAM disk(1 GiB) 위에 올리고, `disk_write`가 불릴 때마다 `n`을 셉니다. host 빌드만 `ffconf.h`의 `FF_USE_MKFS`를 1로 바꿔 `f_mkfs`로 FAT32를 만들고, 클러스터 4 KiB(csize 8)와 512 B(csize 1) 두 볼륨에서 위 `write_bench`와 같은 512 KiB 쓰기와 아래 로거 셈(64바이트 줄, 초당 10줄, 60초)을 돌렸습니다.
+
+```c
+/* ramdisk.c: FatFs diskio over RAM that counts disk_write calls */
+#include <string.h>
+#include "ff.h"
+#include "diskio.h"
+
+#define NSECT (1024u * 1024u * 1024u / 512u)     /* 1 GiB volume */
+static BYTE img[NSECT][512];
+unsigned long wr_calls, wr_single, wr_multi, wr_sectors;
+
+DSTATUS disk_initialize(BYTE pdrv) { return pdrv ? STA_NOINIT : 0; }
+DSTATUS disk_status(BYTE pdrv)     { return pdrv ? STA_NOINIT : 0; }
+DRESULT disk_read(BYTE pdrv, BYTE *buf, LBA_t lba, UINT n) {
+    (void)pdrv; memcpy(buf, img[lba], n * 512u); return RES_OK;
+}
+DRESULT disk_write(BYTE pdrv, const BYTE *buf, LBA_t lba, UINT n) {
+    (void)pdrv; memcpy(img[lba], buf, n * 512u);
+    wr_calls++; wr_sectors += n; if (n == 1) wr_single++; else wr_multi++;
+    return RES_OK;
+}
+DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buf) {
+    (void)pdrv;
+    if (cmd == CTRL_SYNC) return RES_OK;
+    if (cmd == GET_SECTOR_COUNT) { *(LBA_t *)buf = NSECT; return RES_OK; }
+    if (cmd == GET_BLOCK_SIZE)   { *(DWORD *)buf = 1; return RES_OK; }
+    return RES_PARERR;
+}
+DWORD get_fattime(void) { return ((DWORD)(2026 - 1980) << 25) | ((DWORD)1 << 21) | ((DWORD)1 << 16); }
+```
+
+```c
+/* fatfs_host.c */
+#include <stdio.h>
+#include <string.h>
+#include "ff.h"
+
+extern unsigned long wr_calls, wr_single, wr_multi, wr_sectors;
+static FATFS fs;
+static BYTE work[FF_MAX_SS];
+static BYTE wbuf[16384];
+
+static void reset(void) { wr_calls = wr_single = wr_multi = wr_sectors = 0; }
+
+static void bench(UINT chunk) {               /* 512 KiB in chunks, like write_bench() */
+    FIL fp; UINT bw;
+    memset(wbuf, 0xA5, sizeof wbuf);
+    f_open(&fp, "bench.bin", FA_CREATE_ALWAYS | FA_WRITE);
+    reset();
+    for (UINT done = 0; done < 512u * 1024u; done += chunk) f_write(&fp, wbuf, chunk, &bw);
+    f_sync(&fp);
+    printf("  chunk %5u B: disk_write calls %4lu (n=1: %4lu, n>1: %3lu), sectors %lu\n",
+           chunk, wr_calls, wr_single, wr_multi, wr_sectors);
+    f_close(&fp);
+}
+
+static void logger(int sync_every) {         /* 64 B lines, 10 lines/s, 60 s */
+    FIL fp; UINT bw; char line[64];
+    memset(line, 'x', 63); line[63] = '\n';
+    f_open(&fp, "log.txt", FA_CREATE_ALWAYS | FA_WRITE);
+    f_sync(&fp);
+    reset();
+    for (int i = 1; i <= 600; i++) {
+        f_write(&fp, line, 64, &bw);
+        if (sync_every && i % sync_every == 0) f_sync(&fp);
+    }
+    printf("  sync every %3d lines: %4lu single-sector writes in 60 s = %.2f /s\n",
+           sync_every, wr_single, wr_single / 60.0);
+    f_close(&fp);
+}
+
+static void run(DWORD au) {
+    MKFS_PARM opt = { FM_FAT32, 0, 0, 0, au };
+    FRESULT r1 = f_mkfs("", &opt, work, sizeof work);
+    FRESULT r2 = f_mount(&fs, "", 1);
+    if (r1 != FR_OK || r2 != FR_OK) { printf("mkfs %d mount %d\n", r1, r2); return; }
+    printf("FAT32, cluster %lu B (csize %u)\n", (unsigned long)au, (unsigned)fs.csize);
+    bench(512);
+    bench(16384);
+    if (au == 4096) { logger(0); logger(100); logger(1); }
+    f_mount(NULL, "", 0);
+}
+
+int main(void) {
+    run(4096);
+    run(512);
+    return 0;
+}
+```
+
+```bash
+# ff16.zip의 source/ff.c·ff.h·diskio.h와, FF_USE_MKFS를 1로 바꾼 ffconf.h를 같은 디렉터리에 둠
+clang -O2 -Wall -I . -o fatfs_host fatfs_host.c ramdisk.c ff.c && ./fatfs_host
+```
+
+```text
+FAT32, cluster 4096 B (csize 8)
+  chunk   512 B: disk_write calls 1031 (n=1: 1031, n>1:   0), sectors 1031
+  chunk 16384 B: disk_write calls  134 (n=1:    6, n>1: 128), sectors 1030
+  sync every   0 lines:   74 single-sector writes in 60 s = 1.23 /s
+  sync every 100 lines:   96 single-sector writes in 60 s = 1.60 /s
+  sync every   1 lines: 1220 single-sector writes in 60 s = 20.33 /s
+FAT32, cluster 512 B (csize 1)
+  chunk   512 B: disk_write calls 1052 (n=1: 1052, n>1:   0), sectors 1052
+  chunk 16384 B: disk_write calls 1051 (n=1: 1051, n>1:   0), sectors 1051
+```
+
+csize 8 볼륨에서 16 KiB 단위로 쓰면 `disk_write` 134번 가운데 128번이 `n > 1`(8섹터씩)이고, 512 B 단위로 쓰면 1,031번이 모두 `n = 1`입니다. csize 1 볼륨에서는 16 KiB로 써도 1,051번이 모두 `n = 1`입니다. 위 "다중 블록 쓰기" 절의 설명과 같습니다. 로거 셈은 아래 절의 표와 같은 조건이고, FAT·FSInfo 쓰기까지 포함한 실제 횟수입니다.
+
 ### f_sync 주기
 
-FatFs 앱노트의 "Critical Section" 절에 따르면 쓰기 도중 전원이 끊기면 FAT 구조가 깨질 수 있습니다. 앱노트는 그 위험을 줄이는 방법으로 파일을 쓰기 모드로 여는 시간을 줄이거나 `f_sync`를 쓰라고 하고, `f_sync` 문서는 끊긴 시점에서 마지막 `f_sync` 뒤에 쓴 데이터를 잃는다고 그립니다. 다만 `f_sync`는 critical section을 줄일 뿐 없애지 않습니다. 앱노트에 따르면 남은 구간에서 끊기면 cross link로 바뀌던 객체를 잃거나, 덧붙이던 파일이 처음 상태로 돌아갈 수 있습니다. 아래 셈은 이런 경우를 뺀 보통의 손실입니다.
+FatFs 앱노트의 "Critical Section" 절에 따르면 쓰기 도중 전원이 끊기면 FAT 구조가 깨질 수 있습니다. 앱노트는 그 위험을 줄이는 방법으로 파일을 쓰기 모드로 여는 시간을 줄이거나 `f_sync`를 쓰라고 하고, `f_sync` 문서는 끊긴 시점에서 마지막 `f_sync` 뒤에 쓴 데이터를 잃는다고 그립니다. 다만 `f_sync`는 critical section을 줄일 뿐 없애지 않습니다. 앱노트에 따르면 남은 구간에서 끊기면 cross link로 바뀌던 객체를 잃거나, 덧붙이던 파일이 처음 상태로 돌아갈 수 있습니다. 아래 셈은 이런 경우를 뺀 손실입니다.
 
 `f_sync`에는 쓰기 비용이 따릅니다. R0.16 `f_sync`는 파일이 바뀌었으면 캐시된 데이터 섹터가 더럽혀져 있을 때 그 섹터를, 그리고 디렉터리 엔트리 섹터를 각각 `disk_write(…, 1)`로 씁니다. 마지막 sync 뒤에 클러스터를 새로 잡았으면 FAT 섹터(FAT가 둘이면 두 섹터)와 FAT32의 FSInfo 섹터도 단일 섹터로 씁니다. `f_sync` 없이 작은 `f_write`만 이어지면 데이터 섹터는 512바이트가 찰 때마다 한 번 쓰입니다.
 
-예를 들어 64바이트 로그 줄을 초당 10줄(640 B/s) 쓰는 로거를 셈해 보면 다음과 같습니다. FAT·FSInfo 쓰기는 빼고 센 최소값입니다.
+예를 들어 64바이트 로그 줄을 초당 10줄(640 B/s) 쓰는 로거를 셈해 보면 다음과 같습니다. 셈은 FAT·FSInfo 쓰기를 뺀 최소값이고, 오른쪽 열은 위 host 실행에서 센 실제 단일 섹터 쓰기입니다.
 
-| `f_sync` 주기 | 데이터·디렉터리 단일 섹터 쓰기 | 전원 차단 때 잃는 양(critical section 밖에서 끊긴 경우) |
-|------|------|------|
-| 부르지 않음(`f_close`까지) | 640 ÷ 512 = 1.25회/s | 연 뒤에 쓴 전부 |
-| 10초마다 | 1.25 + 2 ÷ 10 = 1.45회/s | 10 s × 640 B = 6,400 B |
-| 줄마다 | 10 × 2 = 20회/s | 64 B(쓰던 한 줄) |
+| `f_sync` 주기 | 데이터·디렉터리 단일 섹터 쓰기(셈) | host 실행(FAT·FSInfo 포함) | 전원 차단 때 잃는 양(critical section 밖에서 끊긴 경우) |
+|------|------|------|------|
+| 부르지 않음(`f_close`까지) | 640 ÷ 512 = 1.25회/s | 1.23회/s | 연 뒤에 쓴 전부 |
+| 10초마다 | 1.25 + 2 ÷ 10 = 1.45회/s | 1.60회/s | 10 s × 640 B = 6,400 B |
+| 줄마다 | 10 × 2 = 20회/s | 20.33회/s | 64 B(쓰던 한 줄) |
+
+sync 없는 줄의 74회는 60초 동안 쓴 38,400 B = 75섹터 가운데 마지막 섹터가 `f_close` 전까지 FatFs의 섹터 캐시에 남아 있어서 하나 적습니다. 10초 주기와 줄마다 sync가 셈보다 큰 것은 새 클러스터를 잡을 때의 FAT·FSInfo 쓰기가 더해졌기 때문입니다.
 
 로거는 파일을 한 번 열어 두고, critical section 밖에서 끊길 때 잃어도 되는 양 ÷ 데이터율로 주기를 정합니다. 위 예에서 6,400바이트까지 잃어도 되면 10초 주기가 되고, 그 대가는 초당 0.2회의 단일 섹터 쓰기입니다.
 
 전원 차단 뒤 마지막 정상 상태로 돌아가는 동작이 필요하면 FAT 대신 [littlefs v2.11.3](https://github.com/littlefs-project/littlefs/blob/v2.11.3/README.md)를 검토합니다. README는 모든 파일 연산이 copy-on-write 보장을 가지고 전원이 끊기면 마지막으로 알려진 정상 상태로 돌아가며, 동적 블록에 대한 wear leveling을 한다고 적습니다. littlefs 볼륨은 FAT가 아니므로 이 글의 전제인 PC와의 FAT 파일 교환은 포기해야 합니다.
 
 ## 자주 보는 함정
-
-> ⚠️ SDUC 카드를 꽂으면 `f_mount: 3`
-
-SDUC 카드는 SPI 모드를 지원하지 않고(7.1절), 실패 지점은 두 가지입니다. Figure 7-1 주석에 따라 CS를 low로 둔 CMD0에 SDUC 카드는 응답하지 않으므로 `sd_cmd(0, …)`이 `0xFF`를 돌려주고 `sd_init()`은 CMD0 단계에서 바로 실패합니다. 같은 그림의 각주 (*3)대로 카드가 ACMD41에 busy를 계속 돌려주면 1100 ms 제한에 걸려 실패합니다. 어느 쪽이든 `disk_initialize`가 `STA_NOINIT`을 돌려 `f_mount: 3`(`FR_NOT_READY`)이 나옵니다. 2 TB 이하 카드(SDSC·SDHC·SDXC)를 씁니다.
 
 > ⚠️ 선로 오류가 데이터에 그대로 들어감
 
