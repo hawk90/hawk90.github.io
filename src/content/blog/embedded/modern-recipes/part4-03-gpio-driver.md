@@ -64,12 +64,12 @@ I2C 핀은 open-drain에 외부 pull-up으로 둡니다. 여러 디바이스가 
 
 | `OSPEEDR` | 큰 부하 | 10 pF |
 | --- | --- | --- |
-| 0 (low) | 2 MHz (50 pF) | TBD |
+| 0 (low) | 2 MHz (50 pF) | Rev 4에 값 없음 |
 | 1 (medium) | 25 MHz (50 pF) | 50 MHz |
 | 2 (high) | 50 MHz (40 pF) | 100 MHz |
 | 3 (very high) | 100 MHz (30 pF) | 200 MHz |
 
-10 pF low 칸의 TBD는 Rev 4 표 자체가 "to be defined"로 비워 둔 값입니다. 같은 표의 주석은 이 값이 "Based on characterization data, not tested in production"이고, "For maximum frequencies above 50 MHz, the compensation cell should be used"라고 적습니다. st.com의 최신 revision은 이 작업 환경에서 내려받지 못해 대조하지 못했습니다. 이 글의 예제는 정적 신호인 LED에 low, USART에 high를 씁니다.
+10 pF low 칸은 Rev 4 표가 값 대신 "TBD"(주석 3: "to be defined")로 남겨 둔 자리라, 이 글이 확인한 자료로는 값을 알 수 없습니다. 같은 표의 주석은 이 값이 "Based on characterization data, not tested in production"이고, "For maximum frequencies above 50 MHz, the compensation cell should be used"라고 적습니다. st.com의 최신 revision은 이 작업 환경에서 내려받지 못해 대조하지 못했습니다. 이 글의 예제는 정적 신호인 LED에 low, USART에 high를 씁니다.
 
 ## 코드 예제
 
