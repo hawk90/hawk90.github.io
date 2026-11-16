@@ -62,7 +62,7 @@ arm-none-eabi-gcc -T app.ld -Wl,--gc-sections -Wl,-Map=app.map \
 
 ### Linker script and memory map
 
-예시 map의 24-40행입니다. `.text`의 나머지 input section은 뺐습니다.
+예시 map의 24-41행입니다. `.text`의 나머지 input section은 뺐습니다.
 
 ```text
 Linker script and memory map
