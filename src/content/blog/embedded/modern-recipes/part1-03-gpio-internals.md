@@ -77,12 +77,12 @@ DS8626 Rev 4 Table 49는 설정마다 최대 출력 주파수를 부하 조건�
 
 | OSPEEDR | f_max (부하 큰 조건) | f_max (C_L = 10 pF) |
 | --- | --- | --- |
-| 00 | 2 MHz (C_L = 50 pF) | TBD |
+| 00 | 2 MHz (C_L = 50 pF) | 값 없음 |
 | 01 | 25 MHz (C_L = 50 pF) | 50 MHz |
 | 10 | 50 MHz (C_L = 40 pF) | 100 MHz |
 | 11 | 100 MHz (C_L = 30 pF) | 200 MHz |
 
-이 판의 Table 49는 rise/fall time 칸을 모두 TBD(to be defined)로 두고 있어 시간 값은 옮기지 않았습니다. 같은 표의 주석 5는 50 MHz가 넘는 주파수에서 compensation cell을 쓰라고 적습니다. 또 데이터시트 본문은 PC13~PC15를 출력으로 쓸 때 30 pF 부하에서 2 MHz를 넘지 말라고 합니다.
+이 판의 Table 49는 00 설정의 10 pF 조건 f_max와 모든 rise/fall time 칸을 아직 정하지 않은 값으로 비워 두었으므로(표 주석 3), 그 칸은 옮기지 않았습니다. 같은 표의 주석 5는 50 MHz가 넘는 주파수에서 compensation cell을 쓰라고 적습니다. 또 데이터시트 본문은 PC13~PC15를 출력으로 쓸 때 30 pF 부하에서 2 MHz를 넘지 말라고 합니다.
 
 ### 4) Schmitt trigger 입력
 

@@ -51,11 +51,11 @@ SNR (dB) = 6.02 × N + 1.76
 
 | 부품 (구조, 해상도) | 단일 채널 최대 rate | 8채널 순환 시 채널당 rate | ENOB (데이터시트 typ, 조건) |
 | --- | --- | --- | --- |
-| STM32F407 (내장 SAR, 12 bit) | 2 MS/s (f_ADC = 30 MHz, t_S = 3 cycles, single ADC) | 138.9 kS/s (t_S = 15 cycles: 30 MHz ÷ (27 cycles × 8)) | TBD |
+| STM32F407 (내장 SAR, 12 bit) | 2 MS/s (f_ADC = 30 MHz, t_S = 3 cycles, single ADC) | 138.9 kS/s (t_S = 15 cycles: 30 MHz ÷ (27 cycles × 8)) | 데이터시트에 없음 |
 | ADS8326 (외장 SAR, 16 bit) | 250 kS/s | 해당 없음 (입력 1쌍) | 14.69 (SINAD 90 dB, I grade, 5 V_PP 2 kHz sine, V_REF = 5 V, f_SAMPLE = 250 kHz) |
 | ADS1256 (Σ-Δ, 24 bit) | 30 kS/s | 546.75 S/s (Table 14의 4374 Hz ÷ 8) | 19.8 (입력 단락 rms 노이즈 기준, 30 kSPS, PGA 1, buffer on, V_REF = 2.5 V, AVDD = 5 V, 25 °C) |
 
-- STM32F407의 단일 채널 rate는 DS8626 Rev 12 Table 67 값입니다. 8채널 값은 RM0090의 T_conv = sampling time + 12 cycles를 채널 수만큼 더해 이 글이 계산했습니다. scan mode는 한 채널 변환이 끝나면 다음 채널을 자동으로 변환합니다(RM0090 13.3.8). 15 cycles를 고른 이유는 [Source impedance와 sampling time](#source-impedance와-sampling-time)에 있습니다. DS8626에는 ENOB나 SINAD 항목이 없어서 TBD로 뒀습니다.
+- STM32F407의 단일 채널 rate는 DS8626 Rev 12 Table 67 값입니다. 8채널 값은 RM0090의 T_conv = sampling time + 12 cycles를 채널 수만큼 더해 이 글이 계산했습니다. scan mode는 한 채널 변환이 끝나면 다음 채널을 자동으로 변환합니다(RM0090 13.3.8). 15 cycles를 고른 이유는 [Source impedance와 sampling time](#source-impedance와-sampling-time)에 있습니다. DS8626에는 ENOB나 SINAD 항목이 없어서 그 칸은 비워 두었습니다.
 - ENOB 두 값은 정의가 다릅니다. ADS8326은 SINAD에서 구한 값이고(10 kHz 입력에서는 14.28), ADS1256은 입력을 단락하고 잰 rms 노이즈로 ln(FSR / rms noise) / ln 2를 계산한 값입니다(SBAS288K Table 2). 왜곡이 들어가지 않은 값이라 ADS8326과 같은 잣대로 비교할 수 없습니다. 데이터시트의 ENOB를 비교하기 전에 어느 정의인지부터 봅니다.
 
 8채널이면 채널당 rate는 F407이 ADS1256의 약 254배입니다. 입력 필터 요구도 다릅니다. F407을 위 조건으로 돌리면 채널당 f_s/2가 69.4 kHz이므로, 그 위를 줄이는 아날로그 LPF가 채널마다 필요합니다. ADS1256은 디지털 필터가 30 kSPS 설정에서 −3 dB 대역폭 6106 Hz의 LPF로 동작하고(SBAS288K Table 12), 이 응답이 modulator rate f_CLKIN/4(1.92 MHz)의 배수마다 반복됩니다. 데이터시트는 그 반복 주파수 위에 큰 노이즈가 있으면 외부 필터로 제거하라고 하고, 그 필터를 간단한 RC 필터로 할 수 있다고 적습니다(SBAS288K Figure 25).
