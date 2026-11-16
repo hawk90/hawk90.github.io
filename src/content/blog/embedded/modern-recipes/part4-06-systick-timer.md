@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 RTOS 없는 펌웨어에서 "100 ms 뒤 LED 끄기"나 "센서 응답을 100 ms까지 기다리기" 같은 시간 처리가 필요할 때 씁니다. 명령어 개수로 시간을 맞추는 busy loop은 클럭을 바꾸면 길이가 같이 바뀌고, 도는 동안 다른 일을 못 합니다. SysTick이 세는 tick은 클럭 설정에서 계산한 reload 값으로 주기가 정해집니다.
 
-이 글의 코드는 STM32F407(Cortex-M4) 기준입니다. 레지스터 동작은 Arm [Cortex-M4 Devices Generic User Guide (DUI 0553A)](https://developer.arm.com/documentation/dui0553/a/)의 4.4절 "System timer, SysTick", 코드의 이름은 [CMSIS 5.9.0 `core_cm4.h`](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)와 [cmsis-device-f4 v2.6.9 `stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)를 따릅니다. 클럭은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`(8 MHz HSE, SYSCLK = HCLK = 168 MHz)를 그대로 쓴다고 둡니다. 우선순위 숫자의 의미는 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)의 Priority 절을 전제로 합니다.
+이 글의 코드는 STM32F407(Cortex-M4) 기준입니다. 레지스터 동작은 Arm [Cortex-M4 Devices Generic User Guide (DUI 0553A)](https://developer.arm.com/documentation/dui0553/a/)의 4.4절 "System timer, SysTick", 코드의 이름은 [CMSIS 5.9.0 `core_cm4.h`](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)와 [cmsis-device-f4 v2.6.9 `stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)를 따릅니다. 클럭은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`(8 MHz HSE, SYSCLK = HCLK = 168 MHz)를 그대로 쓴다고 가정합니다. 우선순위 숫자의 의미는 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)의 Priority 절을 전제로 합니다.
 
 ## 핵심 개념
 
