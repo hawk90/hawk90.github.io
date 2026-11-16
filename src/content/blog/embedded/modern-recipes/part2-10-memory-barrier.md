@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 이 글의 정의는 ARMv7-M Architecture Reference Manual(DDI 0403E.e)과 Arm *Application Note 321: ARM Cortex-M Programming Guide to Memory Barrier Instructions*(DAI 0321A, 2012, 이하 AN321), Armv8-A 쪽은 Arm *Learn the architecture - Memory Systems, Ordering, and Barriers*(102336, 1.1)에서 옮겼습니다. 코드 생성 결과는 arm-none-eabi-gcc 16.2.0(CMSIS 5.9.0)과 Debian 13 arm64 guest의 GCC 14.2.0에서 직접 뽑았습니다.
 
-## 3 가지 Barrier
+## 세 가지 Barrier
 
 | Barrier | 의미 (ARMv7-M ARM, 102336) |
 |---|---|
@@ -52,7 +52,7 @@ flag = 1;   /* shared_data write가 flag write *전*에 관찰됨 */
 
 DMB는 순서만 정합니다. 읽기-수정-쓰기의 원자성은 주지 않으므로, 여러 주체가 같은 변수를 바꾸면 C11 atomic이나 LDREX/STREX가 따로 필요합니다.
 
-### 언제 DMB 필요?
+### DMB가 필요한 때
 
 AN321은 Cortex-M에서 다음을 구분합니다.
 
@@ -89,7 +89,7 @@ __DSB();   /* clock enable write 완료 대기 */
 TIM2->CR1 = 1;
 ```
 
-### 언제 DSB?
+### DSB가 필요한 때
 
 - **WFI·WFE 전.** AN321 4.14절은 "Architecturally, you should use the DSB instruction before executing the WFI or WFE instructions"라고 적습니다.
 - **MPU 설정 뒤.** AN321 4.17절은 MPU 설정 전에 DMB, 끝난 뒤 DSB를 쓰고, 설정 변경이 프로그램 실행에 영향을 주면 ISB도 더하라고 적습니다.
@@ -118,7 +118,7 @@ call((void*)addr);
 
 AN321 4.20절은 프로그램 메모리를 바꾼 뒤의 아키텍처 요구를 "a DSB instruction followed by an ISB instruction"으로 정하고, 예제에 "DSB ; Ensure store is completed before flushing pipeline", "ISB ; Flush pipeline"을 둡니다.
 
-### 언제 ISB?
+### ISB가 필요한 때
 
 - **CONTROL 변경 뒤.** AN321 4.16절: "Architecturally, after programming the CONTROL register, an ISB instruction should be used." 그래야 뒤의 명령이 새 privilege로 fetch됩니다.
 - **MPU 설정이 실행 중인 코드에 영향을 줄 때**(4.17절).
@@ -176,7 +176,7 @@ consume_acquire:  ...  ldr	r0, [r3, #8] / dmb	ish
 
 AArch64에서는 release store가 `STLR`, acquire load가 `LDAR` 한 명령이 됩니다. Cortex-M4에는 그런 명령이 없어 GCC가 일반 `str`/`ldr` 앞뒤에 `dmb ish`를 붙입니다. ARMv7-M에서 `ish` encoding은 앞에서 본 대로 SY로 실행되는 reserved encoding입니다.
 
-### 테스트는 순서를 증명하지 못한다
+### 테스트는 순서를 증명하지 못합니다
 
 Debian guest(QEMU 11.1.3 `virt`, `-accel hvf -cpu host`, 4 vCPU)에서 writer가 `data = r; flag = r;`를 relaxed로 2억 번 쓰고, 다른 CPU의 reader가 `flag`·`data` 순으로 읽어 `data < flag`인 경우를 셌습니다.
 
@@ -229,7 +229,7 @@ Debian guest에서 producer thread와 consumer thread로 1억 byte를 흘려 순
 100000000 items, 0 out-of-order or corrupted
 ```
 
-같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어갑니다. 뒤쪽은 이전 판의 `__DMB()`(buf write → head write) 자리이고, 앞쪽은 tail을 acquire로 읽은 뒤에 하나가 더 붙은 것입니다.
+같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어갑니다. 뒤쪽은 이전 판의 `__DMB()`(buf write → head write) 자리이고, 앞쪽은 tail을 acquire로 읽었기 때문에 붙었습니다.
 
 ```text
 push:
@@ -259,7 +259,7 @@ __DSB();
 read_data(buf);
 ```
 
-CMSIS 5.9.0의 `SCB_*DCache_by_Addr` 함수는 내부에서 이미 `__DSB()`와 `__ISB()`를 실행하므로, 위의 `__DSB()`는 maintenance 없이 non-cacheable buffer를 쓰는 경로에서 필요한 것입니다. 수신 경로에서 DMA 시작 전 invalidate가 왜 한 번 더 필요한지는 [2-06](/blog/embedded/modern-recipes/part2-06-arm-cache)의 "DMA 방향별 순서"에 있습니다.
+CMSIS 5.9.0의 `SCB_*DCache_by_Addr` 함수는 내부에서 이미 `__DSB()`와 `__ISB()`를 실행하므로, 위의 `__DSB()`는 maintenance 없이 non-cacheable buffer를 쓰는 경로에서 필요합니다. 수신 경로에서 DMA 시작 전에도 cache maintenance가 필요한 이유는 [2-06](/blog/embedded/modern-recipes/part2-06-arm-cache)의 "DMA 방향별 순서"에 있습니다.
 
 ## Self-Modifying Code — FW Update
 
