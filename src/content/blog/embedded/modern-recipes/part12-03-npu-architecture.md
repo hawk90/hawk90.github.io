@@ -17,13 +17,13 @@ topics: ["embedded"]
 
 스마트폰, 스마트 카메라, 로봇, 차량, edge AI 박스처럼 저전력으로 신경망 추론을 해야 하는 곳입니다. CPU와 NPU의 latency·전력 차이는 model·runtime·clock·memory path에 따라 다르므로, 이 글은 수치를 외우는 대신 Arm Ethos-U의 공개 컴파일러(Vela)로 같은 모델을 여러 NPU 구성에 넣어 보는 방법을 보입니다.
 
-이 글의 실행은 Debian 13 arm64 guest의 Python venv에 설치한 `ethos-u-vela` 5.2.0으로 했고, 모델은 TensorFlow Lite Micro 저장소의 `person_detect.tflite`(MobileNet v1 기반 96×96 사람 검출, INT8, sha256 `808cfdfc…`)입니다.
+이 글의 실행은 Debian 13 arm64 guest의 Python venv에 설치한 `ethos-u-vela` 5.2.0으로 했고, 모델은 TensorFlow Lite Micro 저장소의 `person_detect.tflite`(96×96 사람 검출, INT8, sha256 `808cfdfc…`)입니다.
 
 ## 핵심 개념 — MAC Array
 
 신경망 연산의 대부분은 곱셈-누적(MAC)입니다. convolution은 weight와 입력 window를 곱해 채널·공간 방향으로 더하고, fully connected는 weight 벡터와 입력 벡터의 내적입니다. 아래 Vela 실행에서도 person detection 모델 한 번의 추론은 7,160,196 MAC으로 보고됐습니다.
 
-NPU는 MAC unit을 격자로 배치해 cycle마다 여러 MAC을 동시에 굴립니다. TPU 계열의 systolic array는 weight를 격자에 미리 올려 두고, 입력이 한쪽에서 흘러 들어와 cell을 차례로 지나며 각 cell이 MAC을 한 뒤 결과를 옆으로 넘깁니다. 공장 조립 라인에 비유하면 작업자(cell)는 자기 자리에서 같은 동작만 하고 부품(데이터)이 컨베이어를 따라 움직입니다. 128 × 128 격자라면 cycle당 16,384 MAC입니다.
+NPU는 MAC unit을 격자로 배치해 cycle마다 여러 MAC을 동시에 굴립니다. 128 × 128 격자라면 cycle당 16,384 MAC입니다. 아래 Ethos-U 구성 이름의 숫자가 바로 이 cycle당 MAC 수입니다.
 
 ## Arm Ethos-U — Cortex-M과 짝을 이루는 NPU
 
@@ -37,13 +37,7 @@ Vela 5.2.0의 `architecture_features.py`는 지원하는 구성을 이름으로 
 
 peak 연산량은 MAC 수 × 2(곱셈과 덧셈) × clock입니다. Vela의 기본 U55 system 구성(`Ethos_U55_High_End_Embedded`)은 core clock을 500 MHz로 두므로, `ethos-u55-256`이면 256 × 2 × 500 MHz = 256 GOPS입니다. 실제 칩의 clock과 구성은 칩 벤더가 정하므로, 제품의 TOPS는 그 칩의 데이터시트에서 봅니다([12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)의 Alif E7 예).
 
-Ethos-U55는 Cortex-M 같은 host CPU와 메모리를 공유합니다.
-
-| 블록 | 역할 |
-| --- | --- |
-| Cortex-M (예: M55) | TFLite Micro 실행, NPU에 command stream dispatch, NPU가 못 하는 operator 처리 |
-| Ethos-U55 | MAC array로 convolution·pooling 등 실행 |
-| SRAM / Flash | activation은 SRAM, weight는 Flash 등에 두고 둘 다 접근 |
+아래 Vela 실행에서 U55의 기본 메모리 모드는 `Shared_Sram`이었고, SRAM 72.73 KiB와 off-chip flash 228 KiB를 함께 썼습니다. 실행 쪽은 TFLite Micro가 맡습니다. Vela가 NPU로 보낼 부분을 custom operator 하나로 바꾸고, TFLite Micro가 그 operator를 Ethos-U driver로 넘깁니다([12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)에서 인용한 TFLite Micro README).
 
 ## Vela로 같은 모델을 여러 구성에 넣기
 
@@ -52,7 +46,7 @@ Vela는 INT8 TFLite 모델을 받아 NPU가 실행할 부분을 custom operator�
 ```bash
 python3 -m venv venv && . venv/bin/activate
 pip install ethos-u-vela            # 5.2.0
-for c in ethos-u55-64 ethos-u55-128 ethos-u55-256 ethos-u65-256 ethos-u85-256; do
+for c in ethos-u55-64 ethos-u55-128 ethos-u55-256 ethos-u65-256; do
     vela --accelerator-config $c --output-dir out-$c person_detect.tflite
 done
 ```
@@ -79,7 +73,7 @@ Neural network macs                           7160196 MACs/batch
 | `ethos-u55-256` | 500 MHz | 127,348 | 299,767 | 0.600 ms |
 | `ethos-u65-256` | 1 GHz | 121,810 | 125,147 | 0.125 ms |
 
-MAC 수를 64에서 256으로 네 배 늘리면 NPU cycle은 약 2.9분의 1로 줄지만, 전체 cycle은 1.5분의 1로만 줄었습니다. 전체 cycle에는 메모리 접근 시간이 포함되고, U55의 이 system 구성은 SRAM과 off-chip flash를 함께 쓰므로 MAC을 늘려도 메모리 쪽 시간이 남기 때문입니다. U65 구성은 Vela 기본값이 `Dedicated_Sram_384KB` 메모리 모드와 1 GHz clock이라 같은 모델에서 전체 cycle이 NPU cycle에 가깝습니다. 이 값들은 Vela의 모델 기반 추정이고, 실제 보드에서 잰 값이 아닙니다.
+MAC 수를 64에서 256으로 네 배 늘리면 NPU cycle은 약 2.9분의 1로 줄지만, 전체 cycle은 1.5분의 1로만 줄었습니다. Vela의 전체 cycle은 NPU 연산 cycle에 메모리 접근 cycle 추정을 더한 값이므로, MAC을 늘려 줄어드는 것은 앞쪽뿐입니다. U65는 Vela가 고른 system 구성 `Ethos_U65_Client_Server`가 `Dedicated_Sram_384KB` 메모리 모드와 1 GHz clock이라 같은 모델에서 전체 cycle이 NPU cycle에 가깝습니다. 이 값들은 Vela의 모델 기반 추정이고, 실제 보드에서 잰 값이 아닙니다.
 
 모델의 operator 57개가 모두 NPU로 갔다는 줄(`CPU operators = 0`)도 중요합니다. 지원되지 않는 operator가 있으면 그 수가 여기에 나오고, 그 부분은 Cortex-M에서 돕니다.
 
@@ -99,12 +93,12 @@ Qualcomm Hexagon, Google Edge TPU 등의 TOPS·전력 수치는 이번에 연 �
 | 플랫폼 | 진입점 |
 |--------|-----------|
 | Arm Ethos-U | Vela로 변환한 모델 → TFLite Micro + Ethos-U custom operator |
-| Apple Neural Engine | Core ML (ISA 비공개) |
+| Apple Neural Engine | Core ML |
 | NVIDIA DLA | TensorRT ([12-05](/blog/embedded/modern-recipes/part12-05-tensorrt)) |
 
 ## Memory Hierarchy
 
-NPU의 MAC array는 데이터가 제때 오지 않으면 쉽니다. weight와 activation을 가까운 SRAM에 둘수록 좋고, 모델이 SRAM에 다 들어가지 않으면 바깥 메모리 접근이 병목이 됩니다. 위 Vela 결과에서 MAC을 네 배로 늘려도 전체 시간이 1.5분의 1로만 준 것이 그 예입니다. roofline으로 말하면 byte당 MAC이 적은 layer는 memory-bound, 많은 layer는 compute-bound입니다.
+NPU의 MAC array는 데이터가 제때 오지 않으면 쉽니다. 위 Vela 결과에서 MAC을 네 배로 늘려도 전체 cycle이 1.5분의 1로만 준 것이 그 예이고, 같은 모델을 전용 SRAM 모드로 돌린 U65 구성은 전체 cycle이 NPU cycle에 거의 붙었습니다.
 
 ## Quantization — INT8
 
