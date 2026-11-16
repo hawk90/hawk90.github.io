@@ -185,7 +185,7 @@ sudo /usr/bin/jetson_clocks                # CPU, GPU, EMC to static max of the 
 sudo /usr/bin/jetson_clocks --restore
 ```
 
-문서는 이 script가 "setting the static maximum frequencies of the CPU, GPU and EMC clocks"하고, 그 최대값은 nvpmodel power mode가 정한다고 적습니다. 또 `jetson_clocks`를 돌린 뒤에는 nvpmodel mode를 바꿀 수 없고, 바꾸려면 reboot해야 합니다. 측정 전에 mode를 먼저 정해 둡니다.
+문서는 이 script가 CPU·GPU·EMC clock을 고정 최대 주파수로 맞춘다("setting the static maximum frequencies of the CPU, GPU and EMC clocks")고 적고, 그 최대값은 nvpmodel power mode가 정한다고 적습니다. 또 `jetson_clocks`를 돌린 뒤에는 nvpmodel mode를 바꿀 수 없고, 바꾸려면 reboot해야 합니다. 측정 전에 mode를 먼저 정해 둡니다.
 
 ### Fan
 
