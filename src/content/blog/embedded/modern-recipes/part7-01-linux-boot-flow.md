@@ -64,7 +64,7 @@ U-Boot가 root 장치에 대해 하는 일은 `root=/dev/mmcblk1p2 rootwait rw`�
 
 ## root를 누가 mount하나
 
-커널은 부팅 때 항상 rootfs(ramfs, `CONFIG_TMPFS`가 켜져 있으면 tmpfs)를 만들고, 커널에 내장한 cpio를 그 안에 풉니다. initrd 지원을 켠 커널은 부트로더가 넘긴 외부 cpio도 같은 rootfs에 풉니다([ramfs-rootfs-initramfs.rst](https://github.com/torvalds/linux/blob/v6.12/Documentation/filesystems/ramfs-rootfs-initramfs.rst)). 그다음 `kernel_init_freeable()`이 rootfs에 `/init`(또는 `rdinit=`로 준 경로)이 있는지 보고 두 경로 중 하나를 고릅니다([init/main.c L1591-1594](https://github.com/torvalds/linux/blob/v6.12/init/main.c#L1591-L1594)).
+커널은 부팅 때 항상 rootfs를 만듭니다. rootfs는 ramfs이고, `CONFIG_TMPFS`가 켜져 있어도 `root=`가 없거나 `rootfstype=`에 `tmpfs`가 있을 때만 tmpfs가 됩니다([init/do_mounts.c L513-521](https://github.com/torvalds/linux/blob/v6.12/init/do_mounts.c#L513-L521)). 그래서 `root=`를 주는 이 보드에서는 ramfs입니다. 커널은 이 rootfs 안에 커널에 내장한 cpio를 풉니다. initrd 지원을 켠 커널은 부트로더가 넘긴 외부 cpio도 같은 rootfs에 풉니다([ramfs-rootfs-initramfs.rst](https://github.com/torvalds/linux/blob/v6.12/Documentation/filesystems/ramfs-rootfs-initramfs.rst)). 그다음 `kernel_init_freeable()`이 rootfs에 `/init`(또는 `rdinit=`로 준 경로)이 있는지 보고 두 경로 중 하나를 고릅니다([init/main.c L1591-1594](https://github.com/torvalds/linux/blob/v6.12/init/main.c#L1591-L1594)).
 
 | 경로 | 조건 | root mount 주체 | PID 1 |
 |------|------|-----------------|-------|
@@ -167,6 +167,9 @@ hello from /init, PID 1
 [    0.587554]  ext3
 [    0.587712]  ext2
 [    0.587778]  ext4
+[    0.587842]  squashfs
+[    0.587908]  vfat
+[    0.587990] 
 [    0.588238] Kernel panic - not syncing: VFS: Unable to mount root fs on "/dev/vda" or unknown-block(254,0)
 ```
 
