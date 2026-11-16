@@ -31,8 +31,8 @@ I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 
 
 | 신호 | 연결 | 역할 |
 | --- | --- | --- |
-| VDD → Rp → SDA | 풀업 (2.2 ~ 10 kΩ) | idle 시 1 유지 |
-| VDD → Rp → SCL | 풀업 (2.2 ~ 10 kΩ) | idle 시 1 유지 |
+| VDD → Rp → SDA | 풀업 (값은 4절에서 계산) | idle 시 1 유지 |
+| VDD → Rp → SCL | 풀업 (값은 4절에서 계산) | idle 시 1 유지 |
 | Master ↔ SDA/SCL | open-drain | wired-AND 출력 |
 | Slave  ↔ SDA/SCL | open-drain | wired-AND 출력 |
 
@@ -49,27 +49,32 @@ I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 
 
 ### 3) 속도 분류
 
-| 표준 | 속도 | 풀업 |
-| --- | --- | --- |
-| Standard | 100 kHz | 4.7 kΩ 표준 |
-| Fast | 400 kHz | 2.2 kΩ |
-| Fast Plus | 1 MHz | rise time·sink current 조건 확인 |
-| High Speed | 3.4 MHz | master code·전기적 조건 확인 |
+NXP UM10204 Rev. 7.0의 속도 모드와, 풀업 계산에 쓰이는 버스 조건입니다. t_r·C_b는 Table 11, I_OL은 Table 10에서 옮겼습니다.
+
+| 모드 | 최대 비트율 | t_r max | C_b max | I_OL min (V_OL 0.4 V) |
+| --- | --- | ---: | ---: | ---: |
+| Standard-mode (Sm) | 100 kbit/s | 1000 ns | 400 pF | 3 mA |
+| Fast-mode (Fm) | 400 kbit/s | 300 ns | 400 pF | 3 mA |
+| Fast-mode Plus (Fm+) | 1 Mbit/s | 120 ns | 550 pF | 20 mA |
+| High-speed mode (Hs) | 3.4 Mbit/s | 별도 표(Table 12) | — | — |
+| Ultra Fast-mode (UFm) | 5 Mbit/s, 단방향 | 별도 규격 | — | — |
+
+Hs-mode는 master code로 진입하는 별도 프로토콜이고, UFm은 push-pull 단방향 버스라 이 글의 open-drain 계산과 다릅니다(UM10204 1장, 3.2절).
 
 ### 4) 풀업 저항 계산
 
-풀업이 너무 크면 rise time이 길어 통신이 깨집니다. 너무 작으면 sink 전류가 슬레이브 사양(보통 3 mA)을 초과합니다.
+풀업이 너무 크면 rise time이 길어 통신이 깨지고, 너무 작으면 디바이스가 V_OL을 지키며 끌어내릴 수 있는 전류(Sm·Fm은 3 mA)를 넘습니다. UM10204 7.1절의 두 식에 V_DD = 3.3 V, C_b = 100 pF를 넣은 값입니다. 0.8473은 0.3 V_DD에서 0.7 V_DD까지 RC 충전에 걸리는 시간 상수 배수 ln(0.7/0.3)입니다.
 
 ```text
-R_min = (V_DD - V_OL) / I_sink_max
-      = (3.3 - 0.4) / 3 mA ≈ 970 Ω → 1 kΩ 이상
+R_min = (V_DD - V_OL) / I_OL
+      = (3.3 - 0.4) / 3 mA = 967 Ω
 
-R_max = T_rise / (0.847 × C_bus)
-      = 1000 ns / (0.847 × 100 pF) ≈ 11.8 kΩ (Standard mode)
-      = 300 ns / (0.847 × 100 pF) ≈ 3.5 kΩ (Fast mode)
+R_max = t_r / (0.8473 × C_b)
+      = 1000 ns / (0.8473 × 100 pF) = 11.8 kΩ (Standard-mode)
+      =  300 ns / (0.8473 × 100 pF) =  3.54 kΩ (Fast-mode)
 ```
 
-100 pF 부하 가정입니다. 실제 보드는 트레이스·디바이스 입력 커패시턴스로 50 ~ 400 pF가 됩니다.
+C_b는 보드마다 재야 하는 값입니다. UM10204가 주는 상한은 디바이스 I/O 핀 하나의 용량 C_i 최대 10 pF(Table 10)와 버스 전체 C_b 400 pF(Sm·Fm)입니다. 디바이스 10개면 핀 용량만으로 최대 100 pF이고, 여기에 배선 용량이 더해집니다. C_b별 범위 전체와 Fast-mode 400 pF 조건은 [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)의 계산표에 있습니다.
 
 ### 5) Clock stretching
 
@@ -86,11 +91,15 @@ while (gpio_read(SCL) == 0) { }        // wait slave to release too
 가속도계(MPU6050) WHO_AM_I 레지스터 read입니다.
 
 ```c
-// I2C 초기화 — Fm 400 kHz 목표 @ PCLK1 42 MHz
-I2C1->CR2  = 42;                       // FREQ = PCLK1 in MHz
-I2C1->CCR  = (1 << 15) | 35;           // F/S = Fm, DUTY = 0: 42 MHz / (3 x 400 kHz)
-I2C1->TRISE = 13;                      // floor(300 ns / 23.8 ns) + 1
-I2C1->CR1 |= I2C_CR1_PE;
+#include "stm32f407xx.h"
+
+// I2C 초기화 — Fm 400 kHz 목표 @ PCLK1 42 MHz (RCC·GPIO AF 설정은 4-09)
+void i2c1_init(void) {
+    I2C1->CR2  = 42;                   // FREQ = PCLK1 in MHz
+    I2C1->CCR  = (1 << 15) | 35;       // F/S = Fm, DUTY = 0: 42 MHz / (3 x 400 kHz)
+    I2C1->TRISE = 13;                  // floor(300 ns / 23.8 ns) + 1
+    I2C1->CR1 |= I2C_CR1_PE;
+}
 
 uint8_t mpu_who_am_i(void) {
     uint8_t val;
@@ -121,32 +130,37 @@ uint8_t mpu_who_am_i(void) {
 }
 ```
 
+MPU-6050의 7비트 주소 0x68과 WHO_AM_I 레지스터 0x75(117), 기대값 0x68은 Linux v6.12의 `inv_mpu6050` 드라이버(`drivers/iio/imu/inv_mpu6050/inv_mpu_iio.h`의 `INV_MPU6050_REG_WHOAMI 117`, `INV_MPU6050_WHOAMI_VALUE 0x68`)와 DT 바인딩 예제(`reg = <0x68>`)에서 확인했습니다. 이 코드는 `cmsis_device_f4` 헤더로 `arm-none-eabi-gcc` 16.2.0에서 경고 없이 빌드됩니다. QEMU의 STM32F4 머신에는 I2C 컨트롤러 모델이 없어 실행은 하지 않았습니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -DSTM32F407xx \
+  -I cmsis_device_f4/Include -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c i2c.c
+```
+
 PCLK1은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`가 만드는 42 MHz이고, STM32F405/407의 fPCLK1 최대값입니다(DS8626 Rev 12 Table 14). CCR·TRISE는 RM0090 Rev 22 27.6.8·27.6.9의 식에 UM10204 Table 11의 Fm 최대 rise time 300 ns를 넣은 값입니다. RM0090 CCR note는 400 kHz 최대 Fm 클럭에 도달하려면 fPCLK1이 10 MHz의 배수여야 한다고 적으므로, 42 MHz에서 400 kHz는 식의 목표값이고 실제 SCL이 400 kHz라는 보장은 아닙니다. 계산 과정은 [4-09: I2C 드라이버 구현](/blog/embedded/modern-recipes/part4-09-i2c-driver)에 있습니다.
 
 ## 측정 / 비교
 
-| 풀업 저항 | 100 pF 부하 rise time | 100 kHz 동작 | 400 kHz 동작 |
-| --- | --- | --- | --- |
-| 1 kΩ | 85 ns | OK (전력 큼) | OK (전력 큼) |
-| 2.2 kΩ | 186 ns | OK | OK |
-| 4.7 kΩ | 398 ns | OK | 한계 |
-| 10 kΩ | 847 ns | 한계 | 불가 |
+자주 쓰는 풀업 값을 C_b = 100 pF에서 t_r = 0.8473 × R × C_b로 계산해 UM10204 Table 11의 상한과 비교했습니다. V_DD = 3.3 V에서 저항이 끌어내리는 전류도 함께 적습니다.
 
-| 디바이스 수 | 전형적인 bus 커패시턴스 |
-| --- | --- |
-| 2 ~ 3 | 50 ~ 80 pF |
-| 5 ~ 10 | 100 ~ 200 pF |
-| 16+ | 300 pF 초과 (buffer 필요) |
+| 풀업 저항 | t_r (100 pF) | Sm (≤ 1000 ns) | Fm (≤ 300 ns) | low일 때 전류 (3.3 V − 0.4 V) / R |
+| --- | ---: | --- | --- | ---: |
+| 1 kΩ | 85 ns | 통과 | 통과 | 2.9 mA |
+| 2.2 kΩ | 186 ns | 통과 | 통과 | 1.3 mA |
+| 4.7 kΩ | 398 ns | 통과 | 불통과 | 0.62 mA |
+| 10 kΩ | 847 ns | 통과 | 불통과 | 0.29 mA |
+
+1 kΩ은 3 mA 한도에 0.1 mA 차이로 들어가고, 4.7 kΩ은 100 pF에서 Fast-mode rise time을 넘습니다.
 
 ## 자주 보는 함정
 
 > ⚠️ 풀업 없음 또는 너무 약함
 
-내부 풀업(30 ~ 50 kΩ)만 켜고 외부 풀업이 없으면 100 kHz도 동작하지 않습니다. SDA가 high로 올라오는 데 1 µs 이상 걸려 깨집니다.
+STM32F405/407 내부 풀업은 30~50 kΩ(PA10·PB12 제외, DS8626 Table 47)입니다. 1-03의 계산대로 가장 작은 30 kΩ에 50 pF만 걸어도 rise time이 1271 ns라 Standard-mode 상한 1000 ns를 넘습니다.
 
 > ⚠️ Bus stuck — SDA 0에 멈춤
 
-슬레이브가 read 도중 reset되면 SDA가 0인 상태로 멈춥니다. master가 STOP을 보낼 수 없게 되어 영원히 멈춥니다.
+master가 읽기 도중 리셋되면, slave는 다음 비트를 내보내려고 SDA를 0으로 잡은 채 SCL을 기다릴 수 있습니다. SCL이 high인 동안 SDA를 올려야 STOP인데 SDA가 0에 묶여 있으니 STOP을 만들 수 없습니다. UM10204 3.1.16절 *Bus clear*는 SDA가 low에 묶이면 controller가 클럭 9개를 보내고, 버스를 잡은 디바이스가 그 안에 SDA를 놓아야 하며, 그래도 안 되면 HW reset이나 전원 재투입을 하라고 적습니다.
 
 ```c
 // Bus recovery — SCL을 9번 토글해 slave를 idle로 강제
@@ -169,23 +183,19 @@ SCL이 high인 동안 SDA가 high에서 low로 바뀌면 START, low에서 high�
 
 > ⚠️ Address 충돌
 
-같은 7-bit 주소를 가진 디바이스를 두 개 붙이면 둘 다 ACK를 시도합니다. 데이터시트의 address pin 또는 OTP로 주소를 분리합니다.
-
-> ⚠️ 10-bit address 미지원 master
-
-대부분의 디바이스는 7-bit이지만 일부 sensor는 10-bit를 씁니다. master 드라이버가 지원하는지 확인합니다.
+같은 7-bit 주소를 가진 디바이스를 두 개 붙이면 둘 다 ACK하고, 읽기에서는 두 출력이 wired-AND로 섞입니다. 주소 선택 핀이 있는 디바이스는 그 핀의 연결로 주소를 나누고, 없으면 같은 주소의 디바이스를 다른 버스로 옮깁니다.
 
 > ⚠️ Repeated START 미지원
 
-write-then-read 시 STOP을 거치면 다른 master가 끼어들 수 있습니다. Repeated START로 한 transaction을 만들어야 atomic 합니다.
+UM10204 3.1.4절은 START 뒤 버스가 busy가 되고, STOP 대신 repeated START(Sr)를 내면 버스가 계속 busy로 남는다고 적습니다. 그래서 레지스터 주소를 쓰고 읽는 사이에 STOP을 넣으면 multi-master 버스에서 다른 master가 그 틈에 버스를 가져갈 수 있습니다. 위 `mpu_who_am_i()`가 두 번째 `START`를 STOP 없이 내는 이유입니다.
 
 ## 정리
 
 - I2C는 두 선(SDA, SCL) open-drain wired-AND 버스입니다.
-- 풀업 저항이 핵심입니다. 4.7 kΩ·2.2 kΩ은 흔한 예시값일 뿐, bus capacitance·전압·sink current·rise-time 요구사항으로 계산해야 합니다.
+- 풀업 저항은 UM10204 7.1절 식으로 C_b와 V_DD에서 범위를 구합니다. 100 pF·3.3 V면 Sm 0.97~11.8 kΩ, Fm 0.97~3.54 kΩ입니다.
 - ACK/NACK로 슬레이브 응답을 확인합니다. NACK는 "디바이스 없음"의 신호입니다.
 - Clock stretching으로 슬레이브가 master를 기다리게 할 수 있습니다.
-- Bus stuck은 SCL 9-toggle 시퀀스로 복구합니다.
+- SDA가 low에 묶이면 클럭 9개를 보내고(UM10204 3.1.16), 그래도 안 되면 리셋이나 전원 재투입입니다.
 
 다음 편에서는 **ADC 동작 원리**를 다룹니다. 아날로그 → 디지털 변환의 내부입니다.
 
@@ -194,4 +204,4 @@ write-then-read 시 STOP을 거치면 다른 master가 끼어들 수 있습니�
 - [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)
 - [1-05: SPI 하드웨어](/blog/embedded/modern-recipes/part1-05-spi-hardware)
 - [1-07: ADC 동작 원리](/blog/embedded/modern-recipes/part1-07-adc-principles)
-- 더 깊이 — [Embedded Performance Engineering: Bus 통계](/blog/embedded/performance-engineering/00-preface)
+- [4-09: I2C 드라이버 구현](/blog/embedded/modern-recipes/part4-09-i2c-driver)
