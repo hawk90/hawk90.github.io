@@ -66,16 +66,16 @@ GOPS = PP × ICP × OCP × 2 × 클록이므로 ZU5는 4096 × 350 MHz ≈ 1434 
 
 ## Step 1 — Inspect와 Quantize (PyTorch)
 
-UG1414 v3.5는 quantize 전에 inspector로 모델을 검사하라고 합니다. inspector는 연산마다 DPU와 CPU 중 어디서 돌지를 나눈 결과와, DPU에서 못 도는 이유를 보여 줍니다("Inspect Float Model Before Quantization" 절).
+UG1414 v3.5는 quantize 전에 inspector로 모델을 검사하라고 합니다. inspector는 연산마다 DPU와 CPU 중 어디서 돌지를 나눈 결과와, DPU에서 못 도는 이유를 담은 메시지를 보여 줍니다(quantizer 개요 절). PyTorch 쪽 사용법은 "Inspect Float Model Before Quantization" 절에 있습니다.
 
 ```python
 from pytorch_nndct.apis import Inspector, torch_quantizer
 
 inspector = Inspector("DPUCZDX8G_ISA1_B4096")      # target name or fingerprint
-inspector.inspect(model, torch.randn([1, 3, 224, 224]))
+inspector.inspect(model, torch.randn([1, 3, 224, 224]), device=torch.device("cpu"))
 ```
 
-Quantize는 같은 스크립트를 두 번 돌리는 구조입니다. `calib` 모드로 calibration 이미지를 흘려 양자화 단계를 정하고, `test` 모드로 정확도를 확인하면서 xmodel을 내보냅니다. `torch_quantizer`의 인자 이름과 기본값은 Vitis AI v3.5 [`pytorch_nndct/apis.py`](https://github.com/Xilinx/Vitis-AI/blob/v3.5/src/vai_quantizer/vai_q_pytorch/pytorch_binding/pytorch_nndct/apis.py)에서 확인했습니다(`device`의 기본값이 `cuda`라 CPU만 있다면 명시해야 합니다).
+Quantize는 같은 스크립트를 두 번 돌리는 구조입니다. `calib` 모드로 calibration 이미지를 흘려 양자화 단계를 정하고, `test` 모드로 정확도를 확인하면서 xmodel을 내보냅니다. `torch_quantizer`의 인자 이름과 기본값은 Vitis AI v3.5 [`pytorch_nndct/apis.py`](https://github.com/Xilinx/Vitis-AI/blob/v3.5/src/vai_quantizer/vai_q_pytorch/pytorch_binding/pytorch_nndct/apis.py)에서 확인했습니다(`torch_quantizer`와 `Inspector.inspect()` 모두 `device`의 기본값이 `cuda`라 CPU만 있다면 명시해야 합니다).
 
 ```python
 dummy = torch.randn(1, 3, 224, 224)
@@ -201,7 +201,7 @@ PG338 v4.1 "Development Flow" 절의 Vivado 흐름은 DPUCZDX8G IP를 저장소�
 | `DPUx_M_AXI_INSTR` | 32 | 명령 fetch용 AXI master |
 | `DPUx_M_AXI_DATA0`, `DATA1` | 128 (MPSoC) | 데이터용 AXI master |
 | `dpux_interrupt` | 1 | Active-High interrupt |
-| `SFM_M_AXI` | — | 하드웨어 softmax를 켰을 때만 생김 |
+| `SFM_M_AXI` | 128 | softmax 데이터용 AXI master. 하드웨어 softmax를 켰을 때만 생김 |
 
 같은 문서의 PS 연결 절은 명령 fetch 포트들은 interconnect 하나를 거쳐 PS의 `S_AXI_LPD`에, 데이터 포트는 가능한 한 PS의 slave 포트에 직접 잇고, 우선순위가 높은 코어(DPU0)를 `S_AXI_HP0_FPD`처럼 번호가 작은 포트에 연결하라고 권합니다. Vitis 흐름(DPU TRD)도 같은 문서의 "Vitis DPU TRD Flow" 절에 있습니다.
 
@@ -221,7 +221,7 @@ inspector 결과에서 CPU로 떨어진 연산이 그래프 중간에 있으면 
 
 > 입력 크기를 정하지 않은 모델
 
-inspector는 "구체적인 입력 shape"을 요구하고, xmodel 내보내기는 batch size 1로 합니다. 동적 shape 모델은 고정 shape으로 만든 뒤 quantize합니다.
+PyTorch inspector에는 구체적인 shape의 입력 텐서를 넘기고(TF2 inspector는 문서에 "concrete input shapes"를 요구한다고 적혀 있습니다), xmodel 내보내기는 batch size 1로 합니다. 동적 shape 모델은 고정 shape으로 만든 뒤 quantize합니다.
 
 > 메모리 대역
 
