@@ -36,7 +36,7 @@ CXL 3.1 Table 1-1과 §3.3의 정의입니다.
 | **HDM-D** | Device Coherent | Type 2만 (§3.3: "legacy Type 2") | CXL.cache (D2H) |
 | **HDM-DB** | Device Coherent using Back-Invalidate | Type 2 또는 Type 3 | CXL.mem의 BISnp / BIRsp |
 
-수동 memory expander(Type 3)의 예로 규격이 드는 것은 HDM-H입니다(§2.3, Figure 2-6). Type 3가 HDM-DB를 쓰면 장치 안에 DCOH가 필요하고, peer의 UIO·CXL.mem 직접 접근이 가능해집니다(§2.3). Shared FAM 영역의 multi-host hardware coherency도 HDM-DB 영역에서 정의됩니다(§2.4.4). 그리고 §2.2.1은 *256B flit 모드를 구현하는 디바이스는 모두 HDM-DB를 지원*해야 하고, HDM-D 흐름은 68B flit 모드와의 호환을 위해 지원된다고 씁니다.
+수동 memory expander(Type 3)의 예로 규격이 드는 것은 HDM-H입니다(§2.3, Figure 2-6). Type 3가 HDM-DB를 쓰면 장치 안에 DCOH가 필요하고, peer의 UIO·CXL.mem 직접 접근이 가능해집니다(§2.3). Shared FAM 영역의 multi-host hardware coherency도 HDM-DB 영역에서 정의되고(§2.4.4), §3.3.2는 MLD와 G-FAM 장치가 multi-host 일관성과 CXL.mem peer-to-peer를 위해 HDM-DB를 쓸 수 있다고 씁니다. 그리고 §2.2.1은 *256B flit 모드를 구현하는 디바이스는 모두 HDM-DB를 지원*해야 하고, HDM-D 흐름은 68B flit 모드와의 호환을 위해 지원된다고 씁니다.
 
 ## HDM-D — Bias 기반 일관성
 

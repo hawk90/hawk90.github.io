@@ -39,7 +39,7 @@ CXL 2.0의 *single-level switch*는 *host 포트 하나* 아래에 *여러 CXL �
       { "endpoint":"endpoint3", "host":"mem0", "parent_dport":"0000:0e:00.0", "depth":3 } ] } ] } ]
 ```
 
-`port2`가 switch upstream port(`0d:00.0`)이고, downstream port 두 개(`0e:00.0`, `0e:01.0`) 아래에 memdev가 하나씩 매달려 있습니다. 같은 게스트의 `numactl -H`는 node 0(1964 MB)과 CPU 없는 node 1(0 MB) 두 개를 보여 줬습니다. node 1은 장치 두 대가 아니라 CEDT의 CFMWS window 하나에서 나왔습니다. v6.12 `drivers/acpi/numa/srat.c:543-556`은 SRAT에 없는 CFMWS 범위마다 NUMA node를 만들고, region을 commit하기 전까지 그 node에는 메모리가 없습니다([Bootloader Ch 35](/blog/embedded/bootloader/chapter35-uefi-cxl-init)와 같은 관찰).
+`port2`가 switch upstream port(`0d:00.0`)이고, downstream port 두 개(`0e:00.0`, `0e:01.0`) 아래에 memdev가 하나씩 매달려 있습니다. 같은 게스트의 `numactl -H`는 node 0(1964 MB)과 CPU 없는 node 1(0 MB) 두 개를 보여 줬습니다. node 1은 장치 두 대가 아니라 CEDT의 CFMWS window 하나에서 나왔습니다. v6.12 `drivers/acpi/numa/srat.c:543-557`은 SRAT에 없는 CFMWS 범위마다 NUMA node를 만들고, region을 commit하기 전까지 그 node에는 메모리가 없습니다([Bootloader Ch 35](/blog/embedded/bootloader/chapter35-uefi-cxl-init)와 같은 관찰).
 
 ## CXL 2.0 Pooling — Multi-Host LD
 
@@ -150,7 +150,7 @@ CXL 메모리 풀링·tiering을 다룬 대표 연구는 둘 다 ASPLOS '23에 �
 
 ### "장치 하나를 붙이면 NUMA node가 하나 생긴다"
 
-QEMU 게스트에서는 Type 3 두 대를 붙였지만 CXL 쪽 NUMA node는 하나였습니다. node를 만든 것은 장치가 아니라 CFMWS window였습니다(`srat.c:543-556`).
+QEMU 게스트에서는 Type 3 두 대를 붙였지만 CXL 쪽 NUMA node는 하나였습니다. node를 만든 것은 장치가 아니라 CFMWS window였습니다(`srat.c:543-557`).
 
 ## 정리
 

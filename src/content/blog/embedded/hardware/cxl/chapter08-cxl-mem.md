@@ -78,7 +78,7 @@ Write는 *RwD 채널*로 *명령과 데이터를 함께* 보냅니다:
 
 RwD는 write 명령과 데이터를 함께 전달하고 NDR의 Cmp가 해당 트랜잭션을 완료합니다(§3.3.9의 Cmp: "writeback·read·invalidate의 완료").
 
-`MemWrPtl` (Partial Write)은 64 B 줄의 일부만 쓸 때 씁니다. §3.3.6의 TRP 비트(이전 이름 BEP)가 서면 byte enable이 trailer로 붙고, 256B flit에서 byte enable 필드는 64 bit, 곧 64 B의 byte마다 1 bit입니다(§3.2.3.3.2).
+`MemWrPtl` (Partial Write)은 64 B 줄의 일부만 쓸 때 씁니다. §3.3.6의 TRP 비트(이전 이름 BEP)가 서면 byte enable이 trailer로 붙고, 256B flit에서 byte enable 필드는 64 bit, 곧 64 B의 byte마다 1 bit입니다(§3.3.6.1, Table 3-43).
 
 ## HDM Decoder — 주소 매핑의 핵심
 
@@ -196,7 +196,7 @@ bash: line 17: echo: write error: No such device or address
 [  135.680487] WARNING: CPU: 3 PID: 899 at drivers/cxl/core/region.c:235 cxl_region_invalidate_memregion.isra.0+0x3c/0x58
 ```
 
-`cxl list -R -i -u`는 이 region을 `"decode_state":"reset"`, `"state":"disabled"`로 보여 줬습니다. 소프트웨어 쪽 decoder 값은 채워졌지만 하드웨어 decoder에 commit되지는 않았다는 뜻입니다. v6.12 `core/region.c:385`의 `commit_store()`가 decoder commit(390행)보다 먼저 `cxl_region_invalidate_memregion()`을 부르고, 이 함수(226-243행)는 CPU가 메모리 범위 캐시 무효화를 지원하지 않으면 `-ENXIO`를 돌려줍니다. v6.12에서 그 지원(`ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`)을 선언하는 아키텍처는 x86뿐이라, arm64 게스트에서는 여기서 멈춥니다([Perf Eng 3-11](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)과 같은 결과). 그래서 이 장의 HPA→DPA 변환을 실제 load로 따라가는 실험은 하지 못했습니다.
+`cxl list -R -i -u`는 이 region을 `"decode_state":"reset"`, `"state":"disabled"`로 보여 줬습니다. 소프트웨어 쪽 decoder 값은 채워졌지만 하드웨어 decoder에 commit되지는 않았다는 뜻입니다. v6.12 `core/region.c:353`의 `commit_store()`가 385행에서 decoder commit(390행)보다 먼저 `cxl_region_invalidate_memregion()`을 부르고, 이 함수(226-243행)는 CPU가 메모리 범위 캐시 무효화를 지원하지 않으면 `-ENXIO`를 돌려줍니다. v6.12에서 그 지원(`ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`)을 선언하는 아키텍처는 x86뿐이라, arm64 게스트에서는 여기서 멈춥니다([Perf Eng 3-11](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)과 같은 결과). 그래서 이 장의 HPA→DPA 변환을 실제 load로 따라가는 실험은 하지 못했습니다.
 
 [ndctl v81 `cxl-create-region` 문서](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-create-region.txt)에 따르면 `-m`은 뒤의 target 이름을 memdev로 해석하라는 옵션이고, `-t`는 `pmem`/`ram` region type입니다. 같은 명령 `cxl create-region -m -d decoder0.0 -w 1 -t ram mem0`도 게스트에서 `failed to commit decode: No such device or address`로 끝났습니다.
 
@@ -242,4 +242,4 @@ QEMU 게스트에서 `region0`은 sysfs에 생겼고 경로의 decoder 값도 �
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 §3.2.3.3.2·§3.3.1~§3.3.11, Linux v6.12 `drivers/cxl/` 소스와 ABI 문서, ndctl v81 문서, Sun et al. MICRO '23, QEMU 11.1.3 게스트의 sysfs·dmesg 출력과 Node.js 24.21.0 실행 결과를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §3.3.1~§3.3.11, Linux v6.12 `drivers/cxl/` 소스와 ABI 문서, ndctl v81 문서, Sun et al. MICRO '23, QEMU 11.1.3 게스트의 sysfs·dmesg 출력과 Node.js 24.21.0 실행 결과를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

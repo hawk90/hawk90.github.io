@@ -75,7 +75,7 @@ Capabilities: [17c v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len
 	PCIe DVSEC for Flex Bus Port
 ```
 
-(ID 0000의 `CXLSta`·`CXLCtl2` 등 몇 줄과 Range2는 줄였습니다.) `Rev=3`은 Table 8-2가 ID 0000h에 적은 최고 revision 3과 같습니다. `CXLCap`의 `Cache-`는 이 장치가 Type 3라는 뜻이고, `Range1` 크기 `0x10000000`은 256 MiB HDM입니다. Register Locator는 component register가 BAR0, 메일박스 등 device register가 BAR2에 있다고 알려 줍니다.
+(ID 0000의 `CXLSta`·`CXLCtl2`·Range1 세부 줄·Range2, GPF·Flex Bus의 세부 줄은 줄였습니다.) `Rev=3`은 Table 8-2가 ID 0000h에 적은 최고 revision 3과 같습니다. `CXLCap`의 `Cache-`는 이 장치가 Type 3라는 뜻이고, `Range1` 크기 `0x10000000`은 256 MiB HDM입니다. Register Locator는 component register가 BAR0, 메일박스 등 device register가 BAR2에 있다고 알려 줍니다.
 
 같은 게스트에서 switch upstream port `0d:00.0`과 root port `0c:00.0`에는 ID 0003h(CXL Extensions DVSEC for Ports)가 있었고, endpoint에는 없었습니다. Table 8-2의 필수·금지 열과 그대로 맞습니다.
 
@@ -174,7 +174,7 @@ CDAT는 장치가 *스스로 보고하는* 속성표입니다. QEMU 모델의 15
 - CXL 기능은 *Vendor ID 1E98h DVSEC*으로 알리고, SLD에는 ID 0000h·0005h·0007h·0008h가 필수입니다(Table 8-2). QEMU endpoint에도 정확히 이 넷이 있었습니다.
 - *DOE*는 config space mailbox입니다. CXL이 정의한 DOE Type은 Compliance(0)와 Table Access/CDAT(2)입니다.
 - 커널은 Table Access DOE로 CDAT를 한 entry씩 읽어 `endpointN/CDAT`에 내놓습니다.
-- 디바이스 간 직접 접근은 *Direct P2P CXL.mem*과 *UIO Direct P2P to HDM* 두 경로가 있고, 둘 다 PBR switch가 필요합니다.
+- 디바이스 간 직접 접근은 *Direct P2P CXL.mem*과 *UIO Direct P2P to HDM* 두 경로가 있습니다. Direct P2P CXL.mem은 PBR switch가 필요하고(§3.3.2.1), UIO 경로는 PBR switch에서 edge-to-edge로 라우팅되며 기존 HDM decoder로는 제한적으로만 됩니다(§7.7.9).
 - Linux에서 Type 3는 `cxl_pci`가 class code `0502`·prog-if `10`으로 잡습니다.
 
 ## 다음 편

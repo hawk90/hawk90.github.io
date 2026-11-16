@@ -91,7 +91,7 @@ Call trace:
  commit_store+0xc8/0x100
 ```
 
-[`commit_store()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c)는 385행에서 `cxl_region_invalidate_memregion()`을 먼저 부르고, 성공해야 390행에서 `cxl_region_decode_commit()`으로 넘어갑니다. 이 함수(226-243행)는 `cpu_cache_has_invalidate_memregion()`이 거짓이고 `CONFIG_CXL_REGION_INVALIDATION_TEST`가 꺼져 있으면 경고를 찍고 `-ENXIO`를 돌려줍니다. v6.12에서 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`을 select하는 곳은 `arch/x86/Kconfig:76` 하나라서 arm64에서는 이 경로를 통과할 수 없습니다. 이 함수와 행 번호는 6.12.116에서도 같습니다.
+[`commit_store()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c)(353행)는 385행에서 `cxl_region_invalidate_memregion()`을 먼저 부르고, 성공해야 390행에서 `cxl_region_decode_commit()`으로 넘어갑니다. 이 함수(226-243행)는 `cpu_cache_has_invalidate_memregion()`이 거짓이고 `CONFIG_CXL_REGION_INVALIDATION_TEST`가 꺼져 있으면 경고를 찍고 `-ENXIO`를 돌려줍니다. v6.12에서 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`을 select하는 곳은 `arch/x86/Kconfig:76` 하나라서 arm64에서는 이 경로를 통과할 수 없습니다. 이 함수와 행 번호는 6.12.116에서도 같습니다.
 
 ## Mailbox: transport 성공과 명령 성공
 
