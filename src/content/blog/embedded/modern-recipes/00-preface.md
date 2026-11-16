@@ -13,7 +13,7 @@ topics: ["embedded"]
 
 ## 이 시리즈가 다루는 것
 
-임베디드 분야는 *기초 튜토리얼*과 *심화 internals* 사이에 큰 골이 있습니다. GPIO 깜빡이기는 어디나 있고, 커널 내부와 RTOS 스케줄러 분석도 좋은 자료가 있습니다. 그런데 둘 사이 — *현장에서 실제로 부딪히는* 전반을 한자리에 모은 자료는 드뭅니다.
+임베디드 분야는 *기초 튜토리얼*과 *심화 internals* 사이에 큰 골이 있습니다. GPIO 깜빡이기는 어디나 있고, 커널 내부와 RTOS 스케줄러 분석도 좋은 자료가 있습니다. 그런데 그 사이, *현장에서 실제로 부딪히는* 문제 전반을 한자리에 모은 자료는 드뭅니다.
 
 이 시리즈는 그 사이를 채웁니다. **HW 인터페이스 동작 원리부터 Edge AI 배포까지** 임베디드 12개 영역을 *cookbook 형태*로 정리합니다. 한 레시피가 한 문제를 풀고, 다음 레시피로 자연스럽게 이어집니다.
 
@@ -37,7 +37,7 @@ topics: ["embedded"]
 
 ## 시리즈 구성
 
-**총 12 Parts, 152 레시피**로 구성됩니다. 아래 편수와 seriesOrder는 이 디렉터리의 실제 파일 152개에서 센 값입니다.
+**총 12 Parts, 152 레시피**로 구성됩니다. 아래 편수와 seriesOrder는 실제 글 152편을 센 값입니다.
 
 ### 한눈에 보는 12 Parts
 
@@ -158,7 +158,7 @@ DC/스테퍼/서보 모터·LCD/OLED/TFT·환경 센서·IMU·CAN·USB·Ethernet
 
 ### Part 6 — RTOS 실전 활용 (12편)
 
-Super-loop를 넘어 RTOS로. Task·scheduler·semaphore·mutex·queue·event·timer·ISR-safe·priority inversion·디버깅.
+Super-loop를 넘어 RTOS로 갑니다. Task·scheduler·semaphore·mutex·queue·event·timer·ISR-safe·priority inversion·디버깅.
 
 | # | 레시피 | 핵심 |
 |---|--------|------|
@@ -303,7 +303,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ### 입문 (Part 1~5, 62편)
 
-처음 임베디드를 시작하거나 Bare-metal 기초가 약하다면 여기부터.
+처음 임베디드를 시작하거나 Bare-metal 기초가 약하다면 여기서 시작하세요.
 
 - **Part 1** — 디지털 신호·GPIO·UART/SPI/I2C 회로 동작
 - **Part 2** — Cortex-M 레지스터·NVIC·MPU
@@ -313,7 +313,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ### 응용 (Part 6~9, 48편)
 
-기초가 잡힌 뒤 RTOS·Linux·메모리·동시성으로 확장.
+기초가 잡힌 뒤 RTOS·Linux·메모리·동시성으로 넓혀 갑니다.
 
 - **Part 6** — RTOS task·sync·디버깅
 - **Part 7** — Linux 부팅·Device Tree·커널 모듈·driver·mmap·epoll·UIO/VFIO
@@ -322,7 +322,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ### 전문 (Part 10~12, 42편)
 
-현장 트러블슈팅과 modern 영역.
+현장 트러블슈팅과 modern 영역을 다룹니다.
 
 - **Part 10** — 체계적 디버깅 방법론
 - **Part 11** — FPGA·AXI·PCIe·HLS·Vitis AI
@@ -364,7 +364,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ## 예제 환경
 
-본문이 예로 드는 플랫폼은 다음과 같습니다. 이 보드들에서 직접 잰 값이라고 적지 않은 수치는 보드 측정값이 아닙니다.
+본문이 예로 드는 플랫폼은 다음과 같습니다. 본문에 이 보드에서 직접 쟀다고 적은 수치만 보드 측정값입니다.
 
 | 플랫폼 | 용도 |
 |--------|------|
@@ -425,7 +425,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 - Linux 커널 모듈·캐릭터/플랫폼 driver·mmap·UIO/VFIO를 *현장 수준*으로 작성할 수 있습니다.
 - 메모리·캐시·DMA·SIMD를 활용한 *성능 최적화*를 할 수 있습니다.
 - Lock-free·wait-free·RCU·CAS 패턴을 *정확하게* 적용할 수 있습니다.
-- HW 디버깅 시 *체계적인 hypothesis-driven 진단*이 가능합니다.
+- HW를 디버깅할 때 *가설을 세우고 검증하는 체계적인 진단*을 할 수 있습니다.
 - FPGA·NPU·NVMe 같은 가속기를 *PCIe와 AXI 레벨*에서 다룰 수 있습니다.
 - Edge AI inference를 *zero-copy + INT8 quantization*까지 최적화할 수 있습니다.
 - TrustZone·Matter 같은 *modern 보안·IoT 표준*을 도입할 수 있습니다.
