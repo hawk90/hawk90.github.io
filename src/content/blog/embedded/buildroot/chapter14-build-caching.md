@@ -12,71 +12,43 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"첫 빌드 30분, 두 번째 빌드 30초."** — Buildroot의 캐싱은 *세 계층*입니다. `dl/`이 다운로드를 막고, `ccache`가 컴파일을 막고, `BR2_PER_PACKAGE_DIRECTORIES`가 sysroot 오염을 막습니다. 셋 중 하나만 빠져도 두 번째 빌드가 다시 30분이 됩니다.
+> **"`dl/`은 다운로드를, ccache는 컴파일을, per-package directories는 sysroot 오염을 막는다."** — Buildroot의 캐시는 세 계층이고, 서로를 대신하지 않습니다. 이 장은 셋을 같은 VM에서 켜고 끄며 잰 값으로 설명합니다.
 
 ## 왜 캐싱이 별도의 장인가
 
-이 시리즈 [Ch 4](/blog/embedded/buildroot/chapter04-first-build)에서 첫 빌드가 *30분에서 1시간*이 걸린다고 했습니다. 두 번째 빌드도 같다면 *개발이 불가능*합니다. 하루에 4~5번 `make`를 돌릴 텐데 매번 30분이면 *하루의 절반*이 빌드 대기로 사라집니다.
+[Ch 4](/blog/embedded/buildroot/chapter04-first-build)의 첫 빌드는 40분 8초였습니다. 변경 없는 `make`는 9초였지만, `make clean` 한 번이면 처음부터 다시 돕니다. CI처럼 매번 빈 output에서 시작하는 환경이라면 그 비용이 빌드마다 붙습니다. 장보기(다운로드), 손질(컴파일), 조리대 분리(sysroot 격리)를 각각 얼마나 아낄 수 있는지 재 봐야 어느 캐시에 투자할지 정할 수 있습니다.
 
-Buildroot의 두 번째 빌드는 *목표가 명확*합니다.
-
-- **변경이 0**이면 *수 초* 안에 끝나야 합니다.
-- **패키지 하나 patch 추가**면 *그 패키지만* 다시 빌드.
-- **defconfig 한 줄 변경**이면 *영향받는 패키지만* 다시 빌드.
-- **브랜치 전환**이면 *어쩔 수 없이 일부 재빌드*, 다만 다운로드는 0.
-
-이 목표를 달성하려면 *세 계층의 캐시*가 모두 살아 있어야 합니다. 하나라도 누락되면 두 번째 빌드 시간이 *눈에 띄게* 늘어납니다. 이번 장은 각 계층이 *무엇을 캐싱하는지*, *어떻게 공유하는지*, *언제 무효화되는지*를 다룹니다.
+측정 조건은 다음과 같습니다. **Buildroot 2026.02.3**, `qemu_aarch64_virt_defconfig`에서 toolchain만 외부 toolchain(`BR2_TOOLCHAIN_EXTERNAL=y`, 이 arm64 호스트에서는 "Arm AArch64 14.2.rel1"이 선택됨)으로 바꾸고 host QEMU를 끈 설정입니다. 모든 소스는 먼저 `make source`로 공유 `dl/`에 받아 두어(667초) 다운로드 시간을 빼고 비교했습니다. 호스트는 Ch 1과 같은 사양의 Debian 13 arm64 VM(vCPU 10, RAM 12 GB)이고, 각 수치는 한 번씩 잰 값입니다.
 
 ## 3-layer 캐싱 모델
 
-Buildroot의 캐시는 세 계층입니다. 각 계층이 빌드 파이프라인의 다른 단계를 막습니다.
-
-| 계층 | 위치 | 캐싱 대상 | 무효화 시점 | 공유 가능? |
+| 계층 | 위치 | 캐싱 대상 | 무효화 시점 | 공유 |
 |---|---|---|---|---|
-| **1. `dl/` (source)** | `BR2_DL_DIR` (기본 `dl/`) | tarball·git archive | hash mismatch | NFS·S3·named volume로 머신 간 공유 |
-| **2. `ccache` (compile)** | `BR2_CCACHE_DIR` (기본 `$HOME/.buildroot-ccache`) | preprocessor 결과 → object 파일 | compiler 인자·소스 hash | 사용자 단위 공유 가능 |
-| **3. `BR2_PER_PACKAGE_DIRECTORIES`** | `output/per-package/<pkg>/` | 패키지별 staging·target | 패키지 재빌드 시 | 단일 빌드 트리 내부 |
+| **1. `dl/`** | `BR2_DL_DIR` (기본 `$(TOPDIR)/dl`) | tarball·git archive | hash 불일치 | 여러 트리·머신 (환경 변수 `BR2_DL_DIR`) |
+| **2. ccache** | `BR2_CCACHE_DIR` (기본 `$(HOME)/.buildroot-ccache`) | 컴파일 결과(object) | 소스·인자·컴파일러가 바뀔 때 | 같은 사용자의 여러 output |
+| **3. `BR2_PER_PACKAGE_DIRECTORIES`** | `output/per-package/<pkg>/` | 패키지별 host·target 트리 | 패키지 재빌드 | 한 output 안 |
 
-세 계층은 *독립*입니다. `dl/`이 살아 있어도 `ccache`가 비어 있으면 *컴파일은 처음부터*. `ccache`가 살아 있어도 `output/build`가 날아갔으면 *모든 패키지 unpack부터*. 캐싱 전략을 세울 때 이 세 계층을 *분리해서* 생각해야 합니다.
-
-다음 절부터 각 계층을 깊이 들어갑니다.
+세 계층은 *독립*입니다. `dl/`이 있어도 ccache가 비어 있으면 컴파일은 처음부터이고, ccache가 있어도 `output/build`가 지워졌으면 압축 해제·configure는 다시 돕니다.
 
 ## dl/ — source tarball cache
 
-`dl/`은 Buildroot의 *download cache*입니다. 모든 패키지의 source archive가 한 곳에 모입니다.
-
-```text
-dl/
-├── busybox/
-│   ├── busybox-1.36.1.tar.bz2
-│   └── busybox-1.36.1.tar.bz2.hash       # 검증 메타
-├── linux/
-│   ├── linux-6.6.32.tar.xz
-│   └── linux-6.6.32.tar.xz.hash
-├── openssl/
-│   ├── openssl-3.2.1.tar.gz
-│   └── openssl-3.2.1.tar.gz.hash
-└── git-cache/
-    └── linux-imx-6.6.32-2.2.0.tar.gz     # git fetch 결과를 tarball화
-```
-
-각 패키지가 `dl/<pkg>/<tarball>` 위치에 *고유 디렉터리*를 가집니다. 같은 패키지의 여러 버전을 동시에 보관할 수 있습니다(예: `linux-6.6.30.tar.xz`와 `linux-6.6.32.tar.xz`).
+`dl/`에는 패키지마다 디렉터리가 있고 받은 파일이 그대로 들어갑니다(Ch 2의 `dl/busybox/busybox-1.37.0.tar.bz2`). hash 파일은 `dl/`이 아니라 `package/<pkg>/<pkg>.hash`에 있습니다. git으로 받는 패키지는 `dl/<pkg>/git/` 아래 저장소와, 거기서 만든 tarball(`…-git4.tar.gz`)이 함께 남습니다.
 
 ### Hash verification gate
 
-다운로드가 끝나면 Buildroot가 `*.hash` 파일과 대조해 *검증*합니다. 일치하지 않으면 *빌드 실패*. 중간자 공격·corrupted mirror로부터 보호하는 1차 방벽입니다.
+이미 `dl/`에 있는 파일도 매번 hash를 검사합니다. `support/download/dl-wrapper`의 주석이 규칙을 적습니다.
 
 ```text
-$ cat package/openssl/openssl.hash
-sha256  83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39  openssl-3.2.1.tar.gz
-sha256  ee335...                                                          openssl-3.2.1.tar.gz.asc
+    # If the output file already exists and:
+    # - there's no .hash file: do not download it again and exit promptly
+    # - matches all its hashes: do not download it again and exit promptly
+    # - fails at least one of its hashes: force a re-download
+    # - there's no hash (but a .hash file): consider it a hard error
 ```
 
-`dl/`에 이미 같은 이름의 파일이 있어도 hash가 다르면 *재다운로드*합니다. 이 동작 때문에 `dl/`을 *그대로 공유*해도 안전합니다.
+그래서 `dl/`을 여러 트리가 공유해도, 깨진 파일은 다시 받거나 빌드를 멈춥니다. Ch 9에서 hash를 일부러 틀리게 했을 때 받은 파일이 지워지고 "Incomplete download, or man-in-the-middle (MITM) attack"으로 멈춘 것이 이 경로입니다.
 
 ### Mirror 설정
-
-`BR2_PRIMARY_SITE`와 `BR2_BACKUP_SITE`로 다운로드 우선순위를 바꿉니다.
 
 ```text
 BR2_PRIMARY_SITE="https://internal-mirror.corp/buildroot-dl"
@@ -84,233 +56,159 @@ BR2_BACKUP_SITE="https://sources.buildroot.net"
 BR2_PRIMARY_SITE_ONLY=n
 ```
 
-`BR2_PRIMARY_SITE`가 *먼저* 시도됩니다. 사내 mirror가 있다면 여기에 설정합니다. `BR2_PRIMARY_SITE_ONLY=y`로 두면 fallback을 차단해 *오프라인 빌드*에 사용. 양산 환경에서 *upstream이 사라져도* 동일 산출물을 만들고 싶을 때 유용합니다.
+`BR2_PRIMARY_SITE`가 먼저 시도되고, upstream이 실패하면 `BR2_BACKUP_SITE`(기본값 `https://sources.buildroot.net`)를 씁니다. Ch 10에서 `git.ti.com`의 git fetch가 멈췄을 때 이 백업 사이트의 tarball로 빌드가 이어졌습니다. `BR2_PRIMARY_SITE_ONLY=y`는 다른 위치를 시도하지 않게 막습니다(Ch 2).
 
 ### 머신 간 공유
 
-`dl/`은 *완전히 read-only로 공유 가능*합니다. 같은 hash면 같은 파일이라는 보장이 있기 때문입니다.
-
 ```bash
-mount -t nfs build-cache.corp:/srv/buildroot-dl /mnt/buildroot-dl
 export BR2_DL_DIR=/mnt/buildroot-dl
-
-# 또는 환경 변수로 명시
-make BR2_DL_DIR=/mnt/buildroot-dl
 ```
 
-CI에서는 다음 패턴이 표준입니다.
-
-- **caching layer**: GitLab artifacts·GitHub Actions cache·S3 bucket에 `dl/` tarball을 저장.
-- **named volume**: Docker로 빌드한다면 named volume(`buildroot-dl`)에 `dl/`을 두고 컨테이너 사이 공유.
-- **shared NFS**: 자체 빌드 서버라면 NFS mount가 가장 단순.
-
-`dl/`의 크기는 *프로젝트마다 1~5 GB*입니다. 한 번 캐싱하면 두 번째부터는 다운로드 시간이 *0초*에 가깝습니다.
+매뉴얼은 이 환경 변수가 `.config`의 값을 덮어쓴다고 적습니다(Ch 2). 이 장의 실험도 네 개 output 디렉터리가 같은 `dl/`을 썼고, 두 번째 output부터 `download` 단계 합이 2~16초였습니다(각 output의 `build-time.log`).
 
 ## ccache — compile cache
 
-ccache는 *컴파일러 결과*를 캐싱합니다. 같은 source + 같은 컴파일 인자 = 같은 object 파일이라는 원칙입니다.
+ccache는 컴파일 결과를 캐싱합니다. 같은 소스 + 같은 인자 + 같은 컴파일러면 object를 다시 쓰는 원리입니다.
 
 ```text
 BR2_CCACHE=y
-BR2_CCACHE_DIR="$(HOME)/.buildroot-ccache"
+BR2_CCACHE_DIR="/home/br/cc14"
 ```
 
-`BR2_CCACHE=y`와 `BR2_CCACHE_DIR`은 Buildroot 설정입니다. 캐시 크기는 ccache 설정으로 별도 지정합니다(예: `ccache --max-size=5G`). Buildroot가 활성화한 compiler cache wrapper를 통해 컴파일 요청이 전달됩니다.
+켜면 Buildroot가 `host-ccache`(이 릴리스는 4.12.3)를 빌드해 모든 host·target 컴파일에 씁니다. 같은 output에서 두 번 빌드했습니다. 첫 빌드 뒤 통계를 지우고(`make CCACHE_OPTIONS="--zero-stats" ccache-options`), `make clean` 뒤 다시 빌드했습니다.
 
-### Hit rate 확인
+| 빌드 | 벽시계 | ccache hit |
+|---|---:|---:|
+| ccache 켬, 빈 캐시 | 915.60초 | 1,299 / 6,825 (19.03%) |
+| ccache 켬, `make clean` 뒤 | **423.88초** | 6,811 / 6,825 (99.79%) |
+| ccache 끔 (다른 output) | 500.78초 | — |
+
+두 번째 빌드의 `make ccache-stats` 출력입니다.
 
 ```text
-$ ccache -s -d ~/.buildroot-ccache
-cache directory                     /home/dev/.buildroot-ccache
-primary config                      /home/dev/.buildroot-ccache/ccache.conf
-cache size                          3.8 GB
-max cache size                      5.0 GB
-files in cache                      24138
-cache hit (direct)                  18432
-cache hit (preprocessed)            2104
-cache miss                          3602
-cache hit rate                      85.07 %
+Cacheable calls:    6825 / 8774 (77.79%)
+  Hits:             6811 / 6825 (99.79%)
+    Direct:         6367 / 6811 (93.48%)
+    Preprocessed:    444 / 6811 ( 6.52%)
+  Misses:             14 / 6825 ( 0.21%)
+Uncacheable calls:  1949 / 8774 (22.21%)
+Local storage:
+  Cache size (GiB):  0.1 /  5.0 ( 2.18%)
 ```
 
-*hit rate 80% 이상*이 건강한 수치입니다. 70% 이하라면 두 가지 중 하나를 의심합니다.
+읽을 점이 셋입니다.
 
-- **캐시 디렉터리가 자주 비워짐** — CI에서 `~/.buildroot-ccache`를 cache step에 안 넣은 경우.
-- **컴파일 인자가 자주 바뀜** — 빌드 ID·timestamp·`__FILE__` 절대 경로가 인자에 섞여 들어가면 hit rate가 0에 수렴.
+- **warm ccache는 캐시 없는 빌드보다 77초(15%) 빨랐습니다.** `build-time.log`의 단계 합으로 보면 build 단계가 323초에서 189초로 줄었습니다. 대신 configure는 93초에서 161초로 늘었습니다. configure 스크립트가 띄우는 작은 테스트 컴파일 대부분이 캐시 대상이 아니거나(위 "Uncacheable calls" 22%), ccache 호출 비용이 붙기 때문입니다. 압축 해제·configure·설치는 ccache가 줄이지 않습니다.
+- **빈 캐시로 처음 빌드한 시간(915.60초)은 ccache 없는 빌드(500.78초)보다 길었습니다.** `host-ccache` 자체를 빌드하고 모든 결과를 캐시에 쓰는 비용이 들지만, 이 차이가 전부 그것인지는 이 실험에서 나누지 않았습니다. "ccache를 켜면 첫 빌드부터 빨라진다"는 기대는 맞지 않았습니다.
+- **캐시 크기는 114 MB였습니다**(`du -sh`). 기본 상한 5.0 GiB 대비 2.18%라, 이 규모의 설정에서는 용량이 문제가 되지 않았습니다.
 
 ### Cross-build cache key
 
-ccache는 *컴파일러 실행 파일의 경로·hash*를 cache key의 일부로 씁니다. Buildroot는 toolchain을 *output 디렉터리 안*에 빌드하기 때문에 *output 디렉터리가 바뀌면* 같은 코드도 cache miss입니다.
-
-다른 output 디렉터리는 *다른 cache key*가 된다.
-
-```text
-output-imx8/host/aarch64-buildroot-linux-gnu/bin/aarch64-buildroot-linux-gnu-gcc
-output-rpi4/host/aarch64-buildroot-linux-gnu/bin/aarch64-buildroot-linux-gnu-gcc
-```
-
-해결책은 `CCACHE_COMPILERCHECK=content`로 *컴파일러 path 무시·content hash만 사용*. Buildroot가 기본으로 이 옵션을 켜 줍니다. 따라서 같은 toolchain 버전이라면 *여러 output 디렉터리 사이에서 ccache 공유*가 됩니다. 같은 사용자의 `$HOME/.buildroot-ccache` 하나로 모든 보드 트리가 캐시를 공유합니다.
+매뉴얼 "Using ccache in Buildroot"는 컴파일러 옵션에 output 디렉터리의 절대 경로가 들어가면 "building in a different output directory would lead to many cache misses"라고 설명하고, 이를 위해 `BR2_CCACHE_USE_BASEDIR`(기본값 y, "Use relative paths")를 둡니다. internal toolchain이면 하나가 더 있습니다. `package/gcc/gcc.mk` 334행이 gcc의 configure 옵션(`$(HOST_DIR)`을 `@HOST_DIR@`로 바꾼 값)과 gcc 패치를 hash해 wrapper에 넣고, `toolchain/toolchain-wrapper.c` 512행이 이를 `CCACHE_COMPILERCHECK=string:<hash>`로 설정합니다. 그래서 output 디렉터리가 달라도 같은 gcc 설정이면 같은 컴파일러로 취급됩니다. 이 hash 설정은 `gcc.mk`에 있으므로 외부 toolchain에는 적용되지 않습니다.
 
 ### 크기 관리
 
-캐시 한도는 ccache 자체 설정으로 관리합니다. 설정한 크기를 초과하면 ccache가 오래된 항목을 제거할 수 있습니다.
-
-```text
-ccache --max-size=5G    # 예: 일반 워크스테이션
-ccache --max-size=20G   # 예: 여러 보드를 빌드하는 CI
+```bash
+make CCACHE_OPTIONS="--max-size=5G" ccache-options
+make CCACHE_OPTIONS="--zero-stats" ccache-options
+make ccache-stats
 ```
 
-5 GB로 시작해서 hit rate가 80% 이하로 떨어지면 늘립니다.
+매뉴얼의 예시 그대로입니다. 빌드 시작 때마다 적용할 옵션은 `BR2_CCACHE_INITIAL_SETUP`에 적습니다.
 
 ## BR2_PER_PACKAGE_DIRECTORIES — sysroot 격리
 
-기본 Buildroot는 모든 패키지가 *공유된 단일 staging·target 디렉터리*에 결과물을 누적합니다. 즉 패키지 A가 헤더를 설치하고, B가 그 헤더를 보고 빌드합니다.
+기본 Buildroot는 모든 패키지가 *하나의* `host/`·`target/`에 결과를 누적합니다. 그래서 패키지 B는 의존성에 적지 않은 패키지 A의 헤더를 *우연히* 볼 수 있습니다. A가 먼저 빌드됐다면 B는 A를 찾아 쓰고, 다른 순서나 다른 머신에서는 다르게 빌드됩니다. `BR2_PER_PACKAGE_DIRECTORIES`의 help가 첫 번째 목적으로 이것을 꼽습니다("a given package only "sees" the dependencies it has explicitly expressed").
 
-이 모델의 함정은 *재빌드 contamination*입니다.
-
-- 패키지 A를 *제거*해도 `output/staging`에는 A의 헤더가 남아 있음.
-- 패키지 B는 A의 헤더가 *없는* 것으로 빌드돼야 하는데 *남아 있어서 다르게* 빌드됨.
-- 결과적으로 *defconfig는 같은데 산출물이 다름*.
-
-`BR2_PER_PACKAGE_DIRECTORIES=y`가 이 문제를 해결합니다.
+켠 output에는 패키지마다 디렉터리가 생겼습니다.
 
 ```text
-BR2_PER_PACKAGE_DIRECTORIES=y
+$ ls ~/opp/per-package | wc -l
+34
+$ ls ~/opp/per-package/busybox
+host
+target
 ```
 
-각 패키지가 *자신만의 staging·target snapshot*을 받습니다.
+### 비용과 효과 (실측)
 
-```text
-output/per-package/openssl/
-├── host/
-└── target/
+per-package를 켜고 매뉴얼 "Top-level parallel build" 절대로 `make -j10`을 줬습니다.
 
-output/per-package/libcurl/
-├── host/
-└── target/
-```
+| 설정 | 벽시계 | build 단계 합 | 디스크 |
+|---|---:|---:|---|
+| 기본 (ccache 없음, 패키지 순차) | 500.78초 | 323초 | `build/` 2.7 GB |
+| per-package + `make -j10` | 473.13초 | 588초 | `build/` 2.7 GB + `per-package/` 1.3 GB |
+| 변경 없는 재빌드 (기본) | 16.62초 | — | — |
+| 변경 없는 재빌드 (per-package, `-j10`) | 12.81초 | — | — |
 
-| 경로 | 내용 |
-|------|------|
-| `openssl/host/`, `openssl/target/` | openssl가 빌드될 때 보이는 host/target tree |
-| `libcurl/host/` | libcurl가 보이는 host tree (openssl까지만 포함) |
-| `libcurl/target/` | libcurl가 보이는 target tree |
-
-패키지 B를 빌드할 때 *B의 의존성*만 *복사*해 와 sysroot로 씁니다. 의존성에 없는 패키지의 헤더·`.so`는 *보이지도 않습니다*. 결과적으로 패키지 빌드가 *defconfig가 명시한 의존성에만* 영향을 받는다는 보장이 생깁니다.
-
-### 비용
-
-`per-package`는 *공짜가 아닙니다*. 각 패키지 빌드 시작 시 sysroot를 *rsync로 복사*해야 합니다.
-
-- **빌드 시간 ~10-20% 증가** — 패키지가 많을수록.
-- **디스크 사용량 증가** — 의존성이 깊은 패키지가 많으면 2-3배.
-- **incremental build에서 *느려질 수 있음*** — 매 패키지 빌드마다 rsync.
+단계 합(588초)이 벽시계(473초)보다 큰 것은 패키지 여러 개가 동시에 돌았다는 뜻입니다. 그래도 벽시계 이득은 28초(5.5%)에 그쳤습니다. 이 설정은 패키지 안에서 이미 `BR2_JLEVEL=0`(CPU 수 + 1)으로 병렬 컴파일하고, 가장 큰 커널 빌드가 혼자 오래 돌기 때문입니다. 반면 디스크는 1.3 GB 더 들었습니다. 같은 매뉴얼 절은 이 기능을 "very experimental feature, which is known to break even in some non-unusual situations"라고 적습니다.
 
 ### 언제 켜는가
 
-`per-package`는 *full rebuild의 reproducibility 도구*입니다. *incremental 최적화 도구가 아닙니다*. 다음 상황에 켭니다.
+실측으로 보면 per-package의 가치는 속도보다 *격리*에 있습니다. 다음 상황에 켭니다.
 
-- **양산 빌드** — 빌드 결과가 *defconfig만으로 완전히 결정*되어야 할 때.
-- **병렬 빌드** — 패키지 단위 병렬 컴파일(`-j`)에서 race condition을 막을 때.
-- **bisect** — defconfig 변경 두 commit 사이를 비교할 때 contamination 차단.
-
-개인 개발 워크스테이션에서는 *끄는 게 보통 더 빠릅니다*. 1초의 사소한 contamination이 *내가 직접 발견할 수 있는* 수준이라면 rsync 비용이 더 큽니다.
+- **의존성 누락을 찾을 때** — `<PKG>_DEPENDENCIES`에 빠진 패키지가 있으면 per-package 빌드에서 헤더·라이브러리를 못 찾고 실패합니다. 기본 모드에서는 우연히 통과하는 문제를 드러냅니다.
+- **top-level 병렬 빌드가 필요할 때** — 패키지가 많고 서로 독립적인 설정이라면 이득이 이 실험보다 클 수 있습니다. 직접 재 보고 결정합니다.
 
 ## 왜 sstate가 없는가
 
-[Ch 20](/blog/embedded/buildroot/chapter20-yocto-migration)에서 다룰 Yocto는 *sstate-cache*라는 정교한 캐싱 메커니즘을 가집니다. 패키지의 *metadata signature*를 계산해 *완전히 같은 입력*이면 *output을 그대로 재사용*합니다. 빌드 트리를 옮겨도, branch를 전환해도 sstate가 살아 있으면 *수 초*에 끝납니다.
+[Ch 20](/blog/embedded/buildroot/chapter20-yocto-migration)에서 다룰 Yocto는 task 입력의 signature가 같으면 산출물을 재사용하는 sstate-cache를 가집니다. Buildroot에는 이에 해당하는 계층이 없습니다. 위 실험에서 warm ccache로도 423.88초가 걸린 이유가 그것입니다. 컴파일은 99.79% 캐시에서 나왔지만, 압축 해제·configure·설치·이미지 생성은 전부 다시 돌았습니다.
 
-Buildroot는 *의도적으로 sstate를 도입하지 않았습니다*. 이유는 *설계 철학*입니다.
-
-- **metadata signature가 어렵다** — recipe·patch·환경 변수·host 도구의 버전까지 정확히 추적해야 hash가 신뢰됩니다. Yocto는 이 추적을 위해 *complex layer system*을 갖췄지만 Buildroot의 단순한 makefile 시스템과는 어울리지 않습니다.
-- **부정확한 invalidation의 위험** — sstate가 hit인데 *실제로는 변경된 입력*이 있었다면 *잘못된 binary*가 산출됩니다. embedded에서는 이 사고가 *현장에서야* 발견됩니다.
-- **clean rebuild 신뢰의 가치** — Buildroot는 *full rebuild가 항상 가능*하다는 점을 강점으로 봅니다. 캐시는 *시간 단축 도구*이지 *진실의 원천*이 아닙니다.
-
-대신 Buildroot가 강조하는 것은 두 가지입니다.
-
-- **patch 재현성** — 모든 변경이 *트리 안의 텍스트 파일*. git이 정확하게 추적합니다.
-- **clean rebuild가 가능한 시간 안에 끝남** — `dl/`·`ccache` 두 캐시가 살아 있으면 from-scratch 빌드가 *수 분*. sstate가 없어도 견딜 수 있는 수준.
-
-이 trade-off는 *프로젝트 크기*에 따라 평가가 갈립니다. 패키지 300개 미만의 embedded 시스템에서는 Buildroot가 충분. 패키지 1000개가 넘는 desktop-class 배포라면 Yocto의 sstate가 큰 차이를 만듭니다.
+Buildroot 매뉴얼은 sstate를 직접 다루지 않지만, 설정 변경 추적 자체를 하지 않는 이유는 "Understanding when a full rebuild is necessary"에 있습니다. "detecting this in a completely reliable manner is very difficult, and therefore the Buildroot developers have decided to simply not attempt to do this."(Ch 1) 산출물 재사용도 같은 신뢰성 문제를 피할 수 없으므로, Buildroot는 *깨끗한 재빌드가 언제나 가능하다*는 쪽을 택한 구조로 읽을 수 있습니다.
 
 ## 빌드 시간 측정
 
-캐싱 효과를 *측정*해야 어떤 계층이 작동하는지 알 수 있습니다.
-
 ### 전체 시간
 
-가장 단순한 방법은 `time make`입니다.
-
 ```bash
-$ time make
-...
-real    32m17.453s
-user    181m22.110s
-sys     12m05.882s
+/usr/bin/time -v make
 ```
 
-`real`이 wall clock 시간, `user`+`sys`가 총 CPU 시간. `user / real` 비율이 *병렬화 효율*입니다(8 코어에서 6에 가까우면 양호).
+Ch 1의 첫 빌드에서 `Elapsed (wall clock) time`은 40:08.16, `Percent of CPU this job got`은 530%였습니다. vCPU 10개 중 평균 5개 정도만 쓰였다는 뜻이고, 패키지 사이가 순차인 기본 모드의 한계를 보여 줍니다.
 
 ### Per-package 시간
 
-Buildroot의 `make` 출력은 패키지 단위로 `>>>` prefix를 가집니다. 이 prefix를 잡아 *패키지별 시간*을 추출할 수 있습니다.
-
-```bash
-$ make 2>&1 | tee build.log
-$ awk '/^>>>/ { print strftime("%H:%M:%S"), $0; fflush() }' build.log > timed.log
-
-# 또는 단순 grep
-$ grep '^>>>' build.log | head -20
->>> openssl 3.2.1 Downloading
->>> openssl 3.2.1 Extracting
->>> openssl 3.2.1 Patching
->>> openssl 3.2.1 Configuring
->>> openssl 3.2.1 Building
->>> openssl 3.2.1 Installing to staging directory
->>> openssl 3.2.1 Installing to target
-```
-
-각 단계의 timestamp 차이가 *그 단계의 시간*. 가장 오래 걸리는 패키지를 찾을 때 유용합니다.
-
-### `BR2_TIME_TAR_GZ`와 utilities
+Buildroot는 단계별 시작·끝 시각을 `output/build/build-time.log`에 남깁니다. 이 장의 단계 합(build 323초 등)도 이 파일을 합산한 것입니다.
 
 ```text
-BR2_REPRODUCIBLE=y          # 재현성 위해 timestamp 고정
+1794796643.600631705:start:download            : host-skeleton
+1794796643.603095030:end  :download            : host-skeleton
+1794796643.698032553:start:extract             : host-skeleton
 ```
 
-이 옵션은 *시간 측정 자체*는 아니지만, 빌드 결과의 hash가 *언제 빌드해도 같아지도록* 만듭니다. CI에서 *캐시 히트 여부*를 hash로 검증할 때 필수입니다.
+`make graph-build`는 이 파일로 패키지·단계별 그래프를 그립니다. 매뉴얼은 이 타깃에 `python-matplotlib`이 필요하다고 적습니다.
 
-`br2-builds`(Buildroot 팀이 제공하는 CI tool)는 정기 빌드의 시간·결과를 추적합니다. 큰 트리를 운영하면 자체 dashboard보다 이 도구를 따라 쓰는 게 빠릅니다.
+### 재현성
 
-## 시나리오별 2nd build 시간
+`BR2_REPRODUCIBLE=y`는 빌드 결과를 *언제 빌드해도 같게* 만드는 옵션입니다. 시간 측정 도구는 아니며, 실제로 같은 결과가 나오는지는 Ch 18에서 확인합니다.
 
-캐싱이 살아 있다는 가정에서 *어떤 변경*이 *얼마나*의 재빌드를 유발하는지 정리합니다.
+## 시나리오별 재빌드
 
-| 시나리오 | 영향 범위 | 예상 시간 (8 코어 워크스테이션) |
+이 장에서 실제로 잰 시나리오와 매뉴얼이 규칙을 정한 시나리오를 나눴습니다.
+
+| 시나리오 | 다시 도는 범위 | 근거 |
 |---|---|---|
-| **변경 0** | nothing | 5-15초 (timestamp 체크만) |
-| **target rootfs 파일 1개 변경** | rootfs 재패키징만 | 30-60초 |
-| **패키지 1개 patch 추가** | 그 패키지 + 의존하는 모든 패키지 | 1-5분 |
-| **패키지 config 옵션 toggle** | 그 패키지 + 의존 패키지 + rootfs | 2-10분 |
-| **kernel `.config` fragment 추가** | kernel만 (의존 패키지 없으면) | 5-15분 |
-| **toolchain 옵션 변경** (libc·GCC 버전) | *전체 재빌드* | 30-50분 |
-| **defconfig 전체 교체** | 전체 재빌드 | 30-50분 |
-| **git branch 전환** (toolchain 그대로) | 영향받은 패키지들 | 10-30분 |
-| **git branch 전환** (toolchain 변경 포함) | *전체 재빌드* | 30-50분 |
+| **변경 없음** | target 마무리·rootfs 이미지·post-image | 실측 8.60초(Ch 4), 16.62초(이 장) |
+| **overlay·post-build 변경** | 위와 같음 | 매뉴얼: "a simple `make` invocation will take the changes into account" |
+| **패키지 1개 `-rebuild`** | 그 패키지 build·install (이미지는 다음 `make`) | 실측 busybox 9.31초(Ch 4) |
+| **커널 fragment 파일 수정** | 커널 merge·configure·build·이미지 | 실측 22.59초(Ch 12) |
+| **fragment 목록에 기존 파일 추가** | 감지하지 않음, `linux-reconfigure` 필요 | 실측(Ch 12) |
+| **패키지 하위 옵션 변경** | 자동으로 다시 빌드하지 않음 | 매뉴얼: "the package is not automatically rebuilt" |
+| **toolchain·아키텍처 변경** | 전체 재빌드 필요 | 매뉴얼: 아키텍처 "a complete rebuild is needed", toolchain "a complete rebuild generally is needed" |
+| **`make clean` 후 (ccache warm)** | 모든 패키지의 압축 해제부터 | 실측 423.88초 |
 
-defconfig나 패키지 옵션을 바꿔도 Buildroot가 모든 기존 패키지의 설정 변화를 자동 추적해 재구성하지는 않습니다. 관련 package target을 명시적으로 rebuild/reconfigure 하거나, 영향이 불명확하면 해당 패키지의 `-dirclean` 후 다시 빌드하세요. 구체적인 무효화 범위는 패키지 infra와 릴리스에 따라 확인해야 합니다.
-
-실무 팁: *toolchain 옵션은 거의 안 바꾸도록* 트리 설계. 보드별 차이는 *kernel·rootfs·패키지 선택*으로 흡수하고 toolchain은 *프로젝트 전체에서 한 가지*로 유지합니다.
+패키지 옵션을 바꿨을 때 무엇을 다시 빌드할지는 Buildroot가 추적하지 않습니다. 영향이 불명확하면 해당 패키지를 `-dirclean`하거나 `make clean all`을 합니다.
 
 ## CI에서의 전략
 
-CI 환경은 *모든 빌드가 cold start*입니다. 캐싱이 없으면 매 PR이 30분. 다음 전략으로 5분 이하로 줄일 수 있습니다.
+CI는 빌드마다 빈 output에서 시작하는 경우가 많습니다. 위 실측을 CI에 옮기면 다음과 같습니다.
 
-| 캐시 계층 | CI에서 켤지 | 이유 |
+| 캐시 계층 | CI에서 | 이유 (실측 기준) |
 |---|---|---|
-| **`dl/`** | **필수** | 다운로드 시간 0으로 줄임. 거의 모든 PR이 *같은 source tarball*을 씀. |
-| **`ccache`** | **권장** | hit rate 70% 이상이면 1.5~3배 가속. 사용자별 *또는* 브랜치별 cache key. |
-| **`BR2_PER_PACKAGE_DIRECTORIES`** | **OFF 권장** | CI는 *clean build가 기본*이라 rsync 비용만 추가됨. |
-| **`output/`** | **상황에 따라** | 같은 머신·같은 commit family면 효과적. 다른 PR·다른 머신 사이에는 의미 없음. |
+| **`dl/`** | 공유 | 이 장의 `make source`만 667초였습니다. 매 job 다시 받으면 이 시간이 그대로 붙습니다 |
+| **ccache** | 공유 | warm이면 clean 빌드가 500.78초 → 423.88초. 단, 캐시가 비어 있을 때는 오히려 느렸습니다 |
+| **`BR2_PER_PACKAGE_DIRECTORIES`** | 의존성 검증 job에만 | 속도 이득 5.5%, 디스크 +1.3 GB, 매뉴얼상 experimental |
+| **`output/`** | 같은 runner에서만 | 변경 없는 재빌드는 16초대지만, 다른 commit 사이에서는 무엇을 다시 빌드할지 Buildroot가 추적하지 않음 |
 
 ### GitHub Actions 예
 
@@ -319,7 +217,7 @@ CI 환경은 *모든 빌드가 cold start*입니다. 캐싱이 없으면 매 PR�
   uses: actions/cache@v4
   with:
     path: dl/
-    key: buildroot-dl-${{ hashFiles('configs/imx8mp_defconfig') }}
+    key: buildroot-dl-${{ hashFiles('configs/freescale_imx8mpevk_defconfig') }}
     restore-keys: buildroot-dl-
 
 - name: Cache ccache
@@ -333,36 +231,31 @@ CI 환경은 *모든 빌드가 cold start*입니다. 캐싱이 없으면 매 PR�
 
 - name: Build
   run: |
+    make freescale_imx8mpevk_defconfig
     echo "BR2_CCACHE=y" >> .config
-    echo "BR2_CCACHE_DIR=$HOME/.buildroot-ccache" >> .config
     make olddefconfig
     make
 ```
 
-`restore-keys`의 fallback이 핵심입니다. 정확한 cache key가 없으면 *가장 가까운 hit*를 찾아 *그 위에서* 빌드를 이어 갑니다.
-
-[Ch 19](/blog/embedded/buildroot/chapter19-cicd)에서 CI 전략을 더 깊이 다룹니다.
+`restore-keys`의 fallback이 핵심입니다. actions/cache README는 `restore-keys`를 "used for restoring stale cache if no cache hit occurred for key"로 설명하고, `tips-and-workarounds.md`는 캐시가 "immutable and cannot be updated"라서 매번 새로 저장하려면 run마다 고유한 key와 `restore-keys`를 함께 쓰라고 적습니다. ccache key에 `github.sha`를 넣은 이유가 그것입니다. 이 workflow는 이 장에서 GitHub에서 실행하지 않았고, 형식은 위 두 문서를 따랐습니다. [Ch 19](/blog/embedded/buildroot/chapter19-cicd)에서 CI 전략을 더 다룹니다.
 
 ## 흔한 실수
 
-- **`ccache` 디렉터리가 cold rebuild마다 사라짐** — CI step에서 `~/.buildroot-ccache`를 cache action에 안 넣은 경우. hit rate가 *0%로 고정*돼 캐싱 자체가 무의미.
-- **`dl/`을 머신마다 따로 가짐** — 빌드 서버 5대가 각자 `dl/`을 다운로드. 같은 mirror에서 같은 tarball을 5번 받음. NFS·named volume 하나로 통합하면 끝.
-- **`BR2_PER_PACKAGE_DIRECTORIES`를 incremental 가속 도구로 오해** — 켜면 *더 빨라질 것*이라 기대하지만 실제는 *느려집니다*. 켜는 이유는 *reproducibility*. 빠르게 iterate하고 싶은 워크스테이션이면 *꺼야* 합니다.
-- **`BR2_DL_DIR`을 `/tmp` 안에 둠** — 재부팅마다 `dl/`이 사라짐. 매번 다운로드. `BR2_DL_DIR`은 *영속적인* 경로에 두는 게 원칙.
-- **`BR2_PRIMARY_SITE_ONLY=y`인데 사내 mirror가 죽음** — 빌드가 *전부 실패*합니다. fallback 차단은 *양산용 환경*에서만 켜고 *개발 환경*에서는 끕니다.
-- **ccache 상한이 작음** — 캐시 통계에서 eviction이 잦은지 확인한 뒤 ccache의 max-size를 조정합니다.
-- **clean rebuild를 안 함** — 캐시만 신뢰하다 보면 *defconfig가 만든 binary*와 *지금 디스크에 있는 binary*가 다른 사고가 옴. 양산 전에는 항상 `make distclean && make`.
+- **ccache 디렉터리를 CI cache에 넣지 않음** — 매 job 빈 캐시로 시작합니다. 이 장의 실측에서 빈 캐시 빌드는 ccache 없는 빌드보다 느렸습니다.
+- **`dl/`을 트리 안에 두고 `make distclean`** — `distclean`은 `$(TOPDIR)/dl`을 지웁니다(Ch 2).
+- **`BR2_PER_PACKAGE_DIRECTORIES`를 가속 도구로 기대** — 이 설정에서 이득은 5.5%였고 디스크는 1.3 GB 더 들었습니다.
+- **`BR2_DL_DIR`을 `/tmp` 안에 둠** — 재부팅마다 사라집니다.
+- **`BR2_PRIMARY_SITE_ONLY=y`인데 사내 mirror가 죽음** — 다른 위치를 시도하지 않으므로 빌드가 멈춥니다.
+- **캐시만 믿고 clean 빌드를 안 함** — 패키지 옵션 변경은 자동으로 반영되지 않습니다(Ch 1). 출시 전에는 `make clean all`로 확인합니다.
 
 ## 정리
 
-- Buildroot의 캐싱은 *세 계층*입니다. `dl/`(source), `ccache`(compile), `BR2_PER_PACKAGE_DIRECTORIES`(sysroot 격리). 세 계층이 *독립*이라 따로 관리합니다.
-- `dl/`은 hash로 검증되므로 *읽기 공유가 안전*합니다. NFS·S3·named volume로 머신 간 공유가 표준입니다.
-- ccache는 `BR2_CCACHE=y`로 켜며 hit rate *80% 이상*이 건강한 수치입니다. `CCACHE_COMPILERCHECK=content` 덕분에 *여러 output 디렉터리가 같은 캐시*를 공유합니다.
-- `BR2_PER_PACKAGE_DIRECTORIES`는 *reproducibility 도구*이며 *incremental 가속 도구가 아닙니다*. 양산·병렬·bisect에 켭니다. 일상 개발에서는 끄는 게 더 빠릅니다.
-- Buildroot에 sstate가 없는 것은 *의도된 설계*. metadata signature 추적이 어려운 단순 makefile 시스템에서 부정확한 hit가 더 위험합니다.
-- 가장 비싼 재빌드는 *toolchain 옵션 변경*과 *branch 전환에 toolchain 차이가 끼는 경우*. toolchain은 *프로젝트 전체에서 한 가지*로 묶는 게 정답입니다.
-- CI에서는 `dl/`·`ccache`가 필수, `BR2_PER_PACKAGE_DIRECTORIES`는 OFF. `restore-keys` fallback으로 partial hit를 활용합니다.
-- 캐시는 *시간 단축 도구*이지 *진실의 원천*이 아닙니다. 양산 전 한 번은 `make distclean && make`로 *cold rebuild*를 검증합니다.
+- `dl/`은 hash로 검증되므로 공유해도 안전하고, upstream이 실패하면 `BR2_BACKUP_SITE`가 받쳐 줍니다.
+- 같은 output에서 `make clean` 뒤 warm ccache 빌드는 99.79% hit로 423.88초였고, ccache 없는 빌드는 500.78초였습니다. 줄어든 것은 build 단계뿐입니다.
+- 빈 캐시로 처음 빌드할 때는 915.60초로 오히려 느렸습니다.
+- internal toolchain은 `CCACHE_COMPILERCHECK=string:<gcc 설정 hash>`로 output 디렉터리를 넘어 캐시를 공유하고, `BR2_CCACHE_USE_BASEDIR`가 절대 경로 차이를 없앱니다.
+- per-package + `-j10`은 473.13초로 5.5% 빨랐고 디스크 1.3 GB를 더 썼습니다. 가치는 의존성 격리에 있습니다.
+- Buildroot에는 sstate 같은 산출물 재사용 계층이 없어, warm ccache로도 압축 해제·configure·설치는 다시 돕니다.
 
 ## 다음 장 예고
 
@@ -376,5 +269,5 @@ CI 환경은 *모든 빌드가 cold start*입니다. 캐싱이 없으면 매 PR�
 - [Ch 15: post-build·post-image 심화](/blog/embedded/buildroot/chapter15-post-build-deep) — 캐싱 다음 단계의 산출물 후처리
 - [Ch 19: CI/CD 파이프라인](/blog/embedded/buildroot/chapter19-cicd) — 캐시 전략을 CI에 녹이는 실전
 - [Ch 20: Yocto로의 마이그레이션](/blog/embedded/buildroot/chapter20-yocto-migration) — sstate와의 비교
-- [원문 — Buildroot Manual §8.13: ccache](https://buildroot.org/downloads/manual/manual.html#ccache)
-- [원문 — Buildroot Manual §8.14: per-package directories](https://buildroot.org/downloads/manual/manual.html#top-level-parallel-build)
+- [원문 — Buildroot Manual: Using ccache in Buildroot](https://buildroot.org/downloads/manual/manual.html#ccache)
+- [원문 — Buildroot Manual: Top-level parallel build](https://buildroot.org/downloads/manual/manual.html#top-level-parallel-build)

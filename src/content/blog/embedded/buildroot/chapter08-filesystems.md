@@ -14,312 +14,327 @@ topics: ["embedded"]
 
 > **"어떤 rootfs 포맷을 고르는지가 곧 제품의 *업데이트 전략*과 *수명*을 결정한다."** — Buildroot는 한 빌드에서 여러 포맷을 동시에 만들 수 있지만, *런타임 정책*은 처음부터 정해야 합니다.
 
-Buildroot로 첫 시스템을 만들 때 대부분 ext4 한 가지만 활성화합니다. 잘 동작하니 그 상태로 production까지 갑니다. 그러다 *현장에서 갑자기 전원이 끊겼을 때 부팅이 안 됨*이라는 이슈가 한 달 뒤에 들어옵니다.
+Buildroot로 첫 시스템을 만들 때 QEMU defconfig처럼 ext4 한 가지만 켜고 시작하는 경우가 많습니다. 잘 동작하니 그 상태로 제품까지 가기 쉽습니다. 그런데 쓰기 가능한 rootfs는 전원이 끊기는 순간 쓰던 파일이 깨질 수 있다는 위험을 그대로 안고 갑니다.
 
-이 장은 그 문제를 *처음부터 막는* 관점에서 rootfs 포맷 네 가지를 비교합니다. 각각이 어떤 비용을 치르고 어떤 장점을 주는지, 그리고 실무에서 가장 많이 쓰이는 *read-only + overlayfs* 패턴을 어떻게 구성하는지 정리합니다.
+이 장은 rootfs 포맷 네 가지를 *실제로 만들어* 비교하고, 읽기 전용 rootfs 위에 overlayfs로 쓰기 영역을 얹는 패턴을 QEMU에서 직접 부팅해 확인합니다. 모든 결과는 **Buildroot 2026.02.3**의 `qemu_aarch64_virt_defconfig` 빌드(Ch 4와 같은 VM)에서 포맷 옵션만 바꿔 얻었습니다.
 
-## 네 포맷의 한눈 비교
+## 같은 rootfs, 포맷별 크기
 
-| 포맷 | 압축 | 쓰기 가능 | 부팅 위치 | 전원 끊김 내성 | 전형적 크기 |
-|------|------|---------|----------|--------------|------------|
-| **initramfs** | gzip/xz | RAM | RAM에 fully loaded | 무관 (RAM) | 5~30MB |
-| **cpio** | 없음(원본) | 형식상 가능 | initramfs 재료 | 무관 | initramfs 참고 |
-| **squashfs** | zstd/xz/gzip | 불가 (read-only) | 디스크/flash mount | 강함 (RO) | ext4 대비 40~60% |
-| **ext4** | 없음 | 가능 | 디스크/flash mount | 약함 (저널 필요) | 원본 크기 |
+포맷마다 옵션을 하나씩 켜고 `make`로 이미지를 만들었습니다. 입력은 모두 같은 `output/target/`입니다. 이 defconfig의 target 트리는 일반 파일 64개, `du --apparent-size` 기준 4,157,184바이트로 작습니다(busybox + glibc + init 스크립트). 그래서 아래 *비율*은 이 작은 rootfs에서의 값이고, 큰 rootfs에서는 바이너리 구성에 따라 달라질 수 있다는 점을 전제로 읽어야 합니다.
 
-크기 예시는 대략적입니다. 같은 rootfs (BusyBox + libc + 작은 데몬 몇 개)를 기준으로 한 측정값에 가깝습니다.
+| 포맷 (Buildroot 옵션) | 압축 | 결과 파일 | 크기 (바이트) | target 대비 |
+|---|---|---|---:|---:|
+| tar (`BR2_TARGET_ROOTFS_TAR_NONE`) | 없음 | `rootfs.tar` | 4,792,320 | 115% |
+| cpio (`_CPIO_NONE`) | 없음 | `rootfs.cpio` | 4,208,640 | 101% |
+| cpio (`_CPIO_GZIP`) | `gzip -9` | `rootfs.cpio.gz` | 2,009,360 | 48% |
+| cpio (`_CPIO_ZSTD`) | `zstd -19` | `rootfs.cpio.zst` | 1,751,622 | 42% |
+| cpio (`_CPIO_XZ`) | `xz -9` | `rootfs.cpio.xz` | 1,545,792 | 37% |
+| squashfs (`_SQUASHFS4_LZ4`) | lz4 | `rootfs.squashfs` | 2,379,776 | 57% |
+| squashfs (`_SQUASHFS4_LZO`) | lzo | `rootfs.squashfs` | 2,195,456 | 53% |
+| squashfs (`_SQUASHFS4_GZIP`, 기본값) | gzip | `rootfs.squashfs` | 2,023,424 | 49% |
+| squashfs (`_SQUASHFS4_ZSTD`) | zstd | `rootfs.squashfs` | 1,884,160 | 45% |
+| squashfs (`_SQUASHFS4_XZ`) | xz | `rootfs.squashfs` | 1,662,976 | 40% |
+| erofs (기본 lz4hc) | `mkfs.erofs -zlz4hc,9` | `rootfs.erofs` | 2,895,872 | 70% |
+| ext4 (`BR2_TARGET_ROOTFS_EXT2_4`) | 없음 | `rootfs.ext2` | 62,914,560 | 고정 60 MiB |
 
-| 같은 rootfs (62MB 원본) | 결과 크기 |
-|-----------------------|-----------|
-| `rootfs.tar` (압축 안 함) | 62MB |
-| `rootfs.cpio.gz` | 23MB |
-| `rootfs.cpio.xz` | 16MB |
-| `rootfs.ext4` (8% reserved) | 80MB |
-| `rootfs.squashfs` (gzip) | 27MB |
-| `rootfs.squashfs` (xz) | 19MB |
-| `rootfs.squashfs` (zstd, level 19) | 21MB |
+압축 명령은 `fs/common.mk` 128~160행에 고정돼 있습니다(`gzip -9 -c -n`, `xz -9 -C crc32 -c`, `zstd -19 -z -f -T$(PARALLEL_JOBS)` 등). squashfs는 `fs/squashfs/squashfs.mk`가 `mksquashfs … -b 128K -comp <알고리즘>`으로 부르며, 블록 크기 기본값은 128K입니다. 실제 빌드 로그의 명령은 다음과 같았습니다.
 
-이 표가 결정의 80%를 정해 줍니다. *작고 압축률 좋고 read-only*가 squashfs, *작고 RAM에만 살면 됨*이 initramfs, *쓰기 필요*가 ext4입니다.
+```text
+/home/br/buildroot/output/host/bin/mksquashfs /home/br/buildroot/output/build/buildroot-fs/squashfs/target /home/br/buildroot/output/images/rootfs.squashfs -noappend -processors 11 -b 128K  -comp zstd
+```
+
+이 표에서 읽을 수 있는 것은 세 가지입니다.
+
+- 같은 알고리즘이라도 cpio 전체를 한 번에 압축한 쪽(`cpio.xz` 1.55 MB)이 블록 단위로 압축하는 squashfs(xz 1.66 MB)보다 작습니다. squashfs는 128K 블록마다 따로 풀 수 있도록 압축하기 때문입니다.
+- squashfs 안에서는 xz < zstd < gzip < lzo < lz4 순으로 작았고, zstd는 xz보다 13% 컸습니다.
+- ext4 이미지는 내용과 무관하게 `BR2_TARGET_ROOTFS_EXT2_SIZE`(기본 `"60M"`) 크기입니다. 실제로 쓰인 블록은 `du` 기준 8,716 KB였습니다.
+
+이미지 생성 시간도 쟀지만(`make rootfs-<fmt>` 6.7~25.8초) 대부분이 fakeroot·device table 등 모든 포맷이 공유하는 단계였고, 압축되지 않은 cpio도 6.67초가 걸려 압축 알고리즘 간 차이를 가르기에는 rootfs가 너무 작았습니다. 압축·해제 속도는 실제 제품 rootfs로 따로 재야 합니다.
+
+## 네 포맷의 성격
+
+| 포맷 | 쓰기 | 부팅 시 위치 | 전원 차단 시 rootfs 자체 |
+|---|---|---|---|
+| **initramfs** (cpio를 커널에 내장) | RAM 위에서 가능, 재부팅 시 사라짐 | RAM | 영향 없음 (매 부팅 새로 풂) |
+| **cpio** (외부 파일) | 위와 같음 | 부트로더가 RAM에 올림 | 영향 없음 |
+| **squashfs** | 불가 | 저장 매체에서 mount | 정상 동작 중 rootfs를 쓰지 않음 |
+| **ext4** | 가능 | 저장 매체에서 mount | 저널은 메타데이터 일관성을 지키지만 쓰던 파일 내용은 보장하지 않음 |
 
 ## initramfs — RAM에 사는 rootfs
 
-initramfs는 *cpio 아카이브를 부트 시점에 압축 해제해 RAM에 펼친* 파일시스템입니다. Linux 커널이 마운트하는 것이 아니라 *커널 안에 내장된 rootfs 메커니즘*이 직접 가져옵니다.
+initramfs는 *cpio 아카이브를 부트 시점에 RAM에 펼친* 파일시스템입니다. 여행 가방을 호텔 방에 풀어 놓고 쓰는 것과 같아서, 체크아웃(재부팅)하면 방은 다시 처음 상태가 됩니다.
 
-Buildroot에서는 다음 옵션으로 활성화합니다.
+Buildroot에서는 다음 옵션으로 켭니다.
 
 ```text
-BR2_TARGET_ROOTFS_CPIO=y
-BR2_TARGET_ROOTFS_CPIO_GZIP=y       # 또는 XZ, ZSTD
-BR2_TARGET_ROOTFS_INITRAMFS=y       # 커널에 내장
+BR2_TARGET_ROOTFS_INITRAMFS=y
 ```
 
-`BR2_TARGET_ROOTFS_INITRAMFS=y`를 켜면 cpio가 *커널 이미지에 포함*됩니다. `zImage`/`Image` 하나만 flash하면 됩니다. 부트로더가 별도의 rootfs를 로드할 필요가 없습니다.
+`fs/initramfs/Config.in`의 help가 동작을 정확히 설명합니다.
 
-initramfs의 장점은 압도적입니다.
+```text
+	  Integrate the root filesystem generated by Buildroot as an
+	  initramfs inside the kernel image. This integration will
+	  take place automatically.
 
-- 전원 끊김에 *무관*. 다음 부팅에서 깨끗한 상태로 시작합니다.
-- 부트 직후 모든 파일이 *RAM 캐시*에 있어 read 성능이 빠릅니다.
-- update 흐름이 단순합니다. 커널 한 파일만 교체하면 끝입니다.
+	  A rootfs.cpio file will be generated in the images/ directory.
+	  This is the archive that will be included in the kernel image.
+	  The default rootfs compression set in the kernel configuration
+	  is used, regardless of how buildroot's cpio archive is
+	  configured.
+```
 
-단점도 명확합니다.
+`select BR2_TARGET_ROOTFS_CPIO`로 cpio가 자동으로 켜지고, 압축은 Buildroot의 cpio 옵션이 아니라 *커널 설정*을 따른다는 점이 핵심입니다. 같은 help는 initramfs와 다른 rootfs 포맷을 같이 켜면 "you would end up having two identical root filesystems"라고 경고합니다.
 
-- *RAM을 영구적으로 소비*합니다. 30MB rootfs면 30MB RAM이 사라집니다.
-- 쓰기는 모두 *휘발성*입니다. 재부팅하면 사라집니다.
-- *큰 rootfs*에는 부적합합니다. 50MB가 넘어가면 부담스럽습니다.
+장점은 다음과 같습니다.
 
-전형적 용도는 *복구 시스템*, *공장 검사 펌웨어*, *부트 중간 단계의 minimal env* 같은 것들입니다. 메인 production rootfs로는 작은 임베디드 시스템에서만 적합합니다.
+- 매 부팅 깨끗한 상태로 시작합니다.
+- 커널 파일 하나만 교체하면 rootfs까지 바뀝니다.
+
+단점도 분명합니다.
+
+- rootfs 전체가 RAM에 상주합니다. 위 rootfs라면 약 4 MB이지만, rootfs가 커지면 그만큼 RAM이 줄어듭니다.
+- 쓰기는 모두 휘발성입니다.
+
+복구 시스템, 공장 검사 펌웨어, 부트 중간 단계처럼 작은 환경에 맞습니다.
 
 ## cpio — initramfs의 재료
 
-`BR2_TARGET_ROOTFS_CPIO`만 켜고 `BR2_TARGET_ROOTFS_INITRAMFS`를 끄면, Buildroot는 `rootfs.cpio.gz`(또는 xz/zstd)를 *독립 파일*로 만듭니다. 이건 *외부 initramfs*로 쓰이거나, 커널을 별도 빌드할 때 `CONFIG_INITRAMFS_SOURCE`로 주입됩니다.
+`BR2_TARGET_ROOTFS_CPIO`만 켜고 initramfs는 끄면 `rootfs.cpio`(+압축본)가 *독립 파일*로 나옵니다. 부트로더가 커널과 함께 RAM에 올려 initrd로 넘기는 용도입니다. 위 실험에서 `_CPIO_GZIP`을 켜면 `rootfs.cpio`와 `rootfs.cpio.gz`가 둘 다 생겼습니다.
+
+U-Boot의 `booti`로 넘길 때는 `주소:크기` 형식을 씁니다. U-Boot 2026.01 `doc/usage/cmd/booti.rst`는 크기를 "This parameter must be specified for raw initial RAM disks"라고 적습니다. 여기서 raw는 `mkimage`의 U-Boot 헤더로 감싸지 않은 파일이라는 뜻이고, gzip으로 압축한 cpio는 커널이 직접 풉니다(커널 `Documentation/filesystems/ramfs-rootfs-initramfs.rst`의 "gzipped cpio"). 같은 문서의 예를 이 장의 파일 이름으로 옮기면 다음과 같습니다.
 
 ```text
-$ ls output/images/
-Image  rootfs.cpio.gz  rootfs.tar
+=> load mmc 0:1 ${fdt_addr_r} board.dtb
+=> load mmc 0:1 ${kernel_addr_r} Image
+=> load mmc 0:1 ${ramdisk_addr_r} rootfs.cpio.gz
+=> booti ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
 ```
 
-U-Boot에서 다음과 같이 부팅합니다.
+`doc/usage/cmd/load.rst`가 적는 대로 `load`는 읽은 바이트 수를 `filesize`에 저장하므로 ramdisk를 마지막에 읽습니다. 이 명령열은 이 장에서 보드로 실행하지 않았습니다. 주소 변수 이름(`kernel_addr_r`·`fdt_addr_r`·`ramdisk_addr_r`)은 `doc/usage/environment.rst`의 표에 있는 이름이고, 실제 값은 보드 설정마다 다릅니다.
 
-```text
-=> tftp 0x82000000 Image
-=> tftp 0x88000000 rootfs.cpio.gz
-=> setenv initrd_size ${filesize}
-=> booti 0x82000000 0x88000000:${initrd_size} ${fdt_addr_r}
-```
+## squashfs — 읽기 전용 압축
 
-raw initramfs를 U-Boot `booti`에 넘길 때는 주소와 크기를 `주소:크기` 형식으로 전달해야 합니다. 위 예시는 두 번째 TFTP 전송이 설정한 `${filesize}`를 저장한 뒤 사용합니다. 실제 부팅 인자와 압축 형식은 보드의 U-Boot 버전으로 검증하세요.
-
-cpio는 *형식상* 쓰기가 가능하지만, 실제로는 initramfs로 마운트된 *tmpfs*에 쓰는 것이지 cpio 파일 자체를 수정하는 게 아닙니다.
-
-## squashfs — read-only 압축
-
-squashfs는 *압축된 read-only* 파일시스템입니다. mount 시점에 압축이 풀리는 게 아니라, *read할 때마다* 블록 단위로 압축이 풀립니다. CPU를 약간 더 쓰는 대신 *flash 크기를 40~60% 줄여 줍니다*.
+squashfs는 *압축된 읽기 전용* 파일시스템입니다. mount할 때 전체를 풀지 않고, 읽을 때마다 블록(기본 128K) 단위로 풉니다. 도서관 서고의 압축 보관함과 같아서, 책 한 권이 필요할 때 그 상자만 엽니다.
 
 ```text
 BR2_TARGET_ROOTFS_SQUASHFS=y
-BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y    # gzip < xz < zstd 권장
+BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
 ```
 
-압축 방식 비교입니다. 같은 rootfs 기준으로 *추정*값입니다.
+압축 알고리즘의 Kconfig 기본값은 gzip입니다(`fs/squashfs/Config.in`의 `default BR2_TARGET_ROOTFS_SQUASHFS4_GZIP`). 위 표 기준으로 zstd는 gzip보다 7% 작았고 xz보다 13% 컸습니다. 어느 쪽이 제품에 맞는지는 이미지 크기 제약과 대상 CPU의 압축 해제 비용을 함께 재서 정합니다.
 
-| 알고리즘 | 크기 | 압축 시간 | 압축 해제 속도 |
-|----------|-----|-----------|--------------|
-| gzip | 27MB | 빠름 | 빠름 |
-| lzo | 28MB | 매우 빠름 | 매우 빠름 |
-| xz | 19MB | 느림 | 보통 |
-| zstd | 21MB | 보통 | 매우 빠름 |
+### 커널이 squashfs를 모르면
 
-*제품용*이라면 zstd가 대부분 정답입니다. 압축률이 xz에 근접하고, 해제는 lzo급으로 빠릅니다. 부팅 시간 차이가 체감될 만큼 큽니다.
+squashfs 이미지를 만들었다고 바로 부팅되지는 않습니다. 커널에 squashfs 지원이 있어야 합니다. QEMU defconfig의 커널 설정(`board/qemu/aarch64-virt/linux.config`)에는 `CONFIG_EXT4_FS=y`와 `CONFIG_OVERLAY_FS=y`는 있지만 `CONFIG_SQUASHFS`가 없습니다. 이 커널로 `root=/dev/vda rootfstype=squashfs ro`를 주고 부팅하면 다음에서 멈췄습니다.
 
-### 왜 read-only인가
+```text
+virtio_blk virtio0: [vda] 4304 512-byte logical blocks (2.20 MB/2.10 MiB)
+...
+VFS: Cannot open root device "/dev/vda" or unknown-block(254,0): error -19
+...
+Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(254,0)
+```
 
-squashfs는 쓰기를 지원하지 않습니다. 이게 단점이 아니라 *기능*입니다. read-only면 다음이 자동으로 보장됩니다.
+커널 config fragment 하나로 고칩니다(Ch 12에서 자세히).
 
-- 읽기 전용 mount는 정상 동작 중 rootfs 변경을 막지만, 저장 매체 오류나 전원 차단에 따른 하드웨어 손상까지 막지는 않는다.
-- 마운트가 항상 깨끗하다. `fsck`가 필요 없다.
-- 이미지 hash는 바이트 무결성 확인에 쓰이며, 신뢰할 수 있는 공개키로 서명 검증하는 절차를 대신하지 않는다.
+```text
+CONFIG_SQUASHFS=y
+CONFIG_SQUASHFS_ZSTD=y
+```
 
-문제는 *쓰기가 필요한 곳*입니다. `/var/log`, `/etc`, `/home`. 이건 overlayfs로 해결합니다.
+이 파일을 `BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES`에 넣고 다시 빌드하자 같은 이미지가 부팅됐습니다.
+
+```text
+VFS: Mounted root (squashfs filesystem) readonly on device 254:0.
+```
+
+### 읽기 전용이 주는 것과 주지 않는 것
+
+읽기 전용 rootfs는 정상 동작 중에 rootfs가 바뀌지 않으므로 `fsck`가 필요 없고, 전원 차단이 rootfs 내용을 망가뜨리지 않습니다. 다만 저장 매체 자체의 손상까지 막지는 않으며, 이미지가 *진짜* 내 이미지인지는 별도의 서명 검증이 확인할 일입니다.
+
+실제로 squashfs root로 부팅하면 쓰기를 기대하는 곳에서 바로 드러납니다. 위 부팅에서 init 스크립트가 이런 메시지를 냈습니다.
+
+```text
+seedrng: can't create directory '/var/lib/seedrng': Read-only file system
+```
+
+로그인 후 `touch /usr/x`도 `Read-only file system`으로 실패했습니다. 쓰기가 필요한 곳은 overlayfs로 따로 엽니다.
 
 ## ext4 — 쓰기 가능, 그러나 위험
 
-ext4는 *쓰기 가능*하고 *저널*이 있어 전원 끊김에 *어느 정도* 견딥니다. *어느 정도*가 문제입니다. 저널이 보장하는 것은 *파일시스템 메타데이터의 일관성*뿐, 사용자 데이터까지는 아닙니다.
+ext4는 쓰기 가능하고 저널이 있어 전원 차단 후에도 *파일시스템 메타데이터*는 일관성을 회복합니다. 사용자 데이터까지는 아닙니다. QEMU defconfig가 만든 ext4의 Kconfig 값은 다음과 같습니다.
 
 ```text
 BR2_TARGET_ROOTFS_EXT2=y
-BR2_TARGET_ROOTFS_EXT2_4=y          # = ext4
-BR2_TARGET_ROOTFS_EXT2_SIZE="512M"
-BR2_TARGET_ROOTFS_EXT2_INODES=0     # 0 = mkfs.ext4 default
-BR2_TARGET_ROOTFS_EXT2_RESBLKS=5    # 5% reserved for root
+BR2_TARGET_ROOTFS_EXT2_4=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="60M"
+BR2_TARGET_ROOTFS_EXT2_INODES=0
+BR2_TARGET_ROOTFS_EXT2_RESBLKS=5
+BR2_TARGET_ROOTFS_EXT2_MKFS_OPTIONS="-O ^64bit"
 ```
 
-`BR2_TARGET_ROOTFS_EXT2_SIZE`는 *최종 이미지 크기*입니다. 빈 공간을 미리 잡아 둡니다. SD 카드를 다 채우려면 부팅 첫 회에 `resize2fs`로 확장합니다.
+`SIZE`는 *최종 이미지 크기*입니다. 부팅한 QEMU에서 `df -h /`는 51.1M 중 4.1M 사용이었습니다(Ch 4). SD 카드 전체를 쓰려면 첫 부팅에서 파티션과 파일시스템을 늘립니다.
 
-ext4의 *5% reserved*는 root 사용자 전용 예약 영역입니다. 디스크가 가득 차도 root가 로그를 쓸 수 있게 합니다. 임베디드에서는 1~2%로 줄이는 게 일반적입니다(`BR2_TARGET_ROOTFS_EXT2_RESBLKS=1`).
+`RESBLKS=5`는 root 전용 예약 비율입니다. `fs/ext2/Config.in` help는 "Traditionally, this has been 5%, and all ext-related tools still default to reserving 5%"라고 적습니다. 위 60 MiB 이미지라면 약 3 MiB입니다. 작은 이미지에서는 이 비율을 줄이는 선택도 있지만, 디스크가 찼을 때 root 프로세스가 쓸 공간이 그만큼 줄어든다는 점과 맞바꾸는 결정입니다.
 
-ext4의 실제 위험은 *journal 자체*가 아니라 *application의 쓰기 패턴*에 있습니다. SQLite, log rotation, config 파일 수정처럼 *partial write*가 일어나는 자리에서 전원이 끊기면 *내용물이 깨집니다*. 저널은 파일시스템을 살릴 뿐, 파일을 살리지는 않습니다.
+ext4의 실제 위험은 저널이 아니라 *application의 쓰기 패턴*입니다. 설정 파일을 제자리에서 덮어쓰는 중에 전원이 끊기면 파일 내용이 반쯤 바뀐 채 남을 수 있습니다. 해결은 application에서 임시 파일에 쓰고 `rename`으로 바꾸는 식의 원자적 쓰기를 강제하거나, rootfs를 읽기 전용으로 만들고 쓰기 영역을 좁히는 것입니다.
 
-이 문제를 푸는 길은 두 가지입니다. *application 수준에서 atomic write*를 강제하거나, 아예 *rootfs를 read-only로 만드는 것*입니다. 후자가 훨씬 안전합니다.
+## Read-only rootfs + overlayfs
 
-## Read-only rootfs + overlayfs — 실무 표준 패턴
+rootfs는 squashfs로 두고, *쓰기가 필요한 디렉터리만 overlayfs로* 엽니다. 투명 필름을 원본 지도 위에 덮고 필름에만 메모하는 것과 같습니다. 필름(data 파티션)을 버리면 원본 지도(squashfs)는 그대로 남습니다.
 
-가장 권장되는 production 패턴입니다. *rootfs는 squashfs(또는 ext4 ro mount)*로 두고, *쓰기 필요한 디렉터리만 overlayfs로 노출*합니다.
+### 구성
 
-### 구조
+| 경로 | 무엇 | 쓰기 |
+|---|---|---|
+| `/` | squashfs (`/dev/vda`) | 불가 |
+| `/data` | ext4 data 파티션 (`/dev/vdb`) | 가능 |
+| `/etc`, `/root` | overlay: lower = squashfs의 같은 경로, upper = `/data/overlay/<dir>` | 가능, 변경분은 `/data`에 저장 |
+| `/tmp`, `/run` | tmpfs (Buildroot 기본 `fstab`) | 가능, 휘발성 |
 
-```text
-/                 ← squashfs (read-only)
-  /etc            ← overlay 마운트
-  /var            ← overlay 마운트
-  /home           ← overlay 마운트
-  /tmp            ← tmpfs
+부팅 흐름은 다음과 같습니다.
 
-overlay 백업 저장:
-  /data/overlay/etc        ← ext4 또는 jffs2 partition
-  /data/overlay/var
-  /data/overlay/home
-```
+1. 커널이 squashfs를 `/`로 읽기 전용 mount합니다.
+2. init 초반 스크립트가 data 파티션을 `/data`에 mount합니다.
+3. `/data/overlay/etc`를 upper로, 원래 `/etc`를 lower로 overlay mount합니다.
 
-부팅 흐름:
+### init 스크립트
 
-1. 커널이 squashfs를 `/`로 마운트 (read-only).
-2. init 초반에 *data 파티션*을 `/data`에 ext4로 마운트.
-3. `/data/overlay/etc`를 upper로, `/etc`(squashfs)를 lower로 overlayfs 마운트.
-4. 결과: `/etc`는 *읽기 가능 + 쓰기 가능*. 변경분은 `/data`에 저장됨.
-
-### Buildroot 설정
-
-```text
-# Read-only rootfs base
-BR2_TARGET_ROOTFS_SQUASHFS=y
-BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
-
-# Buildroot의 ext4 rootfs image는 초기화된 data volume이 아니다.
-# data partition은 제품의 provisioning 절차에서 별도로 생성·검증한다.
-
-# overlay support in kernel (in linux fragment)
-# CONFIG_OVERLAY_FS=y
-```
-
-### init 스크립트 (initscripts 패키지)
-
-`/etc/init.d/S01overlay` 같은 자리에 둡니다. overlay에 들어가야 하므로 *base rootfs* 안에 있어야 합니다.
+다음은 QEMU에서 실제로 돌린 `/etc/init.d/S01overlay`입니다. `BR2_ROOTFS_OVERLAY`로 rootfs에 넣었고(Ch 7), `/data`는 overlay에 빈 디렉터리(`data/.empty`)를 둬서 만들었습니다. squashfs 위에서는 `mkdir`을 할 수 없기 때문입니다.
 
 ```bash
 #!/bin/sh
-# /etc/init.d/S01overlay
 # Mount data partition and overlay writable directories.
 
-set -e
-
-DATA_DEV=/dev/mmcblk0p3
+DATA_DEV=/dev/vdb
 DATA_MNT=/data
 
 case "$1" in
     start)
-        # 기존 데이터 파티션만 mount한다. 파일시스템이 없거나 예상과 다르면
-        # 중단하고 provisioning 절차로 복구한다. 부팅 중 자동 포맷하지 않는다.
-        if [ "$(blkid -s TYPE -o value "$DATA_DEV")" != ext4 ]; then
+        # mount -t ext4 fails if the partition is not ext4; never format here.
+        if ! mount -t ext4 "$DATA_DEV" "$DATA_MNT"; then
             echo "Expected an ext4 data partition at $DATA_DEV" >&2
             exit 1
         fi
-
-        mkdir -p "$DATA_MNT"
-        mount -t ext4 "$DATA_DEV" "$DATA_MNT"
-
-        for d in etc var home; do
+        for d in etc root; do
             UPPER="$DATA_MNT/overlay/$d"
             WORK="$DATA_MNT/overlay/.$d.work"
             mkdir -p "$UPPER" "$WORK"
             mount -t overlay overlay \
-                -o lowerdir=/$d,upperdir=$UPPER,workdir=$WORK \
-                /$d
+                -o lowerdir=/$d,upperdir=$UPPER,workdir=$WORK /$d || exit 1
         done
         ;;
     stop)
-        umount /etc /var /home /data 2>/dev/null || true
+        umount /etc /root /data 2>/dev/null || true
         ;;
 esac
 ```
 
+처음에는 이 스크립트에 `blkid -s TYPE -o value "$DATA_DEV"`로 파일시스템 종류를 먼저 확인하는 줄이 있었습니다. 이 rootfs의 `blkid`는 BusyBox applet(`/sbin/blkid -> ../bin/busybox`)이라 `-s`·`-o` 옵션을 무시하고 `TYPE`도 출력하지 않았습니다.
+
+```text
+# blkid /dev/vdb; blkid -s TYPE -o value /dev/vdb; echo rc=$?
+/dev/vdb: LABEL="data" UUID="f6b01719-7f14-4c16-9bce-e48d1f087d11"
+/dev/vdb: LABEL="data" UUID="f6b01719-7f14-4c16-9bce-e48d1f087d11"
+rc=0
+```
+
+그래서 검사가 항상 실패해 "Expected an ext4 data partition"을 내고 overlay를 하나도 올리지 않았습니다. util-linux의 `blkid`를 넣지 않는다면 `mount -t ext4`의 실패 자체를 검사로 쓰는 위 형태가 BusyBox에서 동작합니다.
+
+### QEMU에서 확인
+
+data 파티션은 VM에서 `output/host/sbin/mkfs.ext4 -q -L data data.ext4`로 만든 32 MiB 파일입니다. 첫 부팅에서 mount 상태를 보고 파일 두 개를 썼습니다.
+
+```text
+# mount | grep -E " on / | /data | /etc | /root "
+/dev/root on / type squashfs (ro,relatime,errors=continue)
+/dev/vdb on /data type ext4 (rw,relatime)
+overlay on /etc type overlay (rw,relatime,lowerdir=/etc,upperdir=/data/overlay/etc,workdir=/data/overlay/.etc.work,uuid=on)
+overlay on /root type overlay (rw,relatime,lowerdir=/root,upperdir=/data/overlay/root,workdir=/data/overlay/.root.work,uuid=on)
+# echo acme-edge > /etc/hostname; echo hello > /root/note
+# ls -a /data/overlay/etc
+.         ..        hostname
+# touch /usr/x
+touch: /usr/x: Read-only file system
+```
+
+upper 디렉터리에는 바뀐 파일(`hostname`)만 들어갔습니다. `poweroff` 후 다시 부팅하니 두 파일이 그대로 남아 있었습니다.
+
+```text
+# cat /etc/hostname /root/note; hostname
+acme-edge
+hello
+buildroot
+```
+
+마지막 줄의 `hostname`이 여전히 `buildroot`인 것은 실험이 드러낸 순서 문제입니다. BusyBox `inittab`(`package/busybox/inittab`)은 `::sysinit:/bin/hostname -F /etc/hostname`을 `::sysinit:/etc/init.d/rcS`보다 *먼저* 실행하므로, hostname은 overlay가 올라가기 전 squashfs의 `/etc/hostname`에서 읽힙니다. overlay에 둔 설정을 init 초기 단계에서 읽어야 한다면 overlay mount를 그 앞으로 옮기거나(예: initramfs), 해당 설정을 overlay 이후에 다시 적용해야 합니다.
+
 이 패턴의 장점은 다음과 같습니다.
 
-- *base rootfs*는 read-only라 일반적인 설정 변경으로 덮어쓰이지 않지만, 하드웨어·매체 손상으로부터 면역인 것은 아닙니다.
-- *factory reset*은 `/data`를 비우면 끝납니다.
-- *업데이트*는 squashfs 파일 하나만 교체합니다. 보통 A/B 슬롯으로 묶습니다.
-- log·config 변경은 자유롭게 가능합니다.
+- 기본 rootfs는 설정 변경으로 덮어쓰이지 않습니다.
+- 공장 초기화는 `/data/overlay`를 비우는 것으로 끝납니다.
+- 업데이트는 squashfs 이미지 하나를 교체합니다. A/B 슬롯과 묶는 방법은 Ch 16에서 다룹니다.
 
-단점은 overlay된 변경분이 *별도 파티션*에 있어 *전원 끊김에 취약*하다는 점입니다. 단, 깨져도 *base rootfs는 멀쩡*하므로 다음 부팅에서 *최소한* 시스템이 살아 있습니다. 그것만 해도 ext4 단독에 비해 안정성이 훨씬 높습니다.
+단점은 overlay 변경분이 data 파티션(ext4)에 있어 앞 절의 쓰기 위험을 그대로 갖는다는 점입니다. 다만 그 파티션이 깨져도 기본 rootfs는 그대로라 시스템은 부팅합니다. 위 스크립트처럼 data mount가 실패하면 overlay 없이 읽기 전용으로 올라옵니다.
 
 ## 한 빌드에 여러 포맷 생성
 
-Buildroot의 강점입니다. 옵션을 여러 개 켜면 *한 번의 빌드*에서 모든 포맷이 동시에 만들어집니다.
+옵션을 여러 개 켜면 한 번의 빌드에서 모든 포맷이 만들어집니다. 위 실험의 squashfs 단계에서도 기본 ext4가 켜져 있어 `make` 한 번에 두 이미지가 나왔습니다.
 
 ```text
-BR2_TARGET_ROOTFS_TAR=y              # 디버깅·검사용
-BR2_TARGET_ROOTFS_TAR_GZIP=y
-BR2_TARGET_ROOTFS_SQUASHFS=y         # production
-BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
-BR2_TARGET_ROOTFS_CPIO=y             # initramfs/recovery
-BR2_TARGET_ROOTFS_CPIO_XZ=y
+>>>   Generating filesystem image rootfs.ext2
+>>>   Generating filesystem image rootfs.squashfs
 ```
 
-빌드 후 `output/images/`에 다음이 생깁니다.
+같은 `target/`에서 만든 결과이므로 내용은 같고 포맷만 다릅니다. CI에서 필요한 포맷을 모두 만들고, 배포할 때 목적에 맞는 것을 고르면 됩니다.
+
+## 부팅 시 마운트 — cmdline과 fstab
+
+ext4를 루트로 mount하려면 커널 cmdline에 `root=`를 넘깁니다. QEMU defconfig의 `start-qemu.sh`는 `rootwait root=/dev/vda console=ttyAMA0`를 썼습니다. squashfs는 위 실험처럼 `rootfstype=squashfs ro`를 더합니다.
 
 ```text
-$ ls output/images/
-Image            rootfs.squashfs
-rootfs.tar.gz    rootfs.cpio.xz
+rootwait root=/dev/vda rootfstype=squashfs ro console=ttyAMA0
 ```
 
-같은 rootfs에서 만든 결과물이므로 *내용은 동일*합니다. 포맷만 다릅니다. CI에서 이걸 모두 만들고, deployment 시점에 *목적에 맞는 것만* 선택합니다.
+initramfs는 `root=`가 필요 없습니다.
 
-## 부팅 시 마운트 — fstab, mount cmdline
-
-ext4를 *루트로 마운트*하려면 커널 cmdline에 `root=`를 넘깁니다.
+`/etc/fstab`은 root 외 나머지 마운트를 적습니다. Buildroot 기본 `fstab`이 `/tmp`와 `/run`을 tmpfs로 올리는 것은 위 부팅의 `mount` 출력(`tmpfs on /tmp type tmpfs`, `tmpfs on /run type tmpfs`)에서 확인할 수 있습니다. data 파티션을 init 스크립트 대신 fstab으로 올리고 싶다면 다음 한 줄을 더합니다.
 
 ```text
-console=ttyS0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait
-```
-
-squashfs면 `rootfstype=squashfs ro`를 씁니다.
-
-```text
-console=ttyS0,115200 root=/dev/mmcblk0p2 rootfstype=squashfs ro rootwait
-```
-
-initramfs는 *마운트가 필요 없습니다*. `root=`도 필요 없습니다. 그저 `console=`만 있어도 됩니다.
-
-`/etc/fstab`은 *root* 외 나머지 마운트만 적습니다.
-
-```text
-# device         mount        type     options             dump  pass
-proc             /proc        proc     defaults            0     0
-sysfs            /sys         sysfs    defaults            0     0
-devpts           /dev/pts     devpts   defaults,gid=5,mode=620  0  0
-tmpfs            /tmp         tmpfs    defaults,size=32M   0     0
-tmpfs            /run         tmpfs    defaults,size=8M    0     0
-/dev/mmcblk0p3   /data        ext4     defaults,noatime    0     2
+/dev/vdb   /data   ext4   defaults,noatime   0   2
 ```
 
 ## Troubleshooting
 
 ### squashfs로 만들면 부팅이 멈춘다
 
-세 가지가 흔합니다. *커널에 SQUASHFS 모듈*이 없거나(`CONFIG_SQUASHFS=y`), *zstd 알고리즘 지원*이 없거나(`CONFIG_SQUASHFS_ZSTD=y`), *cmdline의 rootfstype*이 ext4로 남아 있는 경우.
+위 실험의 `VFS: Unable to mount root fs`가 대표적입니다. 커널에 `CONFIG_SQUASHFS=y`와 선택한 압축의 `CONFIG_SQUASHFS_<ALG>=y`가 있는지, cmdline에 `rootfstype=squashfs`가 있는지 확인합니다. 디스크가 여럿이면 장치 이름도 확인합니다. QEMU virt에서 `-device virtio-blk-device`를 두 개 붙였을 때 *나중에 붙인* 장치가 `vda`가 됐고, 순서를 바꾸지 않았을 때는 data 디스크가 `vda`가 되어 같은 panic이 났습니다.
 
-### ext4 첫 부팅 후 `df`가 가득 차 있다
+### 읽기 전용 root에서 서비스가 경고를 낸다
 
-`BR2_TARGET_ROOTFS_EXT2_SIZE`로 잡은 크기 그대로 마운트되어 있습니다. SD 카드를 다 쓰려면 첫 부팅 init에서 `resize2fs`를 한 번 돌립니다.
+`seedrng`처럼 `/var/lib` 아래에 상태를 쓰려는 서비스가 `Read-only file system`을 냅니다. 상태를 저장해야 하는 디렉터리는 overlay 대상에 추가하거나 data 파티션으로 symlink합니다.
 
-```bash
-parted /dev/mmcblk0 resizepart 2 100%
-resize2fs /dev/mmcblk0p2
-```
+### ext4 첫 부팅 후 `df`가 작다
 
-이 절차는 SD 카드 크기가 *고정이 아닌* 흐름에서만 필요합니다. 공장에서 모두 같은 크기의 eMMC를 쓰면 미리 정확한 크기로 빌드합니다.
+`BR2_TARGET_ROOTFS_EXT2_SIZE`로 잡은 크기 그대로입니다. SD 카드 전체를 쓰려면 첫 부팅에서 파티션을 늘린 뒤 `resize2fs`를 돌립니다. 모든 장치가 같은 크기의 eMMC라면 처음부터 맞는 크기로 빌드하는 편이 단순합니다.
 
-### overlayfs 마운트가 안 된다
+### overlayfs mount가 안 된다
 
-거의 항상 *커널 옵션*입니다. `CONFIG_OVERLAY_FS=y`가 켜져 있어야 합니다. Linux fragment(`linux.config`)에 추가하고 커널을 다시 빌드합니다.
+커널 옵션 `CONFIG_OVERLAY_FS`부터 확인합니다. QEMU defconfig 커널에는 이미 `CONFIG_OVERLAY_FS=y`가 있습니다. upper와 work 디렉터리는 *같은 파일시스템*에 있어야 하므로 위 스크립트처럼 둘 다 `/data` 아래에 둡니다.
 
-### initramfs가 너무 커서 부트가 느리다
+### ext4와 squashfs의 권한이 다르다
 
-initramfs는 *부팅 전*에 전체가 RAM에 펼쳐집니다. 30MB가 넘어가면 *체감*됩니다. 줄이는 길은 두 가지입니다. 더 강한 압축(xz)을 쓰거나, *전체 rootfs를 initramfs로 만들지 말고* 최소 부트만 initramfs로 두고 메인 rootfs는 squashfs로 switch_root합니다.
-
-### 같은 빌드를 ext4·squashfs 두 가지로 빌드했는데 결과가 다르다
-
-내용물은 같아도 *권한·소유권*이 fakeroot 처리 시점에 따라 미세하게 다를 수 있습니다. SUID 비트나 소유권이 중요한 파일은 [device table](/blog/embedded/buildroot/chapter07-board-customize)로 *명시적으로* 잡아 줍니다.
+두 이미지는 같은 fakeroot 단계와 같은 device table을 거쳐 만들어집니다(`fs/common.mk`). 차이가 보이면 이미지 생성 *후*에 무엇이 파일을 건드렸는지(post-image 스크립트 등)를 먼저 의심하고, 권한·소유권은 device table로 명시합니다(Ch 7).
 
 ## 정리
 
-- initramfs는 *RAM에 사는 rootfs*입니다. 작은 시스템·복구 환경에 적합합니다.
-- cpio는 initramfs의 *재료*입니다. 외부 initramfs 흐름에서 쓰입니다.
-- squashfs는 *read-only 압축*입니다. 저장 매체와 내용에 따라 크기 절감률이 달라지며, 서명 검증은 별도로 설계해야 합니다.
-- ext4는 *쓰기 가능*하지만 *application 수준의 partial write* 위험은 그대로입니다.
-- **production 표준 패턴**: squashfs base + overlayfs + 별도 data 파티션.
-- 한 빌드에서 여러 포맷을 동시에 생성할 수 있습니다. 목적별로 골라 deploy합니다.
-- squashfs 압축은 *zstd*가 거의 항상 최적의 균형입니다.
+- 같은 4 MB target에서 cpio.xz 1.55 MB, squashfs xz 1.66 MB, squashfs zstd 1.88 MB, squashfs gzip(기본값) 2.02 MB, erofs lz4hc 2.90 MB가 나왔고, ext4는 설정 크기인 60 MiB 고정이었습니다.
+- initramfs는 커널에 내장된 cpio이며, 압축은 Buildroot cpio 옵션이 아니라 커널 설정을 따릅니다.
+- squashfs 이미지를 쓰려면 커널에 `CONFIG_SQUASHFS`와 압축별 옵션이 필요합니다. QEMU defconfig 커널은 없어서 panic이 났고, fragment 두 줄로 해결됐습니다.
+- squashfs + overlayfs + data 파티션 구성은 QEMU에서 두 번 부팅해 변경분이 `/data/overlay`에 남는 것을 확인했습니다.
+- BusyBox `blkid`는 `-s TYPE -o value`를 지원하지 않았고, BusyBox `inittab`은 hostname을 rcS보다 먼저 설정합니다. 이런 init 순서·도구 차이는 실제 부팅으로 확인해야 드러납니다.
+- ext4는 쓰기 가능하지만 application 수준의 부분 쓰기 위험은 그대로입니다.
 
 ## 다음 장 예고
 
@@ -330,5 +345,6 @@ initramfs는 *부팅 전*에 전체가 RAM에 펼쳐집니다. 30MB가 넘어가
 
 - [Ch 7: 보드 customize — overlay, post-build, post-image](/blog/embedded/buildroot/chapter07-board-customize)
 - [Ch 10: 실전 — BeagleBone Black 시스템 처음부터 끝까지](/blog/embedded/buildroot/chapter10-real-board)
-- [원문 — Buildroot Manual: Target filesystem](https://buildroot.org/downloads/manual/manual.html#rootfs-images)
-- [Linux overlayfs documentation](https://www.kernel.org/doc/Documentation/filesystems/overlayfs.txt)
+- [Ch 12: Linux 커널 customize — defconfig fragment와 DTS](/blog/embedded/buildroot/chapter12-kernel-customize) — 이 장에서 쓴 squashfs fragment
+- [원문 — Buildroot Manual](https://buildroot.org/downloads/manual/manual.html)
+- [Linux overlayfs documentation](https://docs.kernel.org/filesystems/overlayfs.html)
