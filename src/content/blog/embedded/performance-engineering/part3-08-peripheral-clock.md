@@ -149,13 +149,7 @@ HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI, PWR_D3_DOMAIN);
 HAL_PWR_EnterSTANDBYMode();
 ```
 
-STM32H7 HAL에는 `HAL_PWR_EnterSTOPMode(Regulator, STOPEntry)`(`stm32h7xx_hal_pwr.h` 704행) 외에 power domain을 인자로 받는 `HAL_PWREx_EnterSTOPMode(Regulator, STOPEntry, Domain)`(`stm32h7xx_hal_pwr_ex.h` 526행)이 있습니다. 각 모드에서 무엇이 꺼지고 무엇이 유지되는지, 전류와 wakeup 시간은 칩의 reference manual과 datasheet 표에서 읽어 와 아래 표를 채웁니다.
-
-| Mode | Wakeup 시간 | 전류 |
-|---|---|---|
-| Sleep | TBD | TBD |
-| Stop | TBD | TBD |
-| Standby | TBD | TBD |
+STM32H7 HAL에는 `HAL_PWR_EnterSTOPMode(Regulator, STOPEntry)`(`stm32h7xx_hal_pwr.h` 704행) 외에 power domain을 인자로 받는 `HAL_PWREx_EnterSTOPMode(Regulator, STOPEntry, Domain)`(`stm32h7xx_hal_pwr_ex.h` 526행)이 있습니다. 각 모드에서 무엇이 꺼지고 무엇이 유지되는지는 칩의 reference manual이, 모드별 전류와 wakeup 시간은 그 칩 datasheet의 전기적 특성 표(전원 전압, 온도, 켜 둔 domain 조건과 함께)가 정합니다. 이 글은 그 표를 확인하지 못해 수치를 싣지 않습니다.
 
 ## 자주 하는 실수
 
