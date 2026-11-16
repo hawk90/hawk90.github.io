@@ -2,7 +2,7 @@
 title: "사례 분석 — 멀티코어 처리량 저하에서 lock 병목 조사"
 slug: "embedded/performance-engineering/part6-03-case-lock-contention"
 date: 2026-04-28T09:02:00
-description: "스레드 증가 후 처리량이 낮아지는 사례에서 mutex 대기와 cache-line 이동을 구분해 조사하는 방법을 설명합니다. 수치는 재현된 실측값이 아닙니다."
+description: "공유 통계 카운터를 mutex·atomic·worker별 슬롯으로 바꿔 가며 1~8 스레드 처리량을 재고, mutex 대기와 cache-line 이동을 perf lock·strace로 구분합니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 52
 tags: [case-study, lock, contention, scalability, perf-lock]
@@ -11,208 +11,186 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"CPU를 늘린 뒤 처리량이 떨어지면 병목을 측정해 원인을 좁힙니다."**
+> **"스레드를 늘렸더니 처리량이 오히려 떨어졌다면, 공유 쓰기가 어디서 일어나는지 찾습니다. lock을 없애도 같은 cache line에 쓰는 한 확장되지 않습니다."**
 
-## 증상 — 보고된 문제
+## 증상 — 재현한 문제
 
-네트워크 패킷 카운터를 모으는 데몬이 운영 중인 8-core 서버에서 thread 수에 따른 throughput이 이상한 모습을 보였습니다.
+패킷마다 통계 카운터(`packets`·`bytes`·`errors`)를 올리는 데몬을 생각해 봅니다. 스레드를 늘렸는데 처리량이 늘지 않고 오히려 떨어졌다는 보고가 들어왔다고 해 봅니다. 이 글은 그 모양을 직접 만들어 측정했습니다.
 
-아래 수치와 출력은 조사 절차를 설명하기 위한 시나리오 값이며, 원시 로그나 실행 환경이 제공되지 않아 실제 측정 사례로 검증하지 않았습니다.
+측정 프로그램 `counters.c`는 "패킷 처리" 대신 xorshift 난수 몇 번을 돌리고, 그 결과로 길이와 오류 여부를 정한 뒤 통계를 갱신합니다. 통계 갱신 방법만 네 가지로 바꿉니다.
 
-```text
-HW: Cortex-A72 8-core, Linux 5.15
-워크로드: 1초당 수십만 패킷, 각 패킷마다 통계 카운터 업데이트
-측정: thread 개수를 1부터 8까지 늘리며 throughput 측정
+| 모드 | 통계 갱신 | 공유되는 것 |
+|---|---|---|
+| `mutex` | 전역 `struct stats`를 `pthread_mutex_lock`으로 보호 | mutex와 카운터 |
+| `atomic` | 전역 `_Atomic` 카운터 3개에 `atomic_fetch_add_explicit(relaxed)` | 카운터가 있는 cache line |
+| `local_packed` | worker마다 자기 슬롯(24 B)에 relaxed atomic add, 패딩 없음 | 이웃 슬롯과 같은 line(false sharing) |
+| `local_padded` | 위와 같지만 슬롯을 128 B로 정렬 | 없음 |
 
-Thread:  1   2   3   4   5   6   7   8
-Tput:   1.0 1.9 2.7 3.4 3.0 2.5 2.0 1.6  (× single-thread)
+`mutex` 모드의 갱신 부분은 원래 코드 그대로입니다.
+
+```c
+case 0: pthread_mutex_lock(&m); g.packets++; g.bytes += len; if (err) g.errors++; pthread_mutex_unlock(&m); break;
 ```
 
-4-thread까지는 거의 선형 scaling이 나오다가, 5-thread부터 오히려 throughput이 감소했습니다. 8-thread에서는 single-thread보다도 1.6배밖에 빠르지 않았습니다.
+실행 환경은 두 곳입니다. 스레드당 20,000,000 패킷을 처리하고, 각 조합을 5번 돌려 중앙값을 씁니다. 프로그램은 끝날 때 합계가 `스레드 수 × 20,000,000`과 같은지 확인하고, 다르면 실패로 끝납니다. 두 환경 각각 160번 실행 모두 합계가 맞았습니다.
 
-전형적인 contention 또는 coherency 문제로 보였지만, 어디서 발생하는지는 코드만 봐서는 분명하지 않았습니다.
+| 항목 | Mac | VM |
+|---|---|---|
+| CPU | Apple M2 Pro (P 8 + E 4), 스레드 고정 없음 | 같은 M2 Pro 위 QEMU 11.1.3 HVF, 8 vCPU |
+| OS·컴파일러 | macOS 27.2.1, Apple clang 21.0.0 `-O2` | Debian 13 arm64, kernel 6.12.116, GCC 14.2.0 `-O2 -pthread` |
+
+`mutex` 모드의 결과가 보고된 증상과 같은 모양입니다. 1스레드 처리량을 1.00으로 놓은 상대값입니다.
+
+| 스레드 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| Mac `mutex` | 1.00 | 0.59 | 0.43 | 0.39 | 0.38 | 0.33 | 0.34 | 0.35 |
+| VM `mutex` | 1.00 | 0.15 | 0.35 | 0.24 | 0.26 | 0.23 | 0.21 | 0.18 |
+
+스레드를 하나 더 붙이는 순간부터 처리량이 떨어지고, 8스레드에서도 1스레드보다 느립니다. 1스레드의 절대 처리량은 Mac 132.5 Mpps, VM 135.7 Mpps였습니다. VM의 2스레드 값(0.15)이 3스레드(0.35)보다 낮은 것처럼 곡선이 고르지 않은 이유는 이 글에서 확인하지 못했습니다.
 
 ## 가설 1 — Memory bandwidth saturation
 
-처음 의심한 것은 메모리 대역폭 포화였습니다. 패킷 처리는 대량의 메모리 read/write를 동반하므로 8 thread가 동시에 메모리를 두드리면 DRAM이 한계에 부딪힐 수 있습니다.
+처음 의심할 것은 메모리 대역폭 포화입니다. 이 가설은 실험 설계만으로 걸러집니다. 이 프로그램이 패킷마다 쓰는 메모리는 통계 몇 바이트뿐입니다. `local_padded` 모드는 같은 계산과 같은 개수의 atomic add를 하지만, 각 스레드가 자기 cache line에만 씁니다. 대역폭이 한계라면 이 모드도 함께 막혀야 합니다.
 
-```bash
-mpstat -P ALL 1
+| 스레드 | 1 | 2 | 4 | 8 |
+|---|---|---|---|---|
+| Mac `local_padded` | 443.0 Mpps | 897.0 (2.02×) | 1,255.0 (2.83×) | 2,377.5 (5.37×) |
+| VM `local_padded` | 291.7 Mpps | 554.1 (1.90×) | 870.8 (2.99×) | 1,114.3 (3.82×) |
 
-# 16:20:01  CPU   %usr  %sys  %idle
-# 16:20:02    0   42.0  18.0   38.0
-# 16:20:02    1   38.0  21.0   39.0
-# 16:20:02    2   40.0  19.0   39.0
-# 16:20:02    3   41.0  20.0   37.0
-# 16:20:02    4   35.0  22.0   41.0
-# 16:20:02    5   34.0  23.0   41.0
-# 16:20:02    6   33.0  24.0   41.0
-# 16:20:02    7   32.0  25.0   41.0
-```
-
-예시의 idle 값은 약 37~41%입니다. `mpstat`의 CPU accounting만으로 DRAM 포화나 mutex 대기를 구분할 수 없습니다. 실행 중 memory stall과 스레드가 잠든 시간도 구분해야 합니다([sysstat mpstat 매뉴얼](https://github.com/sysstat/sysstat/blob/master/man/mpstat.1)).
-
-`mem_access` 이벤트 수만으로 DRAM 대역폭의 포화 비율을 계산할 수 없습니다. 해당 PMU 이벤트 정의·전송 byte 환산·측정 구간을 확인하고, 지원되는 memory-controller counter와 같은 조건의 지속 대역폭 기준을 비교해야 합니다. 이 원고에는 그 자료가 없어 기존의 “시스템 한계의 30%” 주장은 근거로 사용하지 않습니다.
-
-**가설 1 미검증**: 메모리 대역폭 가설을 배제할 자료가 없습니다.
+`local_padded`는 8스레드에서 Mac 2,377.5 Mpps로, 같은 스레드 수의 `mutex`(46.0 Mpps)보다 51배 많이 처리합니다. **메모리 대역폭은 병목이 아닙니다.** 다만 이 모드도 8배까지 늘지는 않았습니다. 측정하는 동안 같은 Mac에서 다른 VM들이 돌았고, Mac에서는 스레드를 P-core에 고정할 수 없었다는 점을 함께 적어 둡니다.
 
 ## 가설 2 — Lock contention
 
-`perf lock`은 Linux kernel lock instrumentation이 제공하는 lock events를 분석합니다. 이 도구만으로 임의의 userspace `pthread_mutex_t`가 `stats_mutex`라는 이름으로 측정된다고 가정할 수 없습니다. 다음 출력은 조사 결과가 아닌 설명용 표입니다. (출처: [perf-lock 매뉴얼](https://man7.org/linux/man-pages/man1/perf-lock.1.html))
+다음은 mutex 경합입니다. 먼저 *잠든 시간*이 있는지 봅니다. VM에서 `strace -f -c -e trace=futex`로 `futex` 시스템 호출을 셌습니다(스레드당 2,000,000 패킷).
 
 ```text
-sudo perf lock record -- ./packet_daemon
-sudo perf lock report
-
-# illustrative only; not verbatim perf output for a pthread mutex
-# lock class             acquired   contended   wait_total(s)   wait_avg(ns)
-# <kernel lock class>    ...        ...         ...             ...
+== strace -f -c -e trace=futex ./counters mutex 1 2000000
+  0.00    0.000000           0         1           futex
+== strace -f -c -e trace=futex ./counters mutex 2 2000000
+100.00    0.029641          20      1422       551 futex
+== strace -f -c -e trace=futex ./counters mutex 8 2000000
+100.00    3.896173         491      7933      3020 futex
 ```
 
-userspace mutex 대기는 application instrumentation, pthread/futex tracing, 또는 적절히 설정한 userspace probe로 따로 관찰해야 합니다. 이 원고에는 그 원시 관측 자료가 없습니다.
+1스레드에서는 `futex` 호출이 1번뿐입니다. [futex(7)](https://man7.org/linux/man-pages/man7/futex.7.html)는 "Futex operation occurs entirely in user space for the noncontended case. The kernel is involved only to arbitrate the contended case."라고 설명합니다. 경합이 없으면 user 공간에서 끝나고, 경합이 생겨야 커널로 들어가 잠듭니다. 8스레드에서는 7,933번 호출에 3.90초를 썼고, 3,020번이 에러로 돌아왔습니다. `perf stat`으로 보면 차이가 더 분명합니다.
 
-코드를 들여다 보니 모든 thread가 같은 mutex 하나를 잡고 카운터를 증가시키고 있었습니다.
-
-```c
-struct stats {
-    uint64_t packets;
-    uint64_t bytes;
-    uint64_t errors;
-};
-
-static struct stats global_stats;
-static pthread_mutex_t stats_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-void on_packet(packet_t *pkt)
-{
-    /* ... 처리 ... */
-
-    pthread_mutex_lock(&stats_mutex);
-    global_stats.packets++;
-    global_stats.bytes += pkt->len;
-    if (pkt->err) global_stats.errors++;
-    pthread_mutex_unlock(&stats_mutex);
-}
+```text
+mutex threads=8 packets=16000000 sec=1.255 Mpps=12.7
+             11646      context-switches                 #    1.931 K/sec
+           6029.54 msec task-clock                       #    4.798 CPUs utilized
+local_padded threads=8 packets=16000000 sec=0.022 Mpps=728.7
+                 2      context-switches                 #   29.982 /sec
 ```
 
-호출이 잦으면 mutex나 카운터의 cache-line ownership 이동이 비용을 유발할 수 있습니다. 실제 이동 빈도와 대기 시간은 이 코드만으로 알 수 없습니다.
+`mutex` 모드는 1.26초 동안 context switch가 11,646번 일어났습니다. 회의실 하나를 여덟 명이 번갈아 쓰면서, 자리가 날 때마다 잠든 사람을 깨우는 비용까지 치르는 셈입니다. 같은 `mutex` 8스레드가 `perf stat` 아래에서는 12.7 Mpps, `strace` 아래에서는 25.6 Mpps, 도구 없이 잰 5회 중앙값은 24.5 Mpps였습니다. 한 번 실행한 값은 이만큼 흔들리므로, 처리량 비교에는 도구 없이 5번 돌린 중앙값만 씁니다.
 
-**판정 보류**: 단일 mutex는 검토할 가설이지만 이 예시 출력으로 원인을 확정하지 않습니다.
+`perf lock`은 무엇을 보여 줄까요. [perf-lock 매뉴얼](https://man7.org/linux/man-pages/man1/perf-lock.1.html)대로 `perf lock record`·`perf lock contention`을 돌리면, 이 커널의 lock 이벤트가 잡힙니다.
 
-## 원인 — Cache Invalidation과 USL
+```text
+ contended   total wait     max wait     avg wait         type   caller
 
-좀 더 깊게 들여다 봅니다. `stats_mutex`와 `global_stats`의 배치는 binary와 주소로 확인해야 합니다. 일반적인 write-invalidate coherence에서 공유 line에 쓰기 권한을 얻는 과정을 단순화하면 다음과 같습니다.
+      6573      3.26 s     235.59 ms    496.00 us     spinlock   do_futex+0xe8
+      3572      1.97 s     233.33 ms    551.27 us     spinlock   futex_wait_setup+0x80
+         1      2.53 ms      2.53 ms      2.53 ms     spinlock   update_process_times+0xb4
+         1       458 ns       458 ns       458 ns     spinlock   sched_balance_update_blocked_averages+0x58
+```
 
-1. mutex 갱신을 위해 해당 line의 쓰기 권한을 얻습니다. 구체적인 coherence 상태 이름은 구현에 따라 다릅니다.
-2. 다른 코어의 L1에 있던 같은 line은 Invalid로 전환됩니다.
-3. `global_stats` 업데이트도 동일한 패턴으로 진행됩니다.
-4. 다른 코어가 같은 line을 갱신하면 소유권 이동이 필요할 수 있습니다. 데이터 전달 경로는 cache hierarchy와 line 상태에 따라 달라집니다.
+여기에 `stats_mutex` 같은 사용자 mutex의 이름은 없습니다. 보이는 것은 커널 futex 경로(`do_futex`, `futex_wait_setup`)의 spinlock입니다. 즉 `perf lock`은 user 공간 mutex를 직접 재지 않고, 그 mutex가 잠들고 깨는 과정에서 커널 lock이 얼마나 경합했는지를 보여 줍니다. 이 Debian `perf` 6.12.117은 `-b`(BPF로 수집) 옵션이 "not built-in because no BUILD_BPF_SKEL=1"로 빠져 있어서, 위 결과는 tracepoint 기반 수집입니다.
 
-공유 mutex나 카운터가 cache line ownership 이동을 일으킬 수 있지만, 레이아웃·mutex 구현·작업량·스케줄링에 따라 영향이 다릅니다. 이 사례에는 cache-to-cache 원시 측정이 없어 수백 ns라는 비용이나 처리량 저하의 직접 원인을 확인할 수 없습니다.
+**가설 2 확인**: `mutex` 모드에서는 lock 대기와 잠들기·깨우기가 있습니다. 하지만 이것으로 이야기가 끝나지는 않습니다.
 
-Universal Scalability Law(USL)는 이 현상을 식으로 보여 줍니다.
+## 원인 — Cache Line 소유권 이동
+
+lock을 없애면 해결될까요. `atomic` 모드는 mutex 없이 relaxed atomic add만 합니다. 결과는 기계마다 달랐지만, 어느 쪽에서도 확장되지 않았습니다. Mac에서는 `mutex`보다 나빴고(8스레드 17.5 vs 46.0 Mpps), VM에서는 `mutex`보다 높았지만(2스레드 80.0 vs 20.1, 4스레드 32.4 vs 32.3, 8스레드 38.9 vs 24.5 Mpps) 1스레드의 0.13배에 그쳤습니다.
+
+| 스레드 | 1 | 2 | 4 | 8 |
+|---|---|---|---|---|
+| Mac `atomic` | 487.6 Mpps | 26.9 (0.06×) | 22.0 (0.05×) | 17.5 (0.04×) |
+| VM `atomic` | 295.5 Mpps | 80.0 (0.27×) | 32.4 (0.11×) | 38.9 (0.13×) |
+| Mac `local_packed` | 455.2 Mpps | 317.6 (0.70×) | 77.5 (0.17×) | 164.6 (0.36×) |
+| VM `local_packed` | 260.3 Mpps | 95.5 (0.37×) | 76.7 (0.29×) | 75.9 (0.29×) |
+
+Mac에서 `atomic`은 2스레드가 되는 순간 1스레드의 18분의 1로 떨어졌습니다. 잠드는 스레드도 없습니다. VM에서 8스레드 `atomic`의 context switch는 15번뿐이었고 `task-clock`은 4.567 CPUs utilized였습니다. 같은 조건의 `mutex`는 4.798 CPUs utilized에 context switch 11,646번이었습니다. CPU 사용량은 비슷한데, `atomic`은 잠들지 않고도 일을 거의 하지 못했습니다.
+
+원인은 cache line의 소유권입니다. 한 코어가 line에 쓰려면 그 line을 독점해야 하고, 다른 코어에 있던 사본은 무효가 됩니다. 여러 코어가 같은 line에 번갈아 쓰면 line이 코어 사이를 계속 오갑니다. 공 하나로 여덟 명이 캐치볼을 하면 공을 든 사람만 일할 수 있는 것과 같습니다.
+
+`local_packed`가 이것을 확인해 줍니다. 각 스레드는 *자기* 슬롯에만 씁니다. 논리적으로는 아무것도 공유하지 않지만, 24 B 슬롯 여러 개가 한 line에 들어가 같은 일이 벌어졌습니다(false sharing). 같은 코드에 128 B 정렬만 더한 `local_padded`는 앞의 표처럼 확장됩니다.
+
+Universal Scalability Law(USL)로 이 곡선을 설명해 볼 수도 있습니다.
 
 $$C(N) = \frac{N}{1 + \alpha(N-1) + \beta \cdot N(N-1)}$$
 
-여기서 $N$은 CPU 수, $\alpha$는 contention(serial fraction), $\beta$는 coherency(cache invalidation 비용)입니다.
+$N$은 스레드 수, $\alpha$는 직렬화(contention), $\beta$는 coherency 비용입니다. 측정한 상대 처리량에 $\alpha, \beta \in [0, 1]$ 범위로 최소제곱 적합을 해 보면, `local_padded`는 VM에서 $\alpha = 0.0355$, $\beta = 0.01413$(RMSE 0.212)이 나옵니다. 그런데 `mutex`·`atomic`·`local_packed`는 VM에서 셋 다 $\alpha = 1$, $\beta = 1$로 범위 끝에 붙었습니다. 2스레드에서 이미 1스레드보다 느려지는 곡선은 이 범위의 USL로 표현되지 않습니다. USL 계수는 *잘 맞을 때* 병목의 종류를 말해 주지만, 이 사례에서는 직접 측정한 context switch·futex·cache line 실험이 더 많은 것을 알려 줍니다.
 
-$\alpha$만 있으면 Amdahl처럼 점근선에 수렴합니다. $\beta$가 있으면 어느 $N$부터는 throughput이 오히려 감소하는 곡선이 됩니다. USL은 측정 throughput을 설명하는 모델 후보일 뿐이며, 이 사례에는 적합도·잔차가 없어 계수로 원인을 판정할 수 없습니다.
+## 해결 — Worker별 슬롯과 주기적 합산
 
-## 해결 후보 — Worker별 카운터와 주기적 합산
-
-한 후보는 worker별 카운터를 두고 필요한 시점에 합산하는 것입니다. lock contention이 사라지는지와 atomic/cache 비용이 줄어드는지는 실행 환경에서 비교해야 합니다.
+해결은 공유 쓰기를 없애는 것입니다. worker마다 자기 슬롯을 하나씩 갖고, 슬롯끼리 cache line을 나눠 쓰지 않게 정렬합니다. 측정에 쓴 `local_padded`의 정의는 다음과 같습니다.
 
 ```c
-#include <stdatomic.h>
-#include <stdint.h>
+#ifndef LINE
+#define LINE 128            /* >= cache line on both hosts (M2 Pro sysctl: 128, guest getconf: 64) */
+#endif
+struct padded { _Atomic uint64_t packets, bytes, errors; } __attribute__((aligned(LINE)));
+static struct padded ld[MAXT];
 
-#define MAX_WORKERS 16
-#define CACHE_LINE 64
-
-struct local_stats {
-    _Atomic uint64_t packets;
-    _Atomic uint64_t bytes;
-    _Atomic uint64_t errors;
-    char pad[CACHE_LINE - 3 * sizeof(uint64_t)];
-} __attribute__((aligned(CACHE_LINE)));
-
-static struct local_stats per_worker_stats[MAX_WORKERS];
-
-/* worker_id is assigned once to a worker; it is not sched_getcpu(). */
-void on_packet(unsigned worker_id, packet_t *pkt)
-{
-    if (worker_id >= MAX_WORKERS) return;
-    struct local_stats *s = &per_worker_stats[worker_id];
-
-    /* ... 처리 ... */
-
-    atomic_fetch_add_explicit(&s->packets, 1, memory_order_relaxed);
-    atomic_fetch_add_explicit(&s->bytes, pkt->len, memory_order_relaxed);
-    if (pkt->err)
-        atomic_fetch_add_explicit(&s->errors, 1, memory_order_relaxed);
-}
+atomic_fetch_add_explicit(&ld[id].packets, 1, memory_order_relaxed);
+atomic_fetch_add_explicit(&ld[id].bytes, len, memory_order_relaxed);
+if (err) atomic_fetch_add_explicit(&ld[id].errors, 1, memory_order_relaxed);
 ```
 
-worker마다 슬롯을 하나만 소유하도록 계약합니다. 정렬과 padding은 cache-line 크기 및 ABI에 맞는지 확인해야 하며, 이 방식은 `sched_getcpu()`로 CPU별 슬롯을 고르는 per-CPU 구현과 다릅니다.
+정렬 크기 128은 Mac의 `sysctl hw.cachelinesize`(128)에 맞췄습니다. VM guest의 `getconf LEVEL1_DCACHE_LINESIZE`는 64를 보고했으므로, 128이면 둘 다 덮습니다. 정렬 값은 대상 CPU에서 이렇게 확인한 값으로 정합니다. `worker_id`는 스레드를 만들 때 한 번 정하는 번호라 `sched_getcpu()`와 다릅니다. 스레드가 다른 CPU로 옮겨 가도 슬롯은 바뀌지 않습니다.
 
-합계 read는 주기적으로 background thread가 처리합니다.
+합계는 별도 스레드가 주기적으로 읽습니다.
 
 ```c
 struct stats aggregate(void)
 {
     struct stats total = {0};
     for (int i = 0; i < MAX_WORKERS; i++) {
-        total.packets += atomic_load_explicit(&per_worker_stats[i].packets, memory_order_relaxed);
-        total.bytes   += atomic_load_explicit(&per_worker_stats[i].bytes, memory_order_relaxed);
-        total.errors  += atomic_load_explicit(&per_worker_stats[i].errors, memory_order_relaxed);
+        total.packets += atomic_load_explicit(&ld[i].packets, memory_order_relaxed);
+        total.bytes   += atomic_load_explicit(&ld[i].bytes, memory_order_relaxed);
+        total.errors  += atomic_load_explicit(&ld[i].errors, memory_order_relaxed);
     }
     return total;
 }
-
-void *aggregator(void *arg)
-{
-    (void)arg;
-    while (1) {
-        sleep(1);
-        struct stats s = aggregate();
-        publish(&s);
-    }
-}
 ```
 
-각 필드의 snapshot은 data race를 피하지만 여러 필드의 값이 같은 시점을 나타내지는 않습니다. C11 draft는 두 thread가 같은 non-atomic 객체를 동기화 없이 동시에 읽고 쓰는 data race를 정의하고, 해당 실행에 undefined behavior를 둡니다([WG14 N1570 §5.1.2.4](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf)). 일관된 snapshot이 필요하면 worker quiescence나 별도 동기화 프로토콜을 추가합니다. Worker ID로 분리하면 CPU migration 자체가 슬롯을 바꾸지 않습니다.
+슬롯을 일반 `uint64_t`로 두고 집계 스레드가 읽으면 안 됩니다. C11 표준 초안 [N1570](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf) §5.1.2.4 ¶25는 서로 다른 스레드의 두 충돌 접근 중 하나 이상이 atomic이 아니고 어느 쪽도 다른 쪽보다 먼저 일어남(happens before)이 성립하지 않으면 data race이고, 그 결과는 undefined behavior라고 정합니다. 통계값이라는 이유로 예외가 되지 않습니다. 대신 relaxed atomic이라 필드마다 값은 안전하게 읽히지만, 세 필드가 같은 순간의 값이라는 보장은 없습니다. 일관된 snapshot이 필요하면 별도의 동기화 규약을 추가합니다.
 
 ## 검증 — Before / After
 
-다음은 같은 워크로드의 비교 보고서에 넣을 수 있는 시나리오 값입니다. 실제 재측정 결과가 아닙니다.
+"Before"는 `mutex`, "After"는 `local_padded`입니다. 계산과 atomic add 개수는 같고 통계를 쓰는 위치만 다릅니다. 처리량은 5회 중앙값입니다.
 
-| Threads | Before (global mutex) | After (worker-local example) |
-|---|---|---|
-| 1 | 1.0× | 1.0× |
-| 2 | 1.9× | 2.0× |
-| 3 | 2.7× | 3.0× |
-| 4 | 3.4× | 3.9× |
-| 5 | 3.0× | 4.9× |
-| 6 | 2.5× | 5.8× |
-| 7 | 2.0× | 6.8× |
-| 8 | 1.6× | 7.7× |
+| 스레드 | Mac Before | Mac After | VM Before | VM After |
+|---|---|---|---|---|
+| 1 | 132.5 Mpps | 443.0 Mpps | 135.7 Mpps | 291.7 Mpps |
+| 2 | 78.1 | 897.0 | 20.1 | 554.1 |
+| 4 | 52.0 | 1,255.0 | 32.3 | 870.8 |
+| 8 | 46.0 | 2,377.5 | 24.5 | 1,114.3 |
+| 8스레드 / 1스레드 | 0.35× | 5.37× | 0.18× | 3.82× |
 
-예시 표는 8 workers에서 single-thread 대비 7.7배라고 적혀 있지만, 반복 측정과 원시 결과가 없어 개선량은 검증되지 않았습니다. userspace mutex 제거 여부도 `perf lock`만으로 판단할 수 없습니다.
+8스레드 기준으로 After는 Before보다 Mac에서 51.7배, VM에서 45.5배 많이 처리했습니다. 1스레드에서도 After가 빠르지만, lock·unlock과 relaxed add의 비용 차이는 이 글에서 따로 분해해 재지 않았습니다.
 
-`perf c2c`는 지원되는 PMU와 workload에서 cache-to-cache 샘플을 조사하는 후보 도구입니다. 이 원고에는 해당 출력이나 타깃 지원 확인이 없습니다.
+`perf c2c`는 cache line 공유를 직접 찾는 도구입니다. 이 VM에서는 돌지 않았습니다.
+
+```text
+$ perf c2c record -o /tmp/c2c.data -- ./counters local_packed 2 1000000
+failed: no PMU supports the memory events
+```
+
+이 guest의 PMU는 메모리 접근 샘플링 이벤트를 제공하지 않습니다. 실제 보드에서 `local_packed` 같은 false sharing을 찾을 때는 그 보드의 PMU에서 `perf c2c record`가 먼저 동작하는지 확인합니다.
 
 ## 교훈
 
-이번 사례에서 얻은 교훈을 정리합니다.
+- **lock을 없애는 것과 공유를 없애는 것은 다릅니다.** mutex를 atomic으로 바꾸자 Mac 8스레드에서는 46.0 → 17.5 Mpps로 나빠졌고, VM에서는 24.5 → 38.9 Mpps로 나아졌지만 1스레드의 0.13배였습니다.
+- **context switch와 CPU 사용량을 함께 봅니다.** VM 8스레드에서 `mutex`와 `atomic`은 CPU 사용량이 4.798과 4.567 CPUs로 비슷했지만, context switch는 11,646번과 15번으로 달랐습니다.
+- **`perf lock`은 커널 lock을 봅니다.** user 공간 mutex 경합은 커널 futex 경로의 spinlock 경합(`do_futex`, `futex_wait_setup`)으로 간접적으로 보입니다.
+- **padding은 대상 CPU의 line 크기로 정합니다.** M2 Pro는 128 B를 보고했고, 24 B 슬롯을 붙여 둔 `local_packed`는 8스레드에서 1스레드의 0.36배(Mac)였습니다.
+- **USL은 잘 맞을 때만 씁니다.** 2스레드에서 처리량이 떨어지는 곡선에는 $[0,1]$ 범위 계수가 맞지 않았습니다.
+- **공유 snapshot에는 동기화 규약이 필요합니다.** 일반 정수를 다른 스레드가 동시에 읽고 쓰면 C11에서 data race입니다.
+- **한 번 잰 값을 믿지 않습니다.** 같은 `mutex` 8스레드가 실행마다 12.7~25.6 Mpps로 흔들렸습니다. 처리량은 도구 없이 여러 번 재서 중앙값을 씁니다.
 
-- **처리량 저하는 여러 원인이 있습니다**. lock 대기, coherency, memory bandwidth, scheduler, I/O 등을 독립 증거로 확인합니다.
-- **`perf lock`은 kernel lock을 조사합니다**. userspace mutex는 application 계측이나 별도 tracing으로 확인합니다.
-- **`mpstat`만으로 원인을 배제하지 않습니다**. CPU accounting은 stall, run queue, I/O, 장치별 카운터와 함께 해석합니다.
-- **Worker-local 상태는 후보 해법**. 합산 일관성, migration, 메모리 비용, atomic 비용을 포함해 실제 workload에서 평가합니다.
-- **Cache line padding을 확인합니다**. Worker 배열의 정렬은 false sharing을 줄이는 후보이며 대상 cache-line 크기로 확인합니다.
-- **공유 snapshot에는 동기화 계약이 필요합니다**. 일반 정수의 동시 읽기·쓰기는 C에서 data race이므로 단순히 통계값이라는 이유로 허용할 수 없습니다.
-
-USL과 lock/cache 증거를 함께 사용해 병목 가설을 비교합니다. 이 원고에는 실제 대상의 처리량 곡선이나 계수 적합 결과가 없어, worker-local 방식의 효과와 원인은 아직 검증되지 않았습니다.
+측정 소스는 `counters.c` 한 파일이고, 실행은 `./counters <mode> <threads> 20000000`입니다.
 
 다음 사례에서는 [카메라 payload와 DMA 경로](/blog/embedded/performance-engineering/part6-04-case-dma-tuning)를 조사합니다.
 

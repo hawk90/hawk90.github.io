@@ -12,16 +12,16 @@
 ]
 
 % Title
-\node[font=\sffamily\bfseries\small, text=inkc] at (0, 4.2) {CXL 세 프로토콜 — PCIe 5.0 PHY 위에서 시분할};
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 4.2) {CXL 세 프로토콜 — ARB/MUX가 한 링크에 interleave};
 
 % CXL link (container)
 \node[rectangle, rounded corners=4pt, draw=absbord, fill=absfill!30,
       minimum width=50mm, minimum height=50mm, line width=0.6pt] (link) at (0, 1.5) {};
-\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {CXL link (PCIe 5.0 x16 PHY)};
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {CXL link (Flex Bus, PCIe electricals)};
 
 % Three protocols
 \node[proto, draw=impbord, fill=impfill] (cxlio) at (0, 2.8) {CXL.io};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 2.8) {configuration, legacy DMA};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 2.8) {discovery, enumeration, error reporting};
 
 \node[proto, draw=clibord, fill=clifill] (cxlcache) at (0, 1.5) {CXL.cache};
 \node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 1.5) {accelerator caches host memory};
@@ -31,7 +31,7 @@
 
 % Brace on left
 \draw[decorate, decoration={brace, amplitude=5pt, mirror}, line width=0.5pt, draw=edgec]
-  (-2.6, -0.3) -- (-2.6, 3.3) node[midway, anchor=east, font=\sffamily\scriptsize, text=mutec, xshift=-5pt] {Flex Bus\\[1pt] 시분할};
+  (-2.6, -0.3) -- (-2.6, 3.3) node[midway, anchor=east, font=\sffamily\scriptsize, text=mutec, xshift=-5pt] {ARB/MUX\\[1pt] interleave};
 
 \end{tikzpicture}
 \end{document}

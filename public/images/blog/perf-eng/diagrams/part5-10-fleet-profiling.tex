@@ -29,11 +29,11 @@
 \node[agent] (an) at (2.8, 0.1) {Parca agent};
 
 % Central collector
-\node[server] (col) at (5.8, 1.3) {중앙 collector};
+\node[server] (col) at (5.8, 1.3) {Parca server};
 
 % Alarm
 \node[rectangle, rounded corners=2pt, draw=conbord, fill=confill,
-      minimum width=16mm, minimum height=8mm, font=\sffamily\footnotesize, line width=0.4pt] (alarm) at (8.3, 1.3) {알람};
+      minimum width=16mm, minimum height=8mm, font=\sffamily\footnotesize, line width=0.4pt] (alarm) at (8.3, 1.3) {UI·query};
 
 % Connections device -> agent
 \draw[arr] (d1.east) -- (a1.west);
@@ -50,8 +50,8 @@
 
 % Annotation
 \node[font=\sffamily\scriptsize, text=mutec, anchor=north, align=center, text width=70mm] at (4, -0.8) {
-  \textbf{개념적 배포 경로 — 실제 배포 결과 아님}\\[2pt]
-  지원 ISA·kernel·권한·전송량·자원 비용은 target에서 확인
+  \textbf{agent: 논리 CPU당 19 Hz, eBPF + PERF\_COUNT\_SW\_CPU\_CLOCK}\\[2pt]
+  pprof 형식으로 server에 전송 (Parca agent design 문서)
 };
 
 \end{tikzpicture}

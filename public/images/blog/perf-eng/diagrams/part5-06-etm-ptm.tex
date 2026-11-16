@@ -21,26 +21,26 @@
 \node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {ETM (Embedded Trace)};
 
 % ETM items
-\node[item, draw=impbord, fill=impfill] at (0, 2.8) {Instruction trace (PC)};
-\node[item, draw=clibord, fill=clifill] at (0, 1.9) {Data 지원은 구현별 확인};
-\node[item, draw=hibord, fill=hifill] at (0, 1.0) {Timing 옵션은 구성별 확인};
+\node[item, draw=impbord, fill=impfill] at (0, 2.8) {Program flow (ETMv3·ETMv4)};
+\node[item, draw=clibord, fill=clifill] at (0, 1.9) {Data trace: 코어별 (M은 DWT)};
+\node[item, draw=hibord, fill=hifill] at (0, 1.0) {ETMv3 약 1.2 bit/명령};
 
 % PTM container
 \node[box, draw=prpbord, fill=prpfill!30] (ptm) at (5.5, 2) {};
 \node[font=\sffamily\bfseries\footnotesize, text=prpbord, anchor=north] at (5.5, 4.0) {PTM (Program Trace)};
 
 % PTM items
-\node[item] at (5.5, 2.8) {지원 core / TRM 확인};
-\node[item] at (5.5, 1.9) {분기 정보만 (PC 재구성)};
-\node[item, draw=tealbord, fill=tealfill] at (5.5, 1.0) {출력량은 설정별 확인};
+\node[item] at (5.5, 2.8) {Cortex-A9·A15·A17 전용};
+\node[item] at (5.5, 1.9) {Waypoint만, data trace 없음};
+\node[item, draw=tealbord, fill=tealfill] at (5.5, 1.0) {약 0.3 bit/명령};
 
 % ETM output format (bottom)
-\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (3.5, -0.3) {Trace 구성별 확인할 정보};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (3.5, -0.3) {PTM waypoint와 선택 정보};
 
-\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.1) {Branch packet};
-\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.9) {Address packet};
-\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (4.5, -1.1) {Cycle count};
-\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (4.5, -1.9) {Data packet (옵션)};
+\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.1) {간접 분기·조건 코드};
+\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.9) {예외·Context ID 변경};
+\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (4.5, -1.1) {Cycle count (선택)};
+\node[item, draw=absbord, fill=absfill, minimum width=32mm] at (4.5, -1.9) {Global timestamp (선택)};
 
 % Tree lines for ETM output
 \draw[draw=edgesc, line width=0.4pt] (-1.2, -1.1) -- (-1.0, -1.1);

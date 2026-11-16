@@ -2,7 +2,7 @@
 title: "설계 시나리오 — CXL.mem과 LLM inference KV cache"
 slug: "embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache"
 date: 2026-06-16T09:03:00
-description: "H100과 CXL 메모리를 결합하는 LLM KV cache 설계 시나리오를 살펴봅니다. 구성·성능 수치는 재현되거나 검증된 실측 사례가 아닙니다."
+description: "H100 80GB에 OPT-13B를 올리는 LLM KV cache 설계 시나리오입니다. PagedAttention 논문과 NVIDIA·vLLM 문서의 숫자로 용량과 전송 시간을 계산하며, GPU·CXL 실측은 하지 않았습니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 56
 tags: [cxl, llm-inference, kv-cache, hbm, tiered-memory, case-study]
@@ -12,128 +12,134 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"H100 80 GB 5장과 CXL 메모리를 함께 쓰는 KV cache 설계는 어떤 조건을 검증해야 할까요?"** 이 글은 가상 구성으로 용량·주소 지정·이동 정책을 따져 보는 설계 시나리오입니다. 아래 성능 수치와 trace는 실측 자료가 아니며, vLLM의 공식 CXL KV backend로 제시하지 않습니다. NVIDIA는 H100 SXM을 GPU당 80 GB와 3.35 TB/s로 명시합니다([공식 HGX 사양](https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory-h100-h200-b200/latest/components.html)).
+> **"KV cache가 GPU 메모리를 넘칠 때, CXL 메모리를 어느 자리에 두면 되는가?"** 이 글은 논문과 공식 문서의 숫자로 용량·전송 시간을 계산해 보는 *설계 시나리오*입니다. GPU와 CXL 하드웨어는 쓰지 않았고, 처리량이나 지연을 잰 결과는 없습니다. 계산의 입력값은 모두 출처가 있고, 계산 자체는 기록해 두었습니다.
 
 ## 배경
 
-설계 시나리오에 사용할 가정 hardware profile:
+LLM 추론에서 KV cache는 요청마다 생겼다 사라지는 메모리입니다. 이미 읽은 token들의 key·value 벡터를 저장해 두는 메모장 같은 것이라, 대화가 길어질수록 메모장도 두꺼워집니다.
 
-| 항목 | 값 |
-|------|----|
-| GPU | NVIDIA H100 SXM 5개 (GPU당 80 GB HBM) |
-| HBM 총량 | 400 GB nominal (80 GB × 5; 실제 사용 가능량은 더 적음) |
-| CPU | 2 socket Xeon SPR/EMR 세대 |
-| 호스트 RAM | 1 TB DDR5 |
-| 모델 | LLaMA 70B (FP16) |
-| 추론 엔진 | vLLM (CXL 연결·KV 이동은 이 글에서 검증하지 않음) |
+크기는 PagedAttention 논문(Kwon et al., *Efficient Memory Management for Large Language Model Serving with PagedAttention*, SOSP 2023, [arXiv:2309.06180](https://arxiv.org/abs/2309.06180)) 3절이 OPT-13B로 계산해 보입니다.
 
-다섯 GPU는 용량 산술을 위한 가정이며 실제5장 SXM baseboard·slot 구성이 검증됐다는 뜻이 아닙니다. LLaMA의 head 구성과5-way tensor parallel이 호환된다고 가정하지도 않습니다. Host·GPU·PCIe/CXL 경로와 serving parallelism을 실제 지원 구성으로 고정해야 합니다.
+$$
+2\ (\text{key, value}) \times 5120\ (\text{hidden}) \times 40\ (\text{layers}) \times 2\ (\text{bytes, FP16}) = 800\ \text{KB/token}
+$$
+
+같은 절은 OPT가 최대 2048 token을 만들 수 있으니 요청 하나의 KV cache가 1.6 GB까지 커진다고 적습니다. 논문 Table 1의 서버 구성은 다음과 같습니다.
+
+| 모델 | GPU | GPU 메모리 합계 | 파라미터 | KV cache용 메모리 | 최대 KV slot |
+|---|---|---|---|---|---|
+| OPT-13B | A100 | 40 GB | 26 GB | 12 GB | 15.7K |
+| OPT-66B | 4×A100 | 160 GB | 132 GB | 21 GB | 9.7K |
+| OPT-175B | 8×A100-80GB | 640 GB | 346 GB | 264 GB | 60.1K |
+
+13B 줄은 위 식과 맞습니다. 12 GiB를 800 KiB로 나누면 15,728 slot입니다. 66B 줄은 GPU 메모리를 네 배로 늘렸는데 KV cache용 메모리는 21 GB에 그칩니다. 모델이 커지면 weight가 메모리를 먼저 차지한다는 뜻입니다.
+
+이 시나리오는 OPT-13B를 NVIDIA H100 SXM 한 장에 올린다고 가정합니다. NVIDIA HGX 문서는 H100 SXM을 GPU당 "80GB HBM3", "3.35TB/s"로 적습니다([NVIDIA HGX Components](https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory-h100-h200-b200/latest/components.html)).
 
 ## 증상
 
-용량이 모자라는지 판단하려면 batch size만으로 부족합니다. prompt와 generation token 수, 동시 sequence 수, KV dtype, model config, tensor parallel 구성, runtime reserve를 같은 조건에서 기록해야 합니다. 이 글에는 그런 workload profile이 없어 실제 throughput 저하나 OOM 사례를 확인하지 않았습니다.
+서비스 요청이 늘면 KV cache 공간이 먼저 바닥납니다. PagedAttention 4.5절은 이때 vLLM이 하는 일을 적습니다. 새 token에 줄 빈 block이 없으면 일부 sequence를 골라 선점(preempt)하고, 그 KV block을 CPU 메모리로 옮기거나(swapping) 나중에 다시 계산합니다(recomputation). 선점한 sequence가 끝날 때까지 새 요청은 받지 않습니다.
+
+그래서 증상은 "OOM"이 아니라 **처리량 저하와 대기열 증가**로 나타납니다. 메모리가 모자라다는 신호가 지연으로 바뀌어 보이는 셈입니다.
 
 ## 진단
 
-### 1. GPU 메모리 사용량 확인
+### 1. GPU 메모리에 KV cache가 얼마나 들어가는가
 
-```bash
-nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv
-```
+H100 80 GB에서 OPT-13B 파라미터 26 GB(Table 1)를 빼면 54 GB가 남습니다. activation과 runtime 예약분을 무시한 상한입니다. 이 값을 800 KiB/token으로 나누면 다음과 같습니다(계산 기록: `kv-arith.log`).
 
-실제 출력은 GPU별 device capacity, reserved memory, process별 사용량을 확인해야 합니다. 이 글에는 `nvidia-smi` 실행 로그가 없습니다.
+| 항목 | 값 |
+|---|---|
+| KV cache에 쓸 수 있는 상한 | 54 GB |
+| token slot | 약 70,779 |
+| 2048 token짜리 요청 | 약 34개 |
 
-### 2. GPU trace로 데이터 이동 원인 구분
+즉 최대 길이 요청이 35개째 들어오는 순간부터 선점이 시작됩니다. 실제 서비스에서는 activation 몫을 빼야 하니 이보다 일찍 시작합니다.
 
-대상 GPU와 지원되는 Nsight Systems 버전에서 실제 server command를 캡처하고, CUDA memcpy, GPU kernels, host synchronization, KV connector activity를 같은 trace에서 구분해야 합니다. 이 장에는 profiler trace가 없으므로 load/swap 지연이나 원인을 제시하지 않습니다.
+### 2. 옮기는 데 얼마나 걸리는가
+
+GPU와 호스트 메모리 사이의 경로는 PCIe입니다. NVIDIA HGX 문서는 8-GPU baseboard에 "Eight Gen5 x16 links"가 있다고 적고, [H100 제품 페이지](https://www.nvidia.com/en-us/data-center/h100/)는 H100 SXM의 interconnect를 "PCIe Gen5: 128GB/s"로 적습니다. 페이지는 이 값이 한 방향인지 양방향 합인지 밝히지 않습니다. 128 GB/s를 한 방향에 모두 쓴다고 쳐도 요청 하나의 KV(800 KiB × 2048 = 1.5625 GiB)를 옮기는 데 13.1 ms가 걸리고, 이것이 오버헤드를 빼지 않은 *하한*입니다.
+
+PagedAttention 7.3절(Figure 19)은 실제로 재 봤습니다. block이 작으면 CPU와 GPU 사이에 작은 전송이 많아져 "limits the effective PCIe bandwidth"하고, 그래서 swapping의 오버헤드가 커진다고 적습니다. 반면 recomputation의 오버헤드는 block 크기와 무관하고, "recomputation overhead is never higher than 20% of swapping's latency"였습니다. block 크기 16~64에서는 두 방식의 end-to-end 성능이 비슷했습니다. vLLM의 기본 block 크기는 16입니다(7.2절).
 
 ### 3. Roofline 비교에 필요한 사양
 
-[Ch 16(메모리 대역폭 분석)](/blog/embedded/performance-engineering/part2-08-memory-bandwidth) Roofline 비교에 사용할 기준 사양:
-
-- H100 SXM 하나의 공식 메모리 대역폭은 3.35 TB/s입니다. 다섯 GPU의 합산 peak 16.75 TB/s는 동시 접근·토폴로지·실효 대역폭을 보장하지 않는 산술 합입니다.
-- PCIe 5.0 x16은 raw 기준 약 64 GB/s per direction이며 protocol overhead와 실제 구현이 payload throughput을 낮춥니다. (출처: [PCI-SIG PCIe 5.0 rate 설명](https://pcisig.com/what-bit-rates-does-pcie-50-specification-support-and-how-does-it-compare-prior-pcie-generations))
-- compute utilization과 memory throughput은 같은 trace 구간의 device metric으로 측정해야 합니다. 이 장에는 해당 측정 결과가 없습니다.
+[2-08(메모리 대역폭 분석)](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)의 Roofline으로 보면 두 경로의 차이가 큽니다. HBM은 GPU당 3.35 TB/s이고, PCIe Gen5는 128 GB/s입니다. 가장 유리하게 잡아도 약 26배 차이입니다. GPU가 KV cache를 직접 CXL 메모리에서 읽게 하는 설계는 이 비율 때문에 성립하기 어렵습니다. CXL 메모리는 GPU 옆의 *작업대*가 아니라 뒤편의 *창고*로 써야 합니다.
 
 ## 원인
 
-70B parameters를 FP16으로 저장하면 weight payload만 단순 계산으로 약 140 GB입니다. KV cache 용량은 model layer/head configuration, token context, concurrent sequences, KV dtype, parallel sharding에 따라 달라지므로 batch number만으로 계산할 수 없습니다. 이 글에는 이를 계산할 configuration이 없습니다.
-
-PCIe 5.0 x16 bandwidth를 bidirectional 합계 64 GB/s라고 표현하지 않습니다. 표준 raw bandwidth는 각 방향 기준이며, memory swap 여부와 양은 serving engine의 구현·trace로 확인해야 합니다.
+정리하면 원인은 두 가지가 겹친 것입니다. 하나는 용량입니다. 파라미터가 고정으로 자리를 차지한 뒤 남는 공간이 동시 요청 수를 정합니다. 다른 하나는 이동 비용입니다. 넘친 KV를 내보냈다가 다시 들여오는 경로가 HBM보다 두 자릿수 느립니다.
 
 ## 해결
 
-### 1. 하드웨어 추가
+### 1. CXL 메모리를 CPU tier 뒤에 두기
 
-가정 구성에 *CXL memory add-in card 2장*을 둡니다. 실제 host 호환성은 확인하지 않았습니다.
+PagedAttention 4.5절의 swapping 설계에는 중요한 성질이 있습니다. "the number of blocks swapped to the CPU RAM never exceeds the number of total physical blocks in the GPU RAM"이라서, CPU 쪽 swap 공간은 GPU의 KV cache 메모리 크기로 묶입니다. 이 시나리오라면 GPU당 54 GB입니다. 이 설계만 놓고 보면 swap 공간 때문에 CXL을 붙일 이유는 없습니다. 호스트 DRAM이 54 GB를 못 내줄 때에만 CXL이 의미가 있습니다.
 
-| 항목 | 값 |
-|------|---|
-| 검토 대상 | Astera Labs A1000 CXL 계열, 실제 revision·DIMM 구성 미정 |
-| 용량 가정 | 카드당2TB nominal, 해당 revision·DIMM 지원은 별도 확인 |
-| 인터페이스 | PCIe 5.0 x16, CXL 2.0 |
-| 카드 수 | 2장 |
-| 총 CXL.mem 가정 | 4TB nominal (2TB × 2) |
-| 실효 지연·대역폭 | 이 글에서 측정하지 않음 |
+현재 vLLM은 그보다 넓은 offload 구조를 갖고 있습니다. 2026-11-16에 확인한 [vLLM KV Offloading Usage Guide](https://docs.vllm.ai/en/latest/features/kv_offloading_usage/)는 `OffloadingConnector`가 완료된 KV block을 더 느리고 큰 tier로 내린다고 설명합니다. "Only the CPU primary tier has direct GPU access"이고, 그 뒤의 secondary tier(`fs`, `obj`, `p2p`)와 GPU 사이의 전송은 "staged through the CPU primary tier"입니다. CXL은 문서에 나오지 않습니다.
 
-카드2장4TB는 이 시나리오의 명목상 용량 가정입니다. 현재 family page만으로 특정 A1000 revision의 최대2TB 지원을 확정하지 않습니다. 실제 DIMM·firmware·host의 지원 용량이나 사용 가능한 NUMA memory·성능 보장과 별도입니다. [Astera Labs A1000/Leo 제품 사양](https://www.asteralabs.com/products/leo-smart-memory-controllers/)과 실제 플랫폼 호환성을 확인해야 합니다.
+그렇다면 CXL 메모리가 들어갈 자리는 *CPU primary tier* 안입니다. CXL 메모리는 Linux에서 CPU 없는 NUMA 노드로 올라오고([3-11](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)), 같은 vLLM 문서는 `SimpleCPUOffloadConnector`의 huge page 절에서 "the memory follows the worker's NUMA policy, for example from `--numa-bind`"라고 적습니다. 다만 이 경로로 CPU tier를 CXL 노드에 두는 설정은 이 글에서 돌려 보지 않았습니다. 이 글의 arm64 QEMU 환경에서는 CXL region 자체가 만들어지지 않았기 때문입니다(3-11).
 
-### 2. 추론 엔진 측 설정 (개념적)
+### 2. Linux tiered memory에 맡길 때의 조건
 
-2026-10-24에 확인한 vLLM 공식 문서는 CPU primary tier와 optional secondary tiers를 지원하는 KV offload connector를 설명합니다. Secondary tier와 GPU 간 이동은 CPU tier를 거칩니다. 해당 문서만으로 CXL NUMA memory가 지원된다고 단정할 수 없으므로 이 글은 실행 가능한 vLLM CXL 설정을 제공하지 않습니다([vLLM KV offloading 문서](https://docs.vllm.ai/en/latest/features/kv_offloading_usage/)).
+커널이 알아서 내리게 하는 방법도 있습니다. v6.12 `Documentation/ABI/testing/sysfs-kernel-mm-numa`는 `/sys/kernel/mm/numa/demotion_enabled`를 "Enable/disable demoting pages during reclaim"으로 설명합니다. fast tier가 압박을 받으면 slow tier로 page를 옮기고, 이 이동은 swap보다 먼저 일어납니다. 같은 문서는 할당한 프로세스의 cpuset 밖 노드로 옮길 수 있어 엄격한 cpuset 보장이 필요한 시스템에서는 켜지 말라고 적습니다. 이 글의 측정 VM에서 이 값은 `false`였습니다.
 
-설계 질문은 hot KV를 GPU memory에 두고 cold data를 더 느린 tier로 옮길 수 있는지입니다. 실제 정책은 선택한 serving engine release와 connector API가 지원하는 tier에 한정해야 합니다. 임의의 `numa:2,3` 설정은 유효 schema가 아닙니다.
-
-### 3. Linux Tiered Memory 설정
-
-Linux에서 CXL memory를 System RAM/NUMA node로 노출하는 방식은 firmware ACPI 정보, kernel configuration, memory zone 등에 좌우됩니다. NUMA demotion은 memory-tier metadata에 따라 reclaim 시 distant node를 선호할 수 있는 커널 동작이지, DAMON이 LLM KV block을 자동 식별·이동한다는 뜻은 아닙니다([CXL early boot 문서](https://docs.kernel.org/driver-api/cxl/linux/early-boot.html), [CXL reclaim 문서](https://docs.kernel.org/driver-api/cxl/allocation/reclaim.html)).
+이 방식은 *reclaim이 일어날 때* 동작하므로, 호스트 DRAM이 넉넉하면 아무것도 내려가지 않습니다. vLLM처럼 애플리케이션이 직접 tier를 고르는 방식과는 결정 주체가 다릅니다.
 
 ## 결과를 검증하는 방법
 
-이 글에는 결과를 입증할 trace, GPU별 memory telemetry, workload profile이 없습니다. 성능 회복을 주장하기 전 같은 model artifact·prompt/context distribution·concurrency·sampling window에서 baseline과 candidate를 비교하고, throughput 및 latency 분포와 GPU/CXL/host memory traffic을 보존해야 합니다.
+이 시나리오의 숫자는 계산값이라, 실제 시스템에서는 다음을 같은 workload로 비교해야 결론을 낼 수 있습니다. PagedAttention 논문이 쓴 지표와 같은 축입니다.
+
+| 비교 | 측정 대상 | 근거 |
+|---|---|---|
+| baseline vs CXL CPU tier | 요청률별 normalized latency | 논문 6절 평가에서 쓴 지표 |
+| swapping vs recomputation | block 크기별 오버헤드 | 논문 7.3절, Figure 19 |
+| CPU tier 위치 | 호스트 DRAM 노드 vs CXL 노드의 swap-in 시간 | 이 글의 계산(13.1 ms 하한)과 비교 |
 
 ## DAMON로 본 access 분포
 
-[Ch 55](/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools)에서 다룬 DAMON은 address range access pattern을 분석하는 도구입니다. 이를 KV block 단위의 access identity 또는 자동 이동 정책으로 간주하지 않습니다. DAMON이 serving process의 메모리 이동을 유발하는지, 각 allocation이 어느 tier에 놓였는지는 별도의 page-migration/NUMA 및 engine 계측으로 확인해야 합니다.
+CPU tier에 내려간 KV block은 sequence가 다시 스케줄되기 전까지 읽히지 않습니다. 이런 메모리는 DAMON으로 보면 0 Hz region으로 나타납니다. [3-12](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)에서 64 MiB hot 영역과 448 MiB cold 영역을 가진 프로그램을 damo 3.4.5로 기록했더니, hot 영역은 200 Hz, cold 영역은 0 Hz(age 16.8~22.9 s)로 정확히 갈렸습니다.
+
+여기서 주의할 점이 있습니다. v6.12 `Documentation/mm/damon/design.rst`에 따르면 가상·물리 주소 모니터링 모두 "PTE Accessed-bit for basic access checks"를 씁니다. DAMON이 보는 것은 PTE의 Accessed bit입니다. GPU의 DMA 전송이 이 기록에 어떻게 나타나는지는 이 글에서 재 보지 않았으므로, DAMON 결과를 KV block의 실제 재사용 빈도로 바로 읽지 않습니다. KV block 단위의 사용 정보는 serving engine 쪽(vLLM의 `eviction_policy`, KV events)이 더 직접적인 출처입니다.
 
 ## 재발 방지
 
-운영에서는 GPU별 reserved/used memory, host/CXL NUMA node 사용량·page migration, per-token throughput, latency percentile, GPU idle/copy activity를 수집할 수 있습니다. 임계값과 자동 batch 조정은 SLO·장치 용량·workload의 반복 측정으로 정해야 합니다. 이 장의 모니터링 임계값·dashboard는 특정 환경에서 검증되지 않았습니다.
+선점은 용량이 모자랄 때마다 다시 일어나니, 두 값을 계속 봐야 합니다. 하나는 GPU의 KV cache 사용률이고, 다른 하나는 선점·swap 횟수입니다. 앞의 계산처럼 H100 한 장에서 OPT-13B의 최대 길이 요청은 34개 언저리에서 GPU가 가득 차므로, 동시 요청 수의 상한을 이 근처에서 정하고 실측으로 조정합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-> ⚠️ "GPU만 빠르면 LLM inference 빨라진다"
+> ⚠️ GPU가 CXL 메모리를 직접 읽게 하기
 
-GPU compute·HBM 용량/대역폭·KV 재사용·interconnect·동기화의 병목은 model·단계·workload에 따라 달라집니다. KV cache만을 모든 inference의 병목으로 단정하지 않습니다.
+HBM 3.35 TB/s와 PCIe Gen5 128 GB/s는 약 26배 차이입니다. CXL 메모리는 KV cache를 *보관*하는 곳이지, attention 계산 중에 읽는 곳이 아닙니다.
 
-> ⚠️ "CXL.mem 추가 = throughput 무조건 향상"
+> ⚠️ "CXL.mem 추가 = throughput 향상"
 
-용량 확장으로 도움이 될 수 있지만, 더 느린 tier의 전송·재사용·동기화 비용 때문에 성능이 나빠질 수도 있습니다. Compute-bound 여부만으로 영향이 없다고 단정할 수 없으며 동일 workload로 비교해야 합니다.
+PagedAttention 4.5절의 swapping 설계에서 CPU 쪽 swap 공간은 GPU KV 메모리 크기로 묶입니다. 호스트 DRAM이 그만큼을 이미 내줄 수 있다면, CXL을 붙여도 swap 용량은 늘지 않습니다.
 
-> ⚠️ Manual KV cache placement에 집착
+> ⚠️ swap만 고려하고 recomputation을 빼먹기
 
-자동 tiering과 application-managed placement 중 무엇이 나은지는 serving engine, page layout, reuse pattern과 측정 결과로 결정합니다. DAMON을 vLLM KV offload의 자동 controller로 간주하지 않습니다.
+PagedAttention 7.3절에서 recomputation 오버헤드는 swapping 지연의 20%를 넘지 않았습니다. 느린 tier를 늘리기 전에 다시 계산하는 쪽이 싼지부터 비교합니다.
 
-> ⚠️ Tier 추가 후 batch size 같은 그대로
+> ⚠️ 작은 block으로 swap
 
-Batch 증가는 메모리 사용량과 latency를 함께 바꿉니다. 기존 batch를 baseline으로 유지한 뒤 서비스 SLO 범위에서 batch·concurrency를 비교합니다. 용량 확대만으로 batch 증가가 유리하다고 결론 내리지 않습니다.
+같은 절(Figure 19)은 block이 작으면 CPU와 GPU 사이에 작은 전송이 많아져 swapping 오버헤드가 커지고, block 크기 16~64에서는 swapping과 recomputation의 end-to-end 성능이 비슷했다고 적습니다. swapping을 쓴다면 vLLM 기본값인 16보다 block을 줄이지 않습니다.
 
 ## 정리
 
-- 5×H100 80 GB와 CXL memory를 가정한 용량 분석 시나리오입니다. batch별 footprint는 실제 serving configuration으로 검증되지 않았습니다.
-- CXL memory expansion, Linux memory placement, vLLM KV offload는 각각 별도 호환성·API·성능 검증이 필요합니다.
-- throughput, batch capacity, latency 결과는 이 문서에서 실측되지 않았습니다.
-- HBM과 CXL memory는 용량·지연·대역폭이 다른 memory tier입니다. 유용성은 workload, software placement, topology와 측정 결과에 달려 있습니다.
-- 재발 방지 기준과 monitoring threshold는 deployment별로 정의해야 하며 이 글에서 설정값을 검증하지 않았습니다.
+- OPT-13B의 KV cache는 800 KB/token, 최대 길이 요청 하나에 1.6 GB입니다(PagedAttention 3절).
+- H100 80 GB 한 장에서 파라미터 26 GB를 빼면, 최대 길이 요청 약 34개에서 KV 공간이 찹니다(계산값).
+- 그 KV를 PCIe Gen5 128 GB/s(NVIDIA 표기)로 옮기면 요청당 13.1 ms가 하한입니다. HBM과의 대역폭 차이는 약 26배입니다.
+- vLLM의 offload에서 GPU와 직접 주고받는 것은 CPU primary tier뿐이므로, CXL 메모리의 자리는 그 tier 안(NUMA 정책)입니다. 이 설정은 돌려 보지 않았습니다.
+- swapping의 대안인 recomputation은 논문에서 swapping 지연의 20% 이하였습니다.
 
 CXL 주제를 더 살펴보려면 [Embedded Security Ch 11~13](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)의 *보안 측면*, [Memory Diagnostics Ch 6~7](/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics)의 *진단 측면*으로 이어집니다.
 
 ## 관련 항목
 
-- [Ch 7: 성능 모델링 — Roofline](/blog/embedded/performance-engineering/part1-07-modeling)
-- [Ch 16: 메모리 대역폭 분석](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)
-- [Ch 47: NVIDIA Nsight Systems](/blog/embedded/performance-engineering/part5-08-nsight)
-- [Ch 54: CXL.mem 지연·대역폭](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)
-- [Ch 55: CXL 성능 프로파일링 도구](/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools)
+- [1-07: 성능 모델링 — Roofline](/blog/embedded/performance-engineering/part1-07-modeling)
+- [2-08: 메모리 대역폭 분석](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)
+- [5-08: NVIDIA Nsight Systems](/blog/embedded/performance-engineering/part5-08-nsight)
+- [3-12: CXL.mem 지연·대역폭 실측](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)
+- [5-11: CXL 성능 프로파일링 도구](/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools)
 - [HBM·GDDR 심화 Ch 8: NPU·GPU에서의 HBM 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)
 - [HBM·GDDR 심화 Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
