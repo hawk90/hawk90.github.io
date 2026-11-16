@@ -1,8 +1,8 @@
 ---
-title: "서보 모터 제어 — PWM 1ms~2ms·Closed Loop·PID"
+title: "서보 모터 제어 — 50 Hz PWM·다채널·Calibration"
 slug: "embedded/modern-recipes/part5-04-servo-motor"
 date: 2026-04-14T09:52:00
-description: "PWM-based 제어 (50Hz, 1~2ms duty)·각도 매핑."
+description: "50 Hz PWM pulse 폭(1.5 ms 중앙)으로 각도 매핑·TIM3 4채널·calibration·smooth move."
 series: "Modern Embedded Recipes"
 seriesOrder: 52
 tags: [recipes, peripheral, servo]
@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-RC car 조향, 로봇 관절, 카메라 pan/tilt처럼 정해진 각도로 움직여야 하는 곳에 hobby servo를 씁니다. servo는 motor와 감속기, 위치 feedback을 안에 갖고 있어 MCU는 pulse 폭으로 목표 각도만 보냅니다.
+RC car 조향, 로봇 관절, 카메라 pan/tilt처럼 정해진 각도로 움직여야 하는 곳에 hobby servo를 씁니다. MCU는 pulse 폭으로 목표 각도만 보냅니다.
 
 이 글은 STM32F407 TIM3의 PWM 채널로 pulse를 만들고, 여러 servo를 한 timer로 다루는 방법과 calibration을 다룹니다. 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall` 경고 없이 빌드되는 것을 확인했고, 각도 → pulse 변환은 host에서 돌려 값을 확인했습니다. servo로 한 측정은 없습니다. servo 쪽 규격(허용 pulse 범위, 주기)은 제조사마다 다르고 이 글이 연 공식 datasheet가 없으므로, 아래 숫자는 코드의 가정으로 읽습니다.
 
@@ -36,7 +36,7 @@ RC car 조향, 로봇 관절, 카메라 pan/tilt처럼 정해진 각도로 움�
 
 ### Multi-channel 제어
 
-STM32F407의 TIM2·TIM3·TIM4는 `stm32f407xx.h`에서 `CCR1`~`CCR4` 네 채널을 가지므로, 같은 50 Hz 설정을 세 timer에 하면 12 channel이 됩니다.
+`stm32f407xx.h`의 `IS_TIM_CC4_INSTANCE`가 TIM2·TIM3·TIM4를 포함하므로 세 timer 모두 CH1~CH4 네 채널을 가지고, 같은 50 Hz 설정을 세 timer에 하면 12 channel이 됩니다.
 
 | Timer | servo |
 | --- | --- |
@@ -49,6 +49,8 @@ STM32F407의 TIM2·TIM3·TIM4는 `stm32f407xx.h`에서 `CCR1`~`CCR4` 네 채널�
 ## 코드 예제
 
 ### 1. 단일 servo
+
+[4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 clock 설정(SYSCLK 168 MHz, APB1 /4 = 42 MHz)에서 APB1 timer clock은 PCLK1의 2배인 84 MHz입니다(`stm32f4xx_ll_rcc.h`의 `LL_RCC_TIM_PRESCALER_TWICE`: "Timers clock to twice PCLK").
 
 ```c
 void servo_init(void) {
@@ -159,21 +161,35 @@ servo마다 중앙과 끝점의 pulse가 다르므로, 각도를 바꿔 가며 �
 
 ```c
 typedef struct {
-    uint16_t min_us;     // 0° or -90°
+    uint16_t min_us;     // -90°
     uint16_t center_us;  // 0° (center)
-    uint16_t max_us;     // 180° or +90°
+    uint16_t max_us;     // +90°
 } servo_cal_t;
 
 static servo_cal_t cal = {550, 1480, 2400};  // example values; measure your servo
 
 void servo_set_angle_cal(int16_t deg) {
     uint16_t pulse;
+    if (deg < -90) deg = -90;
+    if (deg >  90) deg =  90;
     if (deg < 0)
         pulse = cal.center_us + (deg * (cal.center_us - cal.min_us)) / 90;
     else
         pulse = cal.center_us + (deg * (cal.max_us - cal.center_us)) / 90;
     servo_set_us(pulse);
 }
+```
+
+`servo_set_us()`의 `TIM3->CCR1` 쓰기를 변수 대입으로 바꿔 host(clang)에서 `servo_set_angle()`과 `servo_set_angle_cal()`을 돌린 결과입니다. 범위 밖 ±150°는 양쪽 다 끝점으로 clamp됩니다.
+
+```text
+-150 deg ->  500 us (2.5%), cal  550 us
+ -90 deg ->  500 us (2.5%), cal  550 us
+ -45 deg -> 1000 us (5.0%), cal 1015 us
+   0 deg -> 1500 us (7.5%), cal 1480 us
+  45 deg -> 2000 us (10.0%), cal 1940 us
+  90 deg -> 2500 us (12.5%), cal 2400 us
+ 150 deg -> 2500 us (12.5%), cal 2400 us
 ```
 
 ## 측정 / 동작 확인
@@ -192,7 +208,7 @@ servo motor 전류는 MCU용 regulator가 아니라 servo 전원으로 공급하
 
 > ⚠️ 신호 level
 
-STM32 GPIO의 high는 VDD(3.3 V) 근처입니다. servo 입력이 3.3 V를 high로 받는지는 쓰는 servo의 사양으로 확인하고, 아니면 level shifter를 둡니다.
+STM32 GPIO push-pull 출력의 high는 MCU의 VDD 근처입니다(이 글은 VDD = 3.3 V 가정). servo 입력이 3.3 V를 high로 받는지는 쓰는 servo의 사양으로 확인하고, 아니면 level shifter를 둡니다.
 
 > ⚠️ Pulse 범위 초과
 
@@ -202,7 +218,7 @@ STM32 GPIO의 high는 VDD(3.3 V) 근처입니다. servo 입력이 3.3 V를 high�
 
 - 이 글의 코드는 **50 Hz, 1.5 ms 중앙, 1000 µs당 90°**를 가정하고, 실제 center와 endpoint는 calibration합니다.
 - TIM의 **PSC=83, ARR=19999**로 1 µs resolution, 20 ms period.
-- 한 TIM의 **4 channel로 4 servo**. 16 channel 이상은 PCA9685 같은 I2C PWM controller(24 ~ 1526 Hz).
+- 한 TIM의 **4 channel로 4 servo**. 12 channel보다 많으면 PCA9685(16 channel) 같은 I2C PWM controller(24 ~ 1526 Hz).
 - **Calibration** (min/center/max) + **smooth interpolation**으로 부드러운 motion.
 - **servo 전원 분리**, **GND 공통**.
 
