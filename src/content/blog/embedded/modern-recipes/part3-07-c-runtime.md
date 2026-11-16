@@ -45,7 +45,7 @@ GCC driver는 startup을 여러 작은 object로 나눠 사용자 코드 앞뒤�
 | `crtbegin.o` / `crtend.o` | GCC | C++ 지원 코드와 `__dso_handle` 같은 symbol |
 | `crt0.o` | newlib(libgloss) | entry point `_start` |
 
-`crt0.o`가 맨 앞이 아니라 `crti.o`·`crtbegin.o` 뒤에 온다는 점이 이전 판의 표와 다릅니다.
+`crt0.o`는 맨 앞이 아니라 `crti.o`·`crtbegin.o` 뒤에 옵니다.
 
 ### 2) `_start` — newlib ARM crt0의 실제 순서
 
