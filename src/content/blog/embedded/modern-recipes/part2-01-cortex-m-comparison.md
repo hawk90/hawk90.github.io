@@ -55,7 +55,7 @@ topics: ["embedded"]
 | M55 | "in-order four-stage integer pipeline" | Cortex-M55 TRM r1p1 |
 | M7 | "in-order issue, super-scalar pipeline with dynamic branch prediction" | Cortex-M7 TRM r1p2, 1.1.1 |
 
-M4 TRM의 "three stage pipeline"은 *FPU*의 pipeline을 설명하는 항목이라 정수 pipeline 깊이로 옮기면 안 됩니다. M0·M3·M4·M33·M85의 정수 pipeline 단수는 이번에 연 문서에서 찾지 못해 표에 넣지 않았습니다.
+M4 TRM의 "three stage pipeline"은 *FPU*의 pipeline을 설명하는 항목이라 정수 pipeline 깊이로 옮기면 안 됩니다. M0·M3·M4·M33·M85의 정수 pipeline 단수는 이 글에서 확인한 TRM·datasheet에는 정수 pipeline 단수가 없어 표에 넣지 않았습니다.
 
 ### 3) DSP / SIMD / Helium
 
@@ -170,7 +170,7 @@ $ arm-none-eabi-gcc -ffreestanding -O2 -mthumb -mcpu=cortex-m3 -c acle.c
 acle.c:4:14: error: unknown type name 'int16x2_t'; did you mean 'int16_t'?
 ```
 
-실무에서는 CMSIS-DSP의 `arm_fir_q15`를 쓰는 편이 낫습니다. 다만 "코어를 자동으로 감지"하는 것은 아니고, *컴파일 시점*에 `arm_math_types.h`가 `__ARM_FEATURE_DSP`면 `ARM_MATH_DSP`를, `__ARM_FEATURE_MVE`면 `ARM_MATH_MVEI`를 정의하고, `arm_fir_q15.c`는 `#if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)`로 Helium 구현을 고릅니다. `arm_fir_init_q15`의 문서는 `numTaps`가 "even and greater than or equal to 4"여야 하고, `pState` 길이는 `numTaps+blockSize-1`(`ARM_MATH_LOOPUNROLL` 정의 시 `numTaps+blockSize`)이라고 적습니다.
+실무에서는 CMSIS-DSP의 `arm_fir_q15`를 쓰는 편이 낫습니다. 이 라이브러리가 코어를 런타임에 감지하는 것은 아닙니다. *컴파일 시점*에 `arm_math_types.h`가 `__ARM_FEATURE_DSP`면 `ARM_MATH_DSP`를, `__ARM_FEATURE_MVE`면 `ARM_MATH_MVEI`를 정의하고, `arm_fir_q15.c`는 `#if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)`로 Helium 구현을 고릅니다. `arm_fir_init_q15`의 문서는 `numTaps`가 "even and greater than or equal to 4"여야 하고, `pState` 길이는 `numTaps+blockSize-1`(`ARM_MATH_LOOPUNROLL` 정의 시 `numTaps+blockSize`)이라고 적습니다.
 
 ```c
 #include "arm_math.h"
@@ -209,7 +209,7 @@ cortex-m4  (-DARM_MATH_LOOPUNROLL)   2 smlalbb, 6 smlald, 6 smlaldx
 cortex-m55                          24 vmlalva.s16
 ```
 
-같은 소스가 M4에서는 기본 빌드가 `smlalbb`, `ARM_MATH_LOOPUNROLL`을 정의하면 DSP의 dual-MAC `smlald`로, M55에서는 MVE의 `vmlalva.s16`으로 빌드됩니다. 반대로 M55용으로 빌드하면서 `-mfloat-abi=soft`를 쓰면 `__ARM_FEATURE_MVE`가 정의되지 않아 Helium 경로가 통째로 빠집니다.
+같은 소스가 M4 기본 빌드에서는 `smlalbb`, `ARM_MATH_LOOPUNROLL`을 정의하면 DSP의 dual-MAC `smlald`로, M55에서는 MVE의 `vmlalva.s16`으로 빌드됩니다. 반대로 M55용으로 빌드하면서 `-mfloat-abi=soft`를 쓰면 `__ARM_FEATURE_MVE`가 정의되지 않아 Helium 경로가 통째로 빠집니다.
 
 ## 측정 / 비교
 
@@ -251,7 +251,7 @@ GCC 10 release notes는 Armv8.1-M Mainline(`-march=armv8.1-m.main`)과 MVE *beta
 
 > ⚠️ TrustZone 코어에서 secure 분할을 미룸
 
-M33/M55에 Security Extension이 구현돼 있으면 reset 직후 Secure state에서 시작합니다(M33 TRM, M55 TRM 모두 "always resets into Secure state"). Non-secure로 넘기는 코드를 쓰지 않으면 애플리케이션 전체가 Secure에서 돌고, 그러면 TrustZone으로 얻으려던 격리가 없습니다.
+M33/M55에 Security Extension이 구현돼 있으면 reset 직후 Secure state에서 시작합니다(M33 TRM, M55 TRM 모두 "always resets into Secure state"). Non-secure로 넘기는 코드를 쓰지 않으면 애플리케이션 전체가 Secure에서 돌고, 그러면 TrustZone으로 얻으려던 격리를 얻지 못합니다.
 
 > ⚠️ MPU region 수를 코어 이름으로 짐작
 
