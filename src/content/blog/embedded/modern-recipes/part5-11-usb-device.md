@@ -323,9 +323,9 @@ DS8626의 RPU(PA12)가 이미 1.5 ~ 2.1 kΩ입니다. 외부 pull-up을 더하�
 
 ## 정리
 
-- STM32F407 OTG_FS는 **내장 transceiver·내장 DP pull-up·전용 48 MHz**(PLLQ).
+- STM32F407 OTG_FS는 **내장 transceiver·내장 DP pull-up·전용 48 MHz**(PLLQ)를 갖춥니다.
 - TinyUSB는 **세 descriptor callback + `tud_task()` + `OTG_FS_IRQHandler`**로 붙습니다.
-- CDC ACM은 **IAD + 제어 interface(interrupt EP) + data interface(bulk EP 2개)**, wTotalLength 75.
+- CDC ACM은 **IAD + 제어 interface(interrupt EP) + data interface(bulk EP 2개)**로 구성되고, wTotalLength는 75입니다.
 - 빌드 결과는 **flash 12.4 KB, RAM 941 byte**(TinyUSB 0.18.0, -O2).
 - descriptor는 **host에서 byte로 풀어** 보드 없이도 확인할 수 있습니다.
 
