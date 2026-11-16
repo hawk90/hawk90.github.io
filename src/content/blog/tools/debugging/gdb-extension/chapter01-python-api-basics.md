@@ -283,7 +283,7 @@ const int | int
 volatile int | const int
 ```
 
-마지막 줄이 의외였습니다. `const().volatile()`가 `const volatile int`가 아니라 `volatile int`를 줍니다. GDB 16.3 `gdb/python/py-type.c` 749행의 `typy_volatile`이 `make_cv_type (0, 1, type, NULL)`, 즉 const 플래그를 0으로 넘기기 때문입니다. 두 한정자를 모두 붙인 타입이 필요하면 `gdb.lookup_type("const volatile int")`처럼 이름으로 찾는 편이 확실합니다.
+마지막 줄이 의외였습니다. `const().volatile()`가 `const volatile int`가 아니라 `volatile int`를 줍니다. GDB 16.3 `gdb/python/py-type.c`의 `typy_volatile`이 749행에서 `make_cv_type (0, 1, type, NULL)`, 즉 const 플래그를 0으로 넘기기 때문입니다. 두 한정자를 모두 붙인 타입이 필요하면 `gdb.parse_and_eval("(const volatile int)0").type`처럼 캐스트 식에서 얻습니다. 이렇게 하면 `const volatile int`가 나옵니다. `gdb.lookup_type("const volatile int")`는 `No type named const volatile int.` 오류를 냅니다.
 
 pretty-printer는 `strip_typedefs()`를 자주 씁니다. 같은 컨테이너를 가리키는 typedef 이름이 여러 개여도 한 패턴으로 처리할 수 있기 때문입니다.
 
@@ -452,7 +452,7 @@ GDB 16.3에 있는 `SYMBOL_LOC_*` 상수입니다.
 [('a', 14), ('b', 14), ('s', 14), ('local_var', 14)] 14
 ```
 
-GCC가 만든 DWARF에서는 인자와 지역 변수가 `SYMBOL_LOC_ARG`·`SYMBOL_LOC_LOCAL`이 아니라 모두 `SYMBOL_LOC_COMPUTED`(14)였습니다. 매뉴얼은 이 값을 "computed location", 즉 DWARF location expression으로 계산하는 위치라고 설명합니다.
+GCC가 만든 DWARF에서는 인자와 지역 변수가 `SYMBOL_LOC_ARG`·`SYMBOL_LOC_LOCAL`이 아니라 모두 `SYMBOL_LOC_COMPUTED`(14)였습니다. 매뉴얼은 이 값을 "The value's address is a computed location."이라고만 설명합니다.
 
 `<optimized out>` 판정도 `addr_class`로 하면 안 됩니다. 같은 VM에서 `gcc -g -O2`로 빌드한 작은 함수의 변수를 찍어 보면, 최적화로 사라진 변수도 `addr_class`는 14이고 `Value.is_optimized_out`만 `True`입니다.
 
@@ -488,7 +488,7 @@ def list_all_breakpoints():
 1       breakpoint     keep y   0x0000aaaaaaaa0d18 in process(int, int, MyStruct const*) at inv.cpp:22
 ```
 
-CLI 출력 형식은 GDB 버전에 따라 바뀔 수 있는 사람용 텍스트입니다. breakpoint 목록이 필요하면 `gdb.breakpoints()`가 객체 목록을 주므로 그쪽이 더 단단합니다.
+breakpoint 목록이 필요하면 CLI 텍스트를 파싱하지 말고 `gdb.breakpoints()`가 주는 객체 목록을 씁니다.
 
 ## 단순 출력
 

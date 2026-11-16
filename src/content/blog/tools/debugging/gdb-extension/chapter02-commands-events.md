@@ -141,7 +141,7 @@ symcmd process_request
 
 첫째, 생성자에 `completer_class`를 주면 `complete()`는 불리지 않습니다. GDB 16.3 매뉴얼 CLI Commands In Python 절은 `completer_class`가 *주어지지 않았을 때만* `complete` 메서드로 완성한다고 적습니다. `gdb.COMPLETE_NONE`을 같이 넘긴 판에서는 `complete svc st`가 아무것도 내지 않았습니다.
 
-둘째, `word`가 `None`으로 들어오는 호출이 있습니다. 매뉴얼은 두 인자가 모두 문자열이라고 적지만, `gdb/python/py-cmd.c`의 `cmdpy_completer_handle_brkchars`(228행)는 단어 경계를 정하는 단계에서 `word`를 `NULL`로 넘기고, `cmdpy_completer_helper`(191~194행)가 이를 Python `None`으로 바꿉니다. 가드 없이 `c.startswith(word)`를 쓰면 다음처럼 됩니다.
+둘째, `word`가 `None`으로 들어오는 호출이 있습니다. 매뉴얼은 두 인자가 모두 문자열이라고 적지만, 단어 경계를 정하는 brkchars 단계(`gdb/python/py-cmd.c`의 진입점 `cmdpy_completer_handle_brkchars`, 228행)에서는 `word`가 `NULL`로 들어오고, `cmdpy_completer_helper`(191~194행)가 이를 Python `None`으로 바꿉니다. 가드 없이 `c.startswith(word)`를 쓰면 다음처럼 됩니다.
 
 ```text
 (gdb) complete svc st
@@ -553,7 +553,7 @@ Breakpoint 1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
 1       breakpoint     keep y   0x0000fffff7e67804 in __GI___libc_malloc at ./malloc/malloc.c:3392
 ```
 
-`BigLibcMalloc`은 `BigMalloc`에서 spec만 `"__libc_malloc"`으로 바꾼 클래스입니다. 이 이름은 Debian 13 glibc 2.41 기준이고 libc 구현마다 다를 수 있으므로, 다른 환경에서는 `info breakpoints`의 위치 수와 `bt`로 먼저 확인합니다.
+`BigLibcMalloc`은 `BigMalloc`에서 spec만 `"__libc_malloc"`으로 바꾼 클래스입니다. 이 이름은 Debian 13 glibc 2.41에서 확인한 것이므로, 다른 환경에서는 `info breakpoints`의 위치 수와 `bt`로 먼저 확인합니다.
 
 ### Watchpoint 서브클래스
 
@@ -706,7 +706,7 @@ handle_packet: 3 calls
 send_response: 3 calls
 ```
 
-breakpoint는 함수의 *심볼 위치*에 걸리므로 셀 수 있는 것도 그 위치를 지난 횟수입니다. `-O2`로 빌드해 함수가 호출 지점에 인라인되면 그 호출은 세어지지 않습니다. 이 프로그램은 `-O0`이라 세 번이 정확합니다.
+breakpoint는 함수의 *심볼 위치*에 걸리므로 셀 수 있는 것도 그 위치를 지난 횟수입니다. `-O2`에서 함수가 인라인되면 GDB는 인라인된 자리마다 위치를 따로 겁니다. 같은 VM에서 `-O2`로 빌드한 작은 프로그램은 위치 3곳에서 3회를 셌습니다. 다만 호출 루프째 펼쳐진 변형에서는 위치 1곳, 1회만 세어졌으므로, 최적화 빌드에서는 `maint info breakpoints`로 위치를 먼저 확인합니다. 이 프로그램은 `-O0`이라 세 번이 정확합니다.
 
 ## 헤드리스 모드 — batch
 

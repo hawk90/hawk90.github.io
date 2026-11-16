@@ -45,6 +45,8 @@ int render(struct image *img) {
 
 ```text
 ┌─img.c───────────────────────────────────────────────────────────────────────┐
+│       11 int render(struct image *img) {
+...
 │       16                 img->data[(y * img->width + x) * 3 + c] = checker(x, y, c);
 │       17                 lit += img->data[(y * img->width + x) * 3 + c] > 128;
 │       18             }
@@ -166,14 +168,14 @@ README의 설치 방법은 `wget -P ~ https://github.com/cyrus-and/gdb-dashboard
 | 도구 | README의 설명 |
 |---|------|
 | [GEF](https://github.com/hugsy/gef) | x86/64, ARM, MIPS, PowerPC, SPARC용 명령 모음. exploit 개발자와 리버스 엔지니어용이며 GDB 10.0 이상과 Python 3.10 이상 바인딩이 필요 |
-| [pwndbg](https://github.com/pwndbg/pwndbg) | GDB와 LLDB 플러그인. GDB에는 Python 모듈로 로드되고 LLDB에는 REPL 인터페이스로 동작 |
+| [pwndbg](https://github.com/pwndbg/pwndbg) | GDB와 LLDB 플러그인. GDB에는 Python 모듈로 로드되고 LLDB에는 REPL 인터페이스로 동작. LLDB 구현은 아직 초기 단계라고 명시. qemu-user 에뮬레이션은 GDB에서만 |
 | [PEDA](https://github.com/longld/peda) | Linux/Unix exploit 개발용 Python GDB 스크립트. README의 버전 1.0은 Black Hat USA 2012 공개판이고 요구 사항이 GDB 7.x와 Python 2.6+ |
 
 PEDA의 요구 사항(Python 2.6+)은 Python 3을 내장한 최근 GDB와 맞지 않습니다. Debian 13의 GDB 16.3은 Python 3.13.5를 내장합니다([Ch 1](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics)).
 
 ### 명령은 확장마다 다름
 
-GEF 2026.01 릴리스의 `gef.py`(11945줄)를 받아 등록된 명령을 세어 보니 `_cmdline_`이 102개였고, 그중에는 `context`, `vmmap`, `xinfo`, `pattern`, `checksec`, `hexdump`, `memory watch`, `heap`, `heap bins` 등이 있었습니다. 예를 들어 glibc bin 목록은 GEF에서 `heap bins`입니다. 다른 확장의 같은 기능은 이름과 인자가 다르므로 확장을 바꾸면 명령도 그 문서에서 다시 찾습니다. 여러 컨텍스트 확장을 한 세션에 동시에 source하면 둘 다 `stop` 이벤트에 출력을 붙이고 프롬프트를 바꾸려 하므로, 한 번에 하나만 씁니다.
+GEF 2026.01 릴리스의 `gef.py`(11945줄)를 받아 등록된 명령을 세어 보니 `_cmdline_`이 102개였고, 그중에는 `context`, `vmmap`, `xinfo`, `pattern`, `checksec`, `hexdump`, `memory watch`, `heap`, `heap bins` 등이 있었습니다. 예를 들어 glibc bin 목록은 GEF에서 `heap bins`입니다. 다른 확장의 같은 기능은 이름과 인자가 다르므로 확장을 바꾸면 명령도 그 문서에서 다시 찾습니다. 여러 컨텍스트 확장을 한 세션에 동시에 source하면 둘 다 `stop` 이벤트에 출력을 붙이고 프롬프트를 바꾸려 하므로(gef.py 4140·11894행, dashboard `.gdbinit` 463·639행), 한 번에 하나만 씁니다.
 
 ## VSCode + cppdbg / CodeLLDB
 
@@ -262,11 +264,13 @@ VS Code Linux용 키보드 단축키 표(code.visualstudio.com/shortcuts/keyboar
 
 ### 조건부 BP / Logpoint
 
-VS Code 디버깅 문서에 따르면 breakpoint에는 세 가지 조건을 붙일 수 있습니다.
+VS Code 디버깅 문서의 Conditional breakpoints 절에 따르면 breakpoint에는 세 가지 조건을 붙일 수 있습니다.
 
 - **Expression** — 식이 참일 때 멈춥니다.
-- **Hit Count** — 정해진 횟수만큼 도달한 뒤 멈춥니다. 문서는 "지원 문법이 디버거마다 다르다"고 적습니다.
-- **Log Message** — 멈추지 않고 Debug Console에 메시지를 씁니다. `{}` 안의 식이 치환되고, 디버거 확장이 구현했을 때만 쓸 수 있습니다.
+- **Hit count** — 정해진 횟수만큼 도달한 뒤 멈춥니다. 문서는 "지원 문법이 디버거마다 다르다"고 적습니다.
+- **Wait for breakpoint** — 다른 breakpoint가 걸린 뒤에야 활성화됩니다(triggered breakpoint).
+
+Logpoint는 같은 문서의 별도 절입니다. 멈추지 않고 Debug Console에 메시지를 쓰며, `{}` 안의 식이 치환되고, 디버거 확장이 구현했을 때만 쓸 수 있습니다.
 
 Hit Count 문법이 디버거마다 다르다는 경고는 실제로 크게 갈립니다. [Ch 5](/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol)에서 GDB의 내장 DAP는 hit 조건을 GDB의 ignore count로 해석해 `">= 5"`를 문법 오류로 거부했습니다.
 
@@ -317,7 +321,7 @@ dap.configurations.c = dap.configurations.cpp
 dap.configurations.rust = dap.configurations.cpp
 ```
 
-Debian 13의 `lldb` 패키지(1:19.0-63)를 설치해 보니 실행 파일은 `/usr/bin/lldb-dap-19`뿐이고 PATH에 `lldb-dap`이라는 이름은 없었습니다([GDB and LLDB Ch 10](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends)도 같은 이름을 씁니다). Debian에서는 위 설정의 `'lldb-dap'`을 `'lldb-dap-19'`로 바꿉니다. `dap.txt`의 `pick_process` 절은 이 함수를 `pid`에 넣어 프로세스를 고르게 하는 예를 듭니다. [Ch 5](/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol)의 `gdb -i=dap` 설정으로 바꿔 쓸 수도 있습니다.
+Debian 13의 `lldb` 패키지(1:19.0-63)를 설치해 보니 실행 파일은 `/usr/bin/lldb-dap-19`뿐이고 PATH에 `lldb-dap`이라는 이름은 없었습니다([GDB and LLDB Ch 10](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends)도 같은 이름을 씁니다). Debian에서는 위 설정의 `'lldb-dap'`을 `'lldb-dap-19'`로 바꿉니다. `dap.txt`의 `pick_process` 절은 이 함수를 프로세스 pid를 고르는 프롬프트라고 적습니다. [Ch 5](/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol)의 `gdb -i=dap` 설정으로 바꿔 쓸 수도 있습니다.
 
 [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) README는 nvim-dap의 listener에 `dapui.open()`·`dapui.close()`를 연결하는 다음 형태를 예로 듭니다.
 
@@ -368,7 +372,7 @@ breakpoint 목록은 `breakpoints`가 아니라 `list_breakpoints`입니다.
 
 ## Emacs — dap-mode
 
-[dap-mode](https://github.com/emacs-lsp/dap-mode)의 Configuration 문서는 `dap-auto-configure-mode`와 어댑터별 모듈(`dap-gdb`, `dap-lldb`, `dap-cpptools` 등), 그리고 디버그 구성을 등록하는 `dap-register-debug-template`을 설명합니다. 이 장에서 Emacs는 실행하지 않았습니다.
+[dap-mode](https://github.com/emacs-lsp/dap-mode)의 Configuration 문서는 `dap-auto-configure-mode`와 어댑터별 모듈(`dap-gdb`, `dap-lldb`, `dap-cpptools` 등), 그리고 디버그 구성을 등록하는 `dap-register-debug-template`을 설명합니다. `dap-cpptools`가 등록하는 디버거 타입은 `cpptools`입니다. 이 장에서 Emacs는 실행하지 않았습니다.
 
 ```elisp
 (use-package dap-mode
@@ -380,7 +384,7 @@ breakpoint 목록은 `breakpoints`가 아니라 `list_breakpoints`입니다.
 
 (dap-register-debug-template
  "C++ Launch"
- (list :type "cppdbg"
+ (list :type "cpptools"
        :request "launch"
        :name "C++ Launch"
        :MIMode "gdb"

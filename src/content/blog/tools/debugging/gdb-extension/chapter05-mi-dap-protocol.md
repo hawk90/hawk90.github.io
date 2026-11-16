@@ -36,7 +36,7 @@ int handle(int i) {
 
 ## GDB/MI — Machine Interface
 
-CLI(`(gdb)` 프롬프트의 일반 명령)는 사람용입니다. `info breakpoints`의 열 배치는 버전마다 바뀔 수 있고 파싱 규칙이 정해져 있지 않습니다. MI는 기계용이라 모든 응답이 정해진 문법(GDB 16.3 매뉴얼 GDB/MI Output Syntax 절)을 따릅니다.
+CLI(`(gdb)` 프롬프트의 일반 명령)는 사람용이고, MI는 기계용이라 모든 응답이 정해진 문법(GDB 16.3 매뉴얼 GDB/MI Output Syntax 절)을 따릅니다.
 
 ### 활성화
 

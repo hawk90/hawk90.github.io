@@ -437,7 +437,7 @@ Breakpoint 2, std::vector<int, std::allocator<int> >::size (this=0xfffffffff998)
 The program being debugged stopped while in a function called from GDB.
 ```
 
-xmethod가 켜져 있을 때는 같은 `print v.size()`가 이 breakpoint를 건드리지 않고 3을 냈습니다. 매뉴얼이 "살아 있는 프로그램에서도 xmethod는 디버기를 실행하지 않으므로 상태를 흔들지 않는다"고 적는 차이가 이것입니다.
+xmethod가 켜져 있을 때는 같은 `print v.size()`가 이 breakpoint를 건드리지 않고 3을 냈습니다. 매뉴얼이 살아 있는 프로그램에서도 xmethod 호출은 디버기를 실행할 필요가 없다("which can potentially perturb its state")고 적는 차이가 이것입니다.
 
 ## MI 출력 — IDE 트리
 

@@ -207,7 +207,7 @@ class DropThisDecorator(FrameDecorator):
 
 ## Unwinder — CFI 없이 콜스택 풀기
 
-filter와 달리 unwinder는 표시가 아니라 *호출자 프레임의 레지스터와 프레임 ID*를 GDB에 알려 줍니다. GDB는 보통 DWARF CFI(`.eh_frame`/`.debug_frame`)로 호출자를 찾고, 없으면 아키텍처별 prologue 분석으로 짐작합니다. 둘 다 실패하는 코드가 손으로 짠 어셈블리와 JIT 코드입니다.
+filter와 달리 unwinder는 표시가 아니라 *호출자 프레임의 레지스터와 프레임 ID*를 GDB에 알려 줍니다. GDB 16.3 매뉴얼 `maint set dwarf unwinders` 항목에 따르면 GDB는 DWARF frame unwinder로 backtrace를 만들고, DWARF 정보가 없을 때는 대개 함수 prologue 분석인 두 번째 방법을 씁니다. 아래 trampoline은 CFI가 없고 스택도 표준과 다르게 써서, 두 방법이 모두 빗나간 예입니다.
 
 ### 실패하는 예
 
