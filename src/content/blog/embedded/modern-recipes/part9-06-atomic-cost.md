@@ -74,6 +74,7 @@ done
 ```
 
 ```text
+$ g++ --version | head -1 && bash orders.sh
 g++ (Debian 14.2.0-19) 14.2.0
 ### g++ -std=c++17 -O2 -march=armv8-a -mno-outline-atomics -c orders.cpp
 load_relaxed   ldr x0, [x0]
@@ -95,11 +96,31 @@ store_seq_cst  stlr x0, [x1]
 add_relaxed    bl 0 <__aarch64_ldadd8_relax>
 add_seq_cst    bl 0 <__aarch64_ldadd8_acq_rel>
 fence_seq_cst  dmb ish
+### g++ -std=c++17 -O2 -march=armv8.1-a -c orders.cpp
+load_relaxed   ldr x0, [x0]
+load_acquire   ldar x0, [x0]
+load_seq_cst   ldar x0, [x0]
+store_relaxed  str x0, [x1]
+store_release  stlr x0, [x1]
+store_seq_cst  stlr x0, [x1]
+add_relaxed    ldadd x0, x0, [x1]
+add_seq_cst    ldaddal x0, x0, [x1]
+fence_seq_cst  dmb ish
+### g++ -std=c++17 -O2 -march=armv8.3-a+rcpc -c orders.cpp
+load_relaxed   ldr x0, [x0]
+load_acquire   ldapr x0, [x0]
+load_seq_cst   ldar x0, [x0]
+store_relaxed  str x0, [x1]
+store_release  stlr x0, [x1]
+store_seq_cst  stlr x0, [x1]
+add_relaxed    ldadd x0, x0, [x1]
+add_seq_cst    ldaddal x0, x0, [x1]
+fence_seq_cst  dmb ish
 ```
 
 읽을 점은 네 가지입니다.
 
-- **seq_cst store는 `stlr` 하나입니다.** release store와 같은 명령이고, `dmb`가 붙지 않았습니다. seq_cst load도 `ldar`로 acquire load와 같습니다. 즉 GCC 14는 AArch64에서 seq_cst load/store를 별도 barrier 없이 이 두 명령으로 구현합니다. 그것으로 충분한 이유는 Arm 아키텍처 매뉴얼의 메모리 모델에 있고, 이 글은 그 문서를 직접 확인하지 않았습니다.
+- **seq_cst store는 `stlr` 하나입니다.** release store와 같은 명령이고, `dmb`가 붙지 않았습니다. seq_cst load도 `ldar`로 acquire load와 같습니다. 즉 GCC 14는 AArch64에서 seq_cst load/store를 별도 barrier 없이 이 두 명령으로 구현합니다. 실제로 [9-04](/blog/embedded/modern-recipes/part9-04-hazard-pointer)의 store buffering 실험(Apple clang 21, M2 Pro)에서 seq_cst 판은 500만 번 중 두 load가 함께 0을 본 적이 없었고, acquire load가 `ldapr`로 컴파일된 release/acquire 판은 4,986,231번 봤습니다.
 - **RCpc(`+rcpc`)가 있으면 acquire load만 `ldapr`로 바뀝니다.** seq_cst load는 여전히 `ldar`입니다. Acquire와 seq_cst가 명령 수준에서 갈라지는 곳은 이 한 군데입니다.
 - **`fetch_add`는 ARMv8.0에서 `ldxr`/`stxr` 재시도 루프, ARMv8.1에서 `ldadd`/`ldaddal` 한 명령입니다.**
 - **`-march=armv8-a`만 주면 GCC 14는 `__aarch64_ldadd8_relax` 같은 함수를 부릅니다.** GCC 14.2 문서는 `-moutline-atomics`가 "on by default"이고, 이 helper가 실행 시점에 LSE를 쓸 수 있는지 보고 아니면 load/store-exclusive를 쓴다고 적습니다. `-march=armv8.1-a`나 `+lse`를 주면 LSE 명령을 직접 씁니다(GCC 14.2.0 manual, AArch64 Options, `-moutline-atomics`).
@@ -252,7 +273,7 @@ single thread, 200000000 ops each
 
 결과는 흔한 조언과 다른 곳이 많습니다.
 
-- **경합 없는 한 스레드에서 load·store는 memory order와 상관없이 약 0.3 ns였습니다.** `seq_cst` store도 `stlr`이므로 release store와 같았고, 루프 안의 `dmb ish`(fence seq_cst)도 약 0.3 ns였습니다. 이 루프에는 기다릴 메모리 연산이 거의 없으므로 fence가 막을 것이 없었기 때문입니다. "seq_cst는 DMB 때문에 비싸다"는 이 측정에서는 나타나지 않았습니다.
+- **경합 없는 한 스레드에서 load·store는 memory order와 상관없이 약 0.3 ns였습니다.** `seq_cst` store도 `stlr`이므로 release store와 같았고, 루프 안의 `dmb ish`(fence seq_cst)도 약 0.3 ns였습니다. "seq_cst는 DMB 때문에 비싸다"는 이 측정에서는 나타나지 않았습니다.
 - **`fetch_add`는 relaxed 약 2.1 ns, seq_cst 약 4.0~4.7 ns였습니다.** RMW부터는 memory order가 비용에 보입니다.
 - **스레드 4개가 공유 카운터 하나를 올리면 LL/SC 판이 118~214, LSE 판이 71~82 M incs/s였습니다.** 이 guest에서는 LSE가 경합 상황에서 오히려 느렸습니다. "LSE가 contention에 강하다"는 이 측정으로는 뒷받침되지 않습니다.
 - **스레드마다 자기 shard를 올리면 1,820~1,890 M incs/s로, 공유 카운터보다 열 배 이상 빨랐습니다.** `std::mutex`는 29~36 M incs/s였습니다. 비용을 좌우한 것은 memory order도 명령 종류도 아니고 cache line을 공유하느냐였습니다.
