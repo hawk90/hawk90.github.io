@@ -44,6 +44,8 @@ qemu-system-aarch64 -M virt,gic-version=3,cxl=on -m 4g,maxmem=8g,slots=4 -cpu ma
 
 LTSSM(Link Training and Status State Machine)은 PCIe 링크를 학습시키는 상태 머신입니다. 상태별 정의는 PCI-SIG의 PCIe Base Specification에 있지만, 이 글을 쓰며 그 문서를 열람하지 못해 상태별 동작 설명은 적지 않습니다.
 
+CXL이 끼어드는 지점은 CXL 3.1 명세가 직접 정합니다. 6.4.1.1 Hardware Autonomous Mode Negotiation은 Flex Bus 모드(CXL로 동작할지) 협상이 *링크 학습 중 LTSSM Configuration 상태에서, L0에 들어가기 전, Gen 1 속도로* 일어나며, PCIe Base Specification의 alternate protocol negotiation 방식대로 modified TS1/TS2 ordered set을 주고받는다고 적습니다. Downstream Port가 TS1으로 Flex Bus 능력을 알리고, Upstream Port가 제안하고, 호스트가 modified TS2로 최종 결정을 보냅니다. 같은 절은 retimer가 있으면 협상 전에 소프트웨어가 Flex Bus Port DVSEC에 그 존재를 써 둬야 한다고 요구합니다. 그래서 CXL 모드로 올라오지 않는 링크는 PCIe 링크 문제와 함께 이 협상 단계와 Flex Bus Port DVSEC 설정을 봐야 합니다.
+
 현재 상태는 *컨트롤러 레지스터*로만 볼 수 있고, 위치와 인코딩은 컨트롤러마다 다릅니다. 예를 들어 Linux의 Synopsys DesignWare PCIe 드라이버(`drivers/pci/controller/dwc/pcie-designware.h`)는 `PCIE_PORT_DEBUG0`(0x728)의 비트 [5:0]에서 LTSSM 상태를 읽고(`PORT_LOGIC_LTSSM_STATE_MASK 0x3f`), 그 값을 `DW_PCIE_LTSSM_DETECT_QUIET = 0x0`, `DW_PCIE_LTSSM_DETECT_ACT = 0x1`, `DW_PCIE_LTSSM_L0 = 0x11`, `DW_PCIE_LTSSM_L2_IDLE = 0x15`로 해석합니다. 다른 컨트롤러라면 그 SoC의 레퍼런스 매뉴얼과 해당 Linux 드라이버에서 같은 정보를 찾아야 합니다.
 
 ## 물리 계층 캡처
@@ -104,7 +106,7 @@ CXL 메모리 디바이스는 클래스 코드 0x0502로 보이고, `lspci -vvv`
 	Kernel driver in use: cxl_pci
 ```
 
-`Vendor=1e98`의 DVSEC들이 CXL 능력입니다. ID 0000은 CXL 디바이스 DVSEC(`Mem+`가 CXL.mem 지원), ID 0008은 레지스터 위치(register locator), ID 0005는 GPF입니다. 루트 포트에는 ID 0003 `CXL Extensions DVSEC for Ports`가 보였습니다.
+`Vendor=1e98`의 DVSEC들이 CXL 능력이고, ID 배정은 CXL 3.1 Table 8-2 CXL DVSEC ID Assignment에 있습니다. 0000h는 PCIe DVSEC for CXL Devices(`Mem+`가 CXL.mem 지원), 0005h는 GPF DVSEC for CXL Devices, 0008h는 Register Locator DVSEC입니다. 디바이스와 루트 포트 모두에 보인 0007h는 위에서 말한 PCIe DVSEC for Flex Bus Port이고, 루트 포트의 0003h는 CXL Extensions DVSEC for Ports입니다.
 
 Linux `cxl_pci`(`drivers/cxl/pci.c`)는 CXL 디바이스 DVSEC을 찾지 못하면 `Device DVSEC not present, skip CXL.mem init`을 남깁니다. 이 실험의 디바이스는 DVSEC이 있어 그 메시지는 나오지 않았습니다.
 
@@ -224,6 +226,8 @@ $ cxl list -M -D -P -T -u
 Ch 9 — CXL 디바이스 트러블슈팅. 이벤트 레코드·poison list를 QEMU에서 직접 주입하며 추적합니다.
 
 ## 관련 항목
+
+- Compute Express Link Specification Revision 3.1, Version 1.0 (August 2023, publicly-available evaluation copy) — 6.4.1.1, Table 8-2. © 2019-2023 COMPUTE EXPRESS LINK CONSORTIUM, INC. ALL RIGHTS RESERVED.
 
 - [Ch 7: RTOS-aware 디버깅과 트러블슈팅](/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting)
 - [Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot)
