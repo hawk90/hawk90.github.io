@@ -77,7 +77,7 @@ RTOS의 경우 task마다 별도 stack이 있습니다. FreeRTOS를 예로 들�
 
 ### 5) Stack 사용량 측정
 
-stack을 알려진 값으로 칠해 두고, 나중에 칠이 남아 있는 지점까지 세면 가장 깊게 쓴 지점(high water mark)이 나옵니다. 이전 판은 칠하는 경계로 `__get_PSP()`를 썼는데, `main`은 reset 직후 MSP로 도므로 PSP가 아니라 현재 SP를 기준으로 해야 합니다.
+stack을 알려진 값으로 칠해 두고, 나중에 칠이 남아 있는 지점까지 세면 가장 깊게 쓴 지점(high water mark)이 나옵니다. 칠하는 경계는 `__get_PSP()`가 아니라 현재 SP입니다. `main`은 reset 직후 MSP로 돌기 때문입니다.
 
 ```c
 extern uint32_t _sstack, _estack;
@@ -115,7 +115,7 @@ burn(10)과 burn(40)의 차이 0x870(2160)은 정확히 30 frame × 72 byte입�
 | newlib malloc | 표준 | fragmentation |
 | FreeRTOS heap_4 | free 때 인접 block을 합쳐 fragmentation을 줄임 | `configTOTAL_HEAP_SIZE` 크기의 `ucHeap` 배열 안에서만 할당 |
 
-작은 시스템에서는 heap을 안 쓰는 것도 흔합니다. 모든 buffer를 static으로.
+작은 시스템에서는 heap을 안 쓰는 것도 흔합니다. 모든 buffer를 static으로 둡니다.
 
 ## 코드 / 실제 사용 예
 
@@ -205,15 +205,15 @@ heap의 5 word가 바뀌었지만 fault는 없었고 프로그램은 정상 종�
 
 > ⚠️ Recursive 함수의 stack 폭증
 
-재귀 깊이가 깊으면 stack을 빠르게 소진합니다. 임베디드는 가능한 한 iteration으로 변환.
+재귀 깊이가 깊으면 stack을 빠르게 소진합니다. 임베디드에서는 가능한 한 반복문으로 바꿉니다.
 
 > ⚠️ 큰 local array
 
-`void f(void) { char buf[8192]; ... }` 같은 큰 local은 stack을 한 번에 차지. static 또는 heap으로 이동.
+`void f(void) { char buf[8192]; ... }` 같은 큰 local은 stack을 한 번에 차지합니다. static이나 heap으로 옮깁니다.
 
 > ⚠️ Heap fragmentation
 
-malloc/free를 반복하면 작은 hole이 많이 생겨 큰 할당이 실패. 임베디드는 가능한 lifetime이 짧은 객체만 heap에 두거나, pool allocator 사용.
+malloc/free를 반복하면 작은 hole이 많이 생겨 큰 할당이 실패합니다. 임베디드에서는 되도록 lifetime이 짧은 객체만 heap에 두거나 pool allocator를 씁니다.
 
 > ⚠️ `_end` 위치 오해
 
@@ -224,7 +224,7 @@ malloc/free를 반복하면 작은 hole이 많이 생겨 큰 할당이 실패. �
 - RAM에는 보통 .data, .bss, heap, stack이 배치되지만 실제 순서와 영역은 linker script·RTOS·메모리 보호 설정에 따라 달라집니다.
 - heap은 위로, stack은 아래로 자라며, 겹쳐도 fault 없이 데이터가 바뀝니다(위 실행에서 heap 5 word).
 - linker script에 `_Min_Heap_Size`, `_Min_Stack_Size`를 명시해 영역을 확보합니다.
-- Stack 사용량은 painting 기법 또는 `-Wstack-usage`로 측정.
+- Stack 사용량은 painting 기법이나 `-Wstack-usage`로 잽니다.
 - 작은 임베디드는 heap을 안 쓰고 static buffer만 쓰기도 합니다.
 - ASSERT로 빌드 시점에 RAM overflow를 잡을 수 있습니다.
 
