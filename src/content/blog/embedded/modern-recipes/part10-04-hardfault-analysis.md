@@ -267,7 +267,7 @@ CFSR의 비트는 1을 써야 지워집니다(ARMv7-M ARM B3.2.15의 각 sub-reg
 
 ## 정리
 
-- HardFault는 stacked frame과 CFSR에 모든 단서를 남깁니다.
+- HardFault의 단서는 stacked frame과 CFSR에 남습니다.
 - LR (EXC_RETURN) 비트 2로 MSP/PSP를 골라 stacked frame을 잡습니다.
 - precise fault에서 stacked PC는 fault를 낸 명령입니다(CASE 3·5). INVSTATE는 분기 대상이 PC이고 원인은 stacked LR 쪽입니다(CASE 4). imprecise bus fault는 PC가 뒤에 있습니다.
 - CFSR을 BFSR/UFSR/MMFSR로 나눠 읽고 BFAR/MMFAR을 함께 봅니다. 별도 핸들러가 없으면 `HFSR.FORCED`가 섭니다.
