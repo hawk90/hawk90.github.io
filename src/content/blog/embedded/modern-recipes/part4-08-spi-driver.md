@@ -157,8 +157,7 @@ void spi_init_dma(void) {
     DMA2_Stream3->PAR = (uint32_t)&SPI1->DR;
     DMA2_Stream3->CR  = (3u << 25)
                       | DMA_SxCR_DIR_0
-                      | DMA_SxCR_MINC
-                      | DMA_SxCR_TCIE;
+                      | DMA_SxCR_MINC;
 
     SPI1->CR2 |= SPI_CR2_TXDMAEN | SPI_CR2_RXDMAEN;
     NVIC_EnableIRQ(DMA2_Stream2_IRQn);
@@ -169,6 +168,8 @@ volatile int spi_dma_done;
 void spi_xfer_dma(const uint8_t *tx, uint8_t *rx, size_t n) {
     spi_dma_done = 0;
     cs_low();
+
+    DMA2->LIFCR = (0x3Fu << 16) | (0x3Fu << 22);   // clear stream 2/3 flags (HAL_DMA_Start_IT)
 
     DMA2_Stream2->M0AR = (uint32_t)rx;
     DMA2_Stream2->NDTR = n;
@@ -189,7 +190,7 @@ void DMA2_Stream2_IRQHandler(void) {
 }
 ```
 
-stream·channel은 ST STM32CubeF4의 `Projects/STM32F412ZG-Nucleo/Examples/SPI/SPI_FullDuplex_ComDMA/Inc/main.h`(SPI1: `SPIx_RX_DMA_STREAM DMA2_Stream2`, `SPIx_TX_DMA_STREAM DMA2_Stream3`, 둘 다 `DMA_CHANNEL_3`)를 따랐습니다. F412는 F407과 다른 reference manual을 쓰는 칩이고 이 글은 RM0090의 DMA request 표를 열어 보지 못했으므로, F407 보드에서는 그 표로 확인합니다. 순서는 HAL v1.8.3 `HAL_SPI_TransmitReceive_DMA()`처럼 RX stream을 먼저, TX stream을 나중에 켭니다. TX가 먼저 나가면 첫 byte를 받을 RX stream이 아직 준비되지 않았을 수 있기 때문입니다. RX 완료 인터럽트를 기다리는 이유도 같습니다. 마지막으로 받은 byte가 메모리에 들어가야 transaction이 끝납니다.
+stream·channel은 ST STM32CubeF4의 `Projects/STM32F412ZG-Nucleo/Examples/SPI/SPI_FullDuplex_ComDMA/Inc/main.h`(SPI1: `SPIx_RX_DMA_STREAM DMA2_Stream2`, `SPIx_TX_DMA_STREAM DMA2_Stream3`, 둘 다 `DMA_CHANNEL_3`)를 따랐습니다. F412는 F407과 다른 reference manual을 쓰는 칩이고 이 글은 RM0090의 DMA request 표를 열어 보지 못했으므로, F407 보드에서는 그 표로 확인합니다. 순서는 HAL v1.8.3 `HAL_SPI_TransmitReceive_DMA()`처럼 RX stream을 먼저, TX stream을 나중에 켭니다. stream을 켜기 전에는 HAL `HAL_DMA_Start_IT()`가 하는 `regs->IFCR = 0x3FU << hdma->StreamIndex`처럼 두 stream의 flag를 지웁니다(stream 2는 bit 16부터, stream 3은 bit 22부터). transaction의 끝은 RX 완료로 봅니다. HAL도 "the communication closing is performed in DMA reception complete callback"이라는 주석과 함께 TX 완료 callback을 비워 두고 RX 완료에서 닫습니다. 그래서 TX stream의 `DMA_SxCR_TCIE`는 쓰지 않습니다.
 
 ### 4. Multi-slave CS pattern
 
@@ -230,7 +231,7 @@ uint8_t read_both(void) {
 }
 ```
 
-slave마다 mode·divider가 다를 수 있으므로 select할 때 SPE를 끄고 CR1을 다시 씁니다. `spi_select()`는 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 GPIO 설정으로 두 CS 핀이 이미 output이라고 가정합니다.
+이 예제의 flash(mode 0, BR 0)와 adc(mode 1, BR 2)는 mode·divider가 달라서 select할 때 SPE를 끄고 CR1을 다시 씁니다. `spi_select()`는 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 GPIO 설정으로 두 CS 핀이 이미 output이라고 가정합니다.
 
 ## 측정 / 동작 확인
 
@@ -254,7 +255,7 @@ SCK는 나오는데 받은 값이 틀리면 CPOL/CPHA를 slave datasheet의 timi
 
 > ⚠️ 8-bit frame인데 32-bit로 `DR` 접근
 
-`SPI1->DR`은 `stm32f407xx.h`에서 `__IO uint32_t`이므로 `SPI1->DR = tx;`는 32-bit 접근이 됩니다. 위 `spi_xfer8()`은 `-O2`에서 `strb r0, [r1, #12]`(offset `0x0C`가 `DR`)로 컴파일돼 8-bit로 씁니다. HAL도 8-bit frame에서 `DR`을 `uint8_t` 포인터로 접근합니다. 다른 family의 SPI는 `DR` 폭과 FIFO 동작이 다를 수 있으므로 그 칩의 HAL 구현을 먼저 봅니다.
+`SPI1->DR`은 `stm32f407xx.h`에서 `__IO uint32_t`이므로 `SPI1->DR = tx;`는 32-bit 접근이 됩니다. 위 `spi_xfer8()`은 `-O2`에서 `strb r0, [r1, #12]`(offset `0x0C`가 `DR`)로 컴파일돼 8-bit로 씁니다. HAL도 8-bit frame에서 `DR`을 `uint8_t` 포인터로 접근합니다.
 
 > ⚠️ DMA 사용 시 CR2 enable 누락
 
