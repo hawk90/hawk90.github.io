@@ -96,7 +96,18 @@ int main(void) {
 }
 ```
 
-이 프로그램이 내는 것은 stage별 평균, end-to-end 평균과 최악값입니다. 읽는 순서는 두 가지입니다.
+Debian 13 arm64 guest(QEMU 11.1.3 `virt`, HVF, 4 vCPU)에서 clang 19.1.7로 `clang -std=c11 -O2 -Wall -Wextra -Wpedantic latency.c -o latency`로 빌드해 돌린 결과입니다.
+
+```text
+capture  avg    0.000 ms
+pre      avg   11.501 ms
+infer    avg   32.913 ms
+post     avg    5.689 ms
+action   avg    0.000 ms
+e2e      avg   50.104 ms, worst   56.681 ms (200 frames, 10 warm-up dropped)
+```
+
+stage 평균의 합 11.5 + 32.9 + 5.7 = 50.1 ms가 e2e 평균과 같고, 각 stage가 설계값(10·30·5 ms)보다 1~3 ms 긴 것은 아래 `nanosleep` 설명의 그 차이입니다. 이 프로그램이 내는 것은 stage별 평균, end-to-end 평균과 최악값입니다. 읽는 순서는 두 가지입니다.
 
 - 가장 긴 stage의 평균을 frame 간격과 비교합니다. 직렬 구조에서는 stage 합이 곧 결과 간격이라, 설계값으로는 10 + 30 + 5 = 45 ms입니다. 30 fps 간격 33.3 ms를 넘으므로 이 구성은 직렬로는 30 fps 처리량 예산에 실패합니다.
 - 제어 시스템의 예산과 비교할 값은 평균이 아니라 최악값입니다. 최악값은 한 번의 실행으로 정하지 않고, 같은 보드에서 여러 번 돌린 최댓값을 남깁니다. 앞 10 frame(`WARMUP`)은 시작 직후의 값이 평균과 최악값에 섞이지 않도록 버립니다.
@@ -105,9 +116,11 @@ int main(void) {
 
 ### `t_start`를 V4L2 timestamp로 바꾸기
 
-위 코드는 `capture()`가 시작된 시점부터 잽니다. Linux V4L2 카메라라면 dequeue한 [`struct v4l2_buffer`의 `timestamp`](https://docs.kernel.org/userspace-api/media/v4l/buffer.html)(docs.kernel.org, 7.3.0-rc6 판)를 시작점으로 씁니다. `V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC` flag가 있으면 같은 `CLOCK_MONOTONIC` 기준입니다. 이 값을 `t_start`로 쓰면 driver 대기열에 있던 시간까지 end-to-end에 들어갑니다. 그 시각이 정확히 frame의 어느 순간인지는 아래 `*soe` 설명에 있습니다.
+위 코드는 `capture()`가 시작된 시점부터 잽니다. Linux V4L2 카메라라면 dequeue한 [`struct v4l2_buffer`의 `timestamp`](https://docs.kernel.org/userspace-api/media/v4l/buffer.html)(docs.kernel.org, 7.3.0-rc6 판)를 시작점으로 씁니다. `V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC` flag가 있으면 같은 `CLOCK_MONOTONIC` 기준입니다. 이 값을 `t_start`로 쓰면 driver 대기열에 있던 시간까지 end-to-end에 들어갑니다. 앞의 두 줄(`_POSIX_C_SOURCE`, `<time.h>`)은 `-std=c11`로 컴파일할 때 필요합니다. 빼면 clang 19.1.7이 `linux/videodev2.h`에서 "field has incomplete type 'struct timespec'"로 멈췄습니다. 그 시각이 정확히 frame의 어느 순간인지는 아래 `*soe` 설명에 있습니다.
 
 ```c
+#define _POSIX_C_SOURCE 200809L
+#include <time.h>
 #include <stdint.h>
 #include <sys/time.h>
 #include <linux/videodev2.h>
@@ -316,6 +329,23 @@ clang -std=c11 -O2 -Wall -Wextra -Wpedantic -pthread pipe.c -o pipe_bp
 clang -std=c11 -O2 -Wall -Wextra -Wpedantic -pthread -DLATEST pipe.c -o pipe_latest
 ```
 
+같은 guest에서 두 binary를 돌린 결과입니다.
+
+```text
+$ ./pipe_bp
+captured 210, results 200 (warm-up excluded), dropped 0
+interval avg 33.1 ms
+latency  avg 105.0 ms, worst 112.2 ms
+buffers  max in use 4 of 5, pool waits 0
+stage    pre 11.5 / infer 33.0 / post 5.8 ms (busy avg, this run)
+$ ./pipe_latest
+captured 210, results 69 (warm-up excluded), dropped 137
+interval avg 32.9 ms
+latency  avg 55.7 ms, worst 64.4 ms
+buffers  max in use 4 of 5, pool waits 0
+stage    pre 11.3 / infer 32.9 / post 5.6 ms (busy avg, this run)
+```
+
 ### 구조로 셈한 처리량과 지연
 
 Stage 시간을 preprocess P, inference I, postprocess Q로 두면, 세 구성의 결과 간격과 지연은 코드 구조에서 셈이 나옵니다. 오른쪽 두 열은 설계값(P = 10, I = 30, Q = 5 ms)을 넣은 값입니다.
@@ -332,7 +362,7 @@ Stage 시간을 preprocess P, inference I, postprocess Q로 두면, 세 구성�
 
 **Latest-wins는 처리량을 그대로 두고 지연을 직렬 수준으로 되돌립니다.** Inference thread가 꺼내는 frame은 pre thread가 가장 최근에 넣은 것이고, 다음 frame이 P 뒤에 덮어쓰므로 slot에서 기다린 시간은 P보다 짧습니다. 대가는 버리는 frame입니다. Pre thread는 P마다 하나, inference는 I마다 하나를 처리하므로, 설계값이면 frame 세 개 중 두 개를 버립니다. 출입 카운터처럼 매 frame이 필요한 추론에는 이 정책이 맞지 않고, 장애물 회피처럼 최신 frame만 의미 있는 추론에 맞습니다. 정책은 [12-01](/blog/embedded/modern-recipes/part12-01-edge-inference) 결정 표의 첫 질문에 대한 답으로 고릅니다.
 
-실행에서 찍히는 stage 시간은 설계값보다 길 수 있으므로(앞의 `nanosleep` 설명), 프로그램이 마지막 줄에 찍는 *그 실행의* stage 평균을 위 식에 넣어 같은 실행의 `interval`·`latency` 줄과 비교합니다. 식과 출력이 맞으면 pipeline 구조가 의도대로 동작하는 것이고, 어긋나면 stage 사이에 이 셈에 없는 대기가 있다는 뜻입니다. 최악값은 이 식이 주지 않으므로, 보드에서 예산을 정할 때는 그 보드에서 오래 돌린 최댓값을 씁니다.
+실행에서 찍히는 stage 시간은 설계값보다 길 수 있으므로(앞의 `nanosleep` 설명), 프로그램이 마지막 줄에 찍는 *그 실행의* stage 평균을 위 식에 넣어 같은 실행의 `interval`·`latency` 줄과 비교합니다. 위 실행에 넣어 보면 backpressure는 3I + Q = 3 × 33.0 + 5.8 = 104.8 ms로 측정 평균 105.0 ms와 맞고, latest-wins는 P + (0~P) + I + Q = 49.8~61.1 ms 범위 안에 측정 평균 55.7 ms가 들어갑니다. 두 경우 모두 결과 간격은 I(약 33 ms)였고, latest-wins는 137 frame을 버리고 69개만 냈습니다. 식과 출력이 맞으면 pipeline 구조가 의도대로 동작하는 것이고, 어긋나면 stage 사이에 이 셈에 없는 대기가 있다는 뜻입니다. 최악값은 이 식이 주지 않으므로, 보드에서 예산을 정할 때는 그 보드에서 오래 돌린 최댓값을 씁니다.
 
 ### Buffer는 몇 개면 되나 — 상태 나열
 
@@ -346,7 +376,7 @@ Frame buffer 하나가 있을 수 있는 자리는 다섯입니다.
 | `inf_to_post` slot | 1 |
 | post thread가 처리 중 | 1 |
 
-Pre thread가 `pool_get`을 부르는 순간에는 직전 frame을 이미 `mb_put`으로 넘긴 뒤라 첫 줄이 비어 있습니다. 그때 다른 자리에 있는 buffer는 많아야 4개이므로, pool이 5개면 `pool_get`은 기다리지 않습니다. Latest-wins에서 덮어쓴 frame은 `mb_put` 안에서 곧바로 pool로 돌아가므로 이 셈이 바뀌지 않습니다. 프로그램의 `buffers` 줄이 이 셈을 확인하는 자리이고, `pool waits`가 0이 아니면 이 셈에 없는 자리가 있다는 뜻입니다.
+Pre thread가 `pool_get`을 부르는 순간에는 직전 frame을 이미 `mb_put`으로 넘긴 뒤라 첫 줄이 비어 있습니다. 그때 다른 자리에 있는 buffer는 많아야 4개이므로, pool이 5개면 `pool_get`은 기다리지 않습니다. Latest-wins에서 덮어쓴 frame은 `mb_put` 안에서 곧바로 pool로 돌아가므로 이 셈이 바뀌지 않습니다. 프로그램의 `buffers` 줄이 이 셈을 확인하는 자리이고, `pool waits`가 0이 아니면 이 셈에 없는 자리가 있다는 뜻입니다. 위 두 실행 모두 `max in use 4 of 5, pool waits 0`이었습니다.
 
 ## 자주 보는 함정
 
