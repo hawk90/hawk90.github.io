@@ -127,7 +127,9 @@ doorbell writes: 3 for 9 commands
 
 ## NVMe에서 doorbell은 몇 번 치는가
 
-doorbell은 MMIO 쓰기라서 명령마다 치면 비용이 큽니다. Linux NVMe 드라이버는 이를 줄이도록 짜여 있습니다. 6.12 `drivers/nvme/host/pci.c`의 `nvme_queue_rq()`는 명령을 SQ에 복사한 뒤 `nvme_write_sq_db(nvmeq, bd->last)`를 부르고, `nvme_write_sq_db()`는 block layer가 "이번 묶음의 마지막"(`bd->last`)이라고 알려 줄 때만 doorbell을 씁니다(그 전에 ring이 한 바퀴 차는 경우는 예외로 씁니다). 묶음이 끝났는데 doorbell이 남아 있으면 `nvme_commit_rqs()`가 마저 씁니다.
+doorbell은 MMIO 쓰기라서 명령마다 치면 비용이 큽니다. Linux NVMe 드라이버는 이를 줄이도록 짜여 있습니다. 6.12 `drivers/nvme/host/pci.c`의 `nvme_queue_rq()`는 명령을 SQ에 복사한 뒤 `nvme_write_sq_db(nvmeq, bd->last)`를 부르고, `nvme_write_sq_db()`는 block layer가 "이번 묶음의 마지막"(`bd->last`)이라고 알려 줄 때만 doorbell을 씁니다(그 전에 ring이 한 바퀴 차는 경우는 예외로 씁니다). 묶음이 끝났는데 doorbell이 남아 있으면 `nvme_commit_rqs()`가 마저 씁니다. 여러 요청이 plug로 한꺼번에 내려오면(io_uring은 3개 이상 제출할 때 plug를 씁니다, `io_uring/io_uring.c`) blk-mq가 `nvme_queue_rqs()`를 부르고, `nvme_submit_cmds()`가 묶음 전체를 SQ에 복사한 뒤 doorbell을 한 번 씁니다.
+
+하나 더 고려할 것이 있습니다. 이 QEMU 컨트롤러는 Doorbell Buffer Config(shadow doorbell)를 지원하고(`nvme id-ctrl -H`의 oacs bit 8), Linux는 이 기능이 있으면 doorbell 쓰기 전에 `nvme_dbbuf_update_and_check_event()`로 MMIO가 필요한지 확인합니다. VM에서 QEMU trace `pci_nvme_update_sq_eventidx`가 찍히는 것으로 이 기능이 켜진 것을 확인했습니다. 따라서 아래 숫자는 driver의 묶음 처리와 shadow doorbell 검사를 모두 거친 뒤 실제로 나간 MMIO doorbell 쓰기 횟수입니다.
 
 QEMU NVMe에서 같은 4,096개의 4 KB random read를 queue depth만 바꿔 실행하고, CPU 0에 묶인 I/O queue 1의 doorbell 쓰기를 셌습니다.
 
@@ -145,7 +147,7 @@ fio --name=qd1 --filename=/dev/nvme0n1 --direct=1 --rw=randread --bs=4k \
 | iodepth=32 | 4,096 | 153 | 140 |
 | iodepth=32, batch submit/complete 32 | 4,096 | 128 | 133 |
 
-queue depth 1에서는 명령마다 SQ doorbell과 CQ doorbell을 한 번씩 쳤습니다. depth 32에서는 같은 일을 doorbell 약 150번으로 했습니다. 평균 명령 27개쯤을 doorbell 하나로 알린 셈입니다. 제출을 32개씩 묶으라고 fio에 지시하면 SQ doorbell은 4,096 ÷ 32 = 128번으로 정확히 맞아떨어집니다. 이 VM에서 queue 1의 CPU 매핑은 `/sys/block/nvme0n1/mq/0/cpu_list` = `0`이었고, guest의 NVMe I/O queue는 CPU 4개에 하나씩 4개였습니다(`nvme0: 4/0/0 default/read/poll queues`).
+queue depth 1에서는 명령마다 SQ doorbell과 CQ doorbell을 한 번씩 쳤습니다. depth 32에서는 SQ doorbell 153번, CQ doorbell 140번이었습니다. SQ 기준으로 명령 약 27개(4,096 ÷ 153 ≈ 26.8)를 doorbell 하나로 알린 셈입니다. 제출을 32개씩 묶으라고 fio에 지시하면 SQ doorbell은 4,096 ÷ 32 = 128번으로 정확히 맞아떨어집니다. 이 VM에서 queue 1의 CPU 매핑은 `/sys/block/nvme0n1/mq/0/cpu_list` = `0`이었고, guest의 NVMe I/O queue는 CPU 4개에 하나씩 4개였습니다(`nvme0: 4/0/0 default/read/poll queues`).
 
 ## io_uring — user space에서 쓰는 SQ·CQ
 
@@ -280,9 +282,9 @@ q->sq_tail = (q->sq_tail + 1) % depth;
 ## 정리
 
 - SQ·CQ는 ring 두 개와 doorbell로 이뤄지고, 한 칸을 비워 full과 empty를 구분합니다.
-- NVMe SQ entry는 64 B, CQ entry는 16 B이고(Linux `BUILD_BUG_ON`, QEMU `sqes 0x66`/`cqes 0x44`), CQ의 phase는 status 비트 0입니다.
+- NVMe SQ entry는 64 B(Linux `BUILD_BUG_ON`), CQ entry는 16 B이고(QEMU `sqes 0x66`/`cqes 0x44`), CQ의 phase는 status 비트 0입니다.
 - phase 검사가 없으면 wrap 뒤에 지난 바퀴의 완료를 다시 처리합니다(시뮬레이션에서 `cid=6`).
-- Linux NVMe 드라이버는 `bd->last`일 때만 SQ doorbell을 칩니다. QEMU NVMe에서 4,096개 읽기의 SQ doorbell은 QD1 4,096번, QD32 153번, 32개 일괄 제출 128번이었습니다.
+- Linux NVMe 드라이버는 묶음(`bd->last` 또는 `nvme_queue_rqs()`의 batch)마다 SQ doorbell을 한 번 칩니다. QEMU NVMe에서 4,096개 읽기의 SQ doorbell은 QD1 4,096번, QD32 153번, 32개 일괄 제출 128번이었습니다.
 - io_uring도 같은 ring 모델이고, 완료는 순서가 바뀔 수 있으므로 `user_data`로 짝을 맞춥니다.
 - Xilinx XDMA는 ring + tail doorbell이 아니라 linked-list descriptor + 시작 레지스터 모델입니다.
 
