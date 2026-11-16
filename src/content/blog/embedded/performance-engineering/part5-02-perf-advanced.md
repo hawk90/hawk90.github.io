@@ -11,217 +11,386 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"perf의 진짜 힘은 raw event와 perf script에 있으며, 두 가지를 묶으면 사용자 정의 분석기를 만들 수 있습니다."**
+> **"perf의 진짜 힘은 raw event와 perf script에 있으며, 두 가지를 묶으면 사용자 정의 분석기를 만들 수 있습니다."** 단, raw event는 그 장비의 PMU가 실제로 세는지 먼저 확인해야 합니다.
 
 ## 어떤 문제를 푸는가
 
-5-01에서 본 `perf stat`과 `perf record`는 cycle과 cache-miss 정도의 기본 metric에 머뭅니다. 실제 튜닝 현장에서는 특정 micro-architecture event를 측정하거나, 특정 함수 호출을 trace하거나, sampling 결과를 자체 포맷으로 가공해야 합니다.
+[5-01](/blog/embedded/performance-engineering/part5-01-perf-basics)의 `perf stat`과 `perf record`는 미리 이름 붙은 기본 이벤트에 머뭅니다. 튜닝 현장에서는 특정 코어의 마이크로아키텍처 이벤트를 번호로 지정하거나, 커널 tracepoint로 스케줄러 동작을 기록하거나, 기록한 표본을 내 질문에 맞는 표로 가공해야 할 때가 옵니다.
 
-Event 수와 종류는 CPU·kernel·perf build에 따라 다릅니다. 그중 의미 있는 event를 골라 측정하고, 결과를 `perf script`로 후처리하면 선택한 관측 질문을 분석할 수 있습니다. Vendor profiler와 수집 범위가 같다는 뜻은 아닙니다.
+이 글은 그 세 가지를 실제로 돌린 출력으로 설명합니다. 실행 환경은 5-01과 같습니다. Apple M2 Pro 위 QEMU 11.1.3 HVF guest(8 vCPU)의 Debian 13 arm64, 커널 `6.12.116+deb13-arm64`, perf `6.12.117`이고, PMU 이벤트 문법은 같은 이미지를 `-accel tcg -cpu max`로 띄운 guest에서 따로 확인했습니다. 예제 프로그램 `prog_v1`은 5-01의 열 우선 행렬 합산입니다.
 
-이 글에서는 raw event 코드 지정, tracepoint 활용, perf script Python 후처리, 그리고 sampling overhead를 다룹니다.
-
-이 장의 command·event group은 [Linux6.12 perf-stat 문서](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-stat.txt)와 대조했습니다. 이 환경에서는 Linux PMU/perf session을 실행하지 않았습니다. 예시 trace·latency는 실제 캡처가 아닙니다.
+명령 옵션은 v6.12 소스 트리의 `tools/perf/Documentation/`([perf-stat.txt](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-stat.txt), [perf-record.txt](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-record.txt), [perf-report.txt](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-report.txt), [perf-sched.txt](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-sched.txt))와 대조했습니다.
 
 ## perf list — 사용 가능한 이벤트 둘러보기
 
+`perf list`는 이 장비·커널·perf 빌드 조합에서 쓸 수 있는 이벤트 메뉴판입니다. 같은 perf 바이너리라도 메뉴는 장비마다 다릅니다.
+
 ```bash
 perf list                    # 모든 event
-perf list cache              # cache 관련만
+perf list hw                 # hardware event
+perf list sw                 # software event
+perf list cache              # hardware cache event
 perf list 'sched:*'          # tracepoint 패턴
-perf list pmu                # PMU 카운터 전체
 ```
 
-분류는 크게 네 가지로 나뉩니다.
+HVF guest에서 돌린 결과입니다. 전체 목록은 1728줄이었지만 `hw`와 `cache`는 빈 출력이었습니다. PMU가 사이클 카운터 하나만 보이는 guest라서입니다([5-01](/blog/embedded/performance-engineering/part5-01-perf-basics) 참고).
 
 ```text
-Hardware event   — cycles, instructions, cache-misses, branch-misses
-Software event   — context-switches, page-faults, cpu-clock
-Hardware cache   — L1-dcache-loads, LLC-load-misses
-Tracepoint       — sched:sched_switch, syscalls:sys_enter_read
-Raw PMU          — r<event_code> 형식의 vendor event
+$ perf list sw
+  alignment-faults                                   [Software event]
+  bpf-output                                         [Software event]
+  cgroup-switches                                    [Software event]
+  context-switches OR cs                             [Software event]
+  cpu-clock                                          [Software event]
+  cpu-migrations OR migrations                       [Software event]
+  dummy                                              [Software event]
+  emulation-faults                                   [Software event]
+  major-faults                                       [Software event]
+  minor-faults                                       [Software event]
+  page-faults OR faults                              [Software event]
+  task-clock                                         [Software event]
+...
+$ perf list 'sched:*' | head -3
+  sched:sched_kthread_stop                           [Tracepoint event]
+  sched:sched_kthread_stop_ret                       [Tracepoint event]
+  sched:sched_kthread_work_execute_end               [Tracepoint event]
 ```
 
-Raw encoding과 alias는 해당 PMU의 format·event 정의로 확인합니다. 아래는 Arm PMU에서 사용할 수 있는 문법 예이며 모든 Cortex-A·x86에 같은 code 의미가 보장되지 않습니다.
+`sched:` tracepoint는 29개였습니다. 이벤트는 다섯 부류로 나뉩니다.
 
-```bash
-perf stat -e r03 -e r04 ./app          # L1D refill, L1D access
-perf stat -e armv8_pmuv3/l2d_cache_refill/ ./app
+| 부류 | 예 | 누가 세는가 |
+|---|---|---|
+| Hardware event | `cycles`, `instructions`, `branch-misses` | CPU PMU (generic 이름) |
+| Hardware cache event | `L1-dcache-loads`, `LLC-load-misses` | CPU PMU (generic 이름) |
+| Software event | `context-switches`, `page-faults`, `cpu-clock` | 커널 |
+| Tracepoint | `sched:sched_switch`, `syscalls:sys_enter_read` | 커널 정적 계측 지점 |
+| Raw PMU event | `r11`, `armv8_pmuv3_0/event=0x11/` | CPU PMU (아키텍처·코어별 번호) |
+
+### Raw event — 번호로 지정하기
+
+Raw event는 PMU에 넣을 이벤트 번호를 직접 주는 방식입니다. 라디오 주파수를 채널 이름 대신 숫자로 맞추는 것과 같습니다. 숫자가 맞는지는 PMU의 `format`이 정합니다.
+
+```text
+$ cat /sys/bus/event_source/devices/armv8_pmuv3_0/format/event
+config:0-15
 ```
 
-`rN`은 PMU별 raw register encoding입니다. CPU TRM·event availability·perf의 format을 함께 확인하며 코드만 다른 ISA에 옮기지 않습니다.
+이 PMU에서 이벤트 번호는 `config`의 하위 16비트입니다. 그리고 `events/` 디렉터리에는 PMU가 지원한다고 알린 이벤트만 이름으로 올라옵니다. TCG guest에서는 네 개였습니다.
+
+```text
+$ ls /sys/bus/event_source/devices/armv8_pmuv3_0/events
+cpu_cycles stall stall_backend stall_frontend
+$ cat /sys/bus/event_source/devices/armv8_pmuv3_0/events/cpu_cycles
+event=0x0011
+```
+
+그래서 같은 이벤트를 세 가지로 쓸 수 있습니다. 이름(`cpu_cycles`), `event=` 항, `r` 접두 raw 번호입니다. 셋 다 같은 값을 냈습니다.
+
+```text
+$ perf stat -e armv8_pmuv3_0/cpu_cycles/,armv8_pmuv3_0/event=0x11/,r11,r03,r04 ./prog_v1 1
+        6987448000      armv8_pmuv3_0/cpu_cycles/
+        6987448000      armv8_pmuv3_0/event=0x11/
+        6987447000      r11
+                 0      r03
+                 0      r04
+```
+
+여기서 **`r03`·`r04`가 오류 없이 `0`**으로 나온 것이 함정입니다. v6.12 `include/linux/perf/arm_pmuv3.h`에서 0x0003은 `ARMV8_PMUV3_PERFCTR_L1D_CACHE_REFILL`, 0x0004는 `ARMV8_PMUV3_PERFCTR_L1D_CACHE`이지만, QEMU 11.1.0 `target/arm/cpregs-pmu.c`의 지원 이벤트 표에는 없습니다. TCG guest의 PMU는 모르는 번호를 받아 주고 세지 않았습니다. 반면 HVF guest는 같은 `r03,r04`와 `armv8_pmuv3_0/event=0x17/`을 `<not supported>`로 거부했습니다. 0이 "일어나지 않음"인지 "세지 않음"인지는 `events/` 목록과 코어 TRM의 이벤트 표로 가립니다.
+
+PMU 이름도 장비가 정합니다. 흔히 예제에 나오는 `armv8_pmuv3/...`는 이 guest에 없는 이름이라 perf가 이렇게 거부했습니다.
+
+```text
+$ perf stat -e armv8_pmuv3/l2d_cache_refill/ ./prog_v1 1
+event syntax error: 'armv8_pmuv3/l2d_cache_refill/'
+                     \___ Bad event or PMU
+Unable to find PMU or event on a PMU of 'armv8_pmuv3'
+...
+                                 \___ unknown term 'l2d_cache_refill' for pmu 'armv8_pmuv3_0'
+```
+
+PMU 이름은 `/sys/bus/event_source/devices/`에 있는 디렉터리 이름(여기서는 `armv8_pmuv3_0`)을 씁니다. 그 PMU가 `l2d_cache_refill`을 알리지 않았으므로 이름으로도 쓸 수 없습니다.
 
 ## Hardware Event 묶음 측정
 
-```bash
-perf stat -e cycles,instructions,cache-references,cache-misses,\
-branch-instructions,branch-misses ./app
-```
-
-Group의 event는 같은 관측 구간에 함께 schedule하는 단위입니다. 독립 event의 comma 목록과 다르며, group 자체가 다른 group과 time multiplex될 수 있습니다. 동시에 들어갈 수 없는 group은 not-counted가 될 수 있습니다.
+이벤트를 쉼표로 나열하면 각각 따로 스케줄됩니다. 중괄호로 묶은 **group**은 "항상 같은 구간에 함께 올라가는" 단위입니다. 비율(IPC처럼 두 값을 나누는 지표)을 낼 때 분모와 분자가 같은 구간에서 세어졌다는 보장이 필요하면 group을 씁니다.
 
 ```bash
-perf stat -e '{cycles,instructions,cache-misses}' ./app
+perf stat -e cycles,instructions,cache-misses ./app        # 독립 이벤트
+perf stat -e '{cycles,instructions,cache-misses}' ./app    # group
 ```
 
-PMU counter 수는 CPU에 따라 다릅니다. 그룹 요청이 counter 제약을 넘으면 스케줄링 실패가 나거나 측정이 multiplex될 수 있으므로 `perf stat` 결과의 running/enabled 비율을 확인합니다.
+group은 하나라도 올라갈 수 없으면 통째로 안 셉니다. HVF guest에서는 group 안의 `cycles`가 지원되지 않아 시작부터 실패했습니다.
+
+```text
+$ perf stat -e '{cycles,instructions,cache-misses}' ./prog_v1 1
+Error:
+The cycles event is not supported.
+```
+
+카운터가 7개인 TCG guest에서 `r11` 9개를 group으로 묶었을 때는 7개가 `<not counted>`, 2개가 `<not supported>`였고, 쉼표로 나열했을 때는 각각 약 78% 시간만 돌고 보정된 값이 나왔습니다(5-01의 multiplex 예). 대상 장비에서 group 크기가 카운터 수를 넘지 않게 짜고, 결과의 `<not counted>`와 괄호 안 비율을 먼저 봅니다.
 
 ## Software Event와 시스템 동작
 
-```bash
-perf stat -e context-switches,cpu-migrations,page-faults,\
-minor-faults,major-faults ./app
+Software event는 커널이 직접 세므로 PMU가 없는 guest에서도 그대로 나옵니다.
+
+```text
+$ perf stat -e context-switches,cpu-migrations,page-faults,minor-faults,major-faults ./prog_v1 1
+                 0      context-switches
+                 0      cpu-migrations
+               595      page-faults
+               595      minor-faults
+                 0      major-faults
 ```
 
-| Event | 의미 |
-|---|---|
-| `context-switches` | 컨텍스트 스위치 횟수 |
-| `cpu-migrations` | 코어 간 이주 횟수 |
-| `page-faults` | 페이지 폴트 총합 |
-| `minor-faults` | 디스크 I/O 없이 해결된 폴트 |
-| `major-faults` | 디스크에서 읽어온 폴트 |
+`page-faults` 595개는 모두 minor였습니다. 64 MiB `malloc` 영역을 처음 건드릴 때 생긴 폴트이고 디스크를 읽지 않았습니다. 페이지 캐시를 비운 뒤 다시 돌리면 major가 하나 생깁니다.
 
-Major fault는 보통 저장장치 I/O를 포함하지만, 이를 곧바로 메모리 압박으로 해석하지 말고 workload와 I/O 지표를 함께 봅니다.
+```text
+$ sync; echo 3 > /proc/sys/vm/drop_caches; perf stat -e page-faults,minor-faults,major-faults ./prog_v1 1
+               594      page-faults
+               593      minor-faults
+                 1      major-faults
+```
+
+| Event | 의미 | 이 실행에서 |
+|---|---|---|
+| `context-switches` | 컨텍스트 스위치 횟수 | 0 (1회 반복, 약 0.23초) |
+| `cpu-migrations` | 다른 CPU로 옮겨진 횟수 | 0 |
+| `page-faults` | 페이지 폴트 합계 | 594–595 |
+| `minor-faults` | 저장장치 I/O 없이 해결된 폴트 | 593–595 |
+| `major-faults` | 저장장치에서 읽어 와야 했던 폴트 | 캐시를 비운 뒤에만 1 |
+
+그 한 건이 어느 주소였는지는 `perf trace -F maj`(perf-trace.txt "Trace pagefaults")로 찍습니다. 같은 조건에서 돌린 결과입니다.
+
+```text
+$ sync; echo 3 > /proc/sys/vm/drop_caches; perf trace -F maj --no-syscalls ./prog_v1 1
+     0.000 ( 0.000 ms): prog_v1/8774 majfault [__arch_clear_user+0x10] => 0xaaaae6eb0068 (?k)
+```
+
+커널의 `__arch_clear_user`가 `prog_v1` 매핑 안의 주소 `0xaaaae6eb0068`을 0으로 채우다가 폴트가 났습니다. 프로그램 적재 중 실행 파일의 데이터 페이지를 디스크에서 다시 읽어야 했던 한 건입니다.
 
 ## Tracepoint — 커널 이벤트
 
-Tracepoint는 커널 코드에 정의된 probe입니다. 활성화하면 이벤트 빈도와 수집·기록 방식에 따른 비용이 생기며, 사용 가능한 이름과 필드는 커널 빌드에 따라 달라질 수 있습니다.
-
-```bash
-perf record -e sched:sched_switch -a sleep 5
-perf script | head
-```
+Tracepoint는 커널 개발자가 소스에 미리 박아 둔 계측 지점입니다. 도로의 과속 카메라처럼 위치가 정해져 있고, 켜 둔 카메라만 기록합니다. `perf record -e`로 켜고 `perf script`로 읽습니다.
 
 ```text
-swapper     0 [000] 1234.567: sched:sched_switch: prev_comm=swapper prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=app next_pid=1234 next_prio=120
+$ perf record -e sched:sched_switch -a -o sw.data sleep 1
+[ perf record: Captured and wrote 0.117 MB sw.data (101 samples) ]
+$ perf script -i sw.data | head -5
+            perf    8121 [000]  1283.814216: sched:sched_switch: perf:8121 [120] R ==> migration/0:20 [0]
+     migration/0      20 [000]  1283.814225: sched:sched_switch: migration/0:20 [0] S ==> swapper/0:0 [120]
+            perf    8121 [001]  1283.814499: sched:sched_switch: perf:8121 [120] R ==> migration/1:23 [0]
+     migration/1      23 [001]  1283.814510: sched:sched_switch: migration/1:23 [0] S ==> swapper/1:0 [120]
+            perf    8121 [002]  1283.814529: sched:sched_switch: perf:8121 [120] R ==> migration/2:28 [0]
 ```
 
-자주 쓰는 tracepoint 카테고리입니다.
+한 줄은 "CPU [000]에서 `perf`(pid 8121, 우선순위 120, 상태 R)가 `migration/0`에게 CPU를 넘겼다"는 뜻입니다. 1초 동안 8개 CPU의 전환이 101건이었습니다. 처음 몇 줄은 `perf` 자신이 CPU [000], [001], [002] 순서로 옮겨 다니며 `migration/N`에게 CPU를 넘기는 모습이라, 측정 도구 자체가 기록에 나타난다는 점도 보입니다.
 
-```text
-sched:*       — 스케줄러
-syscalls:*    — 시스템 호출 enter/exit
-irq:*         — 인터럽트
-block:*       — block I/O
-net:*         — 네트워크
-kmem:*        — 커널 메모리
-```
+자주 쓰는 tracepoint 부류와 이 guest의 `perf list '<접두사>:*'` 개수입니다.
+
+| 접두사 | 다루는 영역 | 개수 |
+|---|---|---:|
+| `sched:` | 스케줄러 | 29 |
+| `syscalls:` | 시스템 호출 진입·복귀 | 628 |
+| `irq:` | 인터럽트 핸들러·softirq·tasklet | 7 |
+| `block:` | 블록 I/O | 21 |
+| `net:` | 네트워크 송수신 | 16 |
+| `kmem:` | 커널 메모리 할당 | 12 |
 
 ## perf record와 Call Graph
 
-```bash
-perf record -g --call-graph dwarf ./app
-perf record -g --call-graph fp ./app
-perf record -g --call-graph lbr ./app
-```
-
-- `dwarf` — user stack sample과 unwind 정보에 의존, 크기·unwinder·누락 확인
-- `fp` — frame pointer 기반, 빠르지만 `-fno-omit-frame-pointer`로 컴파일되어야 합니다
-- `lbr` — 지원 x86 PMU의 Last Branch Record 경로, 지원 여부·capture 비용 확인
-
-ARM 환경에서도 frame pointer와 DWARF의 지원·비용은 빌드와 커널에 따라 다릅니다. 두 방식을 대상 workload에서 비교하고 설정을 기록합니다.
+call graph 수집 방식(`fp`·`dwarf`·`lbr`)의 차이와 실측은 [5-01의 Call Graph 절](/blog/embedded/performance-engineering/part5-01-perf-basics)에 있습니다. Arm guest에서 `lbr`은 "PMU Hardware or event type doesn't support branch stack sampling"으로 거부되었고, `dwarf`는 `fp`보다 약 60배 큰 파일을 만들었습니다. 여기서는 그렇게 모은 그래프를 **어느 방향으로 펼칠지**를 봅니다.
 
 ```bash
 perf report -g graph,0.5,caller
+perf report -g graph,0.5,callee
 ```
 
-`graph` 형식은 caller 트리를 보여주며, `caller`는 호출자를 위로, `callee`는 피호출자를 위로 정렬합니다.
+`graph,0.5`는 0.5% 미만 가지를 숨기라는 뜻입니다. perf-report.txt는 order를 이렇게 정의합니다. `callee`는 "callee based call graph", `caller`는 "inverted caller based call graph"이고, 기본값은 `--children`이면 `caller`, 아니면 `callee`입니다. 같은 기록을 두 방향으로 펼친 결과입니다.
+
+```text
+$ perf report -i g.data --stdio --no-children -g graph,0.5,caller --sort sym
+    81.01%  [.] hot_function
+            |
+            ---__libc_start_main@@GLIBC_2.34
+               __libc_start_call_main
+               main
+               process_batch
+               hot_function
+
+$ perf report -i g.data --stdio --no-children -g graph,0.5,callee --sort sym
+    81.01%  [.] hot_function
+            |
+            ---process_batch
+               main
+               __libc_start_call_main
+               __libc_start_main@@GLIBC_2.34
+               _start
+```
+
+`caller`는 시작점(`__libc_start_main`)에서 내려가고, `callee`는 표본이 찍힌 함수에서 호출자 쪽으로 올라갑니다. "이 hot 함수를 누가 불렀나"가 궁금하면 `callee`, "main에서 시작해 어디로 시간이 흘러갔나"가 궁금하면 `caller`입니다.
 
 ## perf script — Python 후처리
 
-`perf script`는 record한 데이터를 텍스트로 출력합니다. 그대로 보면 길지만, Python script로 가공하면 자유로운 분석이 가능합니다.
+`perf script`는 기록을 한 줄씩 텍스트로 풀어 주고, `-s`로 Python 스크립트를 붙이면 이벤트마다 함수를 호출해 줍니다. 엑셀 매크로처럼 표본 하나하나를 내 손으로 집계할 수 있습니다. Debian perf 빌드에 Python 지원이 들어 있는지부터 확인합니다.
 
-```bash
-perf script -i perf.data > trace.txt
-perf script -g python                   # 스켈레톤 생성
+```text
+$ perf version --build-options | grep -i python
+             libpython: [ on  ]  # HAVE_LIBPYTHON_SUPPORT
 ```
 
-선택한 perf build에서 생성한 callback signature·event format을 기준으로 편집합니다. Python scripting support가 build에 없을 수도 있습니다. 다음 callback은 개념 예이며 모든 kernel의 자동 생성 결과나 실행 검증된 API로 제시하지 않습니다.
+`-g python`은 기록에 들어 있는 이벤트에 맞춘 뼈대를 만들어 줍니다. 위 `sw.data`로 만든 `perf-script.py`의 `sched_switch` 콜백 선언은 다음과 같았습니다.
 
 ```python
-def sched__sched_switch(event_name, context, common_cpu, common_secs,
-                         common_nsecs, common_pid, common_comm,
-                         common_callchain, prev_comm, prev_pid, prev_prio,
-                         prev_state, next_comm, next_pid, next_prio):
-    if next_comm.startswith("app"):
-        print(f"{common_secs}.{common_nsecs:09d} cpu{common_cpu} "
-              f"{prev_comm} -> {next_comm}")
+def sched__sched_switch(event_name, context, common_cpu,
+	common_secs, common_nsecs, common_pid, common_comm,
+	common_callchain, prev_comm, prev_pid, prev_prio, prev_state,
+	next_comm, next_pid, next_prio, perf_sample_dict):
 ```
 
-실행은 다음과 같습니다.
+이 선언을 그대로 써서 "comm별 on-CPU 시간"을 내는 스크립트를 만들었습니다. CPU마다 마지막으로 들어온 task와 시각을 기억해 두고, 다음 전환에서 그 차이를 더합니다.
 
-```bash
-perf script -s perf-script.py
+```python title="oncpu.py"
+from collections import defaultdict
+
+since = {}                      # cpu -> (comm, t_ns) of the task switched in
+oncpu = defaultdict(int)        # comm -> ns
+nswitch = defaultdict(int)
+
+def sched__sched_switch(event_name, context, common_cpu,
+        common_secs, common_nsecs, common_pid, common_comm,
+        common_callchain, prev_comm, prev_pid, prev_prio, prev_state,
+        next_comm, next_pid, next_prio, perf_sample_dict):
+    t = common_secs * 1_000_000_000 + common_nsecs
+    if common_cpu in since:
+        comm, t0 = since[common_cpu]
+        oncpu[comm] += t - t0
+    since[common_cpu] = (next_comm, t)
+    nswitch[next_comm] += 1
+
+def trace_end():
+    print(f"{'comm':16} {'on-CPU ms':>10} {'switch-in':>10}")
+    busy = {c: ns for c, ns in oncpu.items() if not c.startswith("swapper")}
+    for comm, ns in sorted(busy.items(), key=lambda kv: -kv[1])[:6]:
+        print(f"{comm:16} {ns / 1e6:10.3f} {nswitch[comm]:10d}")
 ```
 
-특정 프로세스의 wake-up latency를 직접 계산하거나, 함수별 sample 분포를 자체 포맷으로 출력할 수 있습니다.
+입력은 아래 `perf sched` 절에서 기록한 `sched.data`(`perf bench sched pipe -l 20000`)입니다. idle task(`swapper/N`)는 뺐습니다.
 
-위 callback의 syntax만 확인할 수 있으며 실제 perf dispatch·stack·timestamp 단위를 검증한 것은 아닙니다. 잘못된 event·권한·unsupported group·not-counted·lost sample을 정상 결과와 구분해 기록합니다.
+```text
+$ perf script -i sched.data -s oncpu.py
+comm              on-CPU ms  switch-in
+sched-pipe          213.951      39975
+perf-exec             8.020          1
+perf                  7.691         15
+sshd-session          0.196          2
+ksoftirqd/5           0.074          1
+systemd-journal       0.049          1
+```
+
+두 프로세스가 파이프로 2만 번 주고받는 벤치마크라 `sched-pipe`가 약 4만 번 CPU에 들어왔습니다. 이 스크립트는 기록 시작 전부터 돌던 task의 첫 구간과 기록 끝의 마지막 구간을 세지 않으므로, 짧은 기록에서는 그 차이만큼 작게 나옵니다.
 
 ## perf top — 실시간 hotspot
 
+`perf top`의 기본 표본 주파수(4000 Hz, `builtin-top.c`)와 `--stdio` 실행 결과는 [5-01](/blog/embedded/performance-engineering/part5-01-perf-basics)에 있습니다. 이 글의 이벤트 지정은 `perf top`에도 그대로 붙습니다.
+
 ```bash
 perf top -p 1234
-perf top -e cache-misses
+perf top -e sched:sched_switch
 perf top -g
 ```
 
-`perf top`은 설정한 주기로 화면을 갱신하며, 가장 hot한 함수가 위로 올라옵니다. 실제 수집 비용과 권한을 확인해 적용합니다.
-
 ## perf sched — 스케줄러 분석
 
-```bash
-perf sched record -- ./app
-perf sched latency                    # wake-up latency 통계
-perf sched timehist                   # 시간순 상세
-perf sched map                        # ASCII chart
-```
+`perf sched record`는 워크로드의 스케줄링 이벤트를 기록하고(perf-sched.txt), `latency`·`timehist`·`map`이 그 기록을 task별 대기 시간 표나 시간순 목록으로 바꿔 줍니다. 식당에 비유하면 손님(task)이 줄을 선 시각과 자리에 앉은 시각을 모두 적어 두었다가 "평균 몇 분, 최대 몇 분 기다렸나"를 계산하는 도구입니다.
 
 ```text
-Task                   Runtime ms    Switches    Avg delay ms    Max delay ms
-app:1234                  500.123         800           0.045           1.234
-kworker:5                  10.456         120           0.012           0.345
+$ perf sched record -o sched.data -- perf bench sched pipe -l 20000
+# Executed 20000 pipe operations between two processes
+     Total time: 0.423 [sec]
+      21.158800 usecs/op
+          47261 ops/sec
+[ perf record: Captured and wrote 17.530 MB sched.data (160097 samples) ]
 ```
 
-Real-time task가 정해진 deadline 안에 깨어났는지 확인할 때 핵심 도구입니다.
+0.42초 벤치마크에 16만 건, 17.5 MB가 쌓였습니다. 스케줄 이벤트 전부를 기록하므로 짧게 돌립니다.
+
+```text
+$ perf sched -i sched.data latency
+  Task                  |   Runtime ms  |  Count   | Avg delay ms    | Max delay ms    | Max delay start           | Max delay end          |
+  kworker/u32:0-w:11    |      0.009 ms |        1 | avg:   0.040 ms | max:   0.040 ms | max start:  1288.667582 s | max end:  1288.667622 s
+  perf:8151             |      7.642 ms |        2 | avg:   0.028 ms | max:   0.030 ms | max start:  1288.845672 s | max end:  1288.845703 s
+...
+  sched-pipe:(2)        |    242.991 ms |    39956 | avg:   0.009 ms | max:   0.872 ms | max start:  1288.811220 s | max end:  1288.812091 s
+...
+```
+
+`sched-pipe` 두 프로세스는 39956번 스케줄되면서 평균 0.009 ms, 최대 0.872 ms를 기다렸습니다. 평균이 작아도 최대가 100배 가까이 큽니다. RT task라면 이 최대값과 그 시각(`max start`)이 다음 조사의 출발점입니다. `timehist`는 같은 기록을 시간순으로, `map`은 CPU별 열로 보여 줍니다.
+
+```text
+$ perf sched -i sched.data timehist | head -6
+           time    cpu  task name                       wait time  sch delay   run time
+                        [tid/pid]                          (msec)     (msec)     (msec)
+--------------- ------  ------------------------------  ---------  ---------  ---------
+    1288.412999 [0000]  perf[8151]                          0.000      0.000      0.000
+    1288.413016 [0000]  migration/0[20]                     0.000      0.001      0.016
+    1288.413043 [0001]  perf[8151]                          0.000      0.000      0.000
+$ perf sched -i sched.data map | head -4
+  *A0                                1288.412999 secs A0 => migration/0:20
+  *.                                 1288.413016 secs .  => swapper:0
+   .  *B0                            1288.413043 secs B0 => migration/1:23
+   .  *.                             1288.413052 secs
+```
+
+perf-sched.txt의 설명대로 `map`의 열은 CPU, 두 글자는 그 CPU에서 도는 task, `*`는 이벤트가 난 CPU, `.`은 idle CPU입니다. `timehist`의 `sch delay`는 runnable이 된 뒤 실제로 돌기까지의 시간입니다.
 
 ## perf mem과 perf c2c
 
-```bash
-perf mem record ./app
-perf mem report
+`perf mem`은 perf-mem.txt의 표현으로 "memory operation data"를 모으는 도구이고, `perf c2c`는 "cacheline contentions"를 추적하며 HITM 접근이 많은 캐시 라인을 먼저 보여 줍니다(perf-c2c.txt). 여러 CPU가 같은 캐시 라인을 두고 다투는 false sharing을 찾을 때 씁니다. 둘 다 PMU의 메모리 표본 기능에 기대므로, PMU가 없는 이 guest에서는 기록 단계에서 멈췄습니다.
 
-perf c2c record ./app
-perf c2c report
+```text
+$ perf mem record -o mem.data ./prog_v1 1
+failed: no PMU supports the memory events
+$ perf c2c record -o c2c.data ./prog_v1 1
+failed: no PMU supports the memory events
 ```
 
-`perf mem`의 이벤트와 memory-source 정보는 CPU·PMU별 지원에 따릅니다. `perf c2c`도 지원되는 PMU와 커널 구성에서 cache-line contention 단서를 제공합니다. 대상 장비의 `perf list`와 도구 문서를 확인합니다.
+이 오류가 나면 도구 문제가 아니라 장비 문제입니다. 실제 보드에서 같은 오류가 나면 그 코어에 메모리 표본 기능이 있는지 TRM에서 먼저 확인합니다. false sharing을 PMU 없이 재현·측정하는 방법은 [4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)에서 다룹니다.
 
 ## Sampling Overhead 측정
 
-```bash
-# 샘플 주파수는 이벤트·장비에 맞춰 정하고 비용을 비교합니다.
-perf record -F 99 ./app
+표본 주파수(`-F`)와 call graph 방식에 따른 비용은 5-01에서 프로그램 자체 타이머로 쟀습니다. 9999 Hz까지는 실행 간 흩어짐 안이었고, 99999 Hz(상한 `perf_event_max_sample_rate` = 100000 바로 아래)에서 중앙값이 약 10% 늘었습니다. `-c`는 주파수 대신 "이벤트 N번마다 한 표본"을 정합니다(perf-record.txt "Event period to sample").
 
-# 비교용 rate, 99Hz보다 높음
-perf record -F 1000 ./app
-
-# event count period, 정확한 시간 측정과 별도
-perf record -e cycles -c 1000000 ./app
+```text
+$ perf record -e task-clock -c 1000000 -o c.data ./prog_v1 10
+[ perf record: Captured and wrote 0.035 MB c.data (862 samples) ]
+$ perf report -i c.data --stdio --sort sym | grep -E 'Samples|Event count'
+# Samples: 862  of event 'task-clock'
+# Event count (approx.): 862000000
 ```
 
-높은 rate가 곧 더 정확한 결과를 보장하지 않습니다. Multiplex·lost sample·unwind 실패·sampling bias·오버헤드를 확인하고 같은 workload의 무계측 baseline과 비교합니다. 기존1~4kHz·2~5% 수치는 환경 근거가 없어 제거했습니다.
+`task-clock`의 단위는 나노초이므로 `-c 1000000`은 1 ms마다 한 표본입니다. 862개 × 10⁶ ns = 0.862초가 `Event count`와 정확히 맞습니다.
+
+Tracepoint 기록 비용은 이벤트 빈도에 비례합니다. 초당 수만 번 스케줄되는 `perf bench sched pipe -l 50000`을 7번씩 돌려 한 왕복 시간의 중앙값을 비교했습니다(`tpcost.sh`).
+
+| 조건 | 중앙값 (usecs/op) | 7회 범위 |
+|---|---:|---|
+| perf 없음 | 19.06 | 18.02–20.83 |
+| `perf stat -e sched:sched_switch` (세기만) | 21.31 | 20.04–21.60 |
+| `perf record -e sched:sched_switch` | 18.92 | 15.19–22.46 |
+| `perf record -g -e sched:sched_switch` | 24.38 | 22.00–25.04 |
+| `perf record -e 'sched:*'` (29개) | 32.00 | 29.68–32.51 |
+
+`sched_switch` 하나만 기록할 때는 baseline과 범위가 겹쳤습니다. 같은 이벤트에 call graph를 붙이면 중앙값이 약 28%, `sched:*` 전부를 켜면 약 68% 늘었습니다. `-g` 조건의 마지막 실행이 남긴 `tp.data`는 34 MB였습니다. "tracepoint는 무겁다/가볍다"보다 "몇 개를, 스택까지 기록하는가"가 비용을 정합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-> ⚠️ Frame pointer 없이 callchain 수집
+> ⚠️ Raw event의 `0`을 "일어나지 않음"으로 읽기
 
-```bash
-gcc -O2 app.c                    # -fno-omit-frame-pointer 누락
-perf record -g --call-graph fp   # callchain 깨짐
-```
+TCG guest의 `r03`·`r04`는 지원하지 않는 번호인데도 오류 없이 `0`이었습니다. `events/` 목록에 없는 번호는 코어 TRM으로 확인하고, 일부러 이벤트를 일으키는 작은 프로그램으로 값이 움직이는지 봅니다.
 
-`-fno-omit-frame-pointer`를 추가하거나 `--call-graph dwarf`를 사용해야 합니다.
+> ⚠️ 다른 장비의 PMU 이름 복사
+
+예제의 `armv8_pmuv3/...`는 이 guest에서 "Bad event or PMU"였습니다. PMU 이름은 `/sys/bus/event_source/devices/`에서 읽습니다.
 
 > ⚠️ Multiplex된 event를 정확하다고 믿기
 
@@ -229,24 +398,26 @@ perf record -g --call-graph fp   # callchain 깨짐
 perf stat -e e1,e2,e3,e4,e5,e6,e7,e8 ./app
 ```
 
-Counter 수뿐 아니라 event 제약·fixed counter·group에 따라 스케줄링이 달라집니다. `time enabled / time running` 비율을 확인해야 합니다.
+카운터 수를 넘는 요청은 시간 분할되고 보정값이 나옵니다. 괄호 안 비율과 `<not counted>`를 확인합니다. 실측 예는 5-01에 있습니다.
 
-> ⚠️ Tracepoint를 부담스럽다고 회피
+> ⚠️ Tracepoint를 와일드카드로 몽땅 켜기
 
-Tracepoint는 사전 정의된 instrumentation point입니다. 비활성 상태의 구현과 활성화 비용은 tracepoint 종류·kernel config·event rate에 따라 달라집니다. 실제 대상에서 수집 전후 비용을 비교합니다.
+`sched:*` 하나로 pipe 왕복 시간이 약 68% 늘었습니다. 필요한 이벤트만 이름으로 켜고, 스택은 꼭 필요할 때만 붙입니다.
 
-> ⚠️ perf top을 장시간 실행
+> ⚠️ `perf sched record`를 길게 돌리기
 
-`perf top`은 표시 화면 갱신을 위해 추가 CPU를 사용합니다. 고정30분 임계값을 두지 말고 실제 표시·수집 비용과 report 크기를 확인합니다.
+0.42초 벤치마크에 17.5 MB가 쌓였습니다. 스케줄 이벤트가 많은 시스템에서는 몇 초만 돌려도 수백 MB가 됩니다. 재현 구간을 좁혀 짧게 기록합니다.
 
 ## 정리
 
-- `perf list`로 hardware, software, cache, tracepoint, raw PMU event를 둘러봅니다.
-- Raw event는 `r<code>` 또는 `pmu/event=.../` 형식으로 vendor-specific하게 지정합니다.
-- Tracepoint는 sched, syscalls, irq, block 등에서 제공되며, 이름과 필드는 target kernel에서 확인합니다.
-- `perf script`에 Python 콜백을 붙여 커스텀 분석기를 만들 수 있습니다.
-- `perf sched`, `perf mem`, `perf c2c`로 스케줄링과 false sharing을 진단합니다.
-- Sampling rate가 정확도와 overhead의 trade-off이므로 목표 workload에 맞춰 선택하고 비용을 확인합니다.
+- `perf list`의 결과는 장비마다 다릅니다. 이 HVF guest는 `hw`·`cache`가 비어 있었고 software event와 tracepoint만 있었습니다.
+- Raw event는 `rNN` 또는 `<pmu>/event=0xNN/`로 지정합니다. PMU 이름과 지원 번호는 `/sys/bus/event_source/devices/<pmu>/`의 `format`·`events`에서 읽습니다.
+- 지원하지 않는 raw 번호가 `0`으로 나올 수 있습니다(TCG의 `r03`·`r04`).
+- Group은 함께 올라가지 못하면 통째로 `<not counted>`가 됩니다.
+- `perf script -g python`이 만든 콜백 선언 그대로 comm별 on-CPU 집계기를 만들 수 있습니다.
+- `perf sched latency`는 평균 0.009 ms, 최대 0.872 ms처럼 평균에 묻힌 꼬리를 보여 줍니다.
+- `perf mem`·`perf c2c`는 PMU 메모리 표본 기능이 필요합니다. 이 guest에서는 "no PMU supports the memory events"였습니다.
+- Tracepoint 비용은 개수와 스택 수집이 정합니다. `sched_switch` 하나는 잡음 안, `-g`는 약 28%, `sched:*`는 약 68%였습니다.
 
 다음 편은 **ftrace 활용** — 커널 내부 흐름을 추적합니다.
 
