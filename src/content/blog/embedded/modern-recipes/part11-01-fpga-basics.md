@@ -21,7 +21,8 @@ CPU는 명령을 하나씩 가져와 실행합니다. 같은 일을 매 clock �
 
 ### 이 글의 실행 환경
 
-- 데이터시트 수치: AMD DS180 v2.6.1(7 Series Overview), DS190 v1.11.1(Zynq-7000), DS891 v1.11.1(Zynq UltraScale+ MPSoC), UG472 v1.14(Clocking), UG471 v1.10(SelectIO), UG473 v1.14(Memory Resources), UG479 v1.10(DSP48E1)에서 옮겼습니다.
+- 데이터시트 수치: AMD DS180 v2.6.1(7 Series Overview), DS190 v1.11.1(Zynq-7000), DS891 v1.11.1(Zynq UltraScale+ MPSoC), UG472 v1.14(Clocking), UG471 v1.10(SelectIO), UG479 v1.10(DSP48E1)에서 옮겼습니다.
+- 같은 계열 문서로 UG474 v1.9(CLB)도 인용합니다.
 - 합성 출력: Yosys 0.71(`yowasp-yosys` 패키지)의 `synth_xilinx -family xc7`입니다. **Vivado는 이 환경에 설치할 수 없어 돌리지 않았습니다.** Vivado의 동작은 UG901·UG906 문서로만 인용합니다. Yosys 결과는 "RTL이 7 series primitive로 어떻게 매핑되는지"를 보여 주는 예시이고, Vivado가 같은 개수를 낸다는 뜻은 아닙니다.
 - 시뮬레이션·lint: Icarus Verilog 13.0, Verilator 5.054.
 
@@ -39,7 +40,7 @@ CPU는 명령을 하나씩 가져와 실행합니다. 같은 일을 매 clock �
 | IOB | I/O Block | bank당 50 SelectIO 핀(예외 있음) |
 | CMT | Clock Management Tile | MMCM 1개 + PLL 1개 |
 
-자원의 *비율*이 디바이스 성격을 정합니다. 아래 비교 표에서 같은 Artix-7 계열이라도 디바이스마다 DSP와 BRAM 비율이 다른 것을 볼 수 있습니다.
+자원의 *비율*이 디바이스 성격을 정합니다. 아래 자원 비교 표로 계산하면 LUT 1,000개당 DSP 수는 XC7S6 2.7개, XC7A35T 4.3개, Z-7020 4.1개, ZU3EG 5.1개로 계열마다 다릅니다.
 
 ## LUT — 임의의 boolean 함수
 
@@ -86,7 +87,7 @@ LUT RAM은 작고 흩어져 있습니다. 수 KB 이상의 buffer는 BRAM에 둡
 - 포트마다 32K × 1, 16K × 2, 8K × 4, 4K × 9(또는 8), 2K × 18(또는 16), 1K × 36(또는 32), 512 × 72(또는 64) 가운데 하나로 설정합니다. 72-bit 폭은 simple dual-port 모드에서만 됩니다.
 - 두 포트는 저장된 데이터 말고는 공유하는 것이 없습니다. 읽기·쓰기 모두 clock에 동기입니다.
 
-4096 × 8 메모리를 동기 읽기로 기술하면 정확히 36 Kb 블록 하나 크기(4K × 9 설정의 데이터 8비트)입니다.
+4096 × 8 메모리(32 Kb)를 동기 읽기로 기술하면 36 Kb 블록 하나를 4K × 9로 설정해 데이터 8비트만 쓰는 크기가 됩니다.
 
 ```verilog
 module bram_demo(input wire clk, input wire we, input wire [11:0] addr,
@@ -120,7 +121,7 @@ Yosys는 이 배열을 `RAMB36E1` 하나로 추론했습니다. 같은 배열을
       128   RAM256X1S
 ```
 
-BRAM은 읽기도 clock에 동기라서(DS180) 비동기 읽기를 받을 수 없습니다. 그래서 Yosys는 32 Kb를 LUT 기반 distributed RAM(`RAM256X1S` 128개)과 읽기 mux용 LUT 68개로 풀었습니다. 큰 buffer는 읽기를 레지스터에 거는 것만으로 BRAM 하나와 LUT 수백 개 사이의 차이가 납니다.
+BRAM은 읽기도 clock에 동기라서(DS180) 비동기 읽기를 받을 수 없습니다. 그래서 Yosys는 32 Kb를 LUT 기반 distributed RAM(`RAM256X1S` 128개)과 읽기 mux용 `LUT6` 40개, write-enable decode용 `LUT2`·`LUT3` 28개로 풀었습니다. UG474(v1.9)에 따르면 `RAM256X1S` 하나가 LUT 4개를 쓰므로 LUT로만 약 580개입니다. 큰 buffer는 읽기를 레지스터에 거는 것만으로 BRAM 하나와 LUT 수백 개 사이의 차이가 납니다.
 
 ## DSP48E1 — multiply-accumulate
 
@@ -211,20 +212,20 @@ soft core가 fabric을 얼마나 쓰는지 감을 잡기 위해 PicoRV32(YosysHQ
        12   RAM32M
 ```
 
-LUT2~LUT6을 더하면 1,027개, FF는 574개이고, register file은 distributed RAM(`RAM32M` 12개)으로 들어갔습니다. 아래 표의 Spartan-7 XC7S6(LUT 3,752개)에도 들어가는 크기입니다. 이 숫자는 Yosys 0.71 기준이고, Vivado나 다른 파라미터 설정에서는 달라집니다.
+LUT2~LUT6을 더하면 1,027개이고, register file은 distributed RAM(`RAM32M` 12개, UG474 기준 LUT 48개)으로 들어가 LUT는 모두 약 1,075개입니다. FF는 574개입니다. LUT 수로는 아래 표의 Spartan-7 XC7S6(LUT 3,752개)에도 들어가지만, 이 합성은 코어 포트 409개를 모두 I/O 버퍼로 뺀 top이라 XC7S6의 최대 I/O 100개를 넘습니다. 실제로는 메모리·주변장치와 함께 칩 안에 넣어 씁니다. 이 숫자는 Yosys 0.71 기준이고, Vivado나 다른 파라미터 설정에서는 달라집니다.
 
 hard SoC(Zynq 등)는 Arm 코어가 실리콘에 들어 있어 fabric을 쓰지 않습니다. soft core는 fabric만 있으면 어느 디바이스에나 넣을 수 있다는 것이 장점입니다.
 
 ## FPGA 자원 비교
 
-데이터시트 표의 "Logic Cells"는 LUT 개수가 아닙니다. 7 series는 slice당 LUT 4개·FF 8개이므로(DS180 Table 2·3 주석) LUT = slice × 4, FF = slice × 8로 계산합니다. Zynq UltraScale+는 DS891이 CLB LUT와 FF를 직접 적어 둡니다.
+데이터시트 표의 "Logic Cells"는 LUT 개수가 아닙니다. 7 series는 slice당 LUT 4개·FF 8개이므로(DS180 Table 2·4 주석) LUT = slice × 4, FF = slice × 8로 계산합니다. Zynq UltraScale+는 DS891이 CLB LUT와 FF를 직접 적어 둡니다.
 
 | 디바이스 | 출처 | LUT | FF | BRAM | DSP slice |
 |------|------|-----|----|----|----|
 | Spartan-7 XC7S6 | DS180 Table 2 (slice 938) | 3,752 | 7,504 | 5 × 36 Kb = 180 Kb | 10 |
-| Artix-7 XC7A35T | DS180 Table 3 (slice 5,200) | 20,800 | 41,600 | 50 × 36 Kb = 1,800 Kb | 90 |
+| Artix-7 XC7A35T | DS180 Table 4 (slice 5,200) | 20,800 | 41,600 | 50 × 36 Kb = 1,800 Kb | 90 |
 | Zynq-7000 Z-7020 | DS190 Table 1 | 53,200 | 106,400 | 140 × 36 Kb (4.9 Mb) | 220 |
-| Zynq US+ ZU3EG | DS891 | 70,560 | 141,120 | 216 블록 (7.6 Mb) | 360 |
+| Zynq US+ ZU3EG | DS891 Table 3 | 70,560 | 141,120 | 216 블록 (7.6 Mb) | 360 |
 
 같은 표에서 Logic Cells 값은 XC7S6이 6,000, XC7A35T가 33,280입니다. "A35T는 33K LUT"처럼 Logic Cells를 LUT 수로 읽으면 실제보다 60% 크게 잡게 됩니다(33,280 / 20,800 = 1.6).
 
@@ -234,7 +235,7 @@ hard SoC(Zynq 등)는 Arm 코어가 실리콘에 들어 있어 fabric을 쓰지 
 2. Synthesis: RTL을 LUT·FF·BRAM·DSP 같은 primitive netlist로 바꿉니다. 위의 Yosys 출력이 이 단계의 결과입니다.
 3. Place & Route: primitive를 실제 site에 놓고 배선합니다.
 4. Timing analysis: 모든 경로가 constraint 안에 들어오는지 확인합니다.
-5. Bitstream 생성: AMD는 `.bit`, Intel은 `.sof`입니다.
+5. Bitstream 생성: AMD Vivado는 `.bit` 파일을 만듭니다.
 6. Programming: JTAG으로 FPGA 설정 메모리에 load하거나 flash에 씁니다.
 
 Synthesis는 SW의 compile에, P&R은 link와 배치를 합친 단계에 해당합니다. Vivado에서 각 단계를 돌리는 방법은 [다음 편](/blog/embedded/modern-recipes/part11-02-vivado-usage)에서 다룹니다.
@@ -275,7 +276,7 @@ endmodule
 | 실행 모델 | 명령을 하나씩 fetch·decode·execute | 합성된 회로 전체가 매 clock 동시에 동작 |
 | latency | cache·분기 예측·인터럽트에 따라 변함 | 파이프라인 단 수로 clock 단위가 고정 |
 | 수정 | 소스를 고쳐 다시 빌드하고 실행 | 다시 합성·P&R·bitstream 생성 후 다시 load |
-| clock | 칩이 정한 고정 clock | 설계마다 timing closure로 정해지는 clock |
+| clock | 칩과 OS가 정하는 clock | 설계마다 timing closure로 정해지는 clock |
 
 clock 숫자만으로 CPU와 비교하면 안 되는 이유는 매 clock 하는 일의 양이 다르기 때문입니다. 앞의 Z-7020 예처럼 처리량은 "DSP 수 × clock × DSP당 연산"으로 상한을 계산하고, 그다음 메모리 대역폭과 timing으로 깎아 나갑니다.
 
@@ -312,11 +313,11 @@ endmodule
 
 > Timing 위반 무시
 
-UG906(v2026.1) p.153은 timing summary의 WNS(Worst Negative Slack)를 "max delay로 분석한 모든 경로 중 최악의 slack"이라고 정의하고, TNS는 모든 setup 제약을 만족하면 0, 위반이 있으면 음수라고 적습니다. WNS가 음수라는 것은 setup 요구를 만족하지 못하는 경로가 하나 이상 남았다는 뜻입니다. 원인 경로에 pipeline을 넣거나 clock을 낮춰 WNS를 0 이상으로 만든 뒤에 굽습니다.
+UG906(v2026.1) p.153~154는 timing summary의 WNS(Worst Negative Slack)를 "max delay로 분석한 모든 경로 중 최악의 slack"이라고 정의하고, TNS는 모든 setup 제약을 만족하면 0, 위반이 있으면 음수라고 적습니다. WNS가 음수라는 것은 setup 요구를 만족하지 못하는 경로가 하나 이상 남았다는 뜻입니다. 원인 경로에 pipeline을 넣거나 clock을 낮춰 WNS를 0 이상으로 만든 뒤에 굽습니다.
 
 > Reset deassert race
 
-비동기 리셋의 해제도 clock에 대한 timing 검사 대상입니다. UG906 p.153은 setup 쪽에 recovery 검사를, hold 쪽에 removal 검사를 포함한다고 적습니다. 외부에서 들어오는 리셋 버튼은 clock과 관계없이 풀리므로 이 검사를 만족시킬 수 없습니다. 그래서 assert는 즉시, deassert는 clock에 맞추는 reset synchronizer를 둡니다.
+비동기 리셋의 해제도 clock에 대한 timing 검사 대상입니다. UG906 p.153~154는 setup 쪽에 recovery 검사를, hold 쪽에 removal 검사를 포함한다고 적습니다. 외부에서 들어오는 리셋 버튼은 clock과 관계없이 풀리므로 이 검사를 만족시킬 수 없습니다. 그래서 assert는 즉시, deassert는 clock에 맞추는 reset synchronizer를 둡니다.
 
 ```verilog
 module rst_sync (
@@ -344,13 +345,13 @@ endmodule
 ```text
 $ iverilog -g2012 -o rst tb_rst.v rst_sync.v && vvp -n rst
 0 ns arst_n=0 rst_n=x
-5000 ns arst_n=0 rst_n=0
-23000 ns arst_n=1 rst_n=0
-35000 ns arst_n=1 rst_n=1
-63000 ns arst_n=0 rst_n=0
+5 ns arst_n=0 rst_n=0
+23 ns arst_n=1 rst_n=0
+35 ns arst_n=1 rst_n=1
+63 ns arst_n=0 rst_n=0
 ```
 
-(testbench의 `timescale`이 `1ns/1ps`라 `$time`이 ps 단위로 찍혔습니다. 5000은 5 ns입니다.) 해제는 23 ns에 들어왔지만 `rst_n`은 두 번째 상승 edge인 35 ns에야 1이 되고, 다시 걸면 63 ns에 clock을 기다리지 않고 바로 0이 됩니다. 0 ns에 `x`인 이유는 `arst_n`이 처음부터 0이라 `negedge`가 없었기 때문이고, 첫 clock edge(5 ns)에서 리셋 분기가 실행되며 0이 됩니다.
+해제는 23 ns에 들어왔지만 `rst_n`은 두 번째 상승 edge인 35 ns에야 1이 되고, 다시 걸면 63 ns에 clock을 기다리지 않고 바로 0이 됩니다. 0 ns에 `x`인 이유는 `arst_n`이 처음부터 0이라 `negedge`가 없었기 때문이고, 첫 clock edge(5 ns)에서 리셋 분기가 실행되며 0이 됩니다.
 
 > Pin assignment 누락
 
