@@ -36,7 +36,7 @@ Cortex-M은 16개의 32-bit 레지스터를 갖습니다.
 | R14 | LR | Link Register (return 주소) |
 | R15 | PC | Program Counter |
 
-AAPCS(ARM Application Procedure Call Standard)가 함수 호출 시 누가 어떤 레지스터를 보존할지를 정합니다.
+AAPCS(ARM Application Procedure Call Standard, ARM-software/abi-aa `aapcs32`)가 함수 호출 시 누가 어떤 레지스터를 보존할지를 정합니다. 표의 역할은 aapcs32의 core register 표(r9 "Platform register or Variable-register", r12 "Intra-Procedure-call scratch")와 "A subroutine must preserve the contents of the registers r4-r8, r10, r11 and SP" 규칙을 옮긴 것입니다.
 
 ### 2) SP — MSP vs PSP
 
@@ -45,7 +45,7 @@ Cortex-M은 두 개의 stack pointer를 갖습니다.
 - **MSP (Main Stack Pointer)** — reset 직후와 exception handler가 씁니다.
 - **PSP (Process Stack Pointer)** — thread mode에서 CONTROL.SPSEL=1일 때 씁니다. RTOS task가 여기에 해당합니다.
 
-RTOS는 각 task에 PSP를 따로 줍니다. 예외가 발생하면 하드웨어가 레지스터 8개를 그 task의 PSP stack에 쌓고, handler 자체는 항상 MSP를 쓰므로 handler의 stack 사용이 task stack을 침범하지 않습니다.
+RTOS는 각 task에 PSP를 따로 줍니다. 예외가 발생하면 하드웨어가 레지스터 8개(FP context가 있으면 S0~S15·FPSCR까지)를 그 task의 PSP stack에 쌓고, handler 자체는 항상 MSP를 쓰므로 handler의 stack 사용이 task stack을 침범하지 않습니다.
 
 PSP를 먼저 채운 뒤 CONTROL.SPSEL(bit 1)을 바꿔야 합니다. 순서를 거꾸로 하면 아직 설정하지 않은 PSP로 stack을 쓰게 됩니다.
 
@@ -182,7 +182,7 @@ PendSV_Handler:
     bx lr                            @ EXC_RETURN으로 복귀
 ```
 
-HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 직접 처리하는 8개(R4 ~ R11)를 나눠 다룹니다. SW 쪽은 EXC_RETURN이 든 LR도 함께 저장해, 복귀할 task가 FP context를 썼는지 bit 4로 다시 판단합니다. FreeRTOS ARM_CM4F 포트의 `xPortPendSVHandler`도 같은 순서로 저장·복원하며, `cpsid i` 대신 BASEPRI로 IRQ를 막는다는 점만 다릅니다.
+HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 직접 처리하는 8개(R4 ~ R11)를 나눠 다룹니다. SW 쪽은 EXC_RETURN이 든 LR도 함께 저장해, 복귀할 task가 FP context를 썼는지 bit 4로 다시 판단합니다. FreeRTOS ARM_CM4F 포트의 `xPortPendSVHandler`도 같은 순서(`vstmdbeq {s16-s31}` → `stmdb {r4-r11, r14}`)로 저장·복원합니다. 다만 IRQ를 막는 구간은 저장·복원 전체가 아니라 `vTaskSwitchContext` 호출 앞뒤뿐이고, 그때 `cpsid i` 대신 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올립니다.
 
 ### QEMU에서 직접 돌려 보기
 
@@ -276,7 +276,7 @@ UsageFault를 끄면 같은 INVSTATE(CFSR bit 17)가 HardFault로 올라가고 H
 - Cortex-M은 R0 ~ R15와 special register(CONTROL, PRIMASK, BASEPRI, FAULTMASK, xPSR)로 구성됩니다. A-profile의 CPSR·SPSR·모드별 banked register는 없고, ARMv7-M 기준으로 banked인 것은 SP(MSP·PSP)뿐입니다.
 - IPSR은 IRQ 번호가 아니라 exception 번호입니다(외부 IRQ = IRQn + 16).
 - SP는 MSP / PSP로 나뉩니다. RTOS는 task에 PSP를 줘 stack 격리를 합니다.
-- IRQ entry 시 HW가 8 register를 자동 push하고, context switch 코드가 R4 ~ R11(FP 사용 시 S16 ~ S31까지)을 추가로 저장합니다.
+- IRQ entry 시 HW가 8 register(FP 사용 시 S0~S15·FPSCR 추가)를 자동 push하고, context switch 코드가 R4 ~ R11(FP 사용 시 S16 ~ S31까지)을 추가로 저장합니다.
 - BASEPRI는 부분 IRQ 차단에 씁니다. FreeRTOS critical section의 기반입니다.
 - Privilege level, FPU context, T bit 같은 작은 실수가 fault를 부릅니다.
 

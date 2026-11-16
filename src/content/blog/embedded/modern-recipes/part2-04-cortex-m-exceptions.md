@@ -198,6 +198,7 @@ boot: ISPR[0] before jump = 0x00000002
 boot: app[0] (MSP) = 0x20010000
 boot: app[1] (Reset) = 0x000100C3
 app: VTOR = 0x00010000
+app: MSP = 0x2000FFF0
 app: PRIMASK = 0x00000000
 app: SysTick CTRL = 0x00000000
 app: ISER[0] = 0x00000000
