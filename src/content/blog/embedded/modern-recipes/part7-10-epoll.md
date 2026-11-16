@@ -224,7 +224,7 @@ ONESHOT으로 등록한 fd는 첫 `epoll_wait`에서 알린 뒤, 데이터가 �
 
 ### close와 dup
 
-`dupclose()`는 fd를 등록하고 `dup`한 뒤 원래 fd를 닫았습니다. 닫은 fd 번호(3)로 여전히 이벤트가 왔고, `dup`한 fd로 `EPOLL_CTL_DEL`을 하면 `ENOENT`였습니다. man page는 그 fd가 가리키는 open file description을 가리키는 fd가 모두 닫혀야 관심 목록에서 빠진다고 설명하고, 그래서 `dup` 하기 *전에* `EPOLL_CTL_DEL`로 빼라고 적습니다(`epoll(7)` Q&A "Will closing a file descriptor cause it to be removed from all epoll interest lists?"). 원래 fd가 아직 열려 있다면 `close` 전에 그 fd로 `EPOLL_CTL_DEL`을 해도 빠졌습니다(같은 VM에서 반환값 0, 이후 `epoll_wait` 0). `dup`한 fd로 지우면 `ENOENT`인 이유는, 커널이 관심 목록 항목을 (open file description, 등록할 때의 fd 번호) 쌍으로 찾기 때문입니다(v6.12 `fs/eventpoll.c`의 `ep_cmp_ffd`·`ep_find`).
+`dupclose()`는 fd를 등록하고 `dup`한 뒤 원래 fd를 닫았습니다. 닫은 fd 번호(3)로 여전히 이벤트가 왔고, `dup`한 fd로 `EPOLL_CTL_DEL`을 하면 `ENOENT`였습니다. man page는 같은 open file description을 가리키는 fd가 모두 닫혀야 관심 목록에서 빠진다고 설명하고, 그래서 `dup` 하기 *전에* `EPOLL_CTL_DEL`로 빼라고 적습니다(`epoll(7)` Q&A "Will closing a file descriptor cause it to be removed from all epoll interest lists?"). 원래 fd가 아직 열려 있다면 `close` 전에 그 fd로 `EPOLL_CTL_DEL`을 해도 빠졌습니다(같은 VM에서 반환값 0, 이후 `epoll_wait` 0). `dup`한 fd로 지우면 `ENOENT`인 이유는, 커널이 관심 목록 항목을 (open file description, 등록할 때의 fd 번호) 쌍으로 찾기 때문입니다(v6.12 `fs/eventpoll.c`의 `ep_cmp_ffd`·`ep_find`).
 
 ### EPOLLEXCLUSIVE — accept thundering herd
 
@@ -335,7 +335,7 @@ pipe 하나가 fd 두 개라서 pipe 5000개면 fd 번호가 10002까지 갑니�
 
 > ⚠️ ET에서 한 번만 읽음
 
-위 `ET: wakeups=1 bytes read=10 of 40`처럼, 남은 데이터가 있어도 다음 알림이 오지 않습니다. ET는 `EAGAIN`까지 읽습니다.
+위 `ET: wakeups=1 bytes read=10 of 40`처럼, 남은 데이터가 있어도 다음 알림이 오지 않습니다. ET에서는 `EAGAIN`이 날 때까지 읽어야 합니다.
 
 > ⚠️ Blocking fd에 ET
 
@@ -357,7 +357,7 @@ ET의 "빌 때까지 읽기" loop는 `EAGAIN`으로 끝나야 하는데, blockin
 
 - epoll은 관심 목록을 커널에 두고 준비된 fd만 돌려줍니다. 이 측정에서 2만 fd 중 하나가 준비됐을 때 `poll`은 1 ms가 넘었고 epoll은 1.5 µs였습니다.
 - `select`는 `FD_SETSIZE`(1024) 미만의 fd 번호만 다룹니다.
-- LT는 남은 데이터가 있는 동안 계속 알리고, ET는 바뀌는 순간 한 번만 알립니다. ET는 non-blocking fd에서 `EAGAIN`까지 읽습니다.
+- LT는 남은 데이터가 있는 동안 계속 알리고, ET는 바뀌는 순간 한 번만 알립니다. ET에서는 non-blocking fd로 `EAGAIN`까지 읽어야 합니다.
 - ONESHOT은 한 번 알린 fd를 `MOD`로 다시 켤 때까지 끕니다.
 - epoll 등록은 (open file description, 등록한 fd 번호) 쌍으로 잡히므로, `dup`이 남아 있으면 `close`로 빠지지 않고 `dup`한 번호로는 지울 수도 없습니다.
 - `EPOLLEXCLUSIVE`는 같은 fd를 감시하는 여러 epoll 인스턴스 전부가 아니라 하나 이상만 깨웁니다(`epoll_ctl(2)`).
