@@ -156,14 +156,14 @@ AI 가속기 카드의 *HBM 구성*입니다. stack 구성은 벤더가 공개�
 
 | 카드 | HBM | stack 구성 | capacity | spec BW | TDP |
 |------|-----|-----------|----------|---------|-----|
-| NVIDIA H100 SXM5 | HBM3 | 5 stack | 80 GB | 3.35 TB/s | 최대 700 W |
+| NVIDIA H100 SXM5 | HBM3 | 5 stack ([Hopper 구조 설명](https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/)) | 80 GB | 3.35 TB/s | 최대 700 W |
 | NVIDIA H200 SXM | HBM3e | — | 141 GB | 4.8 TB/s | 최대 700 W |
 | NVIDIA B200 | HBM3e | — | 180 GB | 8 TB/s | TBD |
-| AMD Instinct MI300X | HBM3 | 8,192-bit | 192 GB | 5.3 TB/s | 최대 TBP 750 W |
+| AMD Instinct MI300X | HBM3 | — | 192 GB | 5.3 TB/s | 최대 TBP 750 W |
 | AMD Instinct MI325X | HBM3E | — | 256 GB | 6 TB/s | TBP 1000 W peak |
 | Google TPU v5p | HBM | — | 95 GiB (물리 96 GiB) | 2,765 GB/s | — |
 
-이 표는 제품 발표 세대의 예이며 최신 SKU 순위가 아닙니다. B200은 DGX B200의 8 GPU 합계(1,440 GB, 64 TB/s)를 8로 나눈 값입니다. MI300X의 8,192-bit는 AMD 각주(`8,192-bit × 5.2 Gbps ÷ 8 = 5.325 TB/s`)의 값입니다. [Google TPU v5p 문서](https://cloud.google.com/tpu/docs/v5p)는 chip당 물리 HBM이 96 GiB이고, 시스템과 libtpu runtime 예약분을 빼서 95 GiB로 적는다고 설명합니다. 공칭 용량과 runtime 가용 메모리가 다르다는 것을 벤더가 직접 밝힌 예입니다.
+이 표는 제품 발표 세대의 예이며 최신 SKU 순위가 아닙니다. B200은 DGX B200의 8 GPU 합계(1,440 GB, 64 TB/s)를 8로 나눈 값입니다. MI300X의 메모리 bus 8,192-bit는 AMD 각주(`8,192-bit × 5.2 Gbps ÷ 8 = 5.325 TB/s`)의 값입니다. [Google TPU v5p 문서](https://cloud.google.com/tpu/docs/v5p)는 chip당 물리 HBM이 96 GiB이고, 시스템과 libtpu runtime 예약분을 빼서 95 GiB로 적는다고 설명합니다. 공칭 용량과 runtime 가용 메모리가 다르다는 것을 벤더가 직접 밝힌 예입니다.
 
 한국 NPU의 경우입니다.
 
@@ -177,7 +177,7 @@ AI 가속기 카드의 *HBM 구성*입니다. stack 구성은 벤더가 공개�
 
 ![AI 가속기의 메모리 tiering — SRAM / HBM / CXL / NVMe / 네트워크 메모리](/images/blog/hardware/hbm/diagrams/ch08-tiering.svg)
 
-다음은 **별도 offload runtime을 설계한다는 가정의 배치 정책**입니다. CXL Type 3가 host에 연결됐다고 GPU가 그 메모리를 곧바로 HBM처럼 읽는다는 뜻은 아닙니다. GPU 주소 매핑·host staging·copy/P2P 경로·page pinning·장치 지원·일관성과 전송 시간을 따로 확인해야 합니다.
+다음은 **별도 offload runtime을 설계한다는 가정의 배치 정책**입니다. CXL 1.1 규격은 Type 3를 *호스트를 위한 memory expander*로 정의합니다([Ch 11](/blog/embedded/hardware/hbm/chapter11-cxl-device-types)). 그래서 아래 배치에서 CXL에 둔 KV cache는 GPU가 HBM처럼 바로 읽는 것이 아니라, 호스트 쪽 메모리에서 옮겨 와야 하는 데이터입니다.
 
 - *hot KV cache* → HBM
 - *warm KV cache* → CXL

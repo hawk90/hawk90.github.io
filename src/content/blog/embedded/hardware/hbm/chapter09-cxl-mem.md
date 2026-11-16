@@ -14,7 +14,7 @@ topics: ["embedded", "embedded/hardware"]
 
 > **"HBM은 *대역폭*을, DDR은 *용량*을 풀지만, 서버 한 대에 꽂을 수 있는 메모리에는 한계가 있습니다."** — CXL.mem은 PCIe 물리 계층 위에서 *호스트 CPU가 외부 디바이스의 DRAM을 load/store로 직접 접근*하게 합니다. local DDR보다 멀리 있어 *지연은 더 크지만*, *용량을 링크 너머로 늘리는* 새 메모리 단을 만듭니다.
 
-[Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 Llama 2 70B를 batch 128·seq 2048로 서빙하면 *weight+KV 소계 약 226 GB*(나머지 runtime 메모리 제외)가 나온다는 것을 봤습니다. H100 80 GB로는 *weight조차* 한 장에 들어가지 않습니다. CXL.mem은 먼저 **호스트 CPU의 장치 메모리 접근**을 확장합니다. H100의 HBM 부족을 자동으로 해소하지는 않습니다. GPU가 이용하려면 runtime의 offload·staging·복사 경로와 장치 지원을 별도로 확인해야 합니다. 이 장은 *CXL.mem이 메모리 계층의 어디에 끼는지*를 정리합니다.
+[Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 Llama 2 70B를 batch 128·seq 2048로 서빙하면 *weight+KV 소계 약 226 GB*(나머지 runtime 메모리 제외)가 나온다는 것을 봤습니다. H100 80 GB로는 *weight조차* 한 장에 들어가지 않습니다. CXL.mem은 먼저 **호스트 CPU의 장치 메모리 접근**을 확장합니다. CXL 1.1 규격이 Type 3를 *호스트를 위한 memory expander*로 정의하므로, 이 메모리는 GPU의 HBM이 아니라 호스트 쪽 용량입니다. GPU가 이 용량을 쓰는 경로는 이 장에서 다루지 않습니다. 이 장은 *CXL.mem이 메모리 계층의 어디에 끼는지*를 정리합니다.
 
 ## 메모리 계층의 새 자리
 
@@ -48,9 +48,9 @@ CXL.mem에서는 CPU의 *load instruction*이 *MMU 변환 → 메모리 컨트�
 | 버전 | 발표 | 주요 내용 |
 |------|------|-----------|
 | CXL 2.0 | 2020년 11월 10일 | switching(fan-out), memory pooling, persistent memory 지원, 1.1·1.0과 하위 호환 |
-| CXL 3.0 | 2022년 8월 | fabric 기능과 관리, memory sharing·pooling 개선, peer-to-peer 통신 |
+| CXL 3.0 | 2022년 8월 | data rate 2배(64 GT/s), fabric 기능과 관리, memory sharing·pooling 개선, peer-to-peer 통신 |
 
-버전 표는 [CXL 2.0의 2020년 11월 10일 발표](https://computeexpresslink.org/wp-content/uploads/2024/02/0c1418_caa15c61bc7b499087ad4ec3713df1ec.pdf)와 [CXL 3.0 소개](https://computeexpresslink.org/event/cxl-3-0-enabling-composable-systems-with-expanded-fabric-capabilities/)를 기준으로 합니다. switch를 거치는 구성과 pooling은 *CXL 2.0부터*입니다. 64 GT/s는 위 CXL 3.1 규격 본문에서 확인한 값이며, 3.0 소개 페이지에는 나오지 않습니다.
+버전 표는 [CXL 2.0의 2020년 11월 10일 발표](https://computeexpresslink.org/wp-content/uploads/2024/02/0c1418_caa15c61bc7b499087ad4ec3713df1ec.pdf)와 [CXL 3.0 소개](https://computeexpresslink.org/event/cxl-3-0-enabling-composable-systems-with-expanded-fabric-capabilities/)를 기준으로 합니다. switch를 거치는 구성과 pooling은 *CXL 2.0부터*입니다. 3.0 소개 페이지는 64 GT/s를 *CXL 2.0 대비 지연 추가 없이 data rate를 두 배로* 올린 것으로 설명합니다.
 
 ## 공개 제품 사례
 

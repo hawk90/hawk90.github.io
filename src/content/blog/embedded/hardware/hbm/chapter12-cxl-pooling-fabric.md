@@ -53,7 +53,7 @@ CXL 카드를 서버 하나에 꽂아 두면 그 카드의 용량은 *그 서버
 | 단계 | CXL 버전 | 용량이 묶이는 경계 | 나눠 쓰는 단위 |
 |------|---------|------------------|---------------|
 | Direct Attach | 1.1 | 서버 한 대의 슬롯 | 카드 = 서버에 고정 |
-| Switching·Pooling | 2.0 | 풀 하나 | MLD(Multi-Logical Device)의 논리 장치 |
+| Switching·Pooling | 2.0 | 풀 하나 | 장치 전체(SLD) 또는 MLD의 논리 장치(LD, 최대 16개) |
 | Fabric | 3.0 / 3.x | fabric 전역 | 메모리 영역, 여러 host의 공유 |
 
 단계가 하나 올라갈 때마다 [Ch 10](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol)에서 본 대로 *왕복 경로에 통과 지점이 늘어* 지연이 붙고, 그 대가로 *나눠 쓸 수 있는 범위*가 넓어집니다. 단계별 실제 지연 값은 TBD입니다.
@@ -161,7 +161,7 @@ peak가 엇갈린 두 host는 200 대 100, peak가 겹친 두 host는 200 대 20
 
 ### "풀링하면 메모리를 산 만큼 다 쓴다"
 
-*할당 단위가 발목을 잡습니다*. CXL 2.0 pooling은 MLD의 논리 장치 단위로 host에 붙입니다. 워크로드가 요구하는 크기가 그 경계와 맞지 않으면 남는 조각이 생깁니다. 위 계산기의 결과도 할당 단위를 넣지 않은 하한입니다.
+*할당 단위가 발목을 잡습니다*. CXL 3.1 규격(2023년 8월) §1.4는 CXL 2.0이 장치를 여러 virtual hierarchy에 pool할 수 있다고 적고, §2.4는 Type 3 MLD가 자원을 *최대 16개의 격리된 Logical Device*로 나눈다고 적습니다. 그래서 할당 단위는 장치 하나(SLD) 또는 LD 하나입니다. 워크로드가 요구하는 크기가 그 경계와 맞지 않으면 남는 조각이 생깁니다. 위 계산기의 결과도 할당 단위를 넣지 않은 하한입니다.
 
 ### "tiering은 OS에 맡기면 안 된다"
 
@@ -191,7 +191,7 @@ HBM·GDDR 심화 시리즈는 여기서 마칩니다. 시작은 [Ch 1](/blog/emb
 
 CXL을 *프로토콜·구현 쪽에서 다시* 보고 싶다면 [CXL 4.0 Internals](/blog/embedded/hardware/cxl/chapter01-cxl-position) 시리즈가 그 자리를 맡습니다. 그 밖의 인접 주제는 기존 시리즈에 분산 추가된 챕터로 이어집니다.
 
-- *프로토콜·드라이버*: [Modern Embedded Recipes Ch 149~151](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
+- *프로토콜·드라이버*: [Modern Embedded Recipes Ch 150~152](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
 - *성능 분석*: [Embedded Performance Engineering Ch 54~56](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)
 - *보안*: [Embedded Security Ch 11~13](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)
 - *부팅·BIOS*: [Bootloader Internals Ch 34~36](/blog/embedded/bootloader/chapter34-pcie-enumeration)

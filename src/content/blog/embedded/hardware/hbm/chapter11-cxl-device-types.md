@@ -54,7 +54,7 @@ Type 2는 *메모리가 붙은 가속기*입니다. 규격은 그 목적을 이�
 
 두 번째 함정은 대역폭입니다. 규격도 Type 2의 성능이 *가속기와 device-attached memory 사이의 큰 대역폭*에서 나온다고 적습니다. HBM3 stack 하나가 819 GB/s, 9.6 Gbps HBM3E가 1,228.8 GB/s입니다([Ch 3](/blog/embedded/hardware/hbm/chapter03-hbm-generations)). 호스트는 같은 메모리를 *CXL 링크 너머로* 읽고, PCIe 5.0 x16의 원시 전송률은 *64 GB/s*입니다. HBM3 stack 하나만 비교해도 `819 ÷ 64 ≈ 12.8`배입니다.
 
-그래서 "*Type 2 카드를 꽂았으니 그 메모리만큼 내 메모리 풀에 추가됐다*"는 계산은 성립하지 않습니다. 단순히 카드 용량을 host의 일반 RAM에 합산하는 것은 잘못입니다. 그 메모리는 가속기가 일하는 공간이고, 호스트가 같은 구간에 접근하면 위 대역폭 차이와 Device Bias의 *compromised performance*를 함께 치릅니다.
+그래서 "*Type 2 카드를 꽂았으니 그 메모리만큼 내 메모리 풀에 추가됐다*"는 계산은 성립하지 않습니다. 단순히 카드 용량을 host의 일반 RAM에 합산하는 것은 잘못입니다. 그 메모리는 가속기가 일하는 공간이고, 호스트가 읽으면 위 대역폭 차이를 치릅니다. bias를 구현한 장치라면 Device Bias 구간의 *compromised performance*도 더해집니다.
 
 ## Type 1 — 용량은 늘지 않는다
 
@@ -79,7 +79,7 @@ daxctl list          # System RAM 대신 DAX로 노출된 경우
 cxl list -M -D       # memdev와 decoder 확인
 ```
 
-[Ch 9](/blog/embedded/hardware/hbm/chapter09-cxl-mem)의 QEMU 게스트(Debian 13.7 arm64, kernel 6.12.116, cxl-type3 256 MiB)에서 실행한 결과입니다. region 생성은 Ch 9에서 본 대로 실패한 상태입니다.
+[Ch 9](/blog/embedded/hardware/hbm/chapter09-cxl-mem)의 QEMU 게스트(Debian 13.7 arm64, kernel 6.12.116, cxl-type3 256 MiB)에서 실행한 결과입니다. 세 명령 모두 Ch 9의 region 생성이 실패한 뒤, 같은 부팅에서 실행했습니다.
 
 ```text
 # numactl --hardware
@@ -138,7 +138,7 @@ node 1 free: 0 MB
 
 - `numactl`의 node 1은 *CPU가 없고 0 MB*입니다. CPU 없는 node가 있다는 사실만으로는 CXL 메모리가 쓰이고 있다고 말할 수 없습니다.
 - `daxctl list`는 비어 있습니다. DAX 장치가 없다는 것은 region이 없다는 뜻이기도 해서, 이것만으로 Type 2나 System RAM 모드라고 판정할 수 없습니다.
-- `cxl list`는 memdev `mem0`(256 MiB)를 보여 줍니다. region 생성 시도 뒤라 port decoder `decoder1.0`에 256 MiB 범위가 잡혀 있지만, region은 없습니다.
+- `cxl list`는 memdev `mem0`(256 MiB)를 보여 줍니다. region 생성을 시도하기 전 Ch 9의 `cxl list -M -P -D`에는 없던 port decoder `decoder1.0`이 256 MiB 범위로 나타났지만, region은 없습니다.
 
 root decoder의 `accelmem_capable:true`는 이 CXL 창이 Type 2 장치 메모리도 받을 수 있다는 표시입니다. 같은 게스트의 sysfs `decoder0.0/cap_type2`와 `cap_type3`가 둘 다 1이었습니다. [Linux v6.12 CXL 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/driver-api/cxl/memory-devices.rst)가 설명하는 memdev → decoder → region → DAX/메모리 block 연결을 순서대로 따라가야 어느 단계에서 멈췄는지 보입니다.
 
@@ -159,7 +159,7 @@ Type 3에서 *지연이 곧 성능*인 이유가 여기 있습니다. 호스트 
 
 ### "Type 2 가속기를 꽂으면 그 메모리만큼 호스트 메모리가 늘어난다"
 
-CXL 1.1 §2.2가 정한 HDM의 목적은 호스트가 *operand를 넣고 결과를 꺼내는* 것입니다. 그 메모리는 가속기가 일하는 동안 Device Bias로 가속기 쪽에 있고, 호스트가 읽으면 링크(PCIe 5.0 x16 64 GB/s)를 건넙니다.
+CXL 1.1 §2.2가 정한 HDM의 목적은 호스트가 *operand를 넣고 결과를 꺼내는* 것입니다. bias를 구현한 장치라면 그 메모리는 가속기가 일하는 동안 Device Bias로 가속기 쪽에 있고, 호스트가 읽으면 링크(PCIe 5.0 x16 64 GB/s)를 건넙니다.
 
 ### "Type 1도 CXL이니 메모리 확장에 도움이 된다"
 

@@ -40,11 +40,11 @@ CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽
 | CXL.mem (direct attached) | host ↔ 디바이스 링크를 한 번 왕복 |
 | CXL.mem (switch 1단) | 왕복 경로에 switch를 양방향으로 한 번씩 더 통과 |
 
-**switch 한 단은 "장비 하나 추가"가 아니라 "왕복 경로에 통과 지점 두 개 추가"입니다.** pooling으로 얻는 유연성의 값이 *지연으로 청구*되는 구조입니다. 위 논문은 switch 없는 direct-attached 장치만 측정했으므로, switch 구성의 실제 지연은 TBD입니다.
+**switch 한 단은 "장비 하나 추가"가 아니라 "왕복 경로에 통과 지점 두 개 추가"입니다.** pooling으로 얻는 유연성의 값이 *지연으로 청구*되는 구조입니다. 위 논문 Table 1의 구성에는 switch가 없으므로, switch 구성의 실제 지연은 TBD입니다.
 
 ## 왕복 한 번으로 끝나는 것
 
-[CXL 1.1 규격(2019년 6월)](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-1.1-Specification.pdf) §3.3의 기본 transaction입니다. M2S RwD opcode 표(Table 28)와 사용 표(Table 29)에서 `MemWr`의 응답은 S2M NDR의 `Cmp`, `MemRd`의 데이터는 S2M DRS의 `MemData`입니다. CPU store 명령 하나와 wire transaction 하나가 일대일로 대응하거나 모든 접근이 항상 같은 latency라는 뜻은 아닙니다. 캐시·write combining·ordering·snoop·backpressure가 추가로 관여합니다.
+[CXL 1.1 규격(2019년 6월)](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-1.1-Specification.pdf) §3.3의 기본 transaction입니다. M2S RwD opcode 표(Table 28)와 사용 표(Table 29)는 `MemWr`·`MemWrPtl`을 정의합니다. §3.5(Flows for Type 3 Devices)는 Type 3에서 *read에는 S2M NDR이 없고*(데이터는 S2M DRS의 `MemData`), *write는 항상 S2M NDR `Cmp`로 끝난다*고 적습니다. 아래 표는 이 Type 3 흐름입니다. Type 1·2에서는 `MemRd`에도 NDR이 함께 올 수 있습니다(Table 26). CPU store 명령 하나와 wire transaction 하나가 일대일로 대응하거나 모든 접근이 항상 같은 latency라는 뜻은 아닙니다. 캐시·write combining·ordering·snoop·backpressure가 추가로 관여합니다.
 
 | 접근 | host → 디바이스 | 디바이스 → host |
 |------|----------------|----------------|
@@ -52,7 +52,7 @@ CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽
 | Write (store) | `MemWr` + 데이터 | `Cmp` (완료, 데이터 없음) |
 | Partial write (64 B 미만) | `MemWrPtl` + 데이터 + byte enable 64개(byte당 1개) | `Cmp` |
 
-여기서 자주 뒤집히는 직관이 하나 있습니다. 표에서 read와 write는 둘 다 요청 하나·응답 하나입니다. **이 사실만으로 read/write latency나 비용이 같다고 결론낼 수는 없습니다.** write는 데이터가 명령과 함께 나가고 장치 측 완료는 `Cmp`로 통지됩니다. CPU가 store 명령을 retire하는 시점·다른 agent에 보이는 시점·persistent media의 내구성 완료와 같은 의미는 아닙니다. 규격은 `MemWrPtl`을 *byte마다 enable이 하나씩, 64개*를 담은 쓰기로 정의하고, 장치 쪽 DCOH가 필요하면 *merge*한다고 적습니다. 그래서 host가 먼저 읽어 오는 *read-modify-write 왕복*이 링크에 붙지 않습니다.
+여기서 자주 뒤집히는 직관이 하나 있습니다. Type 3 흐름에서 read와 write는 둘 다 요청 하나·응답 하나입니다. **이 사실만으로 read/write latency나 비용이 같다고 결론낼 수는 없습니다.** write는 데이터가 명령과 함께 나가고 장치 측 완료는 `Cmp`로 통지됩니다. CPU가 store 명령을 retire하는 시점·다른 agent에 보이는 시점·persistent media의 내구성 완료와 같은 의미는 아닙니다. 규격은 `MemWrPtl`을 *byte마다 enable이 하나씩, 64개*를 담은 쓰기로 정의하고, 장치 쪽 DCOH가 필요하면 *merge*한다고 적습니다. 그래서 host가 먼저 읽어 오는 *read-modify-write 왕복*이 링크에 붙지 않습니다.
 
 ## bias — 디바이스도 자기 메모리를 쓸 때
 
