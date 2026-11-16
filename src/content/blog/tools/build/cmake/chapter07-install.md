@@ -38,7 +38,7 @@ build/
 | `build/libmylib.so` | `/usr/local/lib/libmylib.so` |
 | `src/include/mylib/*.h` | `/usr/local/include/mylib/*.h` |
 
-`install()`은 이 매핑 규칙을 선언합니다. 설치 prefix·구성·컴포넌트에 따라 선택되는 파일이 달라지므로 실제 산출물을 확인해야 합니다. 이 글의 실행 기준은 CMake/CPack 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 마지막 예제는 임시 prefix에 설치한 정적 라이브러리를 다른 프로젝트에서 찾아 링크하고, TGZ 패키지를 생성합니다.
+`install()`은 이 매핑 규칙을 선언합니다. 어떤 파일이 어디로 가는지는 `cmake --install`이 찍는 `-- Installing: ...` 줄로 확인합니다. 이 글의 실행 기준은 CMake/CPack 4.5.0·Ninja 1.13.2·macOS 27.2·AppleClang 21이고, 아래 설치 경로와 파일 목록은 모두 이 환경에서 실행한 결과입니다. macOS에서 공유 라이브러리는 `.so`가 아니라 `.dylib`로 나옵니다. 마지막 예제는 임시 prefix에 설치한 정적 라이브러리를 다른 프로젝트에서 찾아 링크하고, TGZ 패키지를 생성합니다.
 
 이 챕터의 두 큰 주제는 다음과 같습니다.
 
@@ -69,7 +69,7 @@ install(TARGETS myapp mylib
 | `LIBRARY` | 공유 라이브러리 | libmylib.so, libmylib.dylib |
 | `ARCHIVE` | 정적 라이브러리, import lib | libmylib.a, mylib.lib |
 
-Windows에서 DLL은 `RUNTIME`, import 라이브러리는 `ARCHIVE`로 분류됩니다. 플랫폼별 차이를 CMake가 자동으로 처리합니다.
+Windows에서 DLL은 `RUNTIME`, import 라이브러리는 `ARCHIVE`로 분류됩니다([install(TARGETS)](https://cmake.org/cmake/help/latest/command/install.html#targets)의 산출물 종류 표). 그래서 같은 `install(TARGETS)` 한 줄이 Linux에서는 `.so`를 `lib/`로, Windows에서는 `.dll`을 `bin/`으로 보냅니다. Windows 쪽은 이 글에서 실행하지 않았습니다.
 
 ### 설치 실행
 
@@ -88,29 +88,23 @@ cmake --install build --config Release
 cmake --install build --verbose
 ```
 
-`CMAKE_INSTALL_PREFIX`가 설치 루트입니다. 환경·캐시로 설정하지 않았다면 일반적인 기본값은 Unix에서 `/usr/local`, Windows에서 `C:/Program Files/${PROJECT_NAME}`입니다. 설치 확인에는 시스템 디렉터리 대신 `cmake --install build --prefix ./stage`처럼 별도 경로를 사용합니다.
+`CMAKE_INSTALL_PREFIX`가 설치 루트입니다. [변수 문서](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)의 기본값은 UNIX에서 `/usr/local`, Windows에서 `c:/Program Files/${PROJECT_NAME}`이고, 3.29부터는 같은 이름의 환경 변수가 있으면 그 값이 기본값이 됩니다. 4.5.0·macOS에서 아무 설정 없이 구성한 캐시에는 `CMAKE_INSTALL_PREFIX:PATH=/usr/local`이 들어갔습니다. 설치 확인에는 시스템 디렉터리 대신 `cmake --install build --prefix ./stage`처럼 별도 경로를 사용합니다.
 
 ### DESTDIR: 패키징용 가상 루트
 
-실제 시스템이 아닌 임시 디렉터리에 설치하려면 `DESTDIR`을 사용합니다. 패키지 빌드 시 필수입니다.
+실제 시스템이 아닌 임시 디렉터리에 설치하려면 `DESTDIR`을 사용합니다. 배포판 패키지 빌드는 이 방식으로 파일을 스테이징 디렉터리에 모은 뒤 패키지로 묶습니다.
 
 ```bash
 DESTDIR=/tmp/staging cmake --install build
 ```
 
-결과:
+`myapp`·공유 라이브러리 `mylib`·`include/` 디렉터리를 설치하는 프로젝트를 prefix 기본값(`/usr/local`) 그대로 `DESTDIR=$PWD/st`로 설치한 결과입니다(경로는 줄임, 헤더 설치 줄은 생략).
 
 ```text
-/tmp/staging/
-└── usr/
-    └── local/
-        ├── bin/
-        │   └── myapp
-        ├── lib/
-        │   └── libmylib.so
-        └── include/
-            └── mylib/
-                └── api.h
+-- Install configuration: ""
+-- Installing: <src>/st/usr/local/bin/myapp
+-- Installing: <src>/st/usr/local/lib/libmylib.dylib
+...
 ```
 
 `DESTDIR`은 `CMAKE_INSTALL_PREFIX` 앞에 붙습니다. `DESTDIR=/tmp/staging`이고 `CMAKE_INSTALL_PREFIX=/usr/local`이면 최종 경로는 `/tmp/staging/usr/local/...`이 됩니다.
@@ -150,9 +144,16 @@ install(DIRECTORY include DESTINATION include)
 # → ${PREFIX}/include/include/mylib/api.h  (중복!)
 ```
 
+같은 `include/`를 `DESTINATION slash`와 `DESTINATION noslash`로 각각 설치해 보면 차이가 그대로 나옵니다(4.5.0).
+
+```text
+./noslash/include/mylib/api.h
+./slash/mylib/api.h
+```
+
 ### 파일 필터링
 
-특정 파일만 포함하거나 제외할 수 있습니다.
+`FILES_MATCHING` 뒤의 패턴에 맞는 파일만 설치하고, `EXCLUDE`를 붙인 패턴은 뺍니다.
 
 ```cmake
 install(DIRECTORY include/
@@ -165,6 +166,8 @@ install(DIRECTORY include/
 )
 ```
 
+`include/mylib/`에 `api.h`·`types.hpp`·`config.h.in`·`internal/detail.h`를 두고 위 규칙으로 설치하면 `api.h`와 `types.hpp` 두 파일만 남았습니다. 필터 없이 설치한 쪽에는 네 파일이 모두 들어갔습니다.
+
 ### 권한 설정
 
 ```cmake
@@ -175,6 +178,8 @@ install(FILES scripts/run.sh
                 WORLD_READ WORLD_EXECUTE
 )
 ```
+
+설치된 `bin/run.sh`의 권한은 `-rwxr-xr-x`였습니다. `install(FILES)`는 `PERMISSIONS`를 주지 않으면 실행 비트 없이 설치하므로, 스크립트에는 이 옵션이나 `install(PROGRAMS)`를 씁니다.
 
 ---
 
@@ -195,7 +200,7 @@ include(GNUInstallDirs)
 | `CMAKE_INSTALL_MANDIR` | share/man | 매뉴얼 페이지 |
 | `CMAKE_INSTALL_DOCDIR` | share/doc/${PROJECT_NAME} | 문서 |
 
-64비트 시스템에서 일부 배포판은 `lib64`를 사용합니다. `GNUInstallDirs`가 자동으로 감지합니다.
+`CMAKE_INSTALL_LIBDIR`의 기본값은 플랫폼마다 다르고, 규칙은 `Modules/GNUInstallDirs.cmake`에 있습니다. 크로스 컴파일이 아닌 Linux에서 Debian 계열은 prefix가 `/usr`일 때 `lib/<multiarch-tuple>`, Alpine·Arch·conda 환경을 제외한 그 밖의 64비트 배포판은 `lib64`이고, 크로스 컴파일이나 그 외 플랫폼은 `lib`입니다. 4.5.0·macOS에서 구성하면 `LIBDIR=lib`, `DOCDIR=share/doc/<프로젝트 이름>`, `MANDIR=share/man`이었습니다.
 
 ```cmake
 include(GNUInstallDirs)
@@ -218,7 +223,7 @@ install(FILES README.md LICENSE
 
 ## 패키지 설정 파일 — 내 라이브러리를 `find_package`로 사용하게 하기
 
-여기서부터가 *Modern CMake의 진수*입니다. 이 절을 잘 따라 두면 *내 라이브러리를 설치한 사람이 단 두 줄*로 사용할 수 있습니다.
+이 절의 파일 네 개를 만들어 두면 *내 라이브러리를 설치한 사람이 두 줄*로 사용할 수 있습니다. 아래 "실전 예시"에서 실제로 설치·소비까지 돌립니다.
 
 ```cmake
 # 사용자 측 CMakeLists.txt
@@ -230,34 +235,30 @@ target_link_libraries(app PRIVATE MyLib::mylib)
 
 ### 설치 후의 디렉터리 구조
 
-설치 후의 디렉터리 구조 — `${PREFIX}/` (예: `/usr/local`):
+이 글 끝의 실전 예시(정적 라이브러리)를 Release로 빌드해 `--prefix $PWD/stage`로 설치했을 때 4.5.0이 찍은 목록입니다.
 
 ```text
-${PREFIX}/
-├── bin/
-│   └── myapp
-├── lib/
-│   ├── libmylib.so
-│   └── cmake/
-│       └── MyLib/
-│           ├── MyLibConfig.cmake
-│           ├── MyLibConfigVersion.cmake
-│           ├── MyLibTargets.cmake
-│           └── MyLibTargets-release.cmake
-└── include/
-    └── mylib/
-        └── api.h
+-- Install configuration: "Release"
+-- Installing: <src>/stage/lib/libmylib.a
+-- Installing: <src>/stage/include
+-- Installing: <src>/stage/include/mylib
+-- Installing: <src>/stage/include/mylib/api.hpp
+-- Installing: <src>/stage/lib/cmake/MyLib/MyLibTargets.cmake
+-- Installing: <src>/stage/lib/cmake/MyLib/MyLibTargets-release.cmake
+-- Installing: <src>/stage/lib/cmake/MyLib/MyLibConfig.cmake
+-- Installing: <src>/stage/lib/cmake/MyLib/MyLibConfigVersion.cmake
 ```
+
+`MyLibTargets-release.cmake`의 `release`는 빌드 구성에서 옵니다. `CMAKE_BUILD_TYPE` 없이 빌드하면 같은 파일이 `MyLibTargets-noconfig.cmake`로 생겼습니다.
 
 | 경로 | 역할 |
 |------|------|
-| `bin/myapp` | 실행 파일 |
-| `lib/libmylib.so` | 라이브러리 본체 |
+| `lib/libmylib.a` | 라이브러리 본체 |
 | `lib/cmake/MyLib/MyLibConfig.cmake` | `find_package(MyLib)` 진입점 |
 | `lib/cmake/MyLib/MyLibConfigVersion.cmake` | 버전 검사 로직 |
 | `lib/cmake/MyLib/MyLibTargets.cmake` | imported 타겟 정의 |
 | `lib/cmake/MyLib/MyLibTargets-release.cmake` | 구성별 타겟 정보 |
-| `include/mylib/api.h` | 공개 헤더 |
+| `include/mylib/api.hpp` | 공개 헤더 |
 
 세 파일이 만들어내는 그림:
 
@@ -265,7 +266,7 @@ ${PREFIX}/
 - **Config.cmake** — 채택된 패키지의 진입점입니다. Targets를 include하고 필요한 외부 의존성을 확인합니다. ConfigVersion을 직접 include하는 역할이 아닙니다.
 - **Targets.cmake** — *imported 타겟 정의*. `MyLib::mylib`라는 타겟에 *설치된 위치 기반의 include / library 경로*를 박아 둡니다.
 
-이 셋이 *함께* 작동해야 사용자 측에서 `find_package(MyLib REQUIRED)` 한 줄이 깨끗하게 풀립니다. 단계별로 만들어 갑니다.
+`MyLibTargets.cmake`가 설치 위치를 하드코딩하지 않는다는 점이 중요합니다. 생성된 파일은 자기 위치(`CMAKE_CURRENT_LIST_FILE`)에서 `get_filename_component(... PATH)`를 네 번 올라가 `_IMPORT_PREFIX`를 계산하고, `INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"`처럼 그 기준의 경로를 씁니다. 그래서 설치된 `stage/`를 다른 이름으로 옮긴 뒤 새 prefix로 소비자를 구성해도 `answer=42`가 그대로 나왔습니다. 단계별로 만들어 갑니다.
 
 ### 1단계: Config 파일 템플릿
 
@@ -336,7 +337,7 @@ install(TARGETS myhelper EXPORT MyLibTargets ...)
 **`NAMESPACE MyLib::`** — *imported 타겟 이름 앞에 붙는 접두사*. 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`로 *명확하게* 링크할 수 있게 만듭니다. 이 네임스페이스 관행은 두 효과가 있습니다.
 
 1. *타겟 이름 충돌 방지*. 두 라이브러리가 같은 이름의 타겟을 가져도 네임스페이스로 구분됩니다.
-2. *오타 보호*. CMake는 *`::`이 포함된 이름이 존재하지 않으면 즉시 에러*를 냅니다. 일반 이름은 "있을 수도 있으니 일단 진행"하다가 링크 단계에서 발견되지만, `::`이 들어가면 *구성 단계에서* 잡힙니다.
+2. *오타 보호*. `::`이 포함된 이름이 타겟이 아니면 CMake가 생성 단계에서 `Target "app" links to: ... but the target was not found` 오류를 냅니다. 일반 이름은 링커 옵션 `-l<이름>`으로 넘어가 링크 단계에서야 실패합니다. 두 경우의 실제 출력은 [Ch 3](/blog/tools/build/cmake/chapter03-targets#별칭-없이-사용)에 있습니다.
 
 ### `INCLUDES DESTINATION` — 헤더 경로 자동 전파
 
@@ -350,7 +351,7 @@ install(TARGETS mylib
 
 `INCLUDES DESTINATION`은 *헤더 파일을 설치하는 명령이 아닙니다*. 그건 별도의 `install(DIRECTORY include/...)`이 합니다. 이 옵션은 *imported 타겟에 INTERFACE include 경로를 설정*하는 메타정보입니다.
 
-위 줄 때문에, 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`만 적어도 *자동으로* `-I${PREFIX}/include`가 컴파일러에 들어갑니다. [Ch 3](/blog/tools/build/cmake/chapter03-targets#가시성-키워드-private-public-interface)의 INTERFACE 가시성이 *imported 타겟에도* 동일하게 동작합니다.
+위 줄 때문에, 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`만 적어도 *자동으로* `-I${PREFIX}/include`가 컴파일러에 들어갑니다. `$<BUILD_INTERFACE:...>`만 걸고 `INCLUDES DESTINATION include`를 준 라이브러리를 설치하면, 생성된 `MyLibTargets.cmake`에 `INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"`가 들어 있었습니다. [Ch 3](/blog/tools/build/cmake/chapter03-targets#가시성-키워드-private-public-interface)의 INTERFACE 가시성이 *imported 타겟에도* 동일하게 동작합니다.
 
 ### 4단계: Config 파일 생성 및 설치
 
@@ -407,7 +408,7 @@ cd build
 cpack
 ```
 
-기본적으로 시스템에 따라 적절한 생성기를 선택합니다. 명시적으로 지정하려면:
+`CPACK_GENERATOR`를 정하지 않으면 `include(CPack)`이 플랫폼별 기본값을 넣습니다. 4.5.0·macOS에서 생성된 `CPackConfig.cmake`에는 `set(CPACK_GENERATOR "STGZ;TGZ")`가 있었고, `cpack`만 실행하자 `mylib-1.2.3-Darwin.sh`와 `mylib-1.2.3-Darwin.tar.gz`가 생겼습니다. 명시적으로 지정하려면:
 
 ```bash
 cpack -G TGZ          # tar.gz 아카이브
@@ -418,6 +419,8 @@ cpack -G NSIS         # Windows 설치 프로그램
 cpack -G DragNDrop    # macOS DMG
 cpack -G productbuild # macOS PKG
 ```
+
+쓸 수 있는 생성기는 CPack을 빌드한 플랫폼에 따라 다르고, `cpack --help`의 `Generators` 절에 나옵니다. Homebrew CPack 4.5.0(macOS)의 목록에는 `TGZ`·`ZIP`·`NSIS`·`DragNDrop`·`productbuild` 등은 있지만 `DEB`와 `RPM`이 없었고, `cpack -G DEB`는 `CPack Error: Could not create CPack generator: DEB`로 실패했습니다. 아래 DEB·RPM 설정은 Linux에서 실행하는 것을 전제로 하며, 이 글에서는 실행하지 않았습니다.
 
 ### DEB 패키지 설정
 
@@ -439,6 +442,8 @@ cpack -G DEB
 # 결과: mylib-1.2.3-Linux.deb
 ```
 
+파일 이름은 [CPack DEB 생성기 문서](https://cmake.org/cmake/help/latest/cpack_gen/deb.html)의 `CPACK_DEBIAN_FILE_NAME` 기본값 `<CPACK_PACKAGE_FILE_NAME>[-<component>].deb`에서 나옵니다. `CPACK_PACKAGE_FILE_NAME`의 기본값은 `이름-버전-시스템`이라, 같은 프로젝트를 macOS에서 구성하면 `mylib-1.2.3-Darwin`이었습니다.
+
 ### RPM 패키지 설정
 
 ```cmake
@@ -456,7 +461,7 @@ include(CPack)
 
 ## 컴포넌트 기반 패키징
 
-대규모 프로젝트에서는 런타임, 개발 파일, 문서를 별도 패키지로 분리하고 싶을 수 있습니다.
+런타임만 필요한 사용자와 헤더까지 필요한 개발자가 같은 패키지를 받지 않게 하려면 런타임, 개발 파일, 문서를 별도 패키지로 나눕니다.
 
 ### 컴포넌트 정의
 
@@ -515,7 +520,14 @@ include(CPack)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 ```
 
-결과는 컴포넌트별로 분리된 `.deb` 파일들이 생깁니다 — `mylib-1.2.3-Linux-Runtime.deb`, `Libraries.deb`, `Development.deb`, `Documentation.deb`.
+Linux에서는 위 파일 이름 규칙에 따라 `mylib-1.2.3-Linux-Runtime.deb`처럼 컴포넌트 이름이 붙은 `.deb`가 컴포넌트마다 하나씩 생깁니다. DEB를 만들 수 없는 macOS에서는 아카이브 생성기로 같은 분리를 확인했습니다. 위 네 컴포넌트 규칙에 `cpack -G TGZ -D CPACK_ARCHIVE_COMPONENT_INSTALL=ON`을 주면 4.5.0이 네 파일을 만들었습니다.
+
+```text
+mylib-1.2.3-Darwin-Development.tar.gz generated.
+mylib-1.2.3-Darwin-Documentation.tar.gz generated.
+mylib-1.2.3-Darwin-Libraries.tar.gz generated.
+mylib-1.2.3-Darwin-Runtime.tar.gz generated.
+```
 
 ---
 
@@ -613,7 +625,31 @@ cmake --build consumer-build
 cpack --config build/CPackConfig.cmake -G TGZ -B packages
 ```
 
-실행 결과는 `answer=42`입니다. `stage`를 다른 위치로 옮기고 새 소비자 빌드 디렉터리에서 새 prefix를 지정해도 같은 결과가 나와야 합니다. 요청 버전을 1.9로 바꾸면 설치 버전 1.2.3보다 높아 호환성 검사에서 거절됩니다. TGZ에는 라이브러리·헤더·CMake 패키지 파일이 포함됩니다. DEB/RPM/NSIS/DMG 생성은 이 실행 기록에서 검증하지 않았습니다.
+4.5.0에서 실행 결과는 `answer=42`였습니다. `stage`를 `stage-moved`로 옮기고 새 소비자 빌드 디렉터리에서 `-DCMAKE_PREFIX_PATH=$PWD/stage-moved`로 구성해도 `answer=42`가 나왔습니다. 소비자의 요청 버전을 1.9로 바꾸면 이렇게 거절됩니다.
+
+```text
+CMake Error at CMakeLists.txt:3 (find_package):
+  Could not find a configuration file for package "MyLib" that is compatible
+  with requested version "1.9".
+
+  The following configuration files were considered but not accepted:
+
+    <src>/stage/lib/cmake/MyLib/MyLibConfig.cmake, version: 1.2.3
+      The version found is not compatible with the version requested.
+```
+
+`cpack`은 `packages/MyLib-1.2.3-Darwin.tar.gz`를 만들었고, `tar tzf`로 본 내용은 다음과 같습니다(디렉터리 항목은 생략).
+
+```text
+MyLib-1.2.3-Darwin/include/mylib/api.hpp
+MyLib-1.2.3-Darwin/lib/cmake/MyLib/MyLibConfig.cmake
+MyLib-1.2.3-Darwin/lib/cmake/MyLib/MyLibConfigVersion.cmake
+MyLib-1.2.3-Darwin/lib/cmake/MyLib/MyLibTargets-release.cmake
+MyLib-1.2.3-Darwin/lib/cmake/MyLib/MyLibTargets.cmake
+MyLib-1.2.3-Darwin/lib/libmylib.a
+```
+
+DEB/RPM/NSIS/DMG 생성은 이 실행 기록에서 검증하지 않았습니다.
 
 ## 정리
 
@@ -636,6 +672,8 @@ include(CPack)  # ❌ 변수 설정 전에 호출하면 기본값 사용
 
 set(CPACK_PACKAGE_NAME "MyApp")  # 무시됨
 ```
+
+`include(CPack)`은 그 시점의 변수로 `CPackConfig.cmake`를 씁니다. `project(Ord ...)`에서 위 순서로 구성하면 생성된 파일에 `set(CPACK_PACKAGE_NAME "Ord")`가 들어 있었습니다. 뒤에 적은 `MyApp`은 반영되지 않았습니다.
 
 ```cmake
 # 올바른 순서
@@ -665,7 +703,16 @@ install(TARGETS mylib
 install(DIRECTORY include/ DESTINATION include)  # 이것이 중복
 ```
 
-중복은 EXPORT 자체가 아니라 같은 헤더를 두 설치 규칙으로 지정했을 때 생깁니다. PUBLIC_HEADER 속성에 실제 헤더가 지정되어 있는지도 확인합니다. 타겟 export는 두 방식 모두와 함께 사용할 수 있습니다.
+중복은 EXPORT 자체가 아니라 같은 헤더를 두 설치 규칙으로 지정했을 때 생깁니다. `PUBLIC_HEADER`에 `include/mylib/api.hpp`를 지정하고 위 두 규칙을 함께 쓰면 4.5.0 설치 로그에 같은 파일이 두 번 나옵니다.
+
+```text
+-- Installing: <src>/st/include/mylib/api.hpp
+-- Up-to-date: <src>/st/include
+-- Up-to-date: <src>/st/include/mylib
+-- Up-to-date: <src>/st/include/mylib/api.hpp
+```
+
+결과 파일은 하나지만, 두 규칙의 목적지가 달라지면 헤더가 두 곳에 깔립니다. 한 가지 방식만 씁니다. 타겟 export는 두 방식 모두와 함께 사용할 수 있습니다.
 
 ### INCLUDES DESTINATION 누락
 
@@ -701,13 +748,20 @@ install(FILES
 )
 ```
 
-`INSTALL_DESTINATION`과 실제 설치 경로는 반드시 일치해야 합니다.
+`configure_package_config_file()`은 `INSTALL_DESTINATION`에서 prefix까지 몇 단계 올라가야 하는지를 계산해 `PACKAGE_PREFIX_DIR`에 박아 둡니다(이 예제의 생성 파일에는 `"${CMAKE_CURRENT_LIST_DIR}/../../../"`). 그래서 실제 설치 경로의 깊이가 다르면 `@PACKAGE_...@` 경로가 틀어집니다. `set_and_check(MyLib_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")`를 넣은 Config로 4.5.0에서 시험한 결과입니다.
+
+| 실제 설치 경로 | 소비자 구성 결과 |
+|------|------|
+| `share/cmake/MyLib` (깊이 3, 같음) | 통과, `MyLib_INCLUDE_DIR=<prefix>/include` |
+| `cmake` (깊이 1) | `File or directory .../include referenced by variable MyLib_INCLUDE_DIR does not exist !` |
+
+깊이가 같으면 우연히 동작하므로, 경로가 어긋난 채로 배포되기 쉽습니다. `INSTALL_DESTINATION`과 `install(FILES ... DESTINATION)`에 같은 변수를 씁니다.
 
 ---
 
 ## 다음 장 예고
 
-Ch 8에서는 **Modern CMake 베스트 프랙티스**를 다룹니다. 타겟 중심 접근법, 피해야 할 안티패턴, 그리고 대규모 프로젝트 구성을 정리합니다.
+[Ch 8](/blog/tools/build/cmake/chapter08-best-practices)에서는 **Modern CMake 베스트 프랙티스**를 다룹니다. 타겟 중심 접근법, 피해야 할 안티패턴, 그리고 대규모 프로젝트 구성을 정리합니다.
 
 ---
 

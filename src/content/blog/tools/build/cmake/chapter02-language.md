@@ -33,7 +33,7 @@ endif()
 
 CMake 언어는 다른 스크립팅 언어와 비교했을 때 *기묘하게 느껴지는 자리*가 몇 군데 있습니다. 변수가 *문자열만 있는 점*, 리스트가 *세미콜론으로 구분되는 점*, `if()`가 *변수 이름을 자동 역참조하는 점*. 다른 언어 경험이 있다면 이런 자리에서 한 번씩 발을 헛디딥니다. 본 장은 그런 함정들을 미리 짚어 둡니다.
 
-문서와 실행 확인의 기준은 **CMake 4.4.4**입니다. 아래 최소 프로젝트는 정책 기준을 3.25로 지정하지만, 이전 버전에서 실행한 결과는 아닙니다. 변수·리스트·함수 예제는 `cmake -P script.cmake`로 실행하고, `project()`나 `target_*()`가 있는 코드는 `CMakeLists.txt`에서 실행합니다. [스크립트 모드](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#scripts)는 빌드 타겟을 생성하지 않습니다.
+문서와 실행 확인의 기준은 **CMake 4.5.0**(macOS, AppleClang 21, Ninja 1.13.2)입니다. 아래 예제는 정책 기준을 3.25로 지정하지만, 3.25 자체로 실행한 결과는 아닙니다. 코드 주석에 적은 결과값은 모두 4.5.0에서 실행해 확인한 값입니다. 변수·리스트·함수 예제는 `cmake -P script.cmake`로 실행하고, `project()`나 `target_*()`가 있는 코드는 `CMakeLists.txt`에서 실행합니다. [스크립트 모드](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#scripts)는 빌드 타겟을 생성하지 않습니다.
 
 ---
 
@@ -71,9 +71,10 @@ message("Hello")
 #[[
 여러 줄 주석
 CMake 3.0 이상에서 지원
-복잡한 설명이 필요할 때 유용
 ]]
 ```
+
+`#[[ ... ]]` 형태의 bracket comment는 CMake 3.0 릴리스 노트에 Lua의 long bracket을 본뜬 문법으로 처음 나옵니다.
 
 ### 인자 구분
 
@@ -125,7 +126,7 @@ message("${MY_VAR}")  # (빈 문자열)
 
 일반 변수는 디렉터리, 함수 호출, `block(SCOPE_FOR VARIABLES)`에서 만든 스코프에 놓입니다. `block()`은 CMake 3.25에 도입됐습니다. 함수는 호출자의 변수를 읽지만, 함수 내부의 일반 `set()`은 함수 스코프에만 기록합니다.
 
-캐시는 그 계층의 부모 스코프가 아니라 별도의 저장소입니다. 변수 참조는 일반 변수를 먼저 찾고, 없으면 캐시를 찾습니다. 프로젝트 구성에서 캐시 값은 빌드 디렉터리의 `CMakeCache.txt`에 저장됩니다. `unset(VAR)` 뒤에 같은 이름의 캐시 값이 보일 수 있는 이유도 이 검색 순서 때문입니다. [변수 스코프](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#variables)와 [set()](https://cmake.org/cmake/help/v4.4/command/set.html) 문서에 두 저장 방식이 구분되어 있습니다.
+캐시는 그 계층의 부모 스코프가 아니라 별도의 저장소입니다. 변수 참조는 일반 변수를 먼저 찾고, 없으면 캐시를 찾습니다. 프로젝트 구성에서 캐시 값은 빌드 디렉터리의 `CMakeCache.txt`에 저장됩니다. `unset(VAR)` 뒤에 같은 이름의 캐시 값이 다시 보이는 이유도 이 검색 순서 때문입니다. 캐시 변수 `V`를 `"cached"`로 만든 뒤 일반 변수 `V`를 `"normal"`로 덮고 `unset(V)`를 하면, 4.5.0 출력은 `-- 1: normal` 다음에 `-- 2: cached`입니다. 지운 것은 일반 변수뿐이고 캐시 항목은 그대로 남아 있습니다. [변수 스코프](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#variables)와 [set()](https://cmake.org/cmake/help/v4.4/command/set.html) 문서에 두 저장 방식이 구분되어 있습니다.
 
 ```cmake
 # 현재 스코프
@@ -478,7 +479,7 @@ message("${MY_VAR}")  # from macro (호출자 스코프에서 설정됨)
 | 스코프 | 자체 스코프 | 호출자 스코프 |
 | 변수 전달 | `PARENT_SCOPE` 필요 | 자동 반영 |
 | 인자 처리 | 지역 변수 | 인자 참조의 문자열 치환 |
-| 디버깅 | 예측 가능 | 예상치 못한 부작용 가능 |
+| 호출자 변수 | 건드리지 않음 | 매크로 안의 `set()`이 호출자 변수를 덮어씀 |
 
 이 글의 공통 타겟 설정에는 `function()`을 사용합니다. 임시 변수가 호출자에게 남지 않기 때문입니다. 함수 안에서도 `target_*()`로 타겟 속성을 바꿀 수 있으므로, 타겟을 설정하려고 매크로를 선택할 필요는 없습니다.
 
@@ -612,6 +613,8 @@ endif()
 
 문제는 *multi-config 생성기*(Visual Studio, Xcode, Ninja Multi-Config)입니다. 이들은 여러 구성을 생성하고, 빌드할 때 `--config Debug`처럼 하나를 선택합니다. [`CMAKE_BUILD_TYPE`](https://cmake.org/cmake/help/v4.4/variable/CMAKE_BUILD_TYPE.html)은 이 선택을 제어하지 않습니다. 값을 명시적으로 넣어 위 `if()`가 참이 되더라도, 그 정의는 Debug 전용이 아니라 모든 구성에 붙습니다.
 
+아래 "직접 실행해 확인하기"의 `main.cpp`로 확인하면 이렇습니다. `Ninja Multi-Config`에 `-DCMAKE_BUILD_TYPE=Debug`를 주고 구성한 뒤 `--config Release`로 빌드한 실행 파일이 `DEBUG_MODE=ON`을 찍었습니다. 반대로 `CMAKE_BUILD_TYPE` 없이 구성하면 `--config Debug`로 빌드해도 `DEBUG_MODE=OFF`였습니다. 어느 쪽이든 `if()`는 빌드할 구성을 보지 못합니다.
+
 제너레이터 식은 **빌드 시스템 생성 시점에 구성별로 평가**됩니다. 빌드할 때는 이미 생성된 규칙 중 선택한 구성의 규칙을 실행합니다. [평가 시점](https://cmake.org/cmake/help/v4.4/manual/cmake-generator-expressions.7.html#introduction)과 빌드 시점의 구성 선택을 구분해야 합니다.
 
 ### 자주 쓰는 표현식
@@ -682,10 +685,27 @@ target_include_directories(mylib PUBLIC
 message("일반 메시지")
 message(STATUS "상태 메시지")         # -- 접두사로 출력
 message(WARNING "경고")               # 경고 메시지
-message(AUTHOR_WARNING "개발자 경고")  # -Wno-dev로 끌 수 있음
+message(AUTHOR_WARNING "개발자 경고")  # -Wno-author로 끌 수 있음
 message(SEND_ERROR "오류")            # 오류, 구성은 계속 진행
 message(FATAL_ERROR "치명적 오류")     # 오류, 즉시 중단
 ```
+
+`AUTHOR_WARNING`과 `SEND_ERROR` 다음에 `message(STATUS "still running")`을 둔 프로젝트를 4.5.0으로 구성한 출력입니다.
+
+```text
+CMake Warning (author) at CMakeLists.txt:8 (message):
+  dev warning
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+CMake Error at CMakeLists.txt:9 (message):
+  send error
+
+
+-- still running
+-- Configuring incomplete, errors occurred!
+```
+
+`SEND_ERROR` 뒤의 명령은 계속 실행되지만 구성 결과는 "incomplete"이고 `cmake`의 종료 코드는 1입니다. 빌드 디렉터리에는 `CMakeCache.txt`와 `CMakeFiles/`만 있고 `Makefile`은 생성되지 않았습니다. `-Wno-author`를 주고 다시 구성하면 author 경고 블록이 사라집니다. 예전 이름 `-Wno-dev`도 아직 먹히지만 4.4 릴리스 노트에서 deprecated가 됐고, 4.5.0에서 주면 첫 줄에 `The no-dev option is deprecated.  Use -Wno-author instead.`가 찍혔습니다.
 
 ```cmake
 # 변수 디버깅
@@ -708,7 +728,18 @@ if(${MY_VAR} STREQUAL "value")  # MY_VAR이 비어 있으면 구문 오류
 if("${MY_VAR}" STREQUAL "value")
 ```
 
-`${MY_VAR}`이 빈 문자열이면 `if( STREQUAL "value")`가 되어 구문 오류가 발생합니다. 따옴표로 감싸면 `if("" STREQUAL "value")`가 되어 안전합니다.
+`${MY_VAR}`이 빈 문자열이면 `if( STREQUAL "value")`가 됩니다. 4.5.0의 실제 오류입니다.
+
+```text
+CMake Error at e1.cmake:3 (if):
+  if given arguments:
+
+    "STREQUAL" "value"
+
+  Unknown arguments specified
+```
+
+`set(MY_VAR "")`로 빈 값을 넣은 경우와 `unset(MY_VAR)`로 지운 경우 모두 같은 오류였습니다. 따옴표로 감싸면 `if("" STREQUAL "value")`가 되어 거짓으로 평가됩니다.
 
 ### 리스트와 문자열 혼동
 
@@ -804,7 +835,7 @@ message("CMP0077: ${RESULT}")    # 위 최소 버전 선언 뒤에는 NEW
 cmake_policy(SET CMP0077 NEW)
 ```
 
-대부분의 경우 최소 버전 선언이 정책을 함께 설정합니다. 특정 정책을 직접 설정할 때는 경고를 숨기는 데 그치지 말고, 바뀐 동작이 프로젝트에 맞는지 확인합니다. `cmake_policy(GET ...)`은 아직 설정되지 않은 정책에 빈 문자열을 돌려줄 수도 있습니다.
+정책 값은 최소 버전 선언이 한꺼번에 정합니다. 그 범위 밖의 정책은 미설정이고, `cmake_policy(GET ...)`은 빈 문자열을 돌려줍니다. `VERSION 3.25` 아래에서 3.13의 `CMP0077`과 3.24의 `CMP0135`는 `NEW`였고, 3.31에 들어온 `CMP0180`은 빈 값이었습니다. [cmake-policies(7)](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)은 미설정 정책에 OLD 동작을 쓰고, 정책마다 "설정되지 않았다"는 경고를 붙일 수 있다고 적습니다. `cmake_policy(SET ...)`로 경고만 끄면 동작을 고른 것이므로, 그 정책 문서의 OLD·NEW 설명을 읽고 정합니다.
 
 ```cmake
 # CMake 3.24에 도입된 아카이브 추출 시각 정책
@@ -854,7 +885,7 @@ message(STATUS "CMP0135=${TIMESTAMP_POLICY}")
 cmake -P language-check.cmake
 ```
 
-CMake 4.4.4에서 확인한 출력은 다음과 같습니다. 경로의 공백은 보존되고, `OFF`는 비어 있지 않아도 거짓이며, 문자열 비교 결과는 `1`입니다.
+CMake 4.5.0에서 확인한 출력은 다음과 같습니다. 경로의 공백은 보존되고, `OFF`는 비어 있지 않아도 거짓이며, 문자열 비교 결과는 `1`입니다.
 
 ```text
 -- path=[C:/Program Files/MyApp]
@@ -916,7 +947,7 @@ cmake --build build-multi --config Release
 ./build-multi/Release/app
 ```
 
-실행 결과는 순서대로 `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`, `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`입니다. 구성 명령이 끝나면 각 빌드 디렉터리에 `config-Debug.txt` 또는 `config-Release.txt`가 이미 생겨 있습니다. 파일 내용의 `Debug: ON/OFF`와 프로그램 출력을 대조하면 생성 시점의 평가와 빌드 시점의 구성 선택을 각각 확인할 수 있습니다.
+4.5.0에서 실행 결과는 순서대로 `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`, `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`였습니다. 구성 명령이 끝난 시점에 `build-debug/`에는 `config-Debug.txt`(`Config: Debug`, `Debug: ON`), `build-release/`에는 `config-Release.txt`(`Debug: OFF`)가 이미 생겨 있습니다. `build-multi/`에는 빌드 전부터 `config-Debug.txt`·`config-Release.txt`·`config-RelWithDebInfo.txt` 세 개가 있습니다. 생성 단계가 `CMAKE_CONFIGURATION_TYPES`의 구성마다 식을 한 번씩 평가했다는 증거입니다. Debug 빌드의 컴파일 명령(`cmake --build build-debug -v`)에는 `-DDEBUG_MODE`와 `-Wall -Wextra`가 들어 있었습니다.
 
 ## 정리
 

@@ -60,7 +60,7 @@ target_link_libraries(myapp PRIVATE
 2. 라이브러리가 없는 시스템에서 *FetchContent로 자동 다운로드*하기.
 3. `find_package` + FetchContent의 *하이브리드 패턴* (3.24+).
 
-실행 확인은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21을 기준으로 합니다. 마지막 예제는 로컬에서 만든 Find 모듈과 Config 파일을 대조하고 로컬 FetchContent를 연결합니다. 외부 패키지의 설치 상태나 네트워크에 따라 결과가 바뀌지 않도록 범위를 정했습니다.
+실행 확인은 CMake 4.5.0·Ninja 1.13.2·macOS 27.2·AppleClang 21을 기준으로 합니다. 실제 패키지 예로는 Homebrew로 설치된 fmt 12.2.1과 macOS SDK의 zlib 1.2.12를 썼고, FetchContent·ExternalProject 예제는 GitHub와 zlib.net에서 실제로 내려받아 빌드했습니다. 마지막 예제는 로컬에서 만든 Find 모듈과 Config 파일을 대조하므로 네트워크 없이 재현됩니다.
 
 ---
 
@@ -85,7 +85,7 @@ target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
 **Module 모드** — *CMake가 가진 Find 스크립트*
 
-CMake 자체에 *수십 개의 `FindXxx.cmake` 스크립트*가 내장되어 있습니다(`$CMAKE/Modules/` 디렉터리). 이 스크립트는 *전통적인 라이브러리*를 시스템 표준 위치에서 찾아 줍니다 — zlib, OpenSSL, Threads, X11, JPEG 같이 *오래된, 그리고 CMake보다 먼저 존재한* 라이브러리들.
+CMake 자체에 `FindXxx.cmake` 스크립트가 내장되어 있습니다(`$CMAKE/Modules/` 디렉터리). Homebrew CMake 4.5.0의 `share/cmake/Modules/`에는 `Find*.cmake`가 162개 있습니다. 이 스크립트는 *전통적인 라이브러리*를 시스템 표준 위치에서 찾아 줍니다 — zlib, OpenSSL, Threads, X11, JPEG 같이 *오래된, 그리고 CMake보다 먼저 존재한* 라이브러리들.
 
 ```text
 $CMAKE/Modules/
@@ -101,18 +101,19 @@ Module 모드 흐름:
 2. CMake가 `FindZLIB.cmake`를 실행
 3. 이 스크립트가 *직접 코드를 써서* 라이브러리 위치 탐색 (시스템 경로, 환경변수, 표준 위치)
 4. 찾으면 `ZLIB_FOUND`, `ZLIB_INCLUDE_DIRS`, `ZLIB_LIBRARIES` 같은 *변수*에 결과를 채움
-5. 최근 버전들은 *imported 타겟*(`ZLIB::ZLIB`)도 함께 만들어 줌
+5. 내장 모듈 상당수는 *imported 타겟*도 함께 만듦(4.5.0의 `Find*.cmake` 162개 중 116개 파일에 `IMPORTED`나 "Imported Targets"가 나옴, grep 기준). `FindZLIB`의 `ZLIB::ZLIB`는 3.1, `FindJPEG`의 `JPEG::JPEG`와 `FindCURL`의 `CURL::libcurl`은 3.12에 추가됨(각 모듈 문서의 `versionadded`)
 
 이 모드의 한계는 *라이브러리 자체가 아니라 CMake가 검색 로직을 안다*는 점입니다. 라이브러리가 새 버전을 내거나 새 옵션을 추가해도, CMake의 Find 스크립트가 따라가지 못하면 활용할 수 없습니다.
 
 **Config 모드** — *라이브러리가 제공한 정보 파일*
 
-요즘 잘 만든 라이브러리는 *자기 자신에 대한 CMake 정보 파일*을 직접 제공합니다. 이 파일은 라이브러리가 설치될 때 같이 깔립니다.
+CMake로 빌드하는 라이브러리는 *자기 자신에 대한 CMake 정보 파일*을 설치할 때 함께 깝니다. Homebrew로 설치한 fmt 12.2.1의 디렉터리입니다.
 
 ```text
-/usr/lib/cmake/fmt/
+/opt/homebrew/lib/cmake/fmt/
+├── fmt-config-version.cmake  ← 버전 정보 (PACKAGE_VERSION "12.2.1")
 ├── fmt-config.cmake          ← find_package(fmt)가 찾는 파일
-├── fmt-config-version.cmake  ← 버전 정보
+├── fmt-targets-release.cmake ← Release 구성의 라이브러리 경로
 └── fmt-targets.cmake         ← imported 타겟 정의
 ```
 
@@ -140,7 +141,7 @@ find_package(ZLIB REQUIRED MODULE)
 
 ### 검색 경로 — CMake가 어디를 보는가
 
-`find_package`가 실제로 어디를 뒤지는지는 *모드에 따라 미묘하게 다릅니다*. 디버깅이 필요하면 `--debug-find` 옵션이 정답입니다.
+`find_package`가 실제로 어디를 뒤지는지는 모드마다 다르고, 직접 보려면 `--debug-find` 옵션을 씁니다(`--debug-find-pkg`는 3.23에 추가).
 
 ```bash
 cmake --debug-find -B build
@@ -148,7 +149,39 @@ cmake --debug-find -B build
 cmake --debug-find-pkg=fmt -B build
 ```
 
-출력에 `find_package`가 어떤 경로를 *순서대로* 시도했는지 모두 찍힙니다.
+이 글 끝의 실전 예제를 4.5.0에서 `--debug-find-pkg=Demo`로 구성하면 Module 모드에서는 Find 스크립트 위치만 찍힙니다.
+
+```text
+CMake Debug Log at CMakeLists.txt:7 (find_package):
+  find_package considered the following paths for FindDemo.cmake:
+
+    /opt/homebrew/share/cmake/Modules/FindDemo.cmake
+
+  The file was found at
+
+    <src>/cmake/FindDemo.cmake
+```
+
+`-DPREFER_CONFIG=ON`으로 Config 모드를 먼저 타게 하면 출력이 훨씬 길어지고, 탐색 위치를 종류별로 나열합니다. 앞부분입니다(`...`는 생략, 경로는 줄임).
+
+```text
+  <PackageName>_ROOT CMake variable [CMAKE_FIND_USE_PACKAGE_ROOT_PATH].
+
+    none
+
+  CMAKE_PREFIX_PATH variable [CMAKE_FIND_USE_CMAKE_PATH].
+
+    <src>/prefix
+...
+  Standard system environment variables
+  [CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH].
+
+    /opt/homebrew
+    /usr/local
+...
+```
+
+대괄호 안의 이름은 그 범주를 끄는 변수입니다. 예를 들어 `CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF`를 주면 `PATH`에서 유도한 prefix를 건너뜁니다.
 
 자주 만나는 검색 경로 영향 변수:
 
@@ -195,6 +228,19 @@ find_package(OpenCV 4.0 EXACT REQUIRED)
 find_package(fmt 10.0...<12.0 REQUIRED)  # CMake 3.19+
 ```
 
+버전 범위는 3.19 릴리스 노트에 나옵니다. 범위 판단은 패키지의 버전 파일(`fmt-config-version.cmake`)이 합니다. Homebrew fmt 12.2.1이 설치된 이 환경에서 세 번째 줄은 이렇게 실패합니다.
+
+```text
+CMake Error at CMakeLists.txt:3 (find_package):
+  Could not find a configuration file for package "fmt" that is compatible
+  with requested version range "10.0...<12.0".
+
+  The following configuration files were considered but not accepted:
+
+    /opt/homebrew/lib/cmake/fmt/fmt-config.cmake, version: 12.2.1
+      The version found is not compatible with the version requested.
+```
+
 ### 컴포넌트 지정
 
 큰 라이브러리는 여러 컴포넌트로 나뉩니다.
@@ -234,7 +280,7 @@ Imported 타겟을 사용하면:
 
 ### 레거시 변수 방식
 
-오래된 패키지는 imported 타겟 없이 변수만 설정합니다.
+imported 타겟이 생기기 전의 Find 모듈은 결과를 변수로만 돌려줬고, 지금 모듈도 호환을 위해 그 변수들을 함께 채웁니다. `FindJPEG`는 3.12부터 `JPEG::JPEG`를 제공하지만, 아래처럼 변수를 쓰는 옛 코드도 여전히 동작합니다.
 
 ```cmake
 find_package(JPEG REQUIRED)
@@ -244,7 +290,7 @@ target_include_directories(myapp PRIVATE ${JPEG_INCLUDE_DIRS})
 target_link_libraries(myapp PRIVATE ${JPEG_LIBRARIES})
 ```
 
-일반적인 변수 이름:
+[cmake-developer(7)](https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html)이 Find 모듈의 표준 결과 변수로 정한 이름 중 자주 보는 것들입니다.
 
 | 변수 | 설명 |
 |------|------|
@@ -268,6 +314,19 @@ target_link_libraries(myapp PRIVATE Threads::Threads)
 ```
 
 ### Boost
+
+Boost는 CMake 버전에 따라 경로가 갈립니다. 3.30에 들어온 정책 `CMP0167`이 NEW이면 CMake 내장 `FindBoost`를 쓰지 않고 Boost 1.70 이상이 설치하는 `BoostConfig.cmake`를 찾습니다. 이 시리즈처럼 최소 버전이 3.25면 정책이 미설정이라, 4.5.0에서 `find_package(Boost)`가 경고를 냅니다(이 Mac에는 Boost가 없어 찾지는 못했습니다).
+
+```text
+CMake Warning (policy) at CMakeLists.txt:3 (find_package):
+  Policy CMP0167 is not set: The FindBoost module is removed.  Run "cmake
+  --help-policy CMP0167" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+...
+-- Could NOT find Boost (missing: Boost_INCLUDE_DIR)
+```
+
+새 프로젝트라면 `find_package(Boost CONFIG ...)`로 Config 모드를 명시하면 정책과 무관하게 같은 동작을 얻습니다.
 
 ```cmake
 find_package(Boost 1.70 REQUIRED COMPONENTS filesystem regex)
@@ -342,7 +401,25 @@ pkg_check_modules(FOO QUIET foo)
 pkg_check_modules(FOO REQUIRED IMPORTED_TARGET foo)
 ```
 
-`IMPORTED_TARGET`을 사용하면 `PkgConfig::<NAME>` 타겟이 생성되어 `target_link_libraries`로 바로 연결할 수 있습니다.
+`IMPORTED_TARGET`을 사용하면 `PkgConfig::<NAME>` 타겟이 생성되어 `target_link_libraries`로 바로 연결할 수 있습니다. `Version: 1.2.0`, `Cflags: -I${includedir} -DFOO_PC=1`을 적은 가짜 `foo.pc`를 `PKG_CONFIG_PATH`에 두고 4.5.0(Homebrew pkgconf 3.0.10의 `pkg-config`)에서 확인한 결과입니다.
+
+```text
+-- Checking for module 'foo>=1.0'
+--   Found foo, version 1.2.0
+-- FOO_VERSION=1.2.0
+-- inc=/opt/foo/include
+-- opts=-DFOO_PC=1
+-- BAR_FOUND=[]
+-- Checking for module 'foo>=2.0'
+--   Package dependency requirement 'foo >= 2.0' could not be satisfied.
+Package 'foo' has version '1.2.0', required version is '>= 2.0'
+CMake Error at /opt/homebrew/share/cmake/Modules/FindPkgConfig.cmake:1243 (message):
+  The following required packages were not found:
+
+   - foo>=2.0
+```
+
+`inc`·`opts`는 `PkgConfig::FOO`의 `INTERFACE_INCLUDE_DIRECTORIES`·`INTERFACE_COMPILE_OPTIONS`를 읽은 값입니다. `.pc`의 `-I`는 include 경로로, 나머지 플래그는 컴파일 옵션으로 나뉘어 들어갑니다. `QUIET`으로 찾은 없는 패키지 `bar`는 메시지 없이 `BAR_FOUND`가 빈 값이었습니다.
 
 ---
 
@@ -357,7 +434,7 @@ pkg_check_modules(FOO REQUIRED IMPORTED_TARGET foo)
 이 모델의 장단점은 명확합니다.
 
 **장점**
-- *소스 버전 통일*. 같은 소스를 지정할 수 있지만 컴파일러·플랫폼 호환성은 별도로 확인.
+- *소스 버전 통일*. 모든 개발자와 CI가 같은 소스를 빌드합니다. 다만 그 소스가 내 toolchain에서 컴파일되는지는 별개입니다(아래 ExternalProject 절의 zlib 1.3이 그 예).
 - *디버깅 가능*. 의존 라이브러리도 내 빌드에 같이 들어가서 *그 안까지 스텝 인*이 됨.
 - *버전 고정*. Git tag로 정확한 상태를 묶을 수 있음.
 
@@ -366,7 +443,7 @@ pkg_check_modules(FOO REQUIRED IMPORTED_TARGET foo)
 - *디스크 사용*. 각 프로젝트가 자기 사본을 만듬.
 - *시스템 라이브러리 활용 안 함*. 이미 깔린 zlib을 두고 자기 사본을 만들면 비효율.
 
-이 트레이드오프 때문에, CMake 3.24+에서 *하이브리드 패턴*(find_package + FetchContent)이 도입됐습니다 — 시스템에 있으면 그걸 쓰고, 없으면 가져옵니다. 자세한 건 이 절 마지막에서.
+CMake 3.24는 `FetchContent_Declare`에 `FIND_PACKAGE_ARGS`를 추가해 이 둘을 섞는 길을 열었습니다. 시스템에 있으면 그걸 쓰고, 없으면 가져옵니다. 자세한 건 아래 "시스템 우선, FetchContent 폴백"에서 실행 결과와 함께 봅니다.
 
 ### FetchContent vs ExternalProject — *언제 무엇을*
 
@@ -374,7 +451,7 @@ CMake에는 외부 의존성을 다루는 *두 가지 도구*가 있습니다.
 
 | | `ExternalProject` | `FetchContent` |
 |---|---|---|
-| 등장 시기 | CMake 2.8 (오래됨) | CMake 3.11 (2018) |
+| 등장 시기 | 3.0 이전부터 (3.0 릴리스 노트가 이미 개선 항목으로 언급) | CMake 3.11 (릴리스 노트의 "A new FetchContent module") |
 | 시점 | *빌드 시점*에 다운로드·빌드 | *구성 시점*에 소스 준비 |
 | 타겟 노출 | *아니오* — 자체 외부 빌드로 묶임 | *예* — 메인 빌드에 함께 흡수 |
 | `target_link_libraries` | 직접 불가, ExternalProject 출력 경로 수동 지정 | 일반 타겟처럼 즉시 링크 가능 |
@@ -442,7 +519,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 ```
 
-이 코드는 선언 형식입니다. 실행 전에 해당 릴리스의 신뢰할 수 있는 체크섬을 확인해 `JSON_ARCHIVE_SHA256`에 64자리 SHA-256 값을 설정해야 합니다. 이 글에서는 원격 아카이브를 내려받거나 체크섬을 검증하지 않았습니다. 생략 기호가 든 값을 실제 해시처럼 사용하지 않습니다.
+`JSON_ARCHIVE_SHA256`에는 릴리스 작성자가 공개한 값을 넣습니다. nlohmann/json v3.11.3의 GitHub 릴리스 설명은 `json.tar.xz`의 SHA-256을 `d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d`로 적고 있고, 직접 내려받은 파일의 `shasum -a 256` 결과도 같았습니다. 이 값을 `URL_HASH SHA256=...`에 넣고 4.5.0으로 구성하니 `-- Using the multi-header code from .../_deps/json-src/include/`가 찍혔고, `nlohmann_json::nlohmann_json`을 링크한 프로그램이 빌드·실행됐습니다. 구성이 끝난 시점에 `_deps/`에는 `json-src`·`json-build`·`json-subbuild`가 이미 있습니다. 다운로드가 구성 단계에서 일어났다는 뜻입니다.
 
 ### 의존성 옵션 설정
 
@@ -452,6 +529,7 @@ FetchContent로 가져오는 프로젝트의 옵션을 미리 설정할 수 있�
 include(FetchContent)
 
 # googletest 옵션 설정 (FetchContent_MakeAvailable 전에!)
+# 두 옵션은 googletest v1.15.2 최상위 CMakeLists.txt의 option()이며 기본값은 ON
 set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 
@@ -509,6 +587,16 @@ FetchContent_MakeAvailable(fmt)
 target_link_libraries(myapp PRIVATE fmt::fmt)
 ```
 
+`FMT_VERSION`을 찍는 `main.cpp`로 4.5.0에서 세 가지를 돌렸습니다.
+
+| 구성 | 결과 |
+|------|------|
+| 그대로 (Homebrew fmt 12.2.1 설치됨) | `fmt_DIR=/opt/homebrew/lib/cmake/fmt`, 실행 결과 `fmt 120201`. `_deps/` 없음 |
+| `-DCMAKE_DISABLE_FIND_PACKAGE_fmt=ON` | `-- {fmt} version: 11.0.2`, GitHub에서 받아 빌드, 실행 결과 `fmt 110002` |
+| `FIND_PACKAGE_ARGS 11.0.2 EXACT` | 12.2.1이 버전 조건에 맞지 않아 11.0.2를 내려받음 |
+
+첫 줄이 이 패턴의 함정입니다. `GIT_TAG 11.0.2`로 고정했어도 `FIND_PACKAGE_ARGS`에 버전이 없으면 시스템에 있는 어떤 버전이든 먼저 채택합니다. 메이저 버전이 다른 라이브러리가 조용히 들어오는 것을 막으려면 `FIND_PACKAGE_ARGS`에 버전 조건을 적습니다.
+
 ---
 
 ## ExternalProject
@@ -520,8 +608,8 @@ include(ExternalProject)
 
 ExternalProject_Add(
     external_zlib
-    URL https://zlib.net/zlib-1.3.tar.gz
-    URL_HASH "SHA256=${ZLIB_ARCHIVE_SHA256}"
+    URL https://zlib.net/fossils/zlib-1.3.1.tar.gz
+    URL_HASH SHA256=9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
     PREFIX ${CMAKE_BINARY_DIR}/external
     CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/external/install
@@ -538,7 +626,13 @@ ExternalProject_Add(
 | CMake가 아닌 프로젝트 | 어려움 | 쉬움 |
 | 일반적인 용도 | CMake 프로젝트 | 레거시/비-CMake |
 
-위 코드는 `ZLIB_ARCHIVE_SHA256`에 검증된 체크섬을 제공해야 하는 선언 예제입니다. ExternalProject의 결과를 링크하려면 별도의 IMPORTED 타겟과 산출물·빌드 의존성도 연결해야 합니다.
+해시는 `zlib.net/fossils/`와 GitHub `madler/zlib` 릴리스에서 각각 받은 `zlib-1.3.1.tar.gz`의 SHA-256이 같은 것을 확인한 값입니다. `zlib.net/zlib-1.3.tar.gz`는 지금 404이고, 옛 버전은 `fossils/` 아래로 옮겨져 있습니다.
+
+실행 시점 차이는 디렉터리로 보입니다. 4.5.0에서 구성만 끝낸 상태의 `external/src/external_zlib/`는 비어 있었고, `cmake --build`를 돌린 뒤에야 내려받기·빌드·설치가 진행되어 `external/install/lib/`에 `libz.a`·`libz.1.3.1.dylib`가 생겼습니다.
+
+처음에는 zlib 1.3으로 시도했는데 macOS 27.2 SDK에서 `zutil.c` 컴파일이 `_stdio.h:322:7: error: expected identifier or '('`로 실패했습니다. 1.3의 `zutil.h`는 macOS에서 `#define fdopen(fd,mode) NULL`을 두는데, SDK `_stdio.h` 322행의 `FILE *fdopen(int, const char *)` 선언이 이 매크로로 치환되면서 구문 오류가 됩니다. 1.3.1의 `zutil.h`에는 이 매크로가 없고, 1.3.1로 바꾸자 빌드됐습니다. 외부 빌드는 이렇게 내 toolchain과의 호환성 문제를 빌드 단계에서야 드러냅니다.
+
+ExternalProject의 결과를 링크하려면 별도의 IMPORTED 타겟과 산출물·빌드 의존성도 직접 연결해야 합니다.
 
 ---
 
@@ -648,7 +742,25 @@ cmake --build build-config
 ./build-config/app
 ```
 
-기본 호출은 `source=module`, Config 우선 호출은 `source=config`를 출력하며 둘 다 `local=1`을 출력합니다. 기본 호출에서도 `find_package(Demo CONFIG REQUIRED)`로 바꾸면 Config만 선택합니다. Config 파일을 치우고 CONFIG만 요구하면 Find 모듈이 있어도 탐색에 실패합니다. 각 경우 새 빌드 디렉터리를 사용해야 이전 `Demo_DIR` 캐시의 영향을 구분하기 쉽습니다.
+4.5.0에서 기본 호출은 `source=module`, Config 우선 호출은 `source=config`를 출력했고 둘 다 `local=1`이었습니다. Config 우선 빌드의 캐시에만 `Demo_DIR:PATH=<src>/prefix/lib/cmake/Demo`가 남았습니다. `find_package(Demo CONFIG REQUIRED)`로 바꾸고 `prefix/`를 지우면 Find 모듈이 있어도 이렇게 실패합니다.
+
+```text
+CMake Error at CMakeLists.txt:7 (find_package):
+  Could not find a package configuration file provided by "Demo" with any of
+  the following names:
+
+    Demo.cps
+    demo.cps
+    DemoConfig.cmake
+    demo-config.cmake
+
+  Add the installation prefix of "Demo" to CMAKE_PREFIX_PATH or set
+  "Demo_DIR" to a directory containing one of the above files.  If "Demo"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+```
+
+목록 맨 앞의 `.cps`는 CMake 4.3 릴리스 노트가 추가한 Common Package Specification 파일입니다. [find_package 문서](https://cmake.org/cmake/help/latest/command/find_package.html)는 CPS 파일과 `<Name>Config.cmake`가 함께 있을 때 CPS 쪽을 우선하는 경향으로 탐색한다고 적습니다. 같은 빌드 디렉터리를 재사용하면 캐시된 `Demo_DIR`가 탐색을 건너뛰게 하므로, 모드를 바꿀 때마다 새 빌드 디렉터리를 씁니다.
 
 ## 흔한 실수
 
@@ -682,7 +794,7 @@ FetchContent_MakeAvailable(googletest)
 ```cmake
 # 회피: 찾지 못해도 사용 시도
 find_package(ZLIB)
-target_link_libraries(myapp PRIVATE ZLIB::ZLIB)  # ZLIB 없으면 오류
+target_link_libraries(myapp PRIVATE ZLIB::ZLIB)  # ZLIB 없으면 생성 단계에서 "target was not found" 오류
 
 # Good: REQUIRED 사용
 find_package(ZLIB REQUIRED)
@@ -725,7 +837,7 @@ FetchContent_Declare(fmt
 
 ## 다음 장 예고
 
-Ch 6에서는 테스트와 CTest를 다룹니다. `enable_testing()`, `add_test()`, 그리고 Google Test 연동을 살펴봅니다.
+[Ch 6](/blog/tools/build/cmake/chapter06-testing)에서는 테스트와 CTest를 다룹니다. `enable_testing()`, `add_test()`, 그리고 Google Test 연동을 살펴봅니다.
 
 ## 참고 자료
 

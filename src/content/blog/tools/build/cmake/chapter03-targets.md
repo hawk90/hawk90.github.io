@@ -31,7 +31,7 @@ add_executable(app2 src/app2.cpp)
 2. **의존성 불명확**: 어떤 타겟이 *무엇 때문에* 특정 옵션을 받았는지 추적이 안 됩니다. 코드 위에서 아래로 흐르는 *순서 의존성*이 모든 줄에 깔립니다.
 3. **재사용 불가**: 다른 프로젝트에서 이 라이브러리를 쓰려면, 어떤 옵션·include·라이브러리가 *그 라이브러리를 위해* 필요했는지를 직접 다시 적어야 합니다.
 
-CMake 3.0(2014) 이후 권장되는 *Modern CMake* 모델은 *모든 것을 타겟에 붙입니다*.
+*Modern CMake* 모델은 *모든 것을 타겟에 붙입니다*. CMake 3.0 릴리스 노트는 빌드 규칙 없이 사용 요구사항(usage requirement)만 갖는 `INTERFACE` 라이브러리 타입을 새 기능으로 적고 있고, 현재 [cmake-buildsystem(7)](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html)은 타겟과 사용 요구사항을 중심으로 빌드 시스템을 설명합니다.
 
 ```cmake
 # Modern CMake — 타겟별 설정
@@ -52,7 +52,7 @@ target_include_directories(app2 PRIVATE include)
 
 이 챕터의 목표는 셋입니다.
 
-실행 확인은 macOS의 CMake 4.4.4·Ninja 1.13.2·AppleClang 21을 기준으로 합니다. 아래 완성 예제는 C++ 헤더·소스까지 제공하며, 공개 경로와 매크로가 소비자에게 전달되는지 컴파일 단계에서 확인합니다.
+실행 확인은 macOS의 CMake 4.5.0·Ninja 1.13.2·AppleClang 21을 기준으로 합니다. 아래 완성 예제는 C++ 헤더·소스까지 제공하며, 공개 경로와 매크로가 소비자에게 전달되는지 컴파일 단계에서 확인합니다.
 
 1. 타겟의 *세 종류*(실행 파일·라이브러리·커스텀)와 그 차이.
 2. *PRIVATE / PUBLIC / INTERFACE* 세 가시성의 의미와 선택 기준.
@@ -210,7 +210,7 @@ cmake -B build -DBUILD_SHARED_LIBS=OFF  # STATIC (기본)
 cmake -B build                          # 기존 캐시 값을 유지
 ```
 
-새 빌드 디렉터리에서 변수를 정의하지 않았다면 STATIC입니다. 같은 `build`에서 앞서 ON을 캐시에 기록했다면 마지막 명령도 SHARED를 유지합니다.
+4.5.0에서 `get_target_property(t mylib TYPE)`로 확인하면 새 빌드 디렉터리에서 변수 없이 구성했을 때 `STATIC_LIBRARY`, 같은 디렉터리에 `-DBUILD_SHARED_LIBS=ON`을 준 뒤 `SHARED_LIBRARY`, 그다음 아무 옵션 없이 다시 구성해도 `SHARED_LIBRARY`였습니다. 캐시에 `BUILD_SHARED_LIBS:UNINITIALIZED=ON`이 남아 있기 때문입니다.
 
 ---
 
@@ -224,7 +224,14 @@ cmake -B build                          # 기존 캐시 값을 유지
 | `PUBLIC` | ✓ | ✓ |
 | `INTERFACE` | ✗ | ✓ |
 
-이 표는 컴파일 옵션·헤더 경로·매크로 같은 **사용 요구사항**의 전파를 설명합니다. 정적 라이브러리의 PRIVATE 링크 의존성은 최종 실행 파일의 심볼을 해결하기 위해 링크 단계까지 따라갈 수 있습니다. PRIVATE을 모든 의존성이 최종 링크 명령에서 사라진다는 뜻으로 해석하면 안 됩니다. [정적 라이브러리의 링크 의존성](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html#static-libraries)을 구분합니다.
+이 표는 컴파일 옵션·헤더 경로·매크로 같은 **사용 요구사항**의 전파를 설명합니다. 링크 의존성은 라이브러리 종류에 따라 다르게 움직입니다. `B`가 `A`를 `PRIVATE`로 링크하고 `app`이 `B`만 링크하는 프로젝트를 4.5.0·Ninja로 생성해 `build.ninja`의 `app` 링크 줄을 보면 이렇습니다.
+
+| `A`·`B` 종류 | `app`의 `LINK_LIBRARIES` |
+|------|------|
+| 둘 다 `STATIC` | `libB.a  libA.a` |
+| 둘 다 `SHARED` | `-Wl,-rpath,<빌드 디렉터리>  libB.dylib` |
+
+정적 라이브러리는 `A`의 심볼을 최종 링크에서 풀어야 하므로 `PRIVATE`이어도 `libA.a`가 따라옵니다. 공유 라이브러리는 `libB.dylib`가 `A`를 이미 링크했으므로 `app` 링크 줄에서 빠집니다. [정적 라이브러리의 링크 의존성](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html#static-libraries)을 구분합니다.
 
 ### 한 줄 정의
 
@@ -413,7 +420,7 @@ add_library(MyLib::mylib ALIAS mylib)
 별칭(alias)은 타겟에 네임스페이스 형태의 이름을 붙입니다. 두 가지 장점이 있습니다.
 
 1. **일관성**: `find_package(MyLib)`로 찾은 타겟과 같은 형식
-2. **오류 감지**: 존재하지 않는 별칭을 사용하면 즉시 오류 발생
+2. **오류 감지**: `::`가 들어간 이름이 타겟이 아니면 빌드 전에 생성 단계에서 오류 발생
 
 ```cmake
 # 내부에서 직접 빌드
@@ -425,7 +432,7 @@ find_package(MyLib REQUIRED)
 target_link_libraries(app PRIVATE MyLib::mylib)
 ```
 
-별칭이 없으면 `mylib`이 실제 타겟인지 문자열인지 구분하기 어렵습니다. `MyLib::mylib`은 항상 타겟으로 해석되어 오타를 즉시 잡아냅니다.
+별칭이 없으면 `mylib`이 실제 타겟인지 문자열인지 구분하기 어렵습니다. `::`가 들어간 이름은 ALIAS나 IMPORTED 타겟으로만 해석됩니다(정책 `CMP0028`, 3.0 도입, 4.0부터 OLD 동작 제거). 그래서 오타가 링크 단계까지 가지 않고 CMake 단계에서 멈춥니다. 실제 메시지는 아래 "별칭 없이 사용" 절에 있습니다.
 
 ---
 
@@ -441,7 +448,7 @@ add_subdirectory(libs/mylib)
 
 ### 스코프 — 변수가 어디까지 가는가
 
-`add_subdirectory`는 *새로운 디렉터리 스코프*를 만듭니다. 이 스코프가 어떻게 동작하는지 정확히 알지 못하면, *변수가 사라지는* 미스터리에 자주 빠집니다.
+`add_subdirectory`는 *새로운 디렉터리 스코프*를 만듭니다. 자식 디렉터리에서 `set()`한 값이 부모로 돌아오면 사라져 있는 것이 이 스코프 때문입니다.
 
 ```cmake
 # 최상위 CMakeLists.txt
@@ -469,11 +476,11 @@ message("After change: ${MY_VAR}")   # "child value"
 
 이 두 줄이 *Modern CMake 모델*의 기반입니다. 자식 디렉터리에서 만든 *전역 변수가 부모를 오염시키지 않습니다*. 그 결과 모듈성이 보장됩니다.
 
-자식의 값을 *명시적으로 부모로 올리고* 싶을 때는 `set(VAR value PARENT_SCOPE)`을 씁니다. 하지만 이게 자주 등장하면 설계 신호입니다 — *변수 전달 대신 타겟 속성*([Ch 3 PUBLIC/INTERFACE](/blog/tools/build/cmake/chapter03-targets#가시성-키워드-private-public-interface))을 쓸 수 있는지 다시 보세요.
+자식의 값을 *명시적으로 부모로 올리고* 싶을 때는 `set(VAR value PARENT_SCOPE)`을 씁니다. 하지만 이게 자주 등장하면 설계 신호입니다 — *변수 전달 대신 타겟 속성*(이 글 앞쪽의 [PUBLIC/INTERFACE 가시성](#가시성-키워드-private-public-interface))을 쓸 수 있는지 다시 보세요.
 
 ### 타겟은 스코프를 가로질러 *전역*이다
 
-일반 빌드 타겟의 이름은 프로젝트 전체에서 사용할 수 있습니다. 다만 타겟을 만든 뒤 참조하는 순서가 필요합니다. IMPORTED 타겟과 그 ALIAS는 디렉터리 범위로 제한될 수 있으므로, 모든 종류의 타겟이 전역이라고 일반화하지 않습니다. [별칭 타겟 범위](https://cmake.org/cmake/help/v4.4/command/add_library.html#alias-libraries)를 참고합니다.
+일반 빌드 타겟의 이름은 프로젝트 전체에서 사용할 수 있습니다. 예외는 IMPORTED 타겟입니다. 하위 디렉터리에서 `add_library(imp STATIC IMPORTED)`를 만들면 최상위의 `if(TARGET imp)`는 거짓이었고, `IMPORTED GLOBAL`로 만들면 참이었습니다(4.5.0). `find_package()`가 만드는 타겟도 IMPORTED이므로, 하위 디렉터리에서 찾은 패키지 타겟은 부모에서 보이지 않습니다. 3.24부터는 `find_package(... GLOBAL)`이나 `CMAKE_FIND_PACKAGE_TARGETS_GLOBAL`로 전역 IMPORTED 타겟을 만들 수 있습니다. [별칭 타겟 범위](https://cmake.org/cmake/help/v4.4/command/add_library.html#alias-libraries)를 참고합니다.
 
 ```cmake
 # libs/mylib/CMakeLists.txt
@@ -497,7 +504,7 @@ target_link_libraries(myapp PRIVATE mylib)   # 자식이 만든 타겟이 보임
 add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
 ```
 
-`EXCLUDE_FROM_ALL`은 서브디렉터리의 타겟을 상위 디렉터리의 기본 빌드에서 제외합니다. 다른 빌드 타겟이 의존하면 그 의존성을 만족시키기 위해 빌드하고, `cmake --build build --target target_name`으로 직접 지정해도 빌드합니다. 명시적 링크만 유일한 빌드 조건인 것은 아닙니다. [디렉터리 속성 문서](https://cmake.org/cmake/help/v4.4/prop_dir/EXCLUDE_FROM_ALL.html)에 예외가 정리되어 있습니다.
+`EXCLUDE_FROM_ALL`은 서브디렉터리의 타겟을 상위 디렉터리의 기본 빌드에서 제외합니다. 4.5.0에서 `sub/`에 정적 라이브러리 `extra`를 두고 `add_subdirectory(sub EXCLUDE_FROM_ALL)`로 넣으면, `cmake --build`가 `app`만 빌드하고 `b/sub/libextra.a`는 생기지 않았습니다. `app`이 `extra`를 링크하게 바꾸자 같은 명령이 `libextra.a`를 만들었습니다. 다른 타겟이 의존하거나 `--target extra`로 직접 지정하면 빌드됩니다. [디렉터리 속성 문서](https://cmake.org/cmake/help/v4.4/prop_dir/EXCLUDE_FROM_ALL.html)에 예외가 정리되어 있습니다.
 
 ### 프로젝트 구조 예시
 
@@ -524,7 +531,7 @@ project/
 ### 최상위 CMakeLists.txt
 
 ```cmake
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.25)
 project(MyProject VERSION 1.0.0 LANGUAGES CXX)
 
 # 라이브러리들
@@ -625,9 +632,36 @@ cmake --build build --verbose
 ./build/calc
 ```
 
-CMake 4.4.4·AppleClang 21에서 실행 결과는 `sum=5`입니다. 상세 빌드 명령에는 라이브러리 컴파일에 `-DCALC_INTERNAL`, 실행 파일 컴파일에 `-DCALC_CONSUMER`가 각각 나타납니다. 두 컴파일 모두 공개 include 경로를 받습니다.
+CMake 4.5.0·AppleClang 21에서 실행한 상세 빌드 출력입니다. 소스 경로는 `<src>`로 줄였습니다.
 
-반대로 `target_include_directories(calclib PUBLIC include)`를 PRIVATE으로 바꾸면 라이브러리는 빌드되지만 소비자가 `calc.hpp`를 찾지 못해 실패합니다. INTERFACE 매크로를 PRIVATE으로 바꾸면 소스에 적은 전처리 검사에서 실패합니다. 이 두 실패를 원복한 뒤 다시 빌드하면, 설정 누락과 전파 범위의 차이를 구분할 수 있습니다.
+```text
+[1/4] /usr/bin/c++ -DCALC_INTERNAL -I<src>/include -g -std=gnu++17 -arch arm64 -MD -MT CMakeFiles/calclib.dir/src/calc.cpp.o -MF CMakeFiles/calclib.dir/src/calc.cpp.o.d -o CMakeFiles/calclib.dir/src/calc.cpp.o -c <src>/src/calc.cpp
+[2/4] /usr/bin/c++ -DCALC_CONSUMER -I<src>/include -g -std=gnu++17 -arch arm64 -MD -MT CMakeFiles/calc.dir/main.cpp.o -MF CMakeFiles/calc.dir/main.cpp.o.d -o CMakeFiles/calc.dir/main.cpp.o -c <src>/main.cpp
+[3/4] : && /opt/homebrew/bin/cmake -E rm -f libcalclib.a && /usr/bin/ar qc libcalclib.a  CMakeFiles/calclib.dir/src/calc.cpp.o && /usr/bin/ranlib libcalclib.a && /opt/homebrew/bin/cmake -E touch libcalclib.a && :
+[4/4] : && /usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/calc.dir/main.cpp.o -o calc  libcalclib.a && :
+$ ./build/calc
+sum=5
+```
+
+`-DCALC_INTERNAL`은 라이브러리 컴파일(1번)에만, `-DCALC_CONSUMER`는 실행 파일 컴파일(2번)에만 있고, `-I<src>/include`와 PUBLIC으로 건 `-std=gnu++17`은 둘 다에 있습니다.
+
+일부러 하나씩 망가뜨리면 어느 설정이 어디로 가는지 더 분명해집니다. `target_include_directories(calclib PUBLIC include)`를 PRIVATE으로 바꾸면 라이브러리는 빌드되고 소비자 컴파일에서 멈춥니다.
+
+```text
+[1/4] Building CXX object CMakeFiles/calclib.dir/src/calc.cpp.o
+[2/4] Linking CXX static library libcalclib.a
+[3/4] Building CXX object CMakeFiles/calc.dir/main.cpp.o
+FAILED: [code=1] CMakeFiles/calc.dir/main.cpp.o
+/usr/bin/c++ -DCALC_CONSUMER  -std=gnu++17 -arch arm64 ... -c <src>/main.cpp
+<src>/main.cpp:1:10: fatal error: 'calc.hpp' file not found
+```
+
+`CALC_CONSUMER`를 INTERFACE 대신 PRIVATE으로 바꾸면 두 전처리 검사가 동시에 걸립니다.
+
+```text
+<src>/src/calc.cpp:6:2: error: "Library must not receive CALC_CONSUMER"
+<src>/main.cpp:7:2: error: "Consumer must receive CALC_CONSUMER"
+```
 
 ## 흔한 실수
 
@@ -658,7 +692,20 @@ target_link_libraries(app mylib)
 target_link_libraries(app PRIVATE mylib)
 ```
 
-키워드 생략 자체는 오류가 아닙니다. 위 두 줄을 같은 타겟에 함께 호출하는 것이 오류입니다. [target_link_libraries()의 서명](https://cmake.org/cmake/help/v4.4/command/target_link_libraries.html#libraries-for-both-a-target-and-its-dependents)과 혼용 제한을 구분합니다.
+키워드 생략 자체는 오류가 아닙니다. 위 두 줄을 같은 타겟에 함께 호출하는 것이 오류이고, 4.5.0은 구성 단계에서 이렇게 멈춥니다.
+
+```text
+CMake Error at CMakeLists.txt:6 (target_link_libraries):
+  The plain signature for target_link_libraries has already been used with
+  the target "app".  All uses of target_link_libraries with a target must be
+  either all-keyword or all-plain.
+
+  The uses of the plain signature are here:
+
+   * CMakeLists.txt:5 (target_link_libraries)
+```
+
+순서를 바꾸면 "The keyword signature ... has already been used"로 같은 오류가 납니다. [target_link_libraries()의 서명](https://cmake.org/cmake/help/v4.4/command/target_link_libraries.html#libraries-for-both-a-target-and-its-dependents)과 혼용 제한을 구분합니다.
 
 ### 라이브러리에 모든 설정을 PRIVATE으로
 
@@ -678,19 +725,53 @@ target_include_directories(mylib PUBLIC include)
 ### 별칭 없이 사용
 
 ```cmake
-# 회피: 오타 시 조용히 문자열로 처리될 수 있음
+# 회피: 오타가 타겟이 아니라 링커 옵션 -lmyliib로 넘어감
 target_link_libraries(app PRIVATE myliib)  # 오타!
-# 링커에서 "myliib" 라이브러리를 찾으려 함
 
 # Good: 별칭 사용
 add_library(MyLib::mylib ALIAS mylib)
 target_link_libraries(app PRIVATE MyLib::myliib)  # 오타!
-# CMake 오류: Target "MyLib::myliib" not found
+```
+
+4.5.0에서 첫 번째 오타는 구성·생성을 통과하고 빌드의 링크 단계에서야 실패했습니다.
+
+```text
+FAILED: [code=1] app
+ld: library 'myliib' not found
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+`::`가 들어간 두 번째 오타는 빌드 전에 생성 단계에서 멈춥니다.
+
+```text
+CMake Error at CMakeLists.txt:6 (target_link_libraries):
+  Target "app" links to:
+
+    MyLib::myliib
+
+  but the target was not found.  Possible reasons include:
+
+    * There is a typo in the target name.
+    * A find_package call is missing for an IMPORTED target.
+    * An ALIAS target is missing.
+...
+CMake Generate step failed.  Build files cannot be regenerated correctly.
 ```
 
 ### 순환 의존성
 
-CMake는 정적 라이브러리 사이의 일부 순환을 지원합니다. 순환 자체가 언제나 구성 오류라는 뜻은 아닙니다. 아래는 순환을 공통 구현으로 분리해 의존 방향을 단순화하는 설계 대안입니다.
+순환이 오류인지는 라이브러리 종류가 정합니다. 4.5.0에서 아래 A·B를 `STATIC`으로 만들면 생성·빌드가 통과하고, `app` 링크 줄에 `libA.a  libB.a  libA.a  libB.a`처럼 두 아카이브가 반복해 들어갑니다. 둘을 `SHARED`로 바꾸면 생성 단계에서 멈춥니다.
+
+```text
+CMake Error: The inter-target dependency graph contains the following strongly connected component (cycle):
+  "A" of type SHARED_LIBRARY
+    depends on "B" (weak)
+  "B" of type SHARED_LIBRARY
+    depends on "A" (weak)
+At least one of these targets is not a STATIC_LIBRARY.  Cyclic dependencies are allowed only among static libraries.
+```
+
+정적 라이브러리의 순환도 링크 줄을 반복해서 푸는 것이라, 두 라이브러리를 따로 떼어 쓸 수 없다는 점은 그대로입니다. 아래는 공통 부분을 분리해 의존 방향을 한쪽으로 만드는 설계입니다.
 
 ```cmake
 # 회피: A → B → A
@@ -721,7 +802,7 @@ target_link_libraries(B PRIVATE common)
 
 ## 다음 장 예고
 
-Ch 4에서는 옵션과 캐시 변수를 다룹니다. `option()`, `set(... CACHE ...)`, 그리고 CMakePresets.json으로 빌드 구성을 관리합니다.
+[Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options)에서는 옵션과 캐시 변수를 다룹니다. `option()`, `set(... CACHE ...)`, 그리고 CMakePresets.json으로 빌드 구성을 관리합니다.
 
 ## 참고 자료
 
