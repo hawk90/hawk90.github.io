@@ -18,7 +18,6 @@ topics: ["embedded"]
 
 - LED는 켜지는데 다른 보드와의 인터페이스에서 1이 안 나올 때
 - I2C 라인을 GPIO로 흉내 내려는데 통신이 안 될 때
-- 버튼 입력이 가끔 두 번씩 들어올 때
 - 외부 입력이 3.3V 보드에 5V를 줄 때
 
 ## 핵심 개념
@@ -40,7 +39,7 @@ GPIO 출력단은 VDD 쪽 P-MOS와 GND 쪽 N-MOS 두 트랜지스터로 그립�
 | 0 출력 | N-MOS ON | N-MOS ON |
 | 1 출력 | P-MOS ON | high-Z (풀업이 끌어올림) |
 | 외부 풀업 | 불필요 | 필수 |
-| 양방향 가능 | 어려움 | 가능 (wired-OR) |
+| 양방향 가능 | 어려움 | 가능 (wired-AND) |
 | 사용 예 | LED, 일반 출력 | I2C, alert, IRQ |
 
 I2C가 open-drain인 이유는 여러 디바이스가 같은 라인을 공유해야 하기 때문입니다. Push-pull이면 한 디바이스가 1을, 다른 디바이스가 0을 동시에 내는 순간 VDD에서 P-MOS와 N-MOS를 거쳐 GND로 전류가 바로 흐릅니다. Open-drain에서는 누구든 0을 내면 라인이 0이 되고(wired-AND), 아무도 당기지 않을 때만 풀업이 1을 만듭니다.
@@ -65,9 +64,9 @@ STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 47은 내부 풀�
 
 ### 3) Drive strength
 
-같은 push-pull이라도 출력 트랜지스터의 W/L 비율에 따라 driver 강도가 다릅니다. 강한 driver는 부하 커패시터를 빨리 충전·방전해 rise/fall time을 줄입니다.
+출력단이 부하 용량을 얼마나 빨리 충전·방전하느냐가 rise/fall time을 정합니다.
 
-STM32F4에서는 `OSPEEDR` 2비트가 이 강도를 고릅니다.
+STM32F4에서는 `OSPEEDR` 2비트가 출력 속도 설정을 고릅니다. 데이터시트는 이 설정을 "I/O speed"라고만 부르고 회로로 어떻게 구현했는지는 적지 않습니다.
 
 ```c
 // STM32F4 OSPEEDR: 00 low, 01 medium, 10 high, 11 very high
@@ -89,9 +88,9 @@ DS8626 Rev 4 Table 49는 설정마다 최대 출력 주파수를 부하 조건�
 
 입력 비교기는 일반 비교기가 아니라 히스테리시스가 있는 Schmitt trigger입니다. 0 → 1 임계와 1 → 0 임계가 다릅니다.
 
-![Schmitt Trigger Hysteresis](/images/blog/modern-recipes/diagrams/part1-03-schmitt-hysteresis.svg)
+![Schmitt trigger 전달 특성 — 입력 상승 시 V_T+, 하강 시 V_T−에서 출력이 바뀌고 그 차이가 V_hys](/images/blog/modern-recipes/diagrams/part1-03-schmitt-hysteresis.svg)
 
-DS8626 Table 47은 STM32F405/407 I/O의 Schmitt trigger 히스테리시스 V_hys를 대표 200 mV, FT 핀은 V_DD의 5% 이상(최소 100 mV)으로 적습니다. 입력이 V_IH 근처에서 이보다 작은 잡음으로 흔들리면 출력은 한 번만 바뀝니다. 같은 표의 입력 임계값은 TTL 포트가 V_IL 0.8 V / V_IH 2.0 V(2.7~3.6 V), CMOS 포트가 0.3 V_DD / 0.7 V_DD이고, 표 아래 문장은 모든 I/O가 CMOS와 TTL 양쪽을 만족한다고 적습니다.
+DS8626 Table 47은 STM32F405/407 I/O의 Schmitt trigger 히스테리시스 V_hys를 대표 200 mV, FT 핀은 V_DD의 5% 이상(최소 100 mV)으로 적습니다. 히스테리시스는 두 스위칭 임계 V_T+와 V_T− 사이의 전압 폭입니다(Table 47 주석 2). 입력이 스위칭 임계 근처에서 이보다 작은 잡음으로 흔들리면 출력은 한 번만 바뀝니다. 스위칭 임계는 보장값인 V_IL과 V_IH 사이에 있습니다. 같은 표의 입력 임계값은 TTL 포트가 V_IL 0.8 V / V_IH 2.0 V(2.7~3.6 V), CMOS 포트가 0.3 V_DD / 0.7 V_DD이고, 표 아래 문장은 모든 I/O가 CMOS와 TTL 양쪽을 만족한다고 적습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -107,7 +106,7 @@ TXB0108 데이터시트는 이 소자가 push-pull CMOS 출력만 변환할 수 
 
 소프트웨어 I2C bit-bang에서 SDA를 어떻게 다룰지도 자주 헷갈립니다. STM32 GPIO는 `OTYPER`로 출력단을 open-drain으로 바꿀 수 있으므로, 핀을 open-drain 출력으로 두고 `BSRR`로 0과 release를 오가면 됩니다. MODER를 output/input으로 바꿔 흉내 내는 방법은 ODR이 0이라는 전제가 깨지면 1을 *구동*해 버립니다. 두 방식을 QEMU에서 돌려 비교했습니다.
 
-STM32F4 머신(`netduinoplus2`)은 GPIO를 모델링하지 않으므로, GPIO 레지스터 배치가 같은 STM32L475 보드 머신 `b-l475e-iot01a`를 썼습니다. QEMU 11.1의 `hw/gpio/stm32l4x5_gpio.c`는 `update_gpio_idr()`에서 open-drain ODR=1이고 외부 연결이 없을 때 풀업이면 1, 풀다운이면 0, 둘 다 없으면 floating으로 IDR을 정합니다.
+STM32F4 머신(`netduinoplus2`)은 GPIO를 모델링하지 않으므로, `MODER`~`AFR`(0x00~0x24) 레지스터 배치가 F4와 같은 STM32L475 보드 머신 `b-l475e-iot01a`를 썼습니다. QEMU 11.1의 `hw/gpio/stm32l4x5_gpio.c`는 `update_gpio_idr()`에서 open-drain ODR=1이고 외부 연결이 없을 때 풀업이면 1, 풀다운이면 0, 둘 다 없으면 floating으로 IDR을 정합니다.
 
 ```c
 #include "stm32l4xx.h"
@@ -168,7 +167,7 @@ push-pull, ODR=1, MODER=output -> IDR=1 (drives HIGH, not low)
 
 ## 측정 / 비교
 
-I2C 풀업의 범위는 NXP UM10204(Rev. 7.0) 7.1절 *Pull-up resistor sizing*의 두 식으로 정합니다. 최솟값은 디바이스가 3 mA를 싱크하면서 V_OL 0.4 V를 지켜야 한다는 조건에서, 최댓값은 0.3 V_DD에서 0.7 V_DD까지 오르는 시간 0.8473 × RC가 rise time 상한 t_r(Standard-mode 1000 ns, Fast-mode 300 ns, Table 10) 안에 들어야 한다는 조건에서 나옵니다. V_DD = 3.3 V로 계산한 결과입니다.
+I2C 풀업의 범위는 NXP UM10204(Rev. 7.0) 7.1절 *Pull-up resistor sizing*의 두 식으로 정합니다. 최솟값은 디바이스가 3 mA를 싱크하면서 V_OL 0.4 V를 지켜야 한다는 조건에서, 최댓값은 0.3 V_DD에서 0.7 V_DD까지 오르는 시간 0.8473 × RC가 rise time 상한 t_r(Standard-mode 1000 ns, Fast-mode 300 ns, Table 11) 안에 들어야 한다는 조건에서 나옵니다. V_DD = 3.3 V로 계산한 결과입니다.
 
 ```text
 Rp(min) = (VDD - VOL)/IOL = (3.3 - 0.4)/3 mA = 967 ohm
@@ -185,7 +184,7 @@ internal pull-up 40 kohm, Cb=50 pF -> tr(0.3->0.7 VDD) = 1695 ns
 internal pull-up 50 kohm, Cb=50 pF -> tr(0.3->0.7 VDD) = 2118 ns
 ```
 
-정답은 고정된 저항값이 아니라 버스 용량 C_b에 따른 범위입니다. 100 pF 버스라면 Standard-mode는 0.97~11.8 kΩ, Fast-mode는 0.97~3.54 kΩ 사이에서 고릅니다. Fast-mode에서 C_b가 400 pF(규격 상한)면 최댓값 0.89 kΩ이 최솟값 0.97 kΩ보다 작아 어떤 저항으로도 두 조건을 함께 맞출 수 없습니다. 내부 풀업은 가장 작은 30 kΩ에 50 pF만 걸어도 rise time이 1271 ns로 Standard-mode 상한 1000 ns를 넘습니다.
+정답은 고정된 저항값이 아니라 버스 용량 C_b에 따른 범위입니다. 100 pF 버스라면 Standard-mode는 0.97~11.8 kΩ, Fast-mode는 0.97~3.54 kΩ 사이에서 고릅니다. 3 mA / V_OL 0.4 V 디바이스로 Fast-mode에서 C_b가 400 pF(규격 상한)면 최댓값 0.89 kΩ이 최솟값 0.97 kΩ보다 작아 두 조건을 함께 맞출 수 없습니다. UM10204 Table 10 주석 [4]가 바로 이 경우를 다룹니다. 400 kHz에서 400 pF 전체 부하를 구동하려면 V_OL 0.6 V에서 6 mA를 싱크해야 하고, 그러면 Rp(min) = (3.3 − 0.6) / 6 mA = 450 Ω이라 0.45~0.89 kΩ 범위가 생깁니다. 내부 풀업은 PA10·PB12를 뺀 핀의 가장 작은 값 30 kΩ에 50 pF만 걸어도 rise time이 1271 ns로 Standard-mode 상한 1000 ns를 넘습니다.
 
 ## 자주 보는 함정
 
@@ -199,7 +198,7 @@ internal pull-up 50 kohm, Cb=50 pF -> tr(0.3->0.7 VDD) = 2118 ns
 
 > ⚠️ 5V 입력을 3.3V FT 아닌 핀에 직결
 
-위 표대로 일반 핀의 입력 전압 정격은 4.0 V이고, V_DD를 넘는 입력은 양(+)의 주입 전류가 됩니다. 일반 핀은 ±5 mA, 모든 핀의 합은 ±25 mA가 한계입니다(DS8626 Table 12). 같은 표 주석은 음(−)의 주입이 ADC 정확도를 해친다고 적습니다. 정격을 넘은 상태가 얼마 만에 어떤 고장으로 이어지는지는 데이터시트가 말하지 않으므로, 판단 기준은 '정격 안에 있는가' 하나입니다.
+위 표대로 일반 핀의 입력 전압 정격은 4.0 V이고, V_DD를 넘는 입력은 양(+)의 주입 전류가 됩니다. 일반 핀은 ±5 mA, 모든 핀의 합은 ±25 mA가 한계입니다(DS8626 Table 12). 같은 표 주석은 음(−)의 주입이 ADC 정확도를 해친다고 적습니다. DS8626 5.2절은 정격을 넘으면 영구 손상이 생길 수 있고 오래 노출되면 신뢰성에 영향을 줄 수 있다고만 적고, 시간이나 고장 모드는 적지 않습니다. 그래서 판단 기준은 '정격 안에 있는가' 하나입니다.
 
 > ⚠️ Drive strength 과다
 
@@ -210,7 +209,7 @@ Table 49의 f_max는 그 설정이 낼 수 있는 상한이지 권장값이 아�
 - GPIO는 push-pull 또는 open-drain 출력, 풀업/풀다운/플로팅 입력으로 구성됩니다.
 - Open-drain은 공유 버스(I2C 등)에 씁니다. 풀업이 없으면 release해도 1이 되지 않습니다(QEMU 실행으로 확인).
 - STM32F4 bit-bang I2C는 `OTYPER`로 open-drain을 켜고 `BSRR`로 0/release를 오갑니다. MODER 전환 방식은 ODR = 1이 남아 있으면 1을 구동합니다.
-- STM32F405/407 내부 풀업은 30~50 kΩ(DS8626)이라, 50 pF 버스에서도 rise time이 1271 ns 이상으로 I2C Standard-mode 상한을 넘습니다. 외부 풀업은 UM10204 식으로 C_b에 맞춰 고릅니다.
+- STM32F405/407 내부 풀업은 30~50 kΩ(PA10·PB12 제외, DS8626)이라, 50 pF 버스에서도 rise time이 1271 ns 이상으로 I2C Standard-mode 상한을 넘습니다. 외부 풀업은 UM10204 식으로 C_b에 맞춰 고릅니다.
 - `OSPEEDR`의 f_max는 부하 조건이 붙은 상한입니다(DS8626 Table 49).
 - 5 V 입력은 FT 핀(V_DD + 4 V까지) 또는 레벨 시프터로 받습니다. 일반 핀의 정격은 4.0 V입니다. TXB0108은 I2C에 쓰지 않습니다.
 
@@ -221,4 +220,4 @@ Table 49의 f_max는 그 설정이 낼 수 있는 상한이지 권장값이 아�
 - [1-02: 클럭과 타이밍](/blog/embedded/modern-recipes/part1-02-clock-timing)
 - [1-04: UART 하드웨어 동작](/blog/embedded/modern-recipes/part1-04-uart-hardware)
 - [1-06: I2C 하드웨어](/blog/embedded/modern-recipes/part1-06-i2c-hardware)
-- 더 깊이 — [Embedded Performance Engineering: GPIO 토글 측정](/blog/embedded/performance-engineering/00-preface)
+- 더 깊이 — [Embedded Performance Engineering: Bare-metal 프로파일링 — GPIO 토글](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)
