@@ -315,9 +315,9 @@ bloaty -d symbols --demangle=full firmware_pr.elf -- firmware_main.elf > size-di
 
 ```text
 $ arm-none-eabi-nm -S --size-sort -C fwn.elf | grep process
-0000013a 0000001c W signed char process<signed char>(signed char)
-000000d4 0000001c W int process<int>(int)
-000000f0 0000004a W long long process<long long>(long long)
+080000bc 0000001c W signed char process<signed char>(signed char)
+08000056 0000001c W int process<int>(int)
+08000072 0000004a W long long process<long long>(long long)
 ```
 
 같은 소스가 `int`·`int8_t`에서는 28바이트, `long long`에서는 64비트 시프트·곱셈 때문에 74바이트가 됐고, ELF text는 1,364에서 1,448바이트로 늘었습니다.
