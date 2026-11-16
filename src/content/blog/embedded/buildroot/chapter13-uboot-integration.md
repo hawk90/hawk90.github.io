@@ -159,10 +159,10 @@ SPL은 `BR2_TARGET_UBOOT_SPL=y`와 `BR2_TARGET_UBOOT_SPL_NAME`으로 복사합�
 
 ```text
 $ ls -l output/build/uboot-2026.01/{MLO,spl/u-boot-spl.bin,u-boot.bin,u-boot.img}
--rw-r--r-- 1 br br  110524 Nov 16 04:36 MLO
--rwxr-xr-x 1 br br  110004 Nov 16 04:36 spl/u-boot-spl.bin
--rw-r--r-- 1 br br  717536 Nov 16 04:36 u-boot.bin
--rw-r--r-- 1 br br 1564932 Nov 16 04:36 u-boot.img
+-rw-r--r-- 1 br br  110524 Nov 16 07:56 MLO
+-rwxr-xr-x 1 br br  110004 Nov 16 07:56 spl/u-boot-spl.bin
+-rw-r--r-- 1 br br  717536 Nov 16 07:56 u-boot.bin
+-rw-r--r-- 1 br br 1564932 Nov 16 07:56 u-boot.img
 ```
 
 `MLO`는 `u-boot-spl.bin`보다 520바이트 큽니다. AM335x ROM이 읽는 헤더가 붙은 SPL이기 때문입니다. `BR2_TARGET_UBOOT_FORMAT_BIN`이 꺼져 있으므로 `output/images/`에는 `MLO`와 `u-boot.img`만 복사됐습니다(Ch 10의 목록).
@@ -197,7 +197,7 @@ bootz ${loadaddr} - ${fdtaddr}
 ```text
 $ host/bin/mkimage -l images/boot.scr
 Image Name:   
-Created:      Mon Nov 16 04:34:42 2026
+Created:      Mon Nov 16 07:55:08 2026
 Image Type:   ARM Linux Script (uncompressed)
 Data Size:    209 Bytes = 0.20 KiB = 0.00 MiB
 Load Address: 00000000
@@ -286,20 +286,18 @@ U-Boot 쪽이 redundant env(`CONFIG_ENV_OFFSET_REDUND` 등)를 쓰면 두 줄을
 
 ## SPL과 main U-Boot의 분업
 
-대부분의 modern SoC는 *두 단계 부팅*을 합니다. SoC ROM이 작은 SPL을 SRAM에 로드해 실행하고, SPL이 DRAM을 초기화한 뒤 main U-Boot를 DRAM에 로드합니다.
-
-부팅 흐름은 SoC ROM → SPL(SRAM) → main U-Boot(DRAM) → Linux kernel 순서로 이어집니다. SoC ROM이 SPL을 내부 SRAM으로 로드하고, SPL이 DRAM을 초기화한 뒤 main U-Boot를 DRAM으로 로드합니다. BeagleBone 빌드에서는 SPL(`MLO`)이 110,524바이트, main U-Boot(`u-boot.img`)가 1,564,932바이트였습니다. U-Boot `.config`에 `CONFIG_SPL_MMC=y`, `CONFIG_SPL_FS_FAT=y`가 있어 SPL이 SD의 FAT 파티션에서 `u-boot.img`를 읽습니다. main U-Boot는 전체 device 트리와 filesystem·network·USB를 올린 다음 `bootcmd`를 실행해 Linux kernel로 넘어갑니다.
+AM335x는 *두 단계 부팅*을 합니다. 부팅 흐름은 SoC ROM → SPL → main U-Boot → Linux kernel 순서이고, SPL이 SDRAM을 초기화한 뒤 main U-Boot를 올립니다. BeagleBone 빌드에서는 SPL(`MLO`)이 110,524바이트, main U-Boot(`u-boot.img`)가 1,564,932바이트였습니다. U-Boot `.config`에 `CONFIG_SPL_MMC=y`, `CONFIG_SPL_FS_FAT=y`가 있어 SPL이 SD의 FAT 파티션에서 `u-boot.img`를 읽습니다. main U-Boot는 `bootcmd`를 실행해 Linux kernel로 넘어갑니다.
 
 <!-- TODO: TikZ — boot stage flow diagram (SoC ROM → SPL → main U-Boot → Linux) -->
 
-각 단계의 책임은 다음과 같습니다.
+각 단계의 책임은 U-Boot 2026.01 문서에서 다음과 같이 정의됩니다.
 
-| 단계 | 책임 |
-|---|---|
-| **SoC ROM** | 보드 출하 시 mask programmed. SD/eMMC/SPI에서 SPL 로드 |
-| **SPL** | DDR init, clock init, console UART, main U-Boot 로드 |
-| **main U-Boot** | env, filesystem, ethernet, USB, FIT, bootcmd |
-| **Linux** | 진짜 시스템 |
+| 단계 | 책임 | 출처 |
+|---|---|---|
+| **SoC ROM** | SPL 이미지를 `<SPL_LOAD_ADDR>`에 올림 | `doc/board/ti/am335x_evm.rst` ("the address at which SOC ROM should load") |
+| **SPL** | "Sets up SDRAM and loads U-Boot proper" | `doc/develop/spl.rst` |
+| **main U-Boot** | "containing the command line and boot logic" | `doc/develop/spl.rst` |
+| **Linux** | `bootcmd`가 넘겨준 커널 | 이 장의 `boot.scr` |
 
 Buildroot로 SPL을 함께 빌드하려면 다음 두 옵션이 필요합니다.
 
@@ -312,19 +310,17 @@ BR2_TARGET_UBOOT_SPL_NAME="MLO spl/u-boot-spl.bin"
 
 ## 흔한 실수
 
-U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
+U-Boot 통합에서 만나는 문제들입니다.
 
-**env 위치·크기 불일치.** `fw_env.config`가 U-Boot의 `CONFIG_ENV_*`와 다르면 `fw_printenv`는 CRC가 맞지 않아 env를 읽지 못하고, `fw_setenv`는 엉뚱한 위치에 씁니다. U-Boot 설정을 바꾸면 `fw_env.config`도 같은 커밋에서 바꿉니다. BeagleBone 빌드처럼 env가 FAT 파일이면, 그 파티션이 Linux에서 mount돼 있어야 합니다.
+**env 위치·크기 불일치.** `fw_env.config`가 U-Boot의 `CONFIG_ENV_*`와 다르면 CRC가 맞지 않습니다. libubootenv 0.3.7의 `libuboot_load()`는 이때 `-ENODATA`를 돌려주고(`src/uboot_env.c` 766행), `fw_printenv`는 "Cannot read environment, using default"를 찍은 뒤 기본 env 파일을 대신 읽습니다(`src/fw_printenv.c` 161~167행). `fw_setenv`로 실행했다면 같은 파일 224~228행이 그 기본 env를 *설정된 위치에 저장*하므로, 위치가 틀렸으면 엉뚱한 곳에 씁니다. U-Boot 설정을 바꾸면 `fw_env.config`도 같은 커밋에서 바꿉니다. BeagleBone 빌드처럼 env가 FAT 파일이면, 그 파티션이 Linux에서 mount돼 있어야 합니다.
 
-**FIT signature 불일치.** secure boot 환경에서 FIT image (`u-boot.itb` 또는 `fitImage`)는 U-Boot의 *embedded public key*로 검증됩니다. 빌드 시 사용한 key와 U-Boot DTB에 embed된 공개키가 다르면 검증이 실패해 부팅하지 않습니다. 이 장에서는 FIT 서명을 실행하지 않았으므로 오류 문구는 싣지 않습니다.
-
-**DTB가 잘못 임베디드.** U-Boot의 `u-boot.dtb`와 kernel DTB는 다른 파일입니다. 같다고 가정하면 *U-Boot가 보드 인식 못 함* 또는 *kernel이 peripheral을 못 찾는* 사고가 납니다. 두 개를 분리해서 관리하는 게 안전합니다.
+**FIT signature 불일치.** U-Boot 2026.01 `doc/usage/fit/signature.rst`는 공개키를 서명된 이미지 안에 둘 수 없으므로 "public key in U-Boot's control FDT (using CONFIG_OF_CONTROL)"에 둔다고 적습니다. `mkimage -K <u-boot.dtb>`가 그 DTB에 키를 써 넣습니다. 그래서 FIT를 서명한 키와 U-Boot 바이너리에 들어간 DTB의 키가 같은 빌드에서 나와야 합니다. 서명과 검증은 Ch 15에서 실제로 돌려 봅니다.
 
 **`BR2_TARGET_UBOOT_SPL` 미설정.** AM335x에서 `BR2_TARGET_UBOOT_SPL=y`를 끄면 `MLO`가 `output/images/`로 복사되지 않고, genimage.cfg의 `"MLO"` 항목에서 이미지 생성이 실패합니다. 콘솔에 아무것도 안 나오는 보드라면 boot 파티션에 `MLO`가 있는지부터 확인합니다(Ch 10의 `mdir`).
 
 **boot.scr 생성 실패.** `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y`인데 source 경로가 비어 있으면 `uboot-tools.mk` 209행 오류로 멈춥니다. 경로가 있으면 `host-uboot-tools` 빌드의 `mkimage`로 만들어 `output/images/boot.scr`에 둡니다.
 
-**eMMC boot 파티션의 쓰기 보호.** env를 eMMC의 `mmcblk0boot*` 하드웨어 파티션에 두면, Linux 커널은 이 장치를 기본으로 read-only로 노출합니다(`/sys/block/mmcblk0boot1/force_ro`). `fw_setenv` 전에 이 값을 0으로 바꾸는 절차가 필요합니다.
+**eMMC boot 파티션의 쓰기 보호.** env를 eMMC의 `mmcblk0boot*` 하드웨어 파티션에 두면, 커널 문서 `Documentation/driver-api/mmc/mmc-dev-parts.rst`가 적는 대로 이 장치는 "write access is disabled by default"입니다. `fw_setenv` 전에 `echo 0 > /sys/block/mmcblkXbootY/force_ro`로 쓰기를 열고, 끝나면 1로 되돌립니다.
 
 ## 정리
 
