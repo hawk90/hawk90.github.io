@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 [앞 편의 mailbox](/blog/embedded/modern-recipes/part11-06-mailbox)는 명령 하나를 보내고 응답을 기다리는 구조라 한 번에 명령 하나만 떠 있습니다. 장치가 여러 명령을 동시에 처리할 수 있다면 이 구조가 병목이 됩니다. 식당으로 치면 mailbox는 주문 하나를 받고 음식이 나올 때까지 다음 손님을 받지 않는 카운터이고, SQ·CQ는 주문서를 꽂는 레일(SQ)과 완성된 음식을 올려 두는 선반(CQ)이 따로 있는 주방입니다.
 
-NVMe가 이 모델의 대표입니다. Linux의 io_uring도 같은 모양의 ring 두 개를 user space와 커널 사이에 둡니다. 반면 Xilinx XDMA는 겉보기와 달리 다른 모델을 쓰는데, 아래에서 소스로 비교합니다.
+NVMe가 이 모델의 대표입니다. Linux의 io_uring도 같은 모양의 ring 두 개를 user space와 커널 사이에 둡니다. 반면 Xilinx XDMA는 겉보기엔 비슷해도 다른 모델을 씁니다. 아래에서 소스로 비교합니다.
 
 ### 이 글의 실행 환경
 
@@ -127,7 +127,7 @@ doorbell writes: 3 for 9 commands
 
 ## NVMe에서 doorbell은 몇 번 치는가
 
-doorbell은 MMIO 쓰기라서 명령마다 치면 비용이 큽니다. Linux NVMe 드라이버는 이를 줄이도록 짜여 있습니다. 6.12 `drivers/nvme/host/pci.c`의 `nvme_queue_rq()`는 명령을 SQ에 복사한 뒤 `nvme_write_sq_db(nvmeq, bd->last)`를 부르고, `nvme_write_sq_db()`는 block layer가 "이번 묶음의 마지막"(`bd->last`)이라고 알려 줄 때만 doorbell을 씁니다(그 전에 ring이 한 바퀴 차는 경우는 예외로 씁니다). 묶음이 끝났는데 doorbell이 남아 있으면 `nvme_commit_rqs()`가 마저 씁니다. 여러 요청이 plug로 한꺼번에 내려오면(io_uring은 3개 이상 제출할 때 plug를 씁니다, `io_uring/io_uring.c`) blk-mq가 `nvme_queue_rqs()`를 부르고, `nvme_submit_cmds()`가 묶음 전체를 SQ에 복사한 뒤 doorbell을 한 번 씁니다.
+doorbell은 MMIO 쓰기라서 명령마다 치면 비용이 큽니다. Linux NVMe 드라이버는 이를 줄이도록 짜여 있습니다. 6.12 `drivers/nvme/host/pci.c`의 `nvme_queue_rq()`는 명령을 SQ에 복사한 뒤 `nvme_write_sq_db(nvmeq, bd->last)`를 부르고, `nvme_write_sq_db()`는 block layer가 "이번 묶음의 마지막"(`bd->last`)이라고 알려 줄 때만 doorbell을 씁니다(그 전에 ring이 한 바퀴 차면 예외로 doorbell을 씁니다). 묶음이 끝났는데 doorbell이 남아 있으면 `nvme_commit_rqs()`가 마저 씁니다. 여러 요청이 plug로 한꺼번에 내려오면(io_uring은 3개 이상 제출할 때 plug를 씁니다, `io_uring/io_uring.c`) blk-mq가 `nvme_queue_rqs()`를 부르고, `nvme_submit_cmds()`가 묶음 전체를 SQ에 복사한 뒤 doorbell을 한 번 씁니다.
 
 하나 더 고려할 것이 있습니다. 이 QEMU 컨트롤러는 Doorbell Buffer Config(shadow doorbell)를 지원하고(`nvme id-ctrl -H`의 oacs bit 8), Linux는 이 기능이 있으면 doorbell 쓰기 전에 `nvme_dbbuf_update_and_check_event()`로 MMIO가 필요한지 확인합니다. VM에서 QEMU trace `pci_nvme_update_sq_eventidx`가 찍히는 것으로 이 기능이 켜진 것을 확인했습니다. 따라서 아래 숫자는 driver의 묶음 처리와 shadow doorbell 검사를 모두 거친 뒤 실제로 나간 MMIO doorbell 쓰기 횟수입니다.
 
