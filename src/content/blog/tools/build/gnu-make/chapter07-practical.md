@@ -563,7 +563,7 @@ NPROCS := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 MAKEFLAGS += -j$(NPROCS)
 ```
 
-Linux는 `nproc`, `nproc`이 없는 macOS는 `sysctl -n hw.ncpu`, 둘 다 실패하면 4를 씁니다. 1초씩 자는 타겟 네 개로 확인하니 4.4.1에서 1.02초에 끝났습니다. Makefile 안에서 `MAKEFLAGS`에 `-j`를 넣으면 병렬 모드가 켜진다는 동작은 4.3 NEWS에 적혀 있습니다. macOS의 `/usr/bin/make`(3.81)도 같은 파일에서 1.08초로 병렬 실행됐습니다.
+Linux는 `nproc`, `nproc`이 없는 macOS는 `sysctl -n hw.ncpu`, 둘 다 실패하면 4를 씁니다. 1초씩 자는 타겟 네 개로 확인하니 4.4.1에서 1.02초에 끝났습니다. Makefile 안에서 `MAKEFLAGS`에 `-j`를 넣으면 병렬 모드가 켜진다는 동작은 4.3 NEWS에서 처음 지원 기능으로 적혔습니다. 그 전 버전도 Makefile을 읽은 뒤 `MAKEFLAGS`를 다시 해석했기 때문에 macOS의 `/usr/bin/make`(3.81)도 같은 파일에서 1.08초로 병렬 실행됐습니다. 다만 4.3 이전에는 문서에 없는 동작이라 기대면 안 됩니다.
 
 이 설정은 이 Makefile이 *하위 Make로 불릴 때* 상위의 병렬도를 무시합니다. `make -j2`로 부른 상위 Makefile이 `MAKEFLAGS += -j4`를 가진 하위 디렉터리를 `$(MAKE) -C sub`로 호출하자 하위 Make가 경고를 냈습니다.
 
