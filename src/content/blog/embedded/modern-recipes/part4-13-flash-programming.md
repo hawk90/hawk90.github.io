@@ -103,8 +103,8 @@ int flash_erase_sector(uint8_t sector) {
     flash_unlock();
     FLASH->CR &= ~FLASH_CR_PSIZE;
     FLASH->CR |= (2u << 8);             // PSIZE = word (3.3V)
-    FLASH->CR &= ~(0x1F << 3);
-    FLASH->CR |= FLASH_CR_SER | (sector << 3);
+    FLASH->CR &= ~FLASH_CR_SNB;
+    FLASH->CR |= FLASH_CR_SER | ((uint32_t)sector << FLASH_CR_SNB_Pos);
     FLASH->CR |= FLASH_CR_STRT;
 
     while (FLASH->SR & FLASH_SR_BSY);
@@ -112,7 +112,8 @@ int flash_erase_sector(uint8_t sector) {
     FLASH->CR &= ~FLASH_CR_SER;
     flash_lock();
 
-    return (FLASH->SR & 0xF0) ? -1 : 0;
+    return (FLASH->SR & (FLASH_SR_OPERR | FLASH_SR_WRPERR | FLASH_SR_PGAERR
+                       | FLASH_SR_PGPERR | FLASH_SR_PGSERR)) ? -1 : 0;   // HAL FLASH_WaitForLastOperation
 }
 ```
 
@@ -179,31 +180,32 @@ uint16_t ee_read(uint16_t key) {
 int ee_write(uint16_t key, uint16_t val) {
     ee_entry_t *p = (ee_entry_t *)EE_BASE;
     while ((uint32_t)p < EE_END) {
-        if (p->magic == 0xFFFFFFFFu) {
+        uint32_t data = *(volatile uint32_t *)&p->key;
+        if (p->magic == 0xFFFFFFFFu && data == 0xFFFFFFFFu) {
             // empty slot: data word first, magic last
-            flash_write_word((uint32_t)&p->key,
-                             ((uint32_t)val << 16) | key);
-            flash_write_word((uint32_t)&p->magic, 0xDEADBEEFu);
-            return 0;
+            if (flash_write_word((uint32_t)&p->key, ((uint32_t)val << 16) | key) != 0)
+                return -1;
+            return flash_write_word((uint32_t)&p->magic, 0xDEADBEEFu);
         }
+        // data written but magic still erased: torn write, skip this slot
         p++;
     }
     return -1;   // full — need compact
 }
 ```
 
-magic을 데이터보다 나중에 쓰므로, 두 write 사이에 전원이 끊긴 slot은 magic이 `0xFFFFFFFF`로 남아 `ee_read()`가 건너뜁니다. 다만 그 slot은 데이터 word가 이미 쓰여 있어 다시 쓸 수 없으므로 compact 때 버립니다. compact는 key마다 마지막 유효 값만 다른 sector에 복사한 뒤 원래 sector를 erase합니다.
+magic을 데이터보다 나중에 쓰므로, 두 write 사이에 전원이 끊긴 slot은 magic이 `0xFFFFFFFF`로 남아 `ee_read()`가 건너뜁니다. `ee_write()`는 두 word가 모두 `0xFFFFFFFF`인 slot만 빈 자리로 보므로, 데이터 word만 쓰인 그런 slot은 건너뛰고 compact 때 버립니다. compact는 key마다 마지막 유효 값만 다른 sector에 복사한 뒤 원래 sector를 erase합니다.
 
 ### 5. Dual bank — OTA bootloader
 
-Flash가 두 bank로 나뉜 칩은 한 bank에서 코드를 실행하면서 다른 bank를 erase·program하는 구성을 쓸 수 있습니다. F4 안에서도 칩마다 다릅니다. HAL v1.8.3 `stm32f4xx_hal_flash_ex.h`는 bank별 설정 필드(`Banks`, `SectorsBank2`, `BootConfig`)를 STM32F427/437/429/439/469/479에만 정의하고, F407에는 없습니다. F407에서 같은 구조를 만들려면 아래 표의 두 영역을 서로 다른 sector에 두고, 새 image를 쓰는 동안 실행할 코드를 RAM에 둡니다.
+Flash가 두 bank인지는 F4 안에서도 칩마다 다릅니다. 두 bank 칩에서 한 bank를 실행하며 다른 bank를 쓰는 read-while-write 동작의 조건은 reference manual RM0090에 있는데, 이 글은 그 문서를 확인하지 못했습니다. HAL v1.8.3 `stm32f4xx_hal_flash_ex.h`는 `FLASH_BANK_2`와 bank별 필드(`SectorsBank2`, `BootConfig`)를 STM32F427/437/429/439/469/479에만 정의하고, F407에는 `FLASH_BANK_1`만 있습니다. F407에서 같은 구조를 만들려면 아래 표의 두 영역을 서로 다른 sector에 두고, 새 image를 쓰는 동안 실행할 코드를 RAM에 둡니다.
 
 | 영역 | 역할 |
 |------|------|
 | 영역 A | 현재 실행 중인 firmware |
 | 영역 B | 새 firmware를 받는 영역 |
 
-다운로드가 끝나면 reset하고, bootloader가 B를 검증해 그쪽으로 점프합니다. 그다음 업데이트에서는 A가 받는 영역이 됩니다.
+다운로드가 끝나면 reset하고, bootloader가 B를 검증해 그쪽으로 점프합니다. 그다음 업데이트에서는 A가 받는 영역이 됩니다. image는 절대 주소로 링크되므로, 영역마다 그 주소로 따로 링크한 image를 씁니다.
 
 bootloader는 영역마다 magic과 CRC를 확인하고 유효한 쪽으로 점프합니다. 새 image가 정상 부팅됐다는 표시를 남기기 전에 reset이 반복되면 이전 영역으로 돌아가는 rollback은 [Bootloader 17장](/blog/embedded/bootloader/chapter17-ab-update)의 bootcount 구조와 같습니다.
 
@@ -246,7 +248,7 @@ PSIZE는 위 HAL 표처럼 VDD 범위로 정합니다. 예를 들어 VDD가 2.7 
 
 > ⚠️ IRQ가 erase 중 들어옴
 
-erase 동안에도 인터럽트는 들어옵니다. ISR과 vector table이 Flash에 있으면 그 시간 동안 같은 Flash를 읽어야 하므로, erase 중 반응해야 하는 ISR은 RAM에 두거나 erase 구간을 그 ISR이 없어도 되는 시점으로 옮깁니다. 정확한 stall 동작은 reference manual RM0090에 있는데, 이 글은 그 문서를 확인하지 못했습니다.
+ISR과 vector table이 Flash에 있으면 그 시간 동안 같은 Flash를 읽어야 하므로, erase 중 반응해야 하는 ISR은 RAM에 두거나 erase 구간을 그 ISR이 없어도 되는 시점으로 옮깁니다. 정확한 stall 동작은 reference manual RM0090에 있는데, 이 글은 그 문서를 확인하지 못했습니다.
 
 > ⚠️ Linker가 reserved 영역을 안 비움
 
