@@ -113,7 +113,7 @@ VM 안에서 `gdbserver :2345 ./hello`를 띄우고 `set debug remote 1`로 연�
 - **SW BP** (`Z0`) — 매뉴얼 설명대로 그 주소의 명령을 trap 명령으로 바꿉니다. 스텁이 그 메모리를 쓸 수 있어야 합니다.
 - **HW BP** (`Z1`) — 칩의 breakpoint 비교 레지스터를 씁니다. 명령을 건드리지 않으므로 ROM에서도 되지만, 개수는 칩이 정합니다. 이 시리즈의 arm64 VM 커널은 breakpoint 레지스터 6개를 보고했습니다([Ch 5](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints)).
 
-Cortex-M의 FPB(Flash Patch and Breakpoint) 비교기 수는 칩마다 다릅니다. OpenOCD 0.12.0의 `src/target/cortex_m.c`는 `FP_CTRL`을 읽어 코드 비교기 수를 `((fpcr >> 8) & 0x70) | ((fpcr >> 4) & 0xF)`로(2469행), `DWT_CTRL`의 상위 4비트(`(dwtcr >> 28) & 0xF`)로 DWT 비교기 수를 계산합니다(2196행).
+Cortex-M의 FPB(Flash Patch and Breakpoint) 비교기 수는 칩마다 다릅니다. OpenOCD 0.12.0의 `src/target/cortex_m.c`는 `FP_CTRL`을 읽어 코드 비교기 수를 `((fpcr >> 8) & 0x70) | ((fpcr >> 4) & 0xF)`로(2470행), `DWT_CTRL`의 상위 4비트(`(dwtcr >> 28) & 0xF`)로 DWT 비교기 수를 계산합니다(2196행).
 
 ## OS 있는 원격 — gdbserver
 

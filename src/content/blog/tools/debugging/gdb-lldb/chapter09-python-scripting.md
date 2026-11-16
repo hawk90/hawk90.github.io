@@ -39,7 +39,7 @@ hello from gdb
 (gdb) source tools.py
 ```
 
-GDB가 내장한 Python의 버전은 GDB를 빌드할 때 정해집니다. Debian 13의 GDB 16.3은 Python 3.13.5였습니다. 시스템 Python의 venv나 외부 패키지를 쓰려면 `sys.path`에 그 경로를 직접 넣어야 합니다.
+GDB가 내장한 Python의 버전은 GDB를 빌드할 때 정해집니다. Debian 13의 GDB 16.3은 Python 3.13.5였습니다. Debian 13 GDB의 `sys.path`에는 `/usr/lib/python3/dist-packages`·`/usr/local/lib/python3.13/dist-packages` 같은 시스템 Python 경로가 이미 들어 있습니다. venv에 설치한 패키지는 그 경로를 `sys.path`에 직접 넣어야 합니다.
 
 LLDB는 `script`입니다.
 

@@ -92,7 +92,7 @@ Breakpoint 1 at 0x7b4: file hello.c, line 5.
 Breakpoint 1, factorial (n=5) at hello.c:5
 ```
 
-cgdb 매뉴얼(`info cgdb`)에 따르면 소스 창과 GDB 창은 vi처럼 `Esc`와 `i`로 오가고, GDB와의 통신은 cgdb가 함께 만든 gdbwire 라이브러리가 맡습니다. 위 화면의 `New UI allocated`는 GDB 16.3 `gdb/ui.c`(237행)의 `new-ui` 명령 처리기가 찍는 메시지로, cgdb가 GDB에 `new-ui`로 별도 UI를 연 흔적입니다.
+cgdb 매뉴얼(`info cgdb`)에 따르면 소스 창과 GDB 창은 vi처럼 `Esc`와 `i`로 오가고, GDB와의 통신은 gdbwire 라이브러리가 맡습니다. 위 화면의 `New UI allocated`는 GDB 16.3 `gdb/ui.c`(237행)의 `new-ui` 명령 처리기가 찍는 메시지로, cgdb가 GDB에 `new-ui`로 별도 UI를 연 흔적입니다.
 
 ### 설정
 
@@ -103,7 +103,7 @@ set winminheight=3
 set winsplit=src_big
 set syntax=on
 set color=on
-map <C-n> :gdb next<CR>
+map <C-n> :next<CR>
 ```
 
 ## gdb-dashboard — 단일 파이썬 스크립트
@@ -202,7 +202,7 @@ GDB 16.3 매뉴얼은 Python 지원으로 빌드된 GDB가 DAP도 지원하며 `
 
 ### DAP 메시지
 
-DAP 개요 문서의 Base Protocol 절에 따르면 메시지는 `Content-Length` 헤더(ASCII, 유일한 필수 헤더)와 `\r\n\r\n` 뒤의 JSON 본문(UTF-8)으로 이루어지고, 본문은 request·response·event 셋 중 하나입니다. 이 형식을 그대로 쓰는 40줄짜리 Python 클라이언트(`dap_client.py`)로 lldb-dap 19.1.7에 `initialize` → `launch` → `setBreakpoints` → `configurationDone` → `stackTrace` → `scopes` → `variables`를 보냈습니다. 긴 응답은 줄였습니다.
+DAP 개요 문서의 Base Protocol 절에 따르면 메시지는 `Content-Length` 헤더(ASCII, 유일한 필수 헤더)와 `\r\n\r\n` 뒤의 JSON 본문(UTF-8)으로 이루어지고, 본문은 request·response·event 셋 중 하나입니다. 이 형식을 그대로 쓰는 59줄짜리 Python 클라이언트(`dap_client.py`)로 lldb-dap 19.1.7에 `initialize` → `launch` → `setBreakpoints` → `configurationDone` → `stackTrace` → `scopes` → `variables`를 보냈습니다. 긴 응답은 줄였습니다.
 
 ```text
 >>> Content-Length: 162

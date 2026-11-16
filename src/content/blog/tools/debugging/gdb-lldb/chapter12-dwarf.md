@@ -530,6 +530,7 @@ $ gcc -g -gdwarf-4 ...
 인라인이 겹치면 PC 하나에 논리 프레임이 여럿 생깁니다. 상수 인자로 부르면 최적화가 전부 지워 버리므로, `argc`를 인자로 쓰도록 바꾼 예를 `clang++ -O2 -g`로 빌드했습니다.
 
 ```cpp title="sq.cpp"
+// main.cpp
 inline int square(int x) { return x * x; }
 inline int sum_of_squares(int a, int b) { return square(a) + square(b); }
 int main(int argc, char**) { return sum_of_squares(argc, argc + 1); }
