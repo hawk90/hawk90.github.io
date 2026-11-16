@@ -41,8 +41,10 @@ UART나 BLE로 받은 byte stream을 struct 포인터로 캐스팅해 읽으려 
 | 접근 | Cortex-M0 | Cortex-M3 | Cortex-M3 + `CCR.UNALIGN_TRP` |
 | --- | --- | --- | --- |
 | unaligned `LDR`(word) | HardFault | 읽힘 | HardFault (CFSR.UNALIGNED) |
-| unaligned `LDRD` | 명령 없음 | HardFault (CFSR.UNALIGNED) | HardFault |
-| byte 단위 `LDRB`로 조립 | 읽힘 | 읽힘 | 읽힘 |
+| unaligned `LDRD` | 명령 없음(ARMv6-M) | HardFault (CFSR.UNALIGNED) | 확인 안 함 |
+| byte 단위로 조립(`LDRB`, byte 루프 `memcpy`) | 읽힘 | 읽힘 | 확인 안 함 |
+
+`CCR.UNALIGN_TRP` 열은 첫 단계에서 멈췄으므로 그 뒤 두 줄은 실행되지 않았습니다.
 
 ## 코드 / 실제 사용 예
 
