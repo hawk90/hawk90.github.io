@@ -135,7 +135,7 @@ IBUFDS I=0 IB=1 -> O=0
 IBUFDS I=z IB=z -> O=x
 ```
 
-마지막 줄이 열린 입력에서 x가 나오는 경우입니다. 시뮬레이션에서 이 x가 뒤 로직으로 퍼지면, 보드에서는 HIGH로 고정될 수신기 동작을 시뮬레이션이 다르게 보여 준다는 뜻입니다.
+마지막 줄이 열린 입력에서 x가 나오는 경우입니다. 이 x가 뒤 로직으로 퍼지면, 보드에서는 HIGH로 고정될 수신기 동작을 시뮬레이션은 다르게 보여 줍니다.
 
 같은 라이브러리의 양방향 버퍼 모델 [`IOBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/IOBUFDS.v)는 `IOSTANDARD`가 `LVDS_25`이면 "100 Ω 차동에 최적화된 고정 임피던스 구조이고, turn-around 타이밍 요구가 없는 point-to-point 전송 전용이며, 버스 구조라면 BLVDS를 쓰라"는 DRC 경고를 냅니다. 위 "전류 모드 드라이버와 100 Ω 종단"의 100 Ω 전제가 FPGA 쪽 I/O 표준에도 들어 있습니다.
 
