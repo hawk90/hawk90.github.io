@@ -18,12 +18,12 @@
 \node[imp, minimum width=24mm, minimum height=14mm, anchor=west] (ph1)   at (4.0,0)
   {Phase1\\\small (1 – 8 TQ)};
 \node[con, minimum width=24mm, minimum height=14mm, anchor=west] (ph2)   at (6.4,0)
-  {Phase2\\\small (1 – 8 TQ)};
+  {Phase2\\[2pt]\small max(Phase1, IPT)};
 
 % Sample point arrow between Phase1 / Phase2 — caption with explicit row gap
 \draw[focus, line width=0.6pt] (6.4,-1.0) -- (6.4,-0.4);
 \node[caption, anchor=north, align=center] at (6.4,-1.1)
-  {sample point\\[2pt]\small (보통 75 – 87.5\%)};
+  {sample point\\[2pt]\small (Linux CiA 권장 75 – 87.5\%)};
 
 \end{tikzpicture}
 \end{document}

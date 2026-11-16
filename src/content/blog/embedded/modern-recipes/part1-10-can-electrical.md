@@ -78,7 +78,7 @@ SLLA270 4장은 ISO 11898 고속 규격의 사양이 "최대 1 Mbps, 버스 길�
 | 100 kbit/s | 500 m |
 | 50 kbit/s | 1000 m |
 
-이 길이를 묶는 것은 arbitration입니다. Bosch의 F. Hartwich·A. Bassemir, [The Configuration of the CAN Bit Timing](http://www.oertel-halle.de/files/cia99paper.pdf)(6th iCC, 1999, 제3자 사본) 2절은 bitwise arbitration과 수신 노드의 dominant ACK 때문에 송신 노드가 자기와 동기된 다른 노드의 dominant 비트를 같은 비트 안에서 받아야 한다고 설명합니다. 다른 노드가 보낸 dominant 에지가 너무 늦게 돌아오면 송신 노드가 recessive를 sampling해 bit error를 내고, error flag로 그 frame을 깨뜨립니다. SLLA270 4.9절도 가장 먼 두 노드 사이를 *갔다 돌아오는* 지연의 합을 계산하고, 첫 비트의 입사파가 sampling보다 *충분히 먼저*("long before") 송신 노드로 돌아와야 한다고 설명합니다.
+이 길이를 묶는 것은 arbitration입니다. Bosch의 F. Hartwich·A. Bassemir, [The Configuration of the CAN Bit Timing](http://www.oertel-halle.de/files/cia99paper.pdf)(6th iCC, 1999, 제3자 사본) 2절은 bitwise arbitration과 수신 노드의 dominant ACK 때문에 송신 노드가 자기와 동기된 다른 노드의 dominant 비트를 같은 비트 안에서 받아야 한다고 설명합니다. 다른 노드가 보낸 dominant 에지가 너무 늦게 돌아오면 송신 노드가 recessive를 sampling해 bit error를 내고, error flag로 그 frame을 깨뜨립니다. SLLA270 4.1·4.9절도 가장 먼 두 노드 사이를 *갔다 돌아오는* 지연의 합을 계산하고, 첫 비트의 입사파가 sampling보다 *충분히 먼저*("long before") 송신 노드로 돌아와야 한다고 설명합니다.
 
 이 예산을 TCAN1042-Q1 값으로 직접 계산해 보겠습니다. 재료는 세 가지입니다.
 
@@ -225,7 +225,7 @@ static const uint32_t can_btr_1m =
     | ((CAN_SJW   - 1u) << CAN_BTR_SJW_Pos);   /* = 0x011A0002 */
 ```
 
-상수가 실제로 0x011A0002가 되는지는 `cmsis_device_f4` 헤더로 빌드해 확인했습니다. 상수를 돌려주는 함수 하나를 붙여 `arm-none-eabi-gcc` 16.2.0 `-O2`로 컴파일하면 literal pool에 그 값이 그대로 들어갑니다.
+상수가 실제로 0x011A0002가 되는지는 `cmsis_device_f4` 헤더로 빌드해 확인했습니다. 상수를 돌려주는 함수 하나를 붙여 `arm-none-eabi-gcc` 16.2.0 `-O2 -mcpu=cortex-m4 -mthumb -ffreestanding -DSTM32F407xx`로 컴파일하면(표준 라이브러리 없이 `stdint.h`를 쓰려면 `-ffreestanding`이 필요합니다) literal pool에 그 값이 그대로 들어갑니다.
 
 ```text
 00000000 <get_btr>:
