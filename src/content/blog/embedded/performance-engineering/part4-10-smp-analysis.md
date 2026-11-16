@@ -120,11 +120,11 @@ FreeRTOS-Kernel의 `History.txt`는 V11.0.0(2023년 12월 18일)을 "the first t
 #define configNUMBER_OF_CORES     2
 #define configUSE_CORE_AFFINITY   1
 
-/* task.h:1436 — configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY == 1일 때 */
+/* 선언 task.h:1436, 정의 tasks.c:3057 (configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY == 1) */
 vTaskCoreAffinitySet(task_handle, (1 << 0));   /* core 0에서만 실행 */
 ```
 
-같은 저장소의 `portable/ThirdParty/GCC/`에는 RP2040, Xtensa_ESP32 같은 포트가 있고, `History.txt`에는 Armv8-M 포트와 Cortex-R82 포트의 SMP 지원 추가가 기록돼 있습니다(2026년 10월 29일 커밋 `ca759444` 기준).
+같은 저장소의 `portable/ThirdParty/GCC/`에는 RP2040, Xtensa_ESP32 같은 포트가 있고, `History.txt`에는 Armv8-M 포트와 Cortex-R82 포트의 SMP 지원 추가가 기록돼 있습니다.
 
 ## Zephyr SMP
 
@@ -154,7 +154,7 @@ big.LITTLE처럼 코어 성능이 다른 SoC에서는 작은 task를 LITTLE에, 
 | 같은 CPU (0 ↔ 0) | 1.86 µs |
 | 다른 CPU (0 ↔ 1) | 66.38 µs |
 
-다른 CPU로 깨우는 쪽이 이 guest에서는 35배 느렸습니다. 이 숫자는 vCPU가 잠들었다가 깨어나는 가상화 경로를 포함하므로 실기기의 IPI 비용으로 읽으면 안 됩니다. 대상 vCPU에 `SCHED_IDLE` spinner를 두고 다시 재도 중앙값 63.51 µs로 차이가 줄지 않았습니다.
+다른 CPU로 깨우는 쪽이 이 guest에서는 35배 느렸습니다. 이 숫자는 vCPU가 잠들었다가 깨어나는 가상화 경로를 포함하므로 실기기의 IPI 비용으로 읽으면 안 됩니다. 대상 vCPU에 `SCHED_IDLE` spinner를 두고 다시 재도 중앙값 63.51 µs(범위 28.65~161.58 µs)로 차이가 줄지 않았습니다.
 
 어떤 IPI가 쓰였는지는 `/proc/interrupts`에 남습니다. 다른 CPU 왕복 10만 회 전후의 값입니다.
 
@@ -227,7 +227,7 @@ $$\text{Amdahl:} \quad S(N) = \frac{1}{s + \frac{1 - s}{N}}$$
 
 $$\text{USL:} \quad S(N) = \frac{N}{1 + \alpha(N - 1) + \beta N(N - 1)}$$
 
-Amdahl의 $s$는 직렬 부분의 비율입니다. USL(Universal Scalability Law)의 $\alpha$는 경합(contention), $\beta$는 coherency(코어끼리 상태를 맞추는 비용)이며, $\beta$ 항이 $N^2$로 커지므로 어느 지점부터 코어를 늘릴수록 처리량이 떨어집니다. 예를 들어 $\alpha=0.1$, $\beta=0.01$을 넣으면 $S(4)=2.82$, $S(8)=3.54$, $S(16)=3.27$, $S(32)=2.28$로 8 근처에서 꺾입니다(식에 값을 대입한 계산).
+Amdahl의 $s$는 직렬 부분의 비율입니다. USL(Universal Scalability Law)의 $\alpha$는 경합(contention), $\beta$는 coherency(코어끼리 상태를 맞추는 비용)이며, $\beta$ 항이 $N^2$로 커지므로 어느 지점부터 코어를 늘릴수록 처리량이 떨어집니다. 예를 들어 $\alpha=0.1$, $\beta=0.01$을 넣으면 $S(4)=2.82$, $S(8)=3.54$, $S(16)=3.27$, $S(32)=2.28$이고, 최대점은 $N^*=\sqrt{(1-\alpha)/\beta}\approx 9.5$로 $S(9)=S(10)\approx 3.57$입니다(식에 값을 대입한 계산).
 
 ## 자주 보는 함정과 안티패턴
 
@@ -249,10 +249,19 @@ buf = malloc(huge);   /* 기본 정책: 처음 건드린 CPU의 node에 배치 *
 
 ```c
 sched_setscheduler(0, SCHED_FIFO, &sp);
-for (;;) { }   /* 같은 CPU의 일반 task는 RT throttling 몫만 받음 */
+for (;;) { }   /* 같은 CPU의 일반 task는 fair server 몫만 받음 */
 ```
 
-`sched(7)`은 `/proc/sys/kernel/sched_rt_runtime_us`의 기본값이 950,000(1초 중 0.95초)이고, 5%를 RT·deadline이 아닌 process에 남긴다고 적습니다. 이 guest도 `sched_rt_period_us=1000000`, `sched_rt_runtime_us=950000`이었습니다. 즉 무한 루프 FIFO task가 있어도 kernel이 바로 멈추지는 않지만, 그 CPU의 다른 일은 5%로 버텨야 합니다. 이 값을 `-1`로 바꾸면 그 안전장치도 사라집니다.
+`sched(7)`은 `/proc/sys/kernel/sched_rt_runtime_us`의 기본값이 950,000(1초 중 0.95초)이고, 5%를 RT·deadline이 아닌 process에 남긴다고 적습니다. 이 guest도 `sched_rt_period_us=1000000`, `sched_rt_runtime_us=950000`이었습니다. 그런데 v6.12에서는 이 값과 별개로 CPU마다 fair server가 있습니다. `kernel/sched/deadline.c:1637~1638`의 `dl_server_start()`는 일반(fair) task용 deadline server에 runtime 50 ms, period 1000 ms를 주고, guest의 `/sys/kernel/debug/sched/fair_server/cpu1/runtime`·`period`도 `50000000`·`1000000000`(ns)이었습니다.
+
+실제로 확인했습니다. CPU 1에 일반 spinner를 띄운 뒤 `timeout 3 chrt -f 50 taskset -c 1`로 같은 CPU에 FIFO spinner를 3초 돌리고, 그 동안 일반 spinner의 `se.sum_exec_runtime` 증가량을 쟀습니다(3회씩).
+
+| `sched_rt_runtime_us` | 3초 동안 일반 spinner가 받은 시간 |
+|---|---:|
+| 950000 (기본) | 165.91 ms (161.89~182.50) |
+| -1 | 161.91 ms (161.89~165.89) |
+
+두 설정 모두 3초에 약 160 ms, 즉 fair server 몫인 1초당 50 ms 남짓이었습니다. 즉 이 kernel에서는 무한 루프 FIFO task가 있어도 같은 CPU의 일반 task가 굶지 않고, `sched_rt_runtime_us`를 `-1`로 바꿔도 그 몫은 그대로였습니다. 다만 그 CPU의 일반 작업은 1초에 약 50 ms로 버텨야 합니다. 처음 시도에서 `chrt -f 50 taskset -c 1 timeout 3 ...` 순서로 쓰자 `timeout` 자신이 같은 CPU의 FIFO 50이 되어 시간이 지나도 spinner를 끝내지 못했습니다. RT hog를 실험할 때는 감시 process를 hog 밖에 둡니다.
 
 ## 비교 예시 — Scalability Curve
 
@@ -276,7 +285,7 @@ for (;;) { }   /* 같은 CPU의 일반 task는 RT throttling 몫만 받음 */
 - Migration 비용은 working set에 비례했습니다(64 KiB에서 2.94배, 8 MiB에서 pass당 약 47 µs 추가).
 - 다른 CPU를 깨우는 wakeup은 arm64에서 `Function call interrupts`(IPI_CALL_FUNC)로 잡혔습니다. Guest의 왕복 66 µs는 가상화 경로를 포함합니다.
 - FreeRTOS는 V11.0.0부터 SMP가 mainline이고, Zephyr는 `CONFIG_SCHED_CPU_MASK`로 affinity를 주되 runqueue는 PIN_ONLY일 때만 CPU별입니다.
-- `isolcpus`는 deprecated이고 cpuset이 권장됩니다. RT throttling 기본값은 0.95 s/1 s입니다.
+- `isolcpus`는 deprecated이고 cpuset이 권장됩니다. v6.12에서는 fair server(1초당 50 ms)가 `sched_rt_runtime_us`와 무관하게 일반 task 몫을 남겼습니다.
 - 공유 counter를 매번 쓰면 4 thread 처리량이 1 thread의 19%로 떨어졌습니다.
 
 다음 파트는 **Tooling and Profiling** — perf, ftrace, eBPF 같은 측정 도구를 깊이 다룹니다.

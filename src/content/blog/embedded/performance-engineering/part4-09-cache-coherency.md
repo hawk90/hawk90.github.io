@@ -66,7 +66,7 @@ O 상태가 있으면 dirty line을 메모리에 먼저 쓰지 않고도 다른 
 
 Snoop 방식은 cache가 다른 cache의 요청을 엿듣고(snoop) 자기 사본의 상태를 바꾸는 방식입니다. 회의실에서 누가 "이 문서 고칠게요"라고 말하면 모두가 듣고 자기 출력본을 버리는 것과 같습니다.
 
-Arm의 [CoreLink CCI-400 TRM](https://documentation-service.arm.com/static/5e8f14137100066a414f72ae)(r1p2, ARM DDI 0470H)이 이 계열의 예입니다. 1장은 CCI-400이 "up to two ACE masters, for example, Cortex-A15 or Cortex-A7 processor, and three ACE-Lite masters, for example, Mali-T604"를 연결한다고 적습니다. 2장의 "Snoop connectivity and control"은 "fully-connected snoop topology"로, 각 ACE slave interface가 다른 ACE interface를 snoop하고 ACE-Lite interface는 두 ACE interface를 snoop한다고 설명합니다. 또 snoop이 reset 시 꺼져 있어 Snoop Control Register로 켜야 한다고 적습니다.
+Arm의 [CoreLink CCI-400 TRM](https://documentation-service.arm.com/static/5e8f14137100066a414f72ae)(r1p2, ARM DDI 0470H)이 이 계열의 예입니다. 2.1절은 CCI-400이 "up to two ACE masters, for example, Cortex-A15 or Cortex-A7 processor, and three ACE-Lite masters, for example, Mali-T604"를 연결한다고 적습니다. 2장의 "Snoop connectivity and control"은 "fully-connected snoop topology"로, 각 ACE slave interface가 다른 ACE interface를 snoop하고 ACE-Lite interface는 두 ACE interface를 snoop한다고 설명합니다. 또 snoop이 reset 시 꺼져 있어 Snoop Control Register로 켜야 한다고 적습니다.
 
 ## Directory-Based
 
@@ -109,7 +109,7 @@ Line 하나를 코어 사이에서 넘기는 비용은 ping-pong으로 직접 �
 | Linux guest (hvf, vCPU 4개) | 42.1 ns | 38.2~51.2 ns |
 | macOS 네이티브 (thread 고정 없음) | 105.9 ns | 40.5~174.8 ns |
 
-macOS 실행에서는 thread를 코어에 고정하지 않았고, 범위가 40.5~174.8 ns로 guest보다 훨씬 넓었습니다. 최솟값(40.5 ns)은 guest의 중앙값과 비슷합니다. 두 thread가 실행마다 다른 코어 쌍(예: 같은 cluster 또는 P/E cluster)에 놓였을 가능성이 있지만, 배치를 기록하지 않았으므로 이 글에서는 원인을 확정하지 않습니다.
+macOS 실행에서는 thread를 코어에 고정하지 않았고, 범위가 40.5~174.8 ns로 guest보다 훨씬 넓었습니다. 최솟값(40.5 ns)은 guest의 중앙값과 비슷합니다. 배치를 기록하지 않았으므로 이 글에서는 범위의 원인을 다루지 않습니다.
 
 PMU로 보려면 Armv8 PMU의 이벤트를 씁니다. 이벤트 번호는 기억이 아니라 kernel 헤더에서 확인합니다. v6.12 `include/linux/perf/arm_pmuv3.h`의 정의입니다.
 

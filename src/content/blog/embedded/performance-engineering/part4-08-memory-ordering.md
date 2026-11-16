@@ -123,7 +123,7 @@ __asm__ volatile("dmb ishld" ::: "memory");   /* 앞의 load만 */
 __asm__ volatile("dmb sy"    ::: "memory");   /* full system */
 ```
 
-"범위가 좁을수록 빠르다"는 이 환경에서는 관찰되지 않았습니다. 앞 절과 같은 루프에서 `dmb ishld`, `dmb ish`, `dmb sy`는 모두 0.61 ns/iter(5회 중앙값, 범위 0.60~0.62)였습니다. 경쟁 없는 단일 코어 루프라 범위 차이가 드러날 외부 트래픽이 없었기 때문일 수 있으므로, 범위 선택은 성능보다 *정확성*(누구와 동기화하는가) 기준으로 합니다.
+"범위가 좁을수록 빠르다"는 이 환경에서는 관찰되지 않았습니다. 앞 절과 같은 루프에서 `dmb ishld`, `dmb ish`, `dmb sy`는 모두 0.61 ns/iter(5회 중앙값, 범위 0.60~0.62)였습니다. 이 측정은 경쟁 없는 단일 코어 루프에 한정되며, 범위 선택은 성능보다 *정확성*(누구와 동기화하는가) 기준으로 합니다.
 
 ## x86 vs ARM — 구현 비용은 target에서 확인
 
@@ -134,7 +134,7 @@ __asm__ volatile("dmb sy"    ::: "memory");   /* full system */
 | `fetch_add` relaxed | 3.88 ns | 7.67 ns | 33.11 ns |
 | `fetch_add` seq_cst | 4.56 ns | 17.43 ns | 65.81 ns |
 
-경쟁이 없을 때 차이는 0.7 ns였지만, 4 thread가 같은 counter를 두드리면 seq_cst가 relaxed의 두 배였습니다. x86-64에서는 두 연산이 모두 `lock xaddl`로 같은 명령이라 이런 차이가 생길 여지가 없습니다(표 참조). x86-64 쪽 시간은 이 글에서 재지 않았습니다.
+1 thread에서는 relaxed가 5회 2.28~6.14 ns, seq_cst가 4.55~4.61 ns로 relaxed 쪽이 더 흔들려 차이를 말할 수 없었지만, 4 thread가 같은 counter를 두드리면 seq_cst가 relaxed의 두 배였습니다. x86-64에서는 두 연산이 모두 `lock xaddl`로 같은 명령이라 이런 차이가 생길 여지가 없습니다(표 참조). x86-64 쪽 시간은 이 글에서 재지 않았습니다.
 
 ## Release-Consume Pattern (deprecated)
 

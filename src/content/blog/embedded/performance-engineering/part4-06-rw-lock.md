@@ -80,7 +80,7 @@ Linux의 queued rwlock이 이 계열입니다. `kernel/locking/qrwlock.c`의 `qu
 | 90% | 38.75 | 6.20 | 0.39 | 61.83 | 6.28 |
 | 50% | 19.60 | 10.90 | 0.31 | 29.59 | 1.18 |
 
-여기서 가장 중요한 결과는 **read가 100%인데도 rwlock이 mutex보다 3.6배 느리다**는 점입니다. 앞 절의 `__readers` word를 네 코어가 매번 RMW하기 때문입니다. Mutex 쪽은 다르게 움직였습니다. 같은 조건을 `perf stat -e context-switches,task-clock`으로 3회 재 보니 mutex는 0.5초에 context switch가 46,029~60,729회, CPU 사용이 2.93~3.15개였고, rwlock은 13~24회에 3.98~4.00개였습니다. Mutex에서는 기다리는 thread가 futex에서 잠들고 깨어 있는 thread가 lock을 연달아 다시 잡으므로 lock line이 한 코어에 머무는 시간이 길고, rwlock에서는 네 thread가 모두 깨어 같은 line을 번갈아 씁니다. 1 thread에서는 mutex 137.92, rwlock 83.99로 경쟁이 없어도 rwlock 경로가 더 깁니다.
+여기서 가장 중요한 결과는 **read가 100%인데도 rwlock이 mutex보다 3.6배 느리다**는 점입니다. 앞 절의 `__readers` word를 네 코어가 매번 RMW하기 때문입니다. Mutex 쪽은 다르게 움직였습니다. 같은 조건을 `perf stat -e context-switches,task-clock`으로 3회 재 보니 mutex는 0.5초에 context switch가 46,029~60,729회, CPU 사용이 2.93~3.15개였고, rwlock은 13~24회에 3.98~4.00개였습니다. Mutex에서는 기다리는 thread가 futex에서 잠들고 깨어 있는 thread가 lock을 연달아 다시 잡으므로 lock line이 한 코어에 머무는 시간이 길고, rwlock에서는 네 thread가 모두 깨어 같은 line을 번갈아 씁니다.
 
 Read 구간을 길게 만들면 순위가 뒤집힙니다. 같은 프로그램에 read 구간 안에서 `volatile` 루프 1,000회(1 thread 기준 한 번에 약 2.1 µs)를 추가했습니다.
 
@@ -90,7 +90,7 @@ Read 구간을 길게 만들면 순위가 뒤집힙니다. 같은 프로그램�
 | 100% | 4 | 0.15 | 0.49 (0.40~1.29) | 0.94 (0.70~1.55) |
 | 99% | 4 | 0.28 | 0.63 | 0.95 |
 
-이제 4 thread에서 rwlock이 mutex의 2~6배입니다. 다만 범위가 넓은 것은 호스트 부하 때문이며, vCPU 4개가 이상적으로 병렬이었다면 1.9 Mops/s 근처가 나와야 합니다. 정리하면 RW-lock의 이득을 결정하는 것은 read 비율만이 아니라 **read 구간이 카운터 갱신 비용보다 충분히 긴가**입니다.
+이제 4 thread에서 rwlock이 mutex의 2~6배입니다. 다만 범위가 넓고, vCPU 4개가 이상적으로 병렬이었다면 나왔을 1.9 Mops/s(1 thread 값의 4배)에는 못 미쳤습니다. 정리하면 RW-lock의 이득을 결정하는 것은 read 비율만이 아니라 **read 구간이 카운터 갱신 비용보다 충분히 긴가**입니다.
 
 ## RCU — Lock 없는 Read
 
@@ -147,7 +147,7 @@ for (;;) {
 }
 ```
 
-4 thread 표에서 seqlock은 모든 read 비율에서 가장 빨랐습니다. 다섯 방식 375회 실행 전체에서 값이 어긋난 read(`torn`)는 0건이었습니다. 대가는 retry입니다. 4 thread에서 read 한 번당 재시도가 99.9%일 때 0.245회, 99%일 때 0.584회, 50%일 때 1.089회였습니다. Writer가 많아질수록 reader가 같은 일을 반복합니다.
+4 thread 표에서 seqlock은 모든 read 비율에서 가장 빨랐습니다. 다섯 방식 375회 실행 전체에서 값이 어긋난 read(`torn`)는 0건이었습니다. 대가는 retry입니다. 4 thread에서 read 한 번당 재시도가 99.9%일 때 0.245회, 99%일 때 0.584회, 90%일 때 0.445회, 50%일 때 1.089회였습니다.
 
 Kernel의 실제 예로 `jiffies_64`가 있습니다. v6.12 `kernel/time/jiffies.c:46~58`의 `get_jiffies_64()`는 `read_seqcount_begin(&jiffies_seq)`/`read_seqcount_retry()` 루프로 64-bit 값을 읽습니다. 단, 이 함수는 `#if (BITS_PER_LONG < 64)` 안에 있어 32-bit kernel에서만 쓰입니다. 64-bit에서는 한 번의 load로 읽을 수 있기 때문입니다.
 
@@ -232,7 +232,7 @@ rcu_read_unlock();
 - glibc `pthread_rwlock_t`의 read는 공유 `__readers` word를 RMW하므로, 짧은 read 구간에서는 read 100%에서도 mutex보다 느렸습니다(4 thread, 9.70 대 34.50 Mops/s).
 - Read 구간이 약 2 µs가 되자 같은 4 thread에서 rwlock이 mutex의 2~6배가 됐습니다.
 - glibc 기본값은 reader preference이고, 겹치는 reader 3개 앞에서 writer 대기가 중앙값 9 ms, 최악 98 ms였습니다. `PREFER_WRITER_NONRECURSIVE_NP`로 39 µs까지 줄었습니다.
-- Seqlock은 4 thread 표의 모든 비율에서 가장 빨랐지만 write가 늘수록 retry가 늘고, 포인터 데이터에는 쓸 수 없습니다.
+- Seqlock은 4 thread 표의 모든 비율에서 가장 빨랐지만 read 한 번당 0.245~1.089회 retry가 있었고, 포인터 데이터에는 쓸 수 없습니다.
 - RCU는 read 100%에서 mutex의 16배였지만 write마다 grace period를 기다리면 read 99%에서 이미 이점이 사라졌습니다.
 - 버퍼 두 개 + index 패턴은 측정에서 read의 0.64%가 찢어졌습니다.
 

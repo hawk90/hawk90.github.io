@@ -65,7 +65,7 @@ Armv8.0의 atomic RMW는 `LDXR`/`STXR` 쌍(LL/SC) 루프이고, Armv8.1 LSE는 `
 | CAS 루프 | LL/SC | 2.30 | 11.03 | 35.14 |
 | CAS 루프 | LSE | 2.10 | 8.45 | 74.53 |
 
-경쟁이 없을 때는 LSE가 빨랐습니다(relaxed 1.97 대 3.88 ns). 그러나 4 thread가 같은 line을 두드리자 이 환경에서는 LSE 쪽이 더 느렸습니다. 명령이 하나여도 cache line 소유권은 매번 코어 사이를 옮겨야 하기 때문입니다. 90회 실행 모두 최종값이 기대값과 같았습니다. 4 thread CAS 루프의 재시도는 연산당 LL/SC 0.412회, LSE 0.333회였습니다. 이 결과는 M2 Pro + HVF 한 환경의 측정이며, LSE와 LL/SC의 경쟁 시 순위는 코어 설계마다 다를 수 있으므로 대상 하드웨어에서 같은 표를 다시 만들어야 합니다.
+경쟁이 없을 때 LSE relaxed는 5회 모두 1.93~2.01 ns로 안정적이었고, LL/SC는 2.28~6.14 ns로 실행마다 크게 흔들렸습니다. 그러나 4 thread가 같은 line을 두드리자 이 환경에서는 LSE 쪽이 더 느렸습니다. 명령이 하나여도 cache line 소유권은 매번 코어 사이를 옮겨야 하기 때문입니다. 90회 실행 모두 최종값이 기대값과 같았습니다. 4 thread CAS 루프의 재시도는 연산당 LL/SC 0.412회, LSE 0.333회였습니다. 이 표는 M2 Pro + HVF guest 한 환경의 측정입니다. 다른 코어에서의 순위는 이 글에서 재지 않았으므로, 대상 하드웨어에서 같은 표를 다시 만듭니다.
 
 ## Stack — 즉시 회수와 ABA는 별도 문제
 
@@ -109,7 +109,7 @@ gcc 14.2 + glibc 2.41에서는 `-march=armv8.1-a`로 빌드해도 16-byte가 `0`
 
 ## 해결 2 — Hazard Pointer
 
-Hazard pointer는 Maged M. Michael의 ["Hazard pointers: Safe memory reclamation for lock-free objects"](https://research.ibm.com/publications/hazard-pointers-safe-memory-reclamation-for-lock-free-objects)(IEEE TPDS, 2004)가 제안했습니다. 도서관의 "열람 중" 표지와 같습니다. Reader는 노드를 따라가기 전에 그 주소를 공개 slot에 적고, 노드를 지우려는 thread는 모든 slot을 훑어 아무도 표지를 걸지 않은 노드만 해제합니다.
+Hazard pointer는 Maged M. Michael이 PODC '02(2002년 7월)의 "Safe Memory Reclamation for Dynamic Lock-Free Objects Using Atomic Reads and Writes"에서 제안했고(Fraser 논문의 참고문헌 [Michael02]), 저널판이 ["Hazard pointers: Safe memory reclamation for lock-free objects"](https://research.ibm.com/publications/hazard-pointers-safe-memory-reclamation-for-lock-free-objects)(IEEE TPDS, 2004)입니다. 도서관의 "열람 중" 표지와 같습니다. Reader는 노드를 따라가기 전에 그 주소를 공개 slot에 적고, 노드를 지우려는 thread는 모든 slot을 훑어 아무도 표지를 걸지 않은 노드만 해제합니다.
 
 | 단계 | 필요한 계약 | 빠뜨리면 생기는 일 |
 |------|------|------|
@@ -157,7 +157,7 @@ Producer와 consumer가 여럿이면 slot마다 "예약됨, 채워짐, 비워짐
 
 ## Lock-Free List와 Tree
 
-Fraser 논문 2.3.4절은 CAS 기반 linked list의 계보를 정리합니다. Valois의 첫 설계는 reference count 관리 오류가 뒤의 논문들에서 지적됐고, Tim Harris의 "A Pragmatic Implementation of Non-Blocking Linked Lists"(DISC '01)가 "'pointer marking' to indicate when a node is logically deleted"로 더 단순하고 효율적인 설계를 내놨다고 적습니다. Fraser는 같은 표시 기법을 skip list에 적용했고, skip list·BST·red-black tree의 lock-free 설계를 제시해 고성능 lock 기반 설계와 비교했습니다.
+Fraser 논문 2.3.4절은 CAS 기반 linked list의 계보를 정리합니다. Valois의 첫 설계는 reference count 관리 오류가 뒤의 논문들에서 지적됐고, Tim Harris의 "A Pragmatic Implementation of Non-Blocking Linked Lists"(DISC '01)가 "'pointer marking' to indicate when a node is logically deleted"로 더 단순하고 효율적인 설계를 내놨다고 적습니다. 같은 절에서 Fraser는 이 표시 기법을 4장에서 skip list에 적용한다고 적습니다. 1.3절(Contribution)은 skip list, BST, red-black tree의 lock-free 설계를 제시하고 고성능 lock 기반 설계와 비교한다고 요약합니다.
 
 정리하면 list와 skip list에는 검증된 lock-free 설계가 있지만, 회수(앞의 두 절)까지 포함한 구현은 직접 작성하기보다 검증된 구현을 가져오는 편이 안전합니다.
 
@@ -176,7 +176,7 @@ _Static_assert(ATOMIC_POINTER_LOCK_FREE == 2, "ptr");   /* 통과 */
 
 > ⚠️ 경쟁 없는 측정만 보고 결론
 
-위 표에서 LSE는 1 thread에서 2배 빨랐지만 4 thread에서는 더 느렸습니다. 측정은 실제 thread 수와 공유 패턴으로 합니다.
+위 표에서 LSE는 1 thread에서 1.93~2.01 ns(LL/SC 2.28~6.14 ns)였지만 4 thread에서는 더 느렸습니다. 측정은 실제 thread 수와 공유 패턴으로 합니다.
 
 측정에는 처리량 외에 CAS 재시도 횟수, 꼬리 지연, retire 목록 크기, 멈춘 thread가 있을 때의 동작을 함께 기록합니다. 이 글에서는 hazard pointer와 epoch 구현을 직접 실행하지 않았습니다. 두 절의 동작 설명은 Fraser 논문 5.2.3절의 서술에 근거합니다.
 
@@ -184,7 +184,7 @@ _Static_assert(ATOMIC_POINTER_LOCK_FREE == 2, "ptr");   /* 통과 */
 
 - C++ \[intro.progress\]의 lock-free는 "동시 실행 중 적어도 하나는 끝난다"이며 시간 상한이 아닙니다.
 - 상한 CAS counter는 4 thread에서 정확했지만, 호출 대비 약 22%의 재시도가 있었습니다.
-- LSE 단일 명령은 경쟁 없을 때 LL/SC보다 빨랐고(1.97 대 3.88 ns), 4 thread 경쟁에서는 이 환경에서 더 느렸습니다.
+- LSE 단일 명령은 경쟁 없을 때 1.93~2.01 ns(LL/SC 2.28~6.14 ns)였고, 4 thread 경쟁에서는 이 환경에서 LL/SC보다 느렸습니다.
 - ABA는 재생 프로그램에서 해제된 노드를 `top`에 올렸고 ASan이 use-after-free로 잡았습니다. Linux `llist`도 같은 이유로 다중 consumer `del_first`에 lock을 요구합니다.
 - Tag는 ABA를 탐지할 뿐이고, gcc 14.2에서 16-byte atomic은 `is_lock_free() == 0`이었습니다.
 - Hazard pointer는 공개 단계의 barrier 비용, epoch는 멈춘 thread 앞에서의 회수 정지가 대가입니다.
