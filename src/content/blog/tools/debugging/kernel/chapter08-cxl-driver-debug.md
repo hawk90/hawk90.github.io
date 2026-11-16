@@ -12,7 +12,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 실습 환경 — QEMU CXL Type 3 장치
 
-CXL 장치가 없어도 QEMU는 CXL host bridge·root port·Type 3 메모리 장치를 에뮬레이션합니다. 이 장의 출력은 앞 장들과 같은 Debian 13.7 arm64 게스트(커널 `6.12.116+deb13-arm64`)를 아래 장치 구성으로 띄워서 얻었습니다. [Postmortem Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)와 같은 구성이고, CXL을 켠 `virt` 머신은 이 호스트의 hvf 가속으로는 부팅되지 않아 TCG(소프트웨어 에뮬레이션)로 돌렸습니다. 그래서 아래 시간 값은 실제 장치보다 훨씬 큽니다.
+CXL 장치가 없어도 QEMU는 CXL host bridge·root port·Type 3 메모리 장치를 에뮬레이션합니다. 이 장의 출력은 앞 장들과 같은 Debian 13.7 arm64 게스트(커널 `6.12.116+deb13-arm64`)를 아래 장치 구성으로 띄워서 얻었습니다. [Postmortem Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)와 같은 구성이고, TCG(소프트웨어 에뮬레이션)로 돌렸습니다. 그래서 아래 시간 값은 실제 장치보다 훨씬 큽니다.
 
 ```bash
 qemu-system-aarch64 -M virt,gic-version=3,cxl=on -m 4g,maxmem=8g,slots=4 -smp 4 -cpu max ... \
@@ -186,7 +186,7 @@ cat $T/trace
 # echo 'module cxl_core =_' > /proc/dynamic_debug/control
 ```
 
-장치가 광고한 명령 중 드라이버가 쓰는 것(`enabled`)과 안 쓰는 것(`unsupported by driver`)이 구분되고, mailbox payload가 2048바이트, DPA가 RAM 256 MiB(`0x00000000-0x0fffffff`), PMEM 없음이라는 것까지 나옵니다. `cxl list`의 `ram_size` 256 MiB와 같은 값입니다.
+`enabled`는 장치가 광고한 opcode가 드라이버의 명령 표(`cxl_mem_commands`)나 poison·security 명령에 있다는 뜻입니다(`core/mbox.c:725~755`의 `cxl_walk_cel()`). 그래서 `unsupported by driver`로 찍힌 0x0301·0x0100·0x0102·0x0103도 아래 bpftrace에서 보듯 드라이버가 내부적으로 보냅니다. 이 밖에도 mailbox payload가 2048바이트, DPA가 RAM 256 MiB(`0x00000000-0x0fffffff`), PMEM 없음이라는 것까지 나옵니다. `cxl list`의 `ram_size` 256 MiB와 같은 값입니다.
 
 ## bpftrace로 Mailbox 명령 캡처
 
@@ -238,11 +238,11 @@ bash     opcode=0x0100 ret=0
 
 `drivers/cxl/cxlmem.h`(v6.12, 519~538행)의 `CXL_MBOX_OP_*`로 풀면 Get Supported Logs(0x0400) → Get Log(0x0401) → Set Timestamp(0x0301) → Identify(0x4000) → Get/Set Event Interrupt Policy(0x0102/0x0103) → Get Event Records(0x0100) 네 번입니다. `comm`이 `bash`라는 것은 `bind` 파일에 쓴 셸의 문맥에서 probe가 실행됐다는 뜻입니다. Get Health Info(0x4200)는 probe 중에는 나가지 않았습니다.
 
-실제 장애 조사에서는 실패한 명령만 보면 됩니다. 반환값이 음수일 때만 찍도록 바꿔 같은 bind를 다시 했고, 이번에는 한 줄도 나오지 않았습니다. 에뮬레이션 장치에서는 모든 명령이 성공했다는 뜻입니다.
+실제 장애 조사에서는 실패한 명령만 보면 됩니다. 반환값이 음수일 때만 찍도록 바꿔 같은 bind를 다시 했고, 한 줄도 나오지 않았습니다. 성공 여부는 앞 스크립트의 `ret=0` 11줄이 이미 보여 줍니다. `cxl_internal_send_cmd()`는 `int`를 돌려주므로 비교는 32비트로 잘라서 합니다. 처음에는 `(int64)retval`로 비교했는데, 64비트 레지스터의 위쪽 절반이 음수 부호로 채워진다는 보장이 없어서 `(int32)`로 고쳐 다시 실행했고 결과는 같았습니다.
 
 ```text
 kretprobe:cxl_internal_send_cmd {
-  if (@seen[tid] && (int64)retval < 0) {
+  if (@seen[tid] && (int32)retval < 0) {
     printf("opcode=0x%04x ret=%d\n", @op[tid], retval);
   }
   delete(@op[tid]);

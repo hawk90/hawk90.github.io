@@ -184,7 +184,7 @@ Code starting with the faulting instruction
    0:	f9400400 	ldr	x0, [x0, #8]
 ```
 
-`ldr x0, [x0, #8]`이 범인이고, 바로 앞 `mov x0, #0x0`이 x0을 0으로 만들었습니다. 첫 워드 `ffff8000`은 앞 함수의 꼬리라 `undefined`로 풀렸습니다. 1절의 fault 주소 0x8이 명령의 `#8`과 정확히 맞으므로 "NULL 구조체의 오프셋 8 읽기"가 확정됩니다. vmcore 없이도 Ch 6에서 crash `dis -l`로 얻은 것과 같은 결론입니다.
+`ldr x0, [x0, #8]`이 범인이고, 바로 앞 `mov x0, #0x0`이 x0을 0으로 만들었습니다. 첫 워드 `ffff8000`은 함수 시작(섹션 오프셋 0x8) 앞 8바이트에 있던 값이라 `undefined`로 풀렸습니다. 1절의 fault 주소 0x8이 명령의 `#8`과 정확히 맞으므로 "NULL 구조체의 오프셋 8 읽기"가 확정됩니다. vmcore 없이도 Ch 6에서 crash `dis -l`로 얻은 것과 같은 결론입니다.
 
 ## 6. 레지스터
 

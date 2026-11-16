@@ -23,7 +23,7 @@ kgdb는 커널 안의 gdb stub이고, `kgdboc`가 그 stub을 시리얼 포트�
 | **kdb** | 타깃 콘솔에서 바로 쓰는 셸 (`bt`, `ps`, `md`, `lsmod` …) |
 | **kgdb** | 호스트 gdb가 gdb remote protocol로 원격 연결 |
 
-둘은 같은 디버그 코어 위에 있어서 함께 켤 수 있습니다. v6.12 `Documentation/dev-tools/kgdb.rst`(587~628행)에 따르면 kdb 프롬프트에서 `kgdb`를 치거나, kdb 프롬프트가 떠 있을 때 gdb를 연결하면 gdb가 처음 보내는 패킷을 알아보고 kgdb 모드로 바뀝니다. 이 장의 실습도 그렇게 kdb에서 gdb로 넘어갔습니다.
+둘은 같은 디버그 코어 위에 있어서 함께 켤 수 있습니다. v6.12 `Documentation/dev-tools/kgdb.rst`(587~628행)에 따르면 kdb 프롬프트에서 `kgdb`를 치거나, kdb 프롬프트가 떠 있을 때 gdb를 연결하면 gdb가 처음 보내는 패킷을 알아보고 kgdb 모드로 바뀝니다.
 
 ## 빌드 옵션
 
@@ -53,7 +53,7 @@ CONFIG_PROVE_LOCKING=y    # Ch 7용
 kgdb.rst(56~92행)가 권하는 것은 `CONFIG_DEBUG_INFO`, `CONFIG_FRAME_POINTER`, 그리고 `CONFIG_KGDB_SERIAL_CONSOLE`입니다. 아래 세 줄은 첫 빌드에서 실패를 겪고 추가했습니다.
 
 - **`CONFIG_DEBUG_INFO_REDUCED`**: arm64 `defconfig`는 이것을 켜 둡니다. 첫 빌드에서 커널의 gdb 스크립트가 `Reduced debug information will prevent GDB from having complete types.`라는 오류를 냈습니다.
-- **`CONFIG_ARM64_PTR_AUTH_KERNEL`**: 역시 defconfig에서 켜져 있습니다. 첫 빌드에서 gdb `bt`가 둘째 프레임에서 `0x43ac80008047bf34 in ?? ()`, `Backtrace stopped: previous frame identical to this frame (corrupt stack?)`로 끊겼습니다. 복귀 주소의 위쪽 비트에 서명(PAC)이 들어가 있어서, 정상 커널 주소(`0xffff8000…`)로 보이지 않았던 것입니다. 끄고 다시 빌드하자 아래처럼 전체 스택이 나왔습니다.
+- **`CONFIG_ARM64_PTR_AUTH_KERNEL`**: 역시 defconfig에서 켜져 있습니다. 첫 빌드에서 gdb `bt`가 셋째 프레임(#2)에서 `0x43ac80008047bf34 in ?? ()`, `Backtrace stopped: previous frame identical to this frame (corrupt stack?)`로 끊겼습니다. 복귀 주소의 위쪽 비트에 서명(PAC)이 들어가 있어서, 정상 커널 주소(`0xffff8000…`)로 보이지 않았던 것입니다. 끄고 다시 빌드하자 아래처럼 전체 스택이 나왔습니다.
 - **`CONFIG_RANDOMIZE_BASE`**: kgdb.rst(374~380행)는 KASLR이 gdb의 심볼 해석을 혼란스럽게 하므로 끄라고 권합니다(부팅 인자 `nokaslr`도 같은 효과).
 
 kgdb.rst(71~76행)는 `CONFIG_STRICT_KERNEL_RWX`가 software breakpoint를 막을 수 있으니 끄라고도 하지만, arm64에서는 이 옵션이 항상 켜져 있었습니다(`.config`에 `CONFIG_STRICT_KERNEL_RWX=y`). 그 영향은 아래 breakpoint 절에서 봅니다.
@@ -128,7 +128,7 @@ arch_kgdb_breakpoint () at ./arch/arm64/include/asm/kgdb.h:21
 * 98   Thread 795 (bash)              arch_kgdb_breakpoint () at ./arch/arm64/include/asm/kgdb.h:21
 ```
 
-세 CPU는 idle에서, 하나는 `echo g`를 실행한 bash에서 멈춰 있었습니다. Ch 1에서 본 roundup(`kernel/debug/debug_core.c:131~137`)이 다른 CPU를 모두 세운 결과입니다. 잠든 task는 모두 `__switch_to`에 있습니다. thread 번호를 바꿔 `bt`하면 그 task의 커널 스택을 봅니다.
+CPU 0과 2는 idle 루프(`cpuidle_idle_call`, `default_idle_call`)에, CPU 1은 `__daif_local_save_flags`에, CPU 3은 `echo g`를 실행한 bash의 `kgdb_breakpoint`에 있었습니다. 다른 CPU를 모두 세우는 것은 roundup(`kgdb_roundup_cpus()`, `kernel/debug/debug_core.c:241`)이고, 기본으로 켜져 있습니다(131~137행). 잠든 task는 모두 `__switch_to`에 있습니다. thread 번호를 바꿔 `bt`하면 그 task의 커널 스택을 봅니다.
 
 ### breakpoint
 
@@ -236,16 +236,17 @@ kgdb가 켜진 커널에서는 oops도 디버거로 들어갑니다. Ch 7의 ato
 이때 gdb를 붙이면 oops 순간의 스택이 그대로 보입니다.
 
 ```text
-(gdb) bt 6
+(gdb) bt 12
 #0  __get_vm_area_node (size=size@entry=32768, align=align@entry=65536, shift=shift@entry=12, flags=34, ...) at mm/vmalloc.c:3097
 #1  0xffff800080889254 in __vmalloc_node_range_noprof (...) at mm/vmalloc.c:3788
 #2  0xffff800080165d88 in alloc_thread_stack_node (tsk=<optimized out>, node=<optimized out>) at kernel/fork.c:315
 #3  dup_task_struct (orig=0xffff0000ceb49cc0, node=-1) at kernel/fork.c:1116
 #4  copy_process (pid=pid@entry=0x0, trace=trace@entry=0, node=node@entry=-1, args=args@entry=0xffff800089dc7c70) at kernel/fork.c:2204
 #5  0xffff800080168f10 in kernel_clone (args=args@entry=0xffff800089dc7c70) at kernel/fork.c:2786
+...
 ```
 
-3097행은 `BUG_ON(in_interrupt());`였습니다. bash가 fork하면서 스레드 스택을 vmalloc하는 경로였는데, 앞선 실험이 preempt count를 망가뜨린 탓에 커널이 인터럽트 문맥으로 착각한 것입니다. 원인과 첫 보고서는 Ch 7에서 봅니다.
+3097행은 `BUG_ON(in_interrupt());`였습니다. bash가 fork하면서 스레드 스택을 vmalloc하는 경로였는데, 앞선 실험 뒤 preempt count가 `ffffffff`였으므로(Ch 7), 그 값에서 NMI·HARDIRQ·SOFTIRQ 비트를 보는 `in_interrupt()`(`include/linux/preempt.h:115·143`)가 참이 된 것으로 읽힙니다. 원인과 첫 보고서는 Ch 7에서 봅니다.
 
 ## kdb 사용
 
@@ -348,7 +349,7 @@ v6.12 트리에서 `kgdboe`라는 문자열은 `drivers/tty/serial/kgdboc.c`에�
 
 | 증상 | 원인 (이 장에서 확인한 것) |
 |------|------|
-| `Remote replied unexpectedly to 'vMustReplyEmpty': timeout` | 타깃이 디버거 안에 있지 않음. SysRq `g`를 먼저 |
+| `Remote replied unexpectedly to 'vMustReplyEmpty': timeout` | 이 장에서는 SysRq `g`로 디버거에 들어가기 전에 연결했을 때 났음. `g` 뒤에 연결 |
 | `bt`가 `0x43ac… in ?? ()`에서 끊김 | arm64 PAC. `CONFIG_ARM64_PTR_AUTH_KERNEL` 끄고 재빌드 |
 | `Reduced debug information will prevent GDB …` | `CONFIG_DEBUG_INFO_REDUCED=y` (arm64 defconfig 기본) |
 | `Python Exception … No module named 'linux'` | `vmlinux-gdb.py`가 `scripts/gdb/`와 같은 트리 구조에 있어야 함 |
