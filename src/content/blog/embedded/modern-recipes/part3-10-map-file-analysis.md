@@ -270,7 +270,7 @@ Common symbol       size              file
 ticks               0x4               main-common.o
 ```
 
-archive를 object 앞에 두면 이번에도 링크가 실패했습니다.
+archive를 object 앞에 두면 이 프로젝트에서도 링크가 실패합니다.
 
 ```text
 $ arm-none-eabi-gcc ... libdrv.a startup.o main.o gpio.o -lgcc -o bad.elf
