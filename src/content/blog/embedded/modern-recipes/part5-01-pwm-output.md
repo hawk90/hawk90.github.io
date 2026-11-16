@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Period와 duty 두 숫자로 모든 PWM이 만들어집니다."** ARR가 period, CCR가 duty. `CCR / (ARR+1)`이 비율입니다.
+> **"Period와 duty 두 숫자로 모든 PWM이 만들어집니다."** ARR가 period를, CCR가 duty를 정합니다. `CCR / (ARR+1)`이 비율입니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -129,7 +129,7 @@ void rgb_set(uint8_t r, uint8_t g, uint8_t b) {
 }
 ```
 
-세 channel이 *동일한 ARR을 공유*하므로 frequency·resolution이 동일합니다.
+세 channel이 *같은 ARR을 공유*하므로 frequency·resolution도 같습니다.
 
 ### 3. Complementary PWM + dead-time (TIM1)
 
@@ -246,9 +246,9 @@ PWM mode 1의 정의("active as long as TIMx_CNT<TIMx_CCRy")대로라면 `CCR` >
 ## 정리
 
 - PWM = **ARR (period) + CCR (duty)**. PWM_freq = TIM_clk / ((PSC+1)(ARR+1)).
-- General timer는 single-ended, **advanced timer (TIM1/8)**는 complementary + dead-time.
-- Multi-channel 같은 ARR 공유, **CCR만 다르게**.
-- **Preload + UG**로 glitch-free update.
+- General timer는 single-ended 출력만 내고, **advanced timer (TIM1/8)**는 complementary 출력과 dead-time까지 냅니다.
+- Multi-channel은 같은 ARR을 공유하고 **CCR만 다르게** 둡니다.
+- **Preload + UG**로 glitch 없이 값을 바꿉니다.
 - **dead-time**은 `DTG × tDTS`(168 MHz에서 42 → 250 ns)로 계산합니다.
 
 다음 편은 **DC motor 제어**입니다. H-bridge + PWM duty + direction 제어를 다룹니다.
