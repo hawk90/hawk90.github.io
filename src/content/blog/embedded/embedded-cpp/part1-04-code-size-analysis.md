@@ -20,7 +20,54 @@ topics: ["embedded"]
 
 bloat 추적은 추정이 아닌 측정의 영역입니다. 임베디드 표준 도구가 정확히 어느 함수가, 어느 라이브러리가, 어느 인스턴스가 자리를 먹는지 알려줍니다.
 
-이 글은 네 도구의 사용 패턴과 bloat 추적 워크플로를 정리합니다. 출력 예는 모두 실제로 만든 작은 펌웨어 `fw.elf`에서 나왔습니다. `fw.cpp`는 가상 함수 클래스 `ConcreteDevice`, 멤버 함수 `Logger::log_int`, 함수 템플릿 `process<T>`, 1KB 수신 버퍼, 64비트 나눗셈 하나를 담고 있고, Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -Os -g -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -Wl,--gc-sections -nostdlib -lgcc`)으로 링크해 QEMU `mps2-an386`에서 실행했습니다.
+이 글은 네 도구의 사용 패턴과 bloat 추적 워크플로를 정리합니다. 출력 예는 모두 실제로 만든 작은 펌웨어 `fw.elf`에서 나왔습니다. `fw.cpp`는 가상 함수 클래스 `ConcreteDevice`, 멤버 함수 `Logger::log_int`, 함수 템플릿 `process<T>`, 1KB 수신 버퍼, 64비트 나눗셈 하나와 최소 startup을 담고 있습니다. 링커 스크립트는 [Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts#링커-스크립트-예시--sram과-ccm을-분리하기)의 `memory.ld`(STM32F407 Flash 0x08000000, SRAM 0x20000000)를 그대로 씁니다.
+
+```cpp title="fw.cpp"
+#include <stdint.h>
+#include <stddef.h>
+// --- 최소 startup: memory.ld의 심볼로 .data 복사, .bss 정리, .init_array 실행 ---
+extern "C" {
+extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _estack;
+extern void (*__init_array_start[])(), (*__init_array_end[])();
+int main();
+void Reset_Handler() {
+  for (uint32_t *s = &_sidata, *d = &_sdata; d < &_edata;) *d++ = *s++;
+  for (uint32_t* d = &_sbss; d < &_ebss;) *d++ = 0;
+  for (auto f = __init_array_start; f < __init_array_end; ++f) (*f)();
+  main();
+  for (;;) {}
+}
+__attribute__((section(".isr_vector"), used)) const void* const vectors[2] = {&_estack, (const void*)Reset_Handler};
+}
+// --- 측정 대상 ---
+static volatile uint32_t& uart_dr() { return *reinterpret_cast<volatile uint32_t*>(0x40004404u); }
+static void put(const char* s) { while (*s) uart_dr() = static_cast<uint8_t>(*s++); }
+static void put_u(unsigned v) { char b[11]; int i = 10; b[i] = 0; do { b[--i] = char('0' + v % 10); v /= 10; } while (v); put(&b[i]); }
+struct Device { virtual ~Device() {} virtual int read() = 0; virtual void write(int) = 0; };
+struct ConcreteDevice : Device { int reg = 0; int read() override { return reg; } void write(int v) override { reg = v; } };
+struct Logger { void log_int(const char* tag, int v) { put(tag); put_u(static_cast<unsigned>(v)); put("\n"); } };
+template <typename T> T process(T v) { T acc = 0; for (int i = 0; i < 8; ++i) acc = acc * 3 + (v >> i); return acc; }
+void operator delete(void*, size_t) noexcept { for (;;) {} }   // 가상 소멸자의 deleting 진입점용
+uint8_t rx_buffer[1024];
+int calib[4] = {1, 2, 3, 4};
+ConcreteDevice dev;
+Logger logger;
+int main() {
+  Device* d = &dev; d->write(7);
+  long long big = (long long)calib[1] * 1000003LL;
+  logger.log_int("div=", (int)(big / calib[2]));
+  logger.log_int("p=", process<int>(d->read()) + (int)process<long long>(5) + process<int8_t>(3));
+  rx_buffer[0] = 1;
+  return 0;
+}
+```
+
+```bash
+F="-mcpu=cortex-m4 -mthumb -Os -g -ffreestanding -fno-exceptions -fno-rtti -nostdlib -ffunction-sections -fdata-sections -Wl,--gc-sections"
+arm-none-eabi-g++ $F -T memory.ld -Wl,-Map=fw.map fw.cpp -lgcc -o fw.elf
+```
+
+Homebrew arm-none-eabi-g++ 16.2.0으로 링크했고, 보드에서는 실행하지 않았습니다.
 
 ## ELF 파일의 구조
 
@@ -48,11 +95,11 @@ Flash에서 실행하는 구성에서는 코드·읽기 전용 데이터와 `.da
 ```text
 $ arm-none-eabi-size fw.elf
    text	   data	    bss	    dec	    hex	filename
-   1396	     32	   1024	   2452	    994	fw.elf
+   1364	     24	   1024	   2412	    96c	fw.elf
 ```
 
-- `text`: 코드 + read-only 데이터. 이 ELF에서는 `.text` 1,388바이트에 `.ARM.exidx` 8바이트가 더해진 값입니다
-- `data`: 초기값 있는 RAM 데이터. 이 ELF에서는 `.data` 24바이트에 `.isr_vector` 8바이트가 더해졌습니다. GNU `size`의 Berkeley 형식은 쓰기 가능한 할당 섹션을 data로 세는데, 이 실험의 벡터 테이블이 `const`가 아닌 포인터 배열이라 쓰기 가능 섹션이 됐습니다
+- `text`: 코드 + read-only 데이터. 이 ELF에서는 `.isr_vector` 8 + `.text` 1,348 + `.ARM.exidx` 8 = 1,364바이트입니다. `memory.ld`가 `.rodata`를 `.text`에 합치므로 vtable과 문자열도 여기에 들어 있습니다
+- `data`: 초기값 있는 RAM 데이터. 이 ELF에서는 `.data` 24바이트(`calib` 16, `dev` 8)입니다. GNU `size`의 Berkeley 형식은 쓰기 가능한 할당 섹션을 data로 세므로, 벡터 테이블을 `const`가 아닌 배열로 두면 그 8바이트가 data 쪽에 잡힙니다
 - `bss`: 0 초기화 RAM 데이터
 - `dec`: 위 셋의 합계 (decimal)
 
@@ -70,25 +117,27 @@ arm-none-eabi-size -A -d firmware.elf   # decimal
 arm-none-eabi-size *.o
 ```
 
-`-A`(System V 형식)는 섹션마다 한 줄씩 보여 줍니다. 같은 ELF입니다(`.debug_*` 아홉 줄 중 일곱 줄 생략).
+`-A`(System V 형식)는 섹션마다 한 줄씩 보여 줍니다. 같은 ELF를 `-A -d`로 본 결과입니다(`.debug_*` 아홉 줄 중 일곱 줄 생략).
 
 ```text
 fw.elf  :
 section            size        addr
-.isr_vector           8           0
-.text              1388           8
-.ARM.exidx            8        1396
+.isr_vector           8   134217728
+.text              1348   134217736
+.ARM.exidx            8   134219084
 .data                24   536870912
 .bss               1024   536870936
+.dma                  0   536871960
+.ccmram               0   268435456
+.debug_info        4384           0
+...
+.debug_str         2832           0
 .comment             18           0
 .ARM.attributes      46           0
-.debug_info        4005           0
-...
-.debug_str         2720           0
-Total             17241
+Total             18436
 ```
 
-`.debug_*`·`.comment`·`.ARM.attributes`는 할당 섹션이 아니라 Berkeley 형식 합계에 들어가지 않습니다. `-A`의 `Total`은 이것까지 더하므로 Flash 사용량으로 읽지 않습니다. `size` 출력을 CI에 남겨 두면 PR마다 크기 변화를 추적할 수 있습니다.
+`.debug_*`·`.comment`·`.ARM.attributes`는 할당 섹션이 아니라 Berkeley 형식 합계에 들어가지 않습니다. `-A`의 `Total`은 이것까지 더하므로 Flash 사용량으로 읽지 않습니다. `.debug_*` 크기는 빌드 경로 문자열을 담아 디렉터리에 따라 조금씩 달라집니다. `size` 출력을 CI에 남겨 두면 PR마다 크기 변화를 추적할 수 있습니다.
 
 `dec`는 `text + data + bss`이므로 Flash 임계치로 쓰면 RAM의 `.bss`까지 Flash 사용량으로 오판합니다. 아래 재현 예제에서는 Flash의 첫 근사인 `text + data`와 정적 RAM인 `data + bss`를 별도로 제한합니다. 실제 펌웨어 CI에서는 보드의 linker map으로 영역별 예산을 검사해야 합니다.
 
@@ -123,24 +172,26 @@ nm --demangle firmware.elf
 nm firmware.elf | grep " T "   # .text 함수만
 ```
 
-C++ 심볼은 디맹글해야 읽힙니다. `fw.elf`에 `nm -S --size-sort --reverse-sort --demangle`을 돌린 결과의 앞부분입니다(링커 스크립트가 정의한 `_estack`·`_ebss` 두 줄 생략).
+C++ 심볼은 디맹글해야 읽힙니다. `fw.elf`에 `nm -S --size-sort --reverse-sort --demangle`을 돌린 결과의 앞부분입니다(링커 스크립트가 정의한 `_estack` 한 줄 생략).
 
 ```text
 20000018 00000400 B rx_buffer
-00000224 00000326 T __udivmoddi4
-000000d4 000000b0 T main
-00000184 000000a0 T __aeabi_ldivmod
-00000054 00000074 T Reset_Handler
-00000010 0000002e T sh_putu
-0000055c 00000018 V vtable for ConcreteDevice
-0000003e 00000016 T sh_exit
+080001fc 00000326 T __udivmoddi4
+08000058 000000ac T main
+0800015c 000000a0 T __aeabi_ldivmod
+08000104 00000058 T Reset_Handler
+0800001c 0000002e t put_u(unsigned int)
+08000534 00000018 V vtable for ConcreteDevice
+08000008 00000014 t put(char const*)
 20000008 00000010 D calib
+08000000 00000008 r vectors
+20000000 00000008 D dev
 ...
-000000cc 00000004 W ConcreteDevice::write(int)
-000000c8 00000004 W ConcreteDevice::read()
+0800004e 00000004 W ConcreteDevice::write(int)
+0800004a 00000004 W ConcreteDevice::read()
 ```
 
-`--demangle` 없이는 `vtable for ConcreteDevice`가 `_ZTV14ConcreteDevice`로 보입니다. 이 작은 펌웨어에서 가장 큰 코드는 애플리케이션이 아니라 64비트 나눗셈 한 줄이 끌어온 libgcc의 `__udivmoddi4`(806바이트)와 `__aeabi_ldivmod`(160바이트)입니다. `Logger::log_int`와 `process<T>`는 목록에 없습니다. 둘 다 `main`에 인라인됐기 때문입니다.
+`--demangle` 없이는 `vtable for ConcreteDevice`가 `_ZTV14ConcreteDevice`로 보입니다. `static` 함수인 `put`·`put_u`는 지역 심볼이라 소문자 `t`입니다. 이 작은 펌웨어에서 가장 큰 코드는 애플리케이션이 아니라 64비트 나눗셈 한 줄이 끌어온 libgcc의 `__udivmoddi4`(806바이트)와 `__aeabi_ldivmod`(160바이트)입니다. `Logger::log_int`와 `process<T>`는 목록에 없습니다. 둘 다 `main`에 인라인됐기 때문입니다.
 
 ## 도구 3 — `objdump`
 
@@ -167,22 +218,25 @@ arm-none-eabi-objdump -h firmware.elf
 
 ```text
 $ arm-none-eabi-objdump -d --disassemble=main fw.elf
-000000d4 <main>:
-  d4:	b538      	push	{r3, r4, r5, lr}
-  d6:	4c24      	ldr	r4, [pc, #144]	@ (168 <main+0x94>)
-  d8:	4824      	ldr	r0, [pc, #144]	@ (16c <main+0x98>)
-  da:	2307      	movs	r3, #7
-  dc:	6063      	str	r3, [r4, #4]
-  de:	4b24      	ldr	r3, [pc, #144]	@ (170 <main+0x9c>)
-  e0:	689a      	ldr	r2, [r3, #8]
-  e2:	6859      	ldr	r1, [r3, #4]
-  e4:	17d3      	asrs	r3, r2, #31
-  e6:	fb81 0100 	smull	r0, r1, r1, r0
-  ea:	f000 f84b 	bl	184 <__aeabi_ldivmod>
+08000058 <main>:
+ 8000058:	4b23      	ldr	r3, [pc, #140]	@ (80000e8 <main+0x90>)
+ 800005a:	4824      	ldr	r0, [pc, #144]	@ (80000ec <main+0x94>)
+ 800005c:	b510      	push	{r4, lr}
+ 800005e:	2407      	movs	r4, #7
+ 8000060:	605c      	str	r4, [r3, #4]
+ 8000062:	4b23      	ldr	r3, [pc, #140]	@ (80000f0 <main+0x98>)
+ 8000064:	689a      	ldr	r2, [r3, #8]
+ 8000066:	6859      	ldr	r1, [r3, #4]
+ 8000068:	17d3      	asrs	r3, r2, #31
+ 800006a:	fb81 0100 	smull	r0, r1, r1, r0
+ 800006e:	f000 f875 	bl	800015c <__aeabi_ldivmod>
+ 8000072:	4601      	mov	r1, r0
+ 8000074:	481f      	ldr	r0, [pc, #124]	@ (80000f4 <main+0x9c>)
+ 8000076:	f7ff ffc7 	bl	8000008 <_ZL3putPKc>
 ...
 ```
 
-`d->write(7)`은 가상 호출이 아니라 `dev.reg`에 7을 쓰는 `str r3, [r4, #4]` 하나가 됐습니다. 컴파일러가 `d`가 `dev`를 가리킨다는 것을 알고 devirtualization한 결과입니다. 그 뒤 `smull`로 64비트 곱을 만든 다음 `__aeabi_ldivmod`를 부릅니다. 명령 폭은 2바이트(`b538`)와 4바이트(`fb81 0100`)가 섞이므로 함수 크기는 명령 수가 아니라 `nm -S`의 크기 열로 읽습니다.
+`d->write(7)`은 가상 호출이 아니라 `dev.reg`에 7을 쓰는 `str r4, [r3, #4]` 하나가 됐습니다. 컴파일러가 `d`가 `dev`를 가리킨다는 것을 알고 devirtualization한 결과입니다. 그 뒤 `smull`로 64비트 곱을 만든 다음 `__aeabi_ldivmod`를 부르고, 인라인된 `log_int`가 `put`을 직접 부릅니다. 명령 폭은 2바이트(`b510`)와 4바이트(`fb81 0100`)가 섞이므로 함수 크기는 명령 수가 아니라 `nm -S`의 크기 열로 읽습니다.
 
 ## 도구 4 — `bloaty`
 
@@ -266,7 +320,7 @@ $ arm-none-eabi-nm -S --size-sort -C fwn.elf | grep process
 000000f0 0000004a W long long process<long long>(long long)
 ```
 
-같은 소스가 `int`·`int8_t`에서는 28바이트, `long long`에서는 64비트 시프트·곱셈 때문에 74바이트가 됐고, ELF text는 1,396에서 1,480바이트로 늘었습니다.
+같은 소스가 `int`·`int8_t`에서는 28바이트, `long long`에서는 64비트 시프트·곱셈 때문에 74바이트가 됐고, ELF text는 1,364에서 1,448바이트로 늘었습니다.
 
 `fw.cpp`의 템플릿은 다음과 같습니다.
 
@@ -310,9 +364,9 @@ vtable 크기를 `virtual 함수 수 × 4`로 계산하면 틀립니다. `Concre
 
 위 `size -A` 출력으로 합산하면 다음과 같습니다. 이 실험의 링커 스크립트는 `.rodata`를 `.text` 안에 넣고 heap·stack을 섹션으로 잡지 않습니다.
 
-- Flash 사용 = `.isr_vector + .text + .ARM.exidx + .data` = 8 + 1,388 + 8 + 24 = 1,428바이트
+- Flash 사용 = `.isr_vector + .text + .ARM.exidx + .data` = 8 + 1,348 + 8 + 24 = 1,388바이트
 - 정적 RAM = `.data + .bss` = 24 + 1,024 = 1,048바이트. stack은 RAM 끝(`_estack`)에서 아래로 자라며 이 합계에 없습니다
-- `.data`의 주소 536870912는 `0x20000000`, 즉 RAM VMA입니다. Flash 안의 초기화 이미지 위치(LMA)는 map 파일의 `load address`에 있습니다
+- `.data`의 주소 536870912는 `0x20000000`, 즉 RAM VMA입니다. Flash 안의 초기화 이미지 위치(LMA)는 map 파일의 `load address`에 있고, 이 빌드에서는 `0x08000554`였습니다
 
 RAM이 부족하면 다음을 검토합니다.
 
@@ -328,9 +382,10 @@ arm-none-eabi-g++ -fstack-usage -c file.cpp
 `fw.cpp`에서 만든 `fw.su`의 일부입니다. 열은 위치·함수·바이트·종류이고, `static`은 크기가 컴파일 시 고정이라는 뜻입니다.
 
 ```text
-fw.cpp:5:51:virtual int ConcreteDevice::read()	0	static
-fw.cpp:5:88:virtual void ConcreteDevice::write(int)	0	static
-fw.cpp:13:5:int main()	16	static
+fw.cpp:20:13:void put_u(unsigned int)	32	static
+fw.cpp:22:51:virtual int ConcreteDevice::read()	0	static
+fw.cpp:30:5:int main()	8	static
+fw.cpp:8:6:void Reset_Handler()	16	static
 ```
 
 이 값은 함수 자신의 프레임입니다. 호출 체인 전체의 최대 stack은 호출 그래프를 따라 더해야 합니다.
@@ -362,7 +417,7 @@ map 파일의 첫 절은 아카이브 멤버가 왜 들어왔는지 보여 줍�
 Archive member included to satisfy reference by file (symbol)
 
 <gcc>/thumb/v7e-m/nofp/libgcc.a(_aeabi_ldivmod.o)
-                              <tmp>/ccMyONUO.o (__aeabi_ldivmod)
+                              <tmp>/ccRbLmkC.o (__aeabi_ldivmod)
 <gcc>/thumb/v7e-m/nofp/libgcc.a(_udivmoddi4.o)
                               <gcc>/thumb/v7e-m/nofp/libgcc.a(_aeabi_ldivmod.o) (__udivmoddi4)
 <gcc>/thumb/v7e-m/nofp/libgcc.a(_dvmd_tls.o)
@@ -387,7 +442,7 @@ nm에 없는 함수는 인라인됐거나, 미사용으로 제거됐거나, 처�
 
 ### 4. .o 파일 크기 합계는 ELF 크기와 다름
 
-링커가 gc-sections와 LTO로 크기를 줄이고, 반대로 아카이브에서 libgcc 같은 멤버를 끌어와 늘리기도 합니다. `fw.elf`의 text 1,396바이트 중 980바이트(map 기준 libgcc `.text` 0xa0 + 0x328 + 0x4 = 972바이트와 `_udivmoddi4.o`의 `.ARM.exidx` 8바이트)가 `.o` 파일 어디에도 없던 libgcc 코드였습니다.
+링커가 gc-sections와 LTO로 크기를 줄이고, 반대로 아카이브에서 libgcc 같은 멤버를 끌어와 늘리기도 합니다. `fw.elf`의 text 1,364바이트 중 980바이트(map 기준 libgcc `.text` 0xa0 + 0x328 + 0x4 = 972바이트와 `_udivmoddi4.o`의 `.ARM.exidx` 8바이트)가 `.o` 파일 어디에도 없던 libgcc 코드였습니다.
 
 ### 5. RAM 부족인데 Flash만 분석
 
