@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Kernel module = `.ko` 한 개로 동적 로드하는 driver 단위."** `module_init`과 `module_exit` 두 함수만 있으면 시작할 수 있고, 나머지는 Kbuild·sysfs·modprobe가 받쳐 줍니다. 이 글의 모든 출력은 Debian 13 arm64(커널 `6.12.116+deb13-arm64`, gcc 14.2.0, kmod 34.2)에서 직접 빌드·로드한 결과입니다.
+> **"Kernel module은 `.ko` 한 개로 동적 로드하는 driver 단위입니다."** `module_init`과 `module_exit` 두 함수만 있으면 시작할 수 있고, 나머지는 Kbuild·sysfs·modprobe가 받쳐 줍니다. 이 글의 모든 출력은 Debian 13 arm64(커널 `6.12.116+deb13-arm64`, gcc 14.2.0, kmod 34.2)에서 직접 빌드·로드한 결과입니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -237,7 +237,7 @@ blacklist nouveau
 
 ## 측정 / 성능 비교
 
-모듈 로드 시간은 이 글에서 재지 않았습니다. 위 `dmesg`의 시각으로 보면 `sample`의 `rate=` 줄과 `debug message` 줄은 같은 init 안에서 0.26 ms 차이로 찍혔지만, 이것은 로드 전체 시간이 아닙니다. 로드 시간을 비교하려면 `insmod`를 `perf stat`이나 `time`으로 여러 번 돌려 분포를 봐야 하고.
+모듈 로드 시간은 이 글에서 재지 않았습니다. 위 `dmesg`의 시각으로 보면 `sample`의 `rate=` 줄과 `debug message` 줄은 같은 init 안에서 0.26 ms 차이로 찍혔지만, 이것은 로드 전체 시간이 아닙니다. 로드 시간을 비교하려면 `insmod`를 `perf stat`이나 `time`으로 여러 번 돌려 분포를 봐야 합니다.
 
 ## 자주 보는 함정
 
