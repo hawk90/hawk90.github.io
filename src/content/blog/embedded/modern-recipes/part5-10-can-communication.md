@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-여러 ECU, motor controller, PLC가 한 bus를 공유하며 message를 broadcast하는 곳입니다. CAN은 ID가 작은 frame이 arbitration에서 이기고, 오류 검출과 error counter 관리를 controller가 합니다.
+여러 ECU, motor controller, PLC가 한 bus를 공유하며 message를 broadcast하는 곳에 씁니다. CAN은 ID가 작은 frame이 arbitration에서 이기고, 오류 검출과 error counter 관리를 controller가 합니다.
 
 이 글은 STM32F407의 bxCAN(CAN1, PA11/PA12)으로 500 kbit/s 초기화, acceptance filter, 송신, FIFO0 수신 인터럽트, loopback 시험을 다룹니다. 출처는 Bosch CAN Specification Version 2.0(1991), CMSIS `stm32f407xx.h`(cmsis-device-f4)의 bit 정의, STM32CubeF4 HAL v1.8.3 `stm32f4xx_hal_can.c/.h`, Linux v6.12 `drivers/net/can/bxcan.c`, Zephyr v4.0.0 `drivers/can/can_stm32_bxcan.c`입니다. 버스 전기 특성(종단, transceiver, 전압 범위, 길이 예산)은 [1-10: CAN 버스 전기적 특성](/blog/embedded/modern-recipes/part1-10-can-electrical)이 다룹니다. 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall -Wextra` 경고 없이 빌드되고, bit timing 표는 host에서 계산했습니다. bxCAN은 QEMU에 model이 없어 frame 송수신은 돌려 보지 않았습니다.
 
@@ -348,11 +348,11 @@ ABOM을 끈 상태에서 bus-off가 되면 software가 복구 절차를 밟아�
 
 ## 정리
 
-- BTR = **(SJW−1)<<24 | (TS2−1)<<20 | (TS1−1)<<16 | (BRP−1)**. 42 MHz에서 6 × 14 TQ = 500 kbit/s, sample 85.7 %.
-- filter는 **32-bit mask mode, mask 1 bit만 비교**. standard filter에는 IDE·RTR를 mask에 넣습니다.
-- 송신은 **빈 mailbox → TIR/TDTR/TDLR/TDHR → TXRQ**.
-- 수신은 **FMPIE0 → RIR의 IDE로 ID 해석 → RFOM0**.
-- error 상태는 **ESR의 TEC/REC와 BOFF/EPVF/EWGF**, 규칙은 CAN 2.0 fault confinement.
+- BTR = **(SJW−1)<<24 | (TS2−1)<<20 | (TS1−1)<<16 | (BRP−1)**. 42 MHz에서 6 × 14 TQ로 500 kbit/s, sample point 85.7 %를 냅니다.
+- filter는 **32-bit mask mode**에서 **mask가 1인 bit만 비교**합니다. standard filter에는 IDE·RTR를 mask에 넣습니다.
+- 송신은 **빈 mailbox → TIR/TDTR/TDLR/TDHR → TXRQ** 순서입니다.
+- 수신은 **FMPIE0 → RIR의 IDE로 ID 해석 → RFOM0** 순서입니다.
+- error 상태는 **ESR의 TEC/REC와 BOFF/EPVF/EWGF**로 보고, 규칙은 CAN 2.0 fault confinement를 따릅니다.
 
 다음 편은 **USB Device 기초**입니다. CDC virtual COM, HID class, TinyUSB 통합을 다룹니다.
 
