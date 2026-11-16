@@ -685,7 +685,7 @@ target_include_directories(mylib PUBLIC
 message("일반 메시지")
 message(STATUS "상태 메시지")         # -- 접두사로 출력
 message(WARNING "경고")               # 경고 메시지
-message(AUTHOR_WARNING "개발자 경고")  # -Wno-dev로 끌 수 있음
+message(AUTHOR_WARNING "개발자 경고")  # -Wno-author로 끌 수 있음
 message(SEND_ERROR "오류")            # 오류, 구성은 계속 진행
 message(FATAL_ERROR "치명적 오류")     # 오류, 즉시 중단
 ```
@@ -705,7 +705,7 @@ CMake Error at CMakeLists.txt:9 (message):
 -- Configuring incomplete, errors occurred!
 ```
 
-`SEND_ERROR` 뒤의 명령은 계속 실행되지만 구성 결과는 "incomplete"이고 `cmake`의 종료 코드는 1입니다. 빌드 디렉터리에는 `CMakeCache.txt`와 `CMakeFiles/`만 있고 `Makefile`은 생성되지 않았습니다. `-Wno-dev`를 주고 다시 구성하면 author 경고 블록이 사라졌습니다.
+`SEND_ERROR` 뒤의 명령은 계속 실행되지만 구성 결과는 "incomplete"이고 `cmake`의 종료 코드는 1입니다. 빌드 디렉터리에는 `CMakeCache.txt`와 `CMakeFiles/`만 있고 `Makefile`은 생성되지 않았습니다. `-Wno-author`를 주고 다시 구성하면 author 경고 블록이 사라집니다. 예전 이름 `-Wno-dev`도 아직 먹히지만 4.4 릴리스 노트에서 deprecated가 됐고, 4.5.0에서 주면 첫 줄에 `The no-dev option is deprecated.  Use -Wno-author instead.`가 찍혔습니다.
 
 ```cmake
 # 변수 디버깅

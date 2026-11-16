@@ -704,7 +704,7 @@ target_link_libraries(myapp PRIVATE ${Boost_LIBRARIES})
 target_link_libraries(myapp PRIVATE Boost::filesystem)  # ✓ Modern style
 ```
 
-Boost 1.70 이상은 `BoostConfig.cmake`로 `Boost::filesystem` 같은 imported 타겟을 제공하고, CMake 3.30부터는 내장 `FindBoost` 대신 이 Config 파일을 찾습니다(정책 `CMP0167`, [Ch 5](/blog/tools/build/cmake/chapter05-find-package#boost) 참고). 타겟을 링크하면 include 경로와 컴파일 정의가 자동으로 전파됩니다.
+Boost 1.70 이상은 `BoostConfig.cmake`로 `Boost::filesystem` 같은 imported 타겟을 제공하고, 정책 `CMP0167`(3.30)이 NEW이면 내장 `FindBoost` 대신 이 Config 파일을 찾습니다. 최소 버전이 3.25면 정책이 미설정이라 `find_package(Boost CONFIG ...)`로 명시합니다([Ch 5](/blog/tools/build/cmake/chapter05-find-package#boost) 참고). 타겟을 링크하면 include 경로와 컴파일 정의가 자동으로 전파됩니다.
 
 ---
 

@@ -401,7 +401,7 @@ pkg_check_modules(FOO QUIET foo)
 pkg_check_modules(FOO REQUIRED IMPORTED_TARGET foo)
 ```
 
-`IMPORTED_TARGET`을 사용하면 `PkgConfig::<NAME>` 타겟이 생성되어 `target_link_libraries`로 바로 연결할 수 있습니다. `Version: 1.2.0`, `Cflags: -I${includedir} -DFOO_PC=1`을 적은 가짜 `foo.pc`를 `PKG_CONFIG_PATH`에 두고 4.5.0(pkg-config 3.0.10)에서 확인한 결과입니다.
+`IMPORTED_TARGET`을 사용하면 `PkgConfig::<NAME>` 타겟이 생성되어 `target_link_libraries`로 바로 연결할 수 있습니다. `Version: 1.2.0`, `Cflags: -I${includedir} -DFOO_PC=1`을 적은 가짜 `foo.pc`를 `PKG_CONFIG_PATH`에 두고 4.5.0(Homebrew pkgconf 3.0.10의 `pkg-config`)에서 확인한 결과입니다.
 
 ```text
 -- Checking for module 'foo>=1.0'

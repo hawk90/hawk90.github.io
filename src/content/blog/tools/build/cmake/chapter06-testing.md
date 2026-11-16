@@ -41,7 +41,7 @@ CTest는 테스트 프레임워크에 종속되지 않습니다. 실행 파일�
 
 ### 테스트 활성화
 
-프로젝트의 빌드 루트에서 CTest를 실행하려면 최상위 `CMakeLists.txt`에서 `enable_testing()`을 호출합니다. CTest는 빌드 루트의 `CTestTestfile.cmake`에서 출발해 하위 디렉터리로 내려가는데, 이 파일은 `enable_testing()`을 부른 디렉터리에만 생깁니다. 하위 디렉터리에서만 부르면 어떻게 되는지는 아래 "흔한 실수"에서 실제 출력으로 봅니다.
+프로젝트의 빌드 루트에서 CTest를 실행하려면 최상위 `CMakeLists.txt`에서 `enable_testing()`을 호출합니다. CTest는 빌드 루트의 `CTestTestfile.cmake`에서 출발해 하위 디렉터리로 내려가는데, 이 파일은 `enable_testing()`을 부른 디렉터리와 그 아래 디렉터리에만 생깁니다. 하위 디렉터리에서만 부르면 어떻게 되는지는 아래 "흔한 실수"에서 실제 출력으로 봅니다.
 
 ```cmake
 # 최상위 CMakeLists.txt
@@ -400,7 +400,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 ```
 
-`gtest_force_shared_crt`는 googletest 자체의 옵션입니다. v1.15.2의 `cmake/internal_utils.cmake`는 MSVC·Clang에서 googletest를 정적 라이브러리로 빌드하고 이 옵션이 꺼져 있으면 `CMAKE_CXX_FLAGS*`의 `/MD`를 `-MT`로 바꿉니다. CMake 기본값인 `/MD`로 빌드한 내 실행 파일과 섞이면, googletest README가 예로 든 `error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MTd_StaticDebug' doesn't match value 'MDd_DynamicDebug'` 링크 오류가 납니다. 옵션을 켜면 이 치환을 건너뜁니다. Windows에서 직접 재현하지는 않았습니다.
+`gtest_force_shared_crt`는 googletest 자체의 옵션입니다. v1.15.2의 `cmake/internal_utils.cmake`는 MSVC·Clang에서 googletest를 정적 라이브러리로 빌드하고 이 옵션이 꺼져 있으면 `CMAKE_CXX_FLAGS*`의 `/MD`를 `-MT`로 바꿉니다. 이 치환은 최상위 프로젝트의 최소 버전이 3.15 미만이라 정책 `CMP0091`이 OLD여서 `/MD`가 `CMAKE_CXX_FLAGS_<CONFIG>`에 들어 있을 때만 효과가 있고, 그 경우 googletest README가 예로 든 `error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MTd_StaticDebug' doesn't match value 'MDd_DynamicDebug'` 링크 오류가 납니다. 옵션을 켜면 이 치환을 건너뜁니다. 이 시리즈처럼 최소 버전이 3.25면 `CMP0091`이 NEW라 플래그 문자열에 `/MD`가 없고, 런타임은 `MSVC_RUNTIME_LIBRARY` 속성(기본 `MultiThreaded$<$<CONFIG:Debug>:Debug>DLL`)으로 정해집니다. Windows에서 직접 재현하지는 않았습니다.
 
 ### 테스트 코드 작성
 

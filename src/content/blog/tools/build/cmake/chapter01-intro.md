@@ -355,7 +355,7 @@ $ ./build/hello
 Hello, CMake!
 ```
 
-`cmake --build build`는 생성기가 무엇이든 같은 명령으로 빌드합니다. 실제로 무엇을 부르는지는 `-v`를 붙이면 첫 줄에 나옵니다. Unix Makefiles 빌드 트리에서는 `Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /opt/homebrew/bin/gmake -f Makefile`, Ninja 빌드 트리에서는 `Run Build Command(s): /opt/homebrew/bin/ninja -v`였습니다. 어느 프로그램을 부를지는 구성할 때 캐시에 적힌 `CMAKE_MAKE_PROGRAM`이 정합니다.
+`cmake --build build`는 생성기가 무엇이든 같은 명령으로 빌드합니다. 실제로 무엇을 부르는지는 `-v`를 붙이면 출력 앞부분의 `Change Dir:` 줄 다음에 나옵니다. Unix Makefiles 빌드 트리에서는 `Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /opt/homebrew/bin/gmake -f Makefile`, Ninja 빌드 트리에서는 `Run Build Command(s): /opt/homebrew/bin/ninja -v`였습니다. 어느 프로그램을 부를지는 구성할 때 캐시에 적힌 `CMAKE_MAKE_PROGRAM`이 정합니다.
 
 ### 생성기 선택 — `-G`
 

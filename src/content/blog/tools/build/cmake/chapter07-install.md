@@ -200,7 +200,7 @@ include(GNUInstallDirs)
 | `CMAKE_INSTALL_MANDIR` | share/man | 매뉴얼 페이지 |
 | `CMAKE_INSTALL_DOCDIR` | share/doc/${PROJECT_NAME} | 문서 |
 
-`CMAKE_INSTALL_LIBDIR`의 기본값은 플랫폼마다 다르고, 규칙은 `Modules/GNUInstallDirs.cmake`에 있습니다. 크로스 컴파일이 아닌 Linux에서 Debian 계열은 prefix가 `/usr`일 때 `lib/<multiarch-tuple>`, 그 밖의 64비트 배포판은 `lib64`이고, 크로스 컴파일이나 그 외 플랫폼은 `lib`입니다. 4.5.0·macOS에서 구성하면 `LIBDIR=lib`, `DOCDIR=share/doc/<프로젝트 이름>`, `MANDIR=share/man`이었습니다.
+`CMAKE_INSTALL_LIBDIR`의 기본값은 플랫폼마다 다르고, 규칙은 `Modules/GNUInstallDirs.cmake`에 있습니다. 크로스 컴파일이 아닌 Linux에서 Debian 계열은 prefix가 `/usr`일 때 `lib/<multiarch-tuple>`, Alpine·Arch·conda 환경을 제외한 그 밖의 64비트 배포판은 `lib64`이고, 크로스 컴파일이나 그 외 플랫폼은 `lib`입니다. 4.5.0·macOS에서 구성하면 `LIBDIR=lib`, `DOCDIR=share/doc/<프로젝트 이름>`, `MANDIR=share/man`이었습니다.
 
 ```cmake
 include(GNUInstallDirs)
