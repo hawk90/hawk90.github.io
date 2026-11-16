@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## CI에서 Buildroot의 특수성
 
-일반 application CI는 commit 단위로 몇 분 안에 끝납니다. Buildroot는 다릅니다. 이 시리즈의 VM에서 `qemu_aarch64_virt_defconfig`를 빈 `dl/`에서 빌드하니 29분 50초가 걸렸고(Ch 1), 그중 소스 다운로드만 합산 607초였습니다. 이걸 매 PR마다 반복하면 개발자는 commit 뒤 30분을 기다립니다. 식당이 손님마다 장을 새로 보는 셈이라, CI 설계는 *장 본 재료(dl/)와 반조리 재료(ccache)를 어디에 보관하느냐*에서 시작합니다.
+일반 application CI는 commit 단위로 몇 분 안에 끝납니다. Buildroot는 다릅니다. 이 시리즈의 VM에서 `qemu_aarch64_virt_defconfig`를 빌드하니 40분 8초가 걸렸고(Ch 1), 그중 소스 다운로드만 합산 518초였습니다. 이걸 매 PR마다 반복하면 개발자는 commit 뒤 40분을 기다립니다. 식당이 손님마다 장을 새로 보는 셈이라, CI 설계는 *장 본 재료(dl/)와 반조리 재료(ccache)를 어디에 보관하느냐*에서 시작합니다.
 
 이 장의 사실은 **Buildroot 2026.02.3** 저장소가 *자기 자신*을 CI로 돌리는 데 쓰는 파일(`support/docker/Dockerfile`, `utils/docker-run`, `support/misc/gitlab-ci.yml.in`)과, Ch 14에서 같은 사양의 VM으로 잰 캐시 효과에서 가져왔습니다. GitLab·GitHub 설정 예는 형식 예시이며 이 장에서 실제 러너로 돌리지 않았습니다.
 
@@ -203,7 +203,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [imx8mp_evk, raspberrypi4_64, qemu_aarch64_virt]
+        board: [freescale_imx8mpevk, raspberrypi4_64, qemu_aarch64_virt]
     container:
       image: ghcr.io/example/buildroot-builder:2026.02
       options: --user 1000:1000
@@ -235,12 +235,12 @@ jobs:
           CCACHE_DIR: ${{ github.workspace }}/ccache
         run: |
           mkdir -p dl ccache
-          ccache --max-size=10G
           echo "BR2_CCACHE=y" >> .config
-          echo "BR2_CCACHE_DIR=$CCACHE_DIR" >> .config
+          echo "BR2_CCACHE_DIR=\"$CCACHE_DIR\"" >> .config
           make olddefconfig
+          make CCACHE_OPTIONS="--max-size=10G" ccache-options
           make
-          ccache -s
+          make ccache-stats
 
       - name: Upload image
         uses: actions/upload-artifact@v4
@@ -292,14 +292,14 @@ case "$MODE" in
 esac
 ```
 
-`--size-only`가 핵심입니다. 기본 sync는 mtime을 비교하는데 CI runner마다 시간이 다르기 때문에 *항상 re-upload*가 발생합니다. size 비교로 줄이면 변경이 없는 1 GB tarball을 매번 올리지 않습니다.
+`--size-only`가 핵심입니다. AWS CLI의 기본 sync 전략(`awscli/customizations/s3/syncstrategy/base.py`의 `SizeAndLastModifiedSync`)은 크기가 다르거나 *로컬 파일이 S3 객체보다 새로우면* 올립니다. 새 runner에서 받거나 만든 파일의 수정 시각이 S3 쪽보다 뒤면 내용이 같아도 다시 올라가므로, `--size-only`("Makes the size of each key the only criteria used to decide whether to sync")로 크기만 비교합니다. Ch 1 기준 1.2 GB인 `dl/`을 매번 다시 올리지 않게 됩니다.
 
 dl/ 키 설계 두 가지 모드:
 
 | 모드 | 키 | 장단점 |
 |---|---|---|
 | **Simple** | 보드명 또는 `dl-global` | 모든 source 누적. 폐기된 source도 남아 비대해짐 |
-| **Hash-aware** | `hashFiles('**/*.hash')` | source set이 바뀌면 새 캐시. 깔끔하지만 처음마다 cold start |
+| **Hash-aware** | `hashFiles('**/*.hash')` | source set이 바뀌면 새 캐시. `restore-keys`가 없으면 새 키마다 빈 캐시로 시작 |
 
 5명 미만 팀이면 simple로 시작합니다. 한 분기에 한 번 정도 *수동으로 비대해진 dl/*을 정리합니다.
 
@@ -360,7 +360,7 @@ matrix dimension은 세 가지가 일반적입니다.
 | **release type** | dev / production | debug ON/OFF |
 | **toolchain** | gcc12 / gcc13 | upgrade 검증 |
 
-세 차원을 다 켜면 *2 × 3 × 5 = 30 job*. CI runner pool이 충분하지 않으면 queue가 깁니다. 보통 *보드 변형* 한 차원만 켜두고, *release type*은 *main 브랜치 머지 시점*에만 추가로 돌립니다.
+위 표의 값으로 세 차원을 다 켜면 *3 × 2 × 2 = 12 job*이고, 빌드 하나가 Ch 1처럼 40분이면 runner가 넉넉하지 않을 때 queue가 깁니다. PR에서는 *보드 변형* 한 차원만 켜고, *release type*은 *main 브랜치 머지 시점*에만 추가로 돌리는 식으로 나눕니다.
 
 matrix에서의 cache 공유 원칙:
 
@@ -406,11 +406,11 @@ CI 플랫폼마다 cache·artifact 크기 한도가 있고 요금제·서버 설
 
 ## 흔한 실수
 
-- **dl/ cache key를 git SHA로** — `key: dl-${{ github.sha }}` 같이 잡으면 *commit마다 새 캐시*. 항상 miss. 해결은 `hashFiles('**/*.hash')` 또는 보드별 고정 키.
+- **dl/ cache key를 git SHA로** — `key: dl-${{ github.sha }}`처럼 잡으면 commit마다 primary key가 달라 항상 miss이고, `restore-keys`가 없으면 빈 캐시로 시작합니다. actions/cache 문서(`tips-and-workarounds.md`)는 캐시가 "immutable and cannot be updated"라서 매번 갱신하려면 고유 key + `restore-keys`를 쓰라고 적습니다. dl은 `hashFiles('package/**/*.hash')`처럼 내용이 바뀔 때만 바뀌는 키가 맞습니다.
 - **ccache 디렉터리 권한 불일치** — 캐시를 만든 사용자와 빌드하는 사용자가 다르면 ccache가 캐시에 쓰지 못합니다. Buildroot의 `utils/docker-run`처럼 `--user "$(id -u):$(id -g)"`로 맞춥니다.
 - **artifact 크기 제한 초과** — 이미지·SDK를 CI artifact로 올리다 플랫폼 한도에 걸립니다. 큰 파일은 object storage로 보냅니다.
-- **`cache: paths` 가 너무 큼** — `output/` 전체를 cache에 넣으면 *수십 GB*가 매번 transfer. dl/과 ccache만 캐시.
-- **matrix에 fail-fast 켜둠** — 한 보드 실패가 *다른 보드 빌드를 중단*시킴. embedded는 변형 보드 사이가 독립이므로 `fail-fast: false`가 정답.
+- **`cache: paths`가 너무 큼** — `output/` 전체를 cache에 넣으면 이 시리즈의 QEMU 빌드만으로 14 GB(Ch 1)가 매번 오갑니다. dl/과 ccache만 캐시합니다.
+- **matrix의 fail-fast 기본값을 그대로 둠** — GitHub 문서는 `strategy.fail-fast`의 기본값이 `true`이고, matrix의 job 하나가 실패하면 진행 중·대기 중인 job을 모두 취소한다고 적습니다. 변형 보드 사이가 독립이라면 `fail-fast: false`로 나머지 보드 결과를 받습니다.
 - **container image에 트리 포함** — base image 안에 buildroot tree를 박으면 *PR마다 image 재빌드*. 트리는 항상 *외부 mount* 또는 *checkout*.
 - **defconfig 줄이 조용히 빠짐** — 호스트에 따라 선택할 수 없는 옵션이 Kconfig에서 사라집니다(Ch 10의 Bootlin toolchain). Buildroot CI처럼 `support/scripts/check-dotconfig.py`를 돌립니다.
 
@@ -419,7 +419,7 @@ CI 플랫폼마다 cache·artifact 크기 한도가 있고 요금제·서버 설
 - Buildroot CI는 cache 공유가 *기본 설계*이지 *최적화*가 아닙니다.
 - Buildroot 자체 CI 이미지는 날짜를 고정한 `debian:bookworm-20250203`에 일반 사용자 `br-user`, tar 1.35를 소스 빌드해 둡니다. 트리는 `utils/docker-run`처럼 mount합니다.
 - Buildroot CI의 defconfig job은 `make <defconfig>` → `check-dotconfig.py` → `make world legal-info` → `boot-qemu-image.py` 순서이고, aarch64 호스트에서 `beaglebone_defconfig`는 `check-dotconfig.py`에 걸렸습니다.
-- GitLab CI는 `cache:` directive에 보드별 키. `policy: pull-push`로 차분만 transfer.
+- GitLab CI는 `cache:`에 보드별 키를 두고, 기본값 `policy: pull-push`는 job 시작 때 받고 끝날 때 올립니다. 받기만 할 job은 `policy: pull`로 나눕니다.
 - GitHub Actions는 `actions/cache@v4` + `hashFiles('**/*.hash')`로 dl을 *실제 변경* 시점에만 갱신.
 - dl/은 *전체 공유*, ccache는 *보드별 분리*, output/은 *job별 분리*입니다.
 - 팀 규모에 따라 local volume → NFS → S3 단계로 매체를 키웁니다.
