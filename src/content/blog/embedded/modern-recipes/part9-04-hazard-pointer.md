@@ -96,6 +96,7 @@ struct hp_owner {                               // claims a slot on first use in
         slot->used.store(false);
     }
     void scan() {
+        std::atomic_thread_fence(std::memory_order_seq_cst);  // pairs with the seq_cst slot store in hp_protect
         std::vector<void *> live;
         for (auto &s : g_hp)
             if (void *p = s.ptr.load()) live.push_back(p);       // seq_cst load
@@ -133,7 +134,7 @@ void hp_retire(T *n)
 }
 ```
 
-`hp_protect`의 store와 재확인 load가 기본값인 `memory_order_seq_cst`인 데는 이유가 있습니다. 바로 다음 절에서 봅니다.
+`hp_protect`의 store와 재확인 load가 기본값인 `memory_order_seq_cst`이고 `scan()`이 seq_cst fence로 시작하는 데는 이유가 있습니다. 바로 다음 절에서 봅니다.
 
 ### 왜 release/acquire로는 부족한가
 
@@ -305,7 +306,7 @@ exit=0
 
 ### C++ 표준 `<hazard_pointer>`
 
-현재 C++ working draft는 [saferecl.hp](32.11.3)에 hazard pointer를 둡니다(eel.is/c++draft, 2026-11-16 확인). 원래 이 글의 예제는 `std::hazard_pointer hp;`로 만든 객체에 `protect`를 불렀는데, 기본 생성자로 만든 `hazard_pointer`는 *empty*이고 `protect`의 전제 조건은 "\*this is not empty"입니다. 표준 예제의 형태는 다음과 같습니다.
+현재 C++ working draft는 [saferecl.hp](32.11.3)에 hazard pointer를 둡니다(eel.is/c++draft, 2026-11-16 확인). `std::hazard_pointer hp;`처럼 기본 생성자로 만든 `hazard_pointer`는 *empty*라서 `protect`를 부를 수 없습니다. `protect`는 `try_protect` 루프와 같다고 정의되고(32.11.3.4.3p2), `try_protect`의 전제 조건이 "\*this is not empty"입니다(p4). 표준 예제의 형태는 다음과 같습니다.
 
 ```cpp
 struct Name : std::hazard_pointer_obj_base<Name> { /* fields */ };
@@ -402,19 +403,19 @@ int main()
 
 ```text
 host: Apple M2 Pro (8P+4E), macOS 27.2.1, Apple clang 21.0.0
-$ clang++ -std=c++17 -O2 bench.cpp -o bench && ./bench   # 3 runs
-threads=1  hazard-pointer 30.3 M pairs/s   mutex 42.7 M pairs/s
-threads=4  hazard-pointer 6.1 M pairs/s   mutex 15.1 M pairs/s
-threads=8  hazard-pointer 2.7 M pairs/s   mutex 15.2 M pairs/s
-threads=1  hazard-pointer 31.4 M pairs/s   mutex 44.2 M pairs/s
-threads=4  hazard-pointer 5.8 M pairs/s   mutex 16.0 M pairs/s
-threads=8  hazard-pointer 2.6 M pairs/s   mutex 15.4 M pairs/s
-threads=1  hazard-pointer 31.8 M pairs/s   mutex 45.6 M pairs/s
-threads=4  hazard-pointer 5.5 M pairs/s   mutex 15.9 M pairs/s
-threads=8  hazard-pointer 2.7 M pairs/s   mutex 14.9 M pairs/s
+$ clang++ -std=c++17 -O2 bench.cpp -o bench && for i in 1 2 3; do ./bench; done
+threads=1  hazard-pointer 30.8 M pairs/s   mutex 45.7 M pairs/s
+threads=4  hazard-pointer 7.1 M pairs/s   mutex 15.1 M pairs/s
+threads=8  hazard-pointer 2.7 M pairs/s   mutex 16.1 M pairs/s
+threads=1  hazard-pointer 30.0 M pairs/s   mutex 43.9 M pairs/s
+threads=4  hazard-pointer 9.3 M pairs/s   mutex 17.2 M pairs/s
+threads=8  hazard-pointer 2.9 M pairs/s   mutex 16.8 M pairs/s
+threads=1  hazard-pointer 26.3 M pairs/s   mutex 44.0 M pairs/s
+threads=4  hazard-pointer 5.6 M pairs/s   mutex 15.8 M pairs/s
+threads=8  hazard-pointer 3.4 M pairs/s   mutex 13.3 M pairs/s
 ```
 
-이 Mac에서는 mutex 판이 모든 경우에 빨랐고, 스레드 8개에서는 hazard pointer 판의 약 5.5~5.9배였습니다. Hazard pointer stack은 모든 스레드가 `top` 하나에 CAS를 걸고, 실패할 때마다 slot store·reload·CAS를 다시 하므로 경합이 심한 단일 지점에서는 이득이 없습니다. 이 결과가 hazard pointer를 쓰지 말라는 뜻은 아닙니다. 이 기법이 주는 것은 *lock 없이도 안전하게 해제한다*와 *멈춘 스레드가 있어도 미해제 객체가 NR개를 넘지 않는다*는 보장이고, 처리량은 자료구조와 경합 정도에 따라 따로 재야 합니다.
+이 Mac에서는 mutex 판이 모든 경우에 빨랐고, 스레드 8개에서는 hazard pointer 판의 약 3.9~6.0배였습니다. Hazard pointer stack은 모든 스레드가 `top` 하나에 CAS를 걸고, 실패할 때마다 slot store·reload·CAS를 다시 하므로 경합이 심한 단일 지점에서는 이득이 없습니다. 이 결과가 hazard pointer를 쓰지 말라는 뜻은 아닙니다. 이 기법이 주는 것은 *lock 없이도 안전하게 해제한다*와 *멈춘 스레드가 있어도 미해제 객체가 NR개를 넘지 않는다*는 보장이고, 처리량은 자료구조와 경합 정도에 따라 따로 재야 합니다.
 
 ## 자주 보는 함정
 
@@ -430,7 +431,7 @@ return p;                 /* no re-check: src may already have moved on and p be
 
 > ⚠️ 슬롯 store와 재확인 load를 release/acquire로 약하게 씀
 
-위 SB 실험처럼 store 뒤의 load가 store를 앞질러 보일 수 있습니다. 두 연산은 seq_cst로 둡니다.
+위 SB 실험처럼 store 뒤의 load가 store를 앞질러 보일 수 있습니다. 조건은 양쪽에 다 걸립니다. reader는 슬롯에 쓴 뒤 `src`를 다시 읽고, writer는 node를 떼어 낸 뒤(제거 CAS) scan에서 슬롯을 읽습니다. reader 쪽 두 연산은 seq_cst로 두고, writer 쪽은 제거 CAS가 acquire이므로 `scan()` 첫 줄에 seq_cst fence를 둡니다. [atomics.order]의 Note 4(p7)는 seq_cst의 순차 일관성이 seq_cst 연산만 쓰는 프로그램에 한한다며 "Any use of weaker ordering will invalidate this guarantee unless extreme care is used"라고 적습니다. fence를 두면 제거 CAS가 fence보다 먼저 일어나므로, p4.2의 fence 규칙으로 scan의 load와 reader의 seq_cst 연산이 같은 순서 S 안에서 비교됩니다.
 
 > ⚠️ 매 retire마다 scan
 
