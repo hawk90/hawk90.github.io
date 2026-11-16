@@ -69,7 +69,7 @@ portENABLE_INTERRUPTS();
 
 1. `mrs r0, psp`로 지금 task의 stack pointer를 읽고, `stmdb r0!, {r4-r11}`로 r4–r11을 그 stack에 저장합니다. r0–r3, r12, lr, pc, xPSR은 예외 진입 때 hardware가 이미 쌓았습니다.
 2. `bl vTaskSwitchContext`로 다음 task를 고릅니다(앞뒤로 BASEPRI를 올렸다 내림).
-3. 새 task의 stack pointer에서 `ldmia r0!, {r4-r11}`로 r4–r11을 꺼내고 `msr psp, r0`.
+3. 새 task의 stack pointer에서 `ldmia r0!, {r4-r11}`로 r4–r11을 꺼내고, `msr psp, r0`로 PSP를 바꿉니다.
 4. `bx r14`로 예외에서 돌아가며 hardware가 나머지 register를 꺼냅니다.
 
 hardware 쪽 비용(예외 진입·복귀·tail-chaining cycle)과 FPU context는 [PRTOS 2-04](/blog/embedded/rtos/practical-internals/part2-04-context-switch)가 Cortex-M4 TRM으로 정리합니다.
@@ -233,8 +233,8 @@ ISR이 길어지면 그 사이 같거나 낮은 우선순위 인터럽트와 모
 
 ## 정리
 
-- 전환 시점은 **tick, block, unblock, yield**. SysTick은 전환이 필요하면 **PendSV만 걸고**, PendSV가 r4–r11을 저장·복원합니다.
-- **cooperative**(`configUSE_PREEMPTION` 0)에서는 높은 우선순위 task도 지금 task의 yield를 기다립니다. 위 실행에서 tick 5 → 30.
+- 전환 시점은 **tick, block, unblock, yield** 넷입니다. SysTick은 전환이 필요하면 **PendSV만 걸고**, PendSV가 r4–r11을 저장·복원합니다.
+- **cooperative**(`configUSE_PREEMPTION` 0)에서는 높은 우선순위 task도 지금 task의 yield를 기다립니다. 위 실행에서는 tick 5에서 30으로 늦어졌습니다.
 - **tickless idle**은 100 tick 대기 동안 SysTick 인터럽트를 100번에서 1번으로 줄였습니다.
 - tick rate는 시간 해상도를, 우선순위와 ISR 길이는 응답 지연을 정합니다.
 
