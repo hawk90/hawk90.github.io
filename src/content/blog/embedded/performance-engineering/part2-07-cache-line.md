@@ -213,7 +213,7 @@ M2 Pro clang에서 이 구조체의 `sizeof`는 12였습니다(`bench/cl/sz.c`).
 
 - line 크기는 Cortex-M7 32 B, Cortex-A53 64 B, M2 Pro 128 B입니다. `hardware_destructive_interference_size`는 두 toolchain 모두 256이었습니다.
 - M2 Pro에서 같은 line의 두 카운터는 5.7배 느렸고, 64 byte 간격으로는 부족했으며 128 byte에서 멈췄습니다.
-- SoA는 AoS보다 4배 빨랐습니다(0.14 대 0.60 ns/입자). 쓰는 필드만 가져오기 때문입니다.
+- M2 Pro에서 SoA는 AoS보다 4배 빨랐습니다(0.14 대 0.60 ns/입자). 쓰는 필드만 가져오기 때문입니다.
 - A53의 `LDNP`는 L2에만 할당됩니다. clang의 non-temporal builtin이 실제로 `stnp`가 되는지는 코드를 보고 확인합니다.
 - Cortex-M7 DMA buffer는 32 byte 정렬·32 byte 배수 크기로 두고 clean·invalidate합니다.
 

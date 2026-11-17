@@ -131,7 +131,7 @@ STREAM 규칙은 배열 하나를 last-level cache 합의 4배 이상으로 두�
 
 - STREAM은 Copy/Scale/Add/Triad를 16/16/24/24 byte로 세고, write-allocate traffic은 세지 않습니다.
 - M2 Pro에서 직접 쓴 STREAM 루프는 thread 4개에서 Copy 174 GB/s로 Apple 발표값 200 GB/s의 87%였고, 그 이상 thread를 늘려도 오르지 않았습니다.
-- Triad의 OI는 1/12이므로 154 GB/s에서 12.8 GFLOP/s로 묶입니다.
+- Triad의 OI는 1/12이므로 이 글의 M2 Pro 측정값 154 GB/s에서 12.8 GFLOP/s로 묶입니다.
 - Arm CCN-504는 ring bus, CMN-600은 mesh입니다(Linux perf 문서).
 - 하드웨어 bus 이벤트는 접근 횟수를 셉니다. byte로 바꾸려면 접근 폭을 알아야 합니다.
 

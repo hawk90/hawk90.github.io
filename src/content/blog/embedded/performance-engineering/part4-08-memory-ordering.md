@@ -258,7 +258,7 @@ Apple clang 21.0.0에서는 relaxed가 `str`, release와 seq_cst가 `stlr`이었
 - Relaxed SB litmus는 M2 코어에서 600만 회 중 28회 관찰됐고, seq_cst에서는 0회였습니다.
 - AArch64 gcc 기본 빌드의 acquire(`LDAR`)에서는 SB가 관찰되지 않았지만, `-march=armv8.3-a`의 `LDAPR`은 앞선 `STLR`을 지나갈 수 있습니다(Arm 블로그). Dekker류에는 seq_cst를 씁니다.
 - AArch64는 acquire/release가 단일 명령, ARMv7은 `dmb ish` 조합, x86-64는 seq_cst store만 `xchg`입니다.
-- DSB는 DMB의 약 16배, ISB는 약 33배 비쌌고, DMB 범위(ishld/ish/sy)는 단일 코어 루프에서 차이가 없었습니다.
+- M2 Pro HVF 게스트에서 DSB는 DMB의 약 16배, ISB는 약 33배 비쌌고, DMB 범위(ishld/ish/sy)는 단일 코어 루프에서 차이가 없었습니다.
 - Cortex-M은 접근을 재정렬하지 않지만 DMA·multi-master에는 DMB가 필요하고(AN321), dual M0+(RP2040)는 hardware spinlock으로 동기화합니다.
 
 다음 편은 **Cache Coherency** — MESI 프로토콜과 멀티코어 동기화입니다.

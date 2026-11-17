@@ -124,7 +124,7 @@ spin-table의 한계는 CPU를 *끄는* 경로가 없다는 점입니다. `smp_s
 
 ## smp_init — 커널 시작
 
-secondary CPU를 깨우는 호출은 `kernel/smp.c:1000`의 `smp_init()`에서 시작합니다. 이 함수가 `"Bringing up secondary CPUs ..."`(1007행)와 `"Brought up %d node%s, %d CPU%s"`(1013행)를 찍습니다. 위 QEMU 로그에서 두 줄 사이가 37 ms(0.051 → 0.088초)였습니다.
+secondary CPU를 깨우는 호출은 `kernel/smp.c:1000`의 `smp_init()`에서 시작합니다. 이 함수가 `"Bringing up secondary CPUs ..."`(1007행)와 `"Brought up %d node%s, %d CPU%s"`(1013행)를 찍습니다. 위 QEMU 로그에서 두 줄 사이가 37 ms(0.051 → 0.088초)였습니다. TCG 에뮬레이션 시간이므로 보드의 bring-up 시간이 아닙니다.
 
 ## kernel CPU hotplug
 
@@ -184,7 +184,7 @@ secondary CPU를 깨우기도 전에, PSCI 버전을 묻는 첫 호출(`x0 = 0x8
 
 - arm64의 `enable-method`는 `psci`와 `spin-table` 둘이고, 계약은 `Documentation/arch/arm64/booting.rst:431-452`에 있습니다.
 - PSCI 경로는 `cpu_psci_cpu_boot()` → `smc` → TF-A `psci_cpu_on_start()` → `pwr_domain_on()` → `bl31_warm_entrypoint` → `secondary_entry`입니다.
-- QEMU + TF-A 체인에서 4코어가 37 ms 안에 올라왔고, SMCCC는 v1.5로 보고됐습니다.
+- QEMU TCG + TF-A 체인에서 4코어가 37 ms(TCG 시간, 보드 값 아님) 안에 올라왔고, SMCCC는 v1.5로 보고됐습니다.
 - DT `method`를 firmware와 다르게 쓰면 첫 PSCI 호출에서 undefined instruction으로 죽습니다.
 - spin-table에는 CPU를 끄는 경로가 없어 hotplug·깊은 idle은 PSCI에서만 됩니다.
 - firmware의 `CPU_OFF`가 돌아오면 `cpu_die()`의 `BUG()`(`smp.c:393`)로 끝납니다. hvf guest에서 실제로 일어났습니다.

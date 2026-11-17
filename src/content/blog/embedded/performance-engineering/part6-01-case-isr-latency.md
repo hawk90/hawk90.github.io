@@ -2,7 +2,7 @@
 title: "사례 분석 — ISR latency deadline miss 진단 절차"
 slug: "embedded/performance-engineering/part6-01-case-isr-latency"
 date: 2026-04-28T09:00:00
-description: "산업용 센서 보드의 지연 사례를 바탕으로 irqsoff가 측정하는 범위와 IRQ affinity·threaded IRQ 검증 절차를 설명합니다."
+description: "HVF VM에서 cyclictest로 재현한 IRQ affinity 문제로 irqsoff가 측정하는 범위와 IRQ affinity·threaded IRQ 검증 절차를 설명합니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 50
 tags: [case-study, isr, latency, ftrace, irq]
@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 증상 — 재현한 문제
 
-산업용 진동 센서 보드처럼 10 kHz로 샘플을 받는 시스템을 생각해 봅니다. 샘플 하나당 처리 예산은 100 µs입니다. 이 사례는 그런 보드에서 "평균은 여유 있는데 가끔 샘플이 빠진다"는 보고가 들어온 상황에서 출발합니다. 다만 이 글은 남의 보드 로그를 옮기지 않고, 같은 모양의 문제를 직접 만들어 측정했습니다.
+산업용 진동 센서 보드처럼 10 kHz로 샘플을 받는 시스템을 생각해 봅니다. 샘플 하나당 처리 예산은 100 µs입니다. 그런 보드에서 "평균은 여유 있는데 가끔 샘플이 빠진다"는 보고가 들어왔다고 가정해 봅니다. 다만 이 글은 남의 보드 로그를 옮기지 않고, 같은 모양의 문제를 직접 만들어 측정했습니다.
 
 재현 환경은 다음과 같습니다. 진짜 센서 대신 `cyclictest`가 100 µs 주기로 깨어나며, 예정 시각보다 얼마나 늦게 깨어났는지를 기록합니다. 이 값이 "샘플이 user 공간에 도착하기까지의 지연"을 대신합니다. 샘플을 제때 받는 일을 정시 출발 버스에 빗대면, `cyclictest`는 버스가 정류장에 몇 분 늦게 왔는지를 매번 적는 사람입니다.
 
@@ -159,7 +159,7 @@ IRQ를 옮긴 뒤의 결과는 idle과 거의 같아졌습니다. 몇몇 지표�
 
 ## 교훈
 
-- **평균과 꼬리를 따로 봅니다.** 평균 32 µs와 38.5 µs는 비슷해 보이지만, deadline 초과는 두 배 가까이 차이 났습니다.
+- **평균과 꼬리를 따로 봅니다.** HVF VM에서 잰 평균 32 µs와 38.5 µs는 비슷해 보이지만, deadline 초과는 두 배 가까이 차이 났습니다.
 - **CPU 사용률은 CPU별로, 종류별로 봅니다.** 8개 CPU 평균으로는 소프트IRQ 부하가 희석됐습니다. CPU0의 `%soft` 62%가 원인이었습니다.
 - **`irqsoff`는 커널 설정부터 확인합니다.** Debian 6.12 커널에는 이 tracer가 없었습니다. 또 이 tracer는 IRQ가 꺼진 구간을 잴 뿐, end-to-end 지연을 재지 않습니다.
 - **IRQ affinity는 바꿀 수 있는 IRQ에만 통합니다.** managed IRQ는 `/proc/irq`로 옮길 수 없고(`EPERM`), `isolcpus=managed_irq`가 필요합니다.

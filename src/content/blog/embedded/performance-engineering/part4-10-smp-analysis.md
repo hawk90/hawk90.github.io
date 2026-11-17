@@ -280,6 +280,8 @@ for (;;) { }   /* 같은 CPU의 일반 task는 fair server 몫만 받음 */
 
 ## 정리
 
+아래 수치는 모두 이 글의 측정 환경(Apple M2 Pro 위 HVF Debian 13 arm64 게스트)에서 잰 값이며, 다른 CPU나 보드의 값이 아닙니다.
+
 - `mpstat -P ALL`의 `all` 줄 24%가 실제로는 CPU 0 100% + 세 코어 유휴였습니다. 코어별로 봅니다.
 - 6.6 이후 일반 task 스케줄러는 EEVDF이고, load balancing은 sched domain 단위로 `sched_balance_rq()`가 합니다. 0.5 ms 안에 돈 task는 `task_hot()`이 cache-hot으로 봅니다.
 - Migration 비용은 working set에 비례했습니다(64 KiB에서 2.94배, 8 MiB에서 pass당 약 47 µs 추가).

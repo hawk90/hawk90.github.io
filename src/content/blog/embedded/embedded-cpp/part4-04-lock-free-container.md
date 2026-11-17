@@ -330,7 +330,7 @@ pointer를 atomic swap하는 방식으로 우회합니다.
 Treiber stack 같은 복잡한 lock-free에는 tagged pointer를 적용하거나 전문 라이브러리를 사용합니다.
 
 ### 5. Cache line alignment 무시
-multi-core target이라면 위 측정처럼 같은 line의 두 카운터가 세 배가량 느려집니다. target의 line 크기로 `alignas`를 줍니다. single core Cortex-M에서는 해당하지 않습니다.
+multi-core target에서는 같은 line의 두 카운터가 서로를 느리게 합니다(위 M2 Pro 측정에서 약 세 배). target의 line 크기로 `alignas`를 줍니다. single core Cortex-M에서는 해당하지 않습니다.
 
 ### 6. retry loop 무한 반복 가능성
 C++ 표준은 lock-free 연산에 시스템 전체의 진행조차 권고(should)로만 두므로([intro.progress]/2), 경쟁이 계속되면 특정 스레드의 CAS retry에는 상한이 없습니다. 시간 상한이 필요한 경로에는 retry 횟수 limit과 실패 처리를 둡니다.

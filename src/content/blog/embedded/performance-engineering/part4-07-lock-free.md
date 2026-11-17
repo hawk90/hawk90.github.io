@@ -13,7 +13,7 @@ topics: ["embedded"]
 
 > **"Lock-free는 '누군가는 진행한다'는 보장이지 '빠르다'는 보장이 아닙니다."** CAS 재시도 비용, ABA, 메모리 회수를 따로 재고 따로 설계합니다.
 
-이 글의 측정 환경은 [4-06](/blog/embedded/performance-engineering/part4-06-rw-lock)과 같습니다. Apple M2 Pro 위 QEMU 11.1.3(`-accel hvf -cpu host`, vCPU 4개) Debian 13 arm64 guest, gcc 14.2.0, glibc 2.41이고, 호스트 부하가 있어 5회 실행의 중앙값으로 적습니다. HVF는 guest 명령을 M2 코어에서 그대로 실행하므로 atomic 명령의 비용은 실제 하드웨어 비용입니다.
+이 글의 측정 환경은 [4-06](/blog/embedded/performance-engineering/part4-06-rw-lock)과 같습니다. Apple M2 Pro 위 QEMU 11.1.3(`-accel hvf -cpu host`, vCPU 4개) Debian 13 arm64 guest, gcc 14.2.0, glibc 2.41이고, 호스트 부하가 있어 5회 실행의 중앙값으로 적습니다. HVF는 guest 명령을 M2 코어에서 그대로 실행하므로 atomic 명령의 비용은 M2 코어의 비용이며, 다른 AArch64 코어의 값이 아닙니다.
 
 ## Progress Property
 
@@ -184,11 +184,11 @@ _Static_assert(ATOMIC_POINTER_LOCK_FREE == 2, "ptr");   /* 통과 */
 
 - C++ \[intro.progress\]의 lock-free는 "동시 실행 중 적어도 하나는 끝난다"이며 시간 상한이 아닙니다.
 - 상한 CAS counter는 4 thread에서 정확했지만, 호출 대비 약 22%의 재시도가 있었습니다.
-- LSE 단일 명령은 경쟁 없을 때 1.93~2.01 ns(LL/SC 2.28~6.14 ns)였고, 4 thread 경쟁에서는 이 환경에서 LL/SC보다 느렸습니다.
+- M2 Pro HVF 게스트에서 LSE 단일 명령은 경쟁 없을 때 1.93~2.01 ns(LL/SC 2.28~6.14 ns)였고, 4 thread 경쟁에서는 이 환경에서 LL/SC보다 느렸습니다.
 - ABA는 재생 프로그램에서 해제된 노드를 `top`에 올렸고 ASan이 use-after-free로 잡았습니다. Linux `llist`도 같은 이유로 다중 consumer `del_first`에 lock을 요구합니다.
 - Tag는 ABA를 탐지할 뿐이고, gcc 14.2에서 16-byte atomic은 `is_lock_free() == 0`이었습니다.
 - Hazard pointer는 공개 단계의 barrier 비용, epoch는 멈춘 thread 앞에서의 회수 정지가 대가입니다.
-- SPSC ring은 mutex 버전의 두 배(15.3 대 7.0 Mitems/s)였고, AArch64에서 seq_cst index도 같은 속도였습니다.
+- 같은 게스트에서 SPSC ring은 mutex 버전의 두 배(15.3 대 7.0 Mitems/s)였고, seq_cst index도 같은 속도였습니다.
 
 다음 편은 **Memory Ordering** — acquire-release semantics를 살펴봅니다.
 
