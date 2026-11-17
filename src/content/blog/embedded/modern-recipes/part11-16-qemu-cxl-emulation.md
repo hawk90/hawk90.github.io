@@ -70,7 +70,7 @@ disk를 `-drive ...,if=virtio`로 붙이면 QEMU 11.1.3은 시작하자마자 �
 qemu-system-x86_64: -drive file=./overlay.qcow2,if=virtio: PCI: Only PCI/PCIe bridges can be plugged into pxb-cxl
 ```
 
-그래서 disk와 NIC은 위처럼 `bus=pcie.0`을 명시한 `-device`로 붙입니다(NIC은 `-netdev user,id=n0 -device virtio-net-pci,netdev=n0,bus=pcie.0`). 이전 판의 `-drive ...,if=virtio`는 이 오류로 실행되지 않았습니다.
+그래서 disk와 NIC은 위처럼 `bus=pcie.0`을 명시한 `-device`로 붙입니다(NIC은 `-netdev user,id=n0 -device virtio-net-pci,netdev=n0,bus=pcie.0`).
 
 디바이스 스택은 실 하드웨어의 계층을 그대로 흉내 냅니다. host bridge(`pxb-cxl`) 아래 root port(`cxl-rp`)가 있고 그 아래 endpoint(`cxl-type3`)가 붙는 구조입니다. `cxl-fmw`는 펌웨어가 잡아 주는 주소 창(CFMWS)에 해당하고, 여기서는 그 역할을 QEMU가 대신합니다.
 
