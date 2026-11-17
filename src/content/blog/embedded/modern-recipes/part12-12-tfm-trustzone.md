@@ -261,7 +261,7 @@ void sau_setup(void) {
 }
 ```
 
-CMSIS_6(`69b5aa3`) `core_cm33.h`로 `-mcpu=cortex-m33 -mcmse` 컴파일만 했습니다. 이전 판은 `(NS_FLASH_END - 1) | SAU_RLAR_ENABLE_Msk`처럼 끝 주소를 mask하지 않았습니다. 끝 주소가 `0x003FFFFF`처럼 끝나면 하위 bit가 모두 1이라, `SAU_RLAR_NSC_Pos`가 1인 RLAR에서 **NSC bit까지 켜집니다**. 그래서 끝 주소는 `SAU_RLAR_LADDR_Msk`로 거른 뒤 필요한 flag만 OR합니다. TF-M은 이 설정을 platform code에서 하므로 직접 쓸 일은 보통 없지만, bare-metal TrustZone을 짤 때 그대로 걸리는 실수입니다.
+CMSIS_6(`69b5aa3`) `core_cm33.h`로 `-mcpu=cortex-m33 -mcmse` 컴파일만 했습니다. `(NS_FLASH_END - 1) | SAU_RLAR_ENABLE_Msk`처럼 끝 주소를 mask하지 않고 OR하면 안 됩니다. 끝 주소가 `0x003FFFFF`처럼 끝나면 하위 bit가 모두 1이라, `SAU_RLAR_NSC_Pos`가 1인 RLAR에서 **NSC bit까지 켜집니다**. 그래서 끝 주소는 `SAU_RLAR_LADDR_Msk`로 거른 뒤 필요한 flag만 OR합니다. TF-M은 이 설정을 platform code에서 하므로 직접 쓸 일은 보통 없지만, bare-metal TrustZone을 짤 때 그대로 걸리는 실수입니다.
 
 ## 측정 / 성능 비교
 
