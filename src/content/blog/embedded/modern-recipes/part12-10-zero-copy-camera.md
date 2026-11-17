@@ -58,7 +58,7 @@ Number of planes  : 2
    Size Image     : 1036800
 ```
 
-`V4L2_PIX_FMT_NV12`은 multiplanar API에서도 buffer 하나(plane 1개)이고, Y와 UV가 2,073,600 byte 간격으로 붙어 있습니다. 이전 판처럼 `V4L2_PIX_FMT_NV12`에 `num_planes = 2`를 적어도 driver가 1로 고쳐 돌려줍니다. plane마다 따로 export하려면 `NV12M`을 씁니다.
+`V4L2_PIX_FMT_NV12`은 multiplanar API에서도 buffer 하나(plane 1개)이고, Y와 UV가 2,073,600 byte 간격으로 붙어 있습니다. `V4L2_PIX_FMT_NV12`에 `num_planes = 2`를 적어도 driver가 1로 고쳐 돌려줍니다. plane마다 따로 export하려면 `NV12M`을 씁니다.
 
 ## 코드 / 실제 사용 예
 
@@ -173,7 +173,7 @@ GLuint import_nv12(EGLDisplay egl_display, int dma_fd) {
 }
 ```
 
-이전 판처럼 `eglCreateImageKHR`·`glEGLImageTargetTexture2DOES`를 직접 부르면 Debian의 libglvnd `libEGL`·`libGLESv2`에 link할 때 `undefined reference`가 납니다. 확장 함수라 `eglGetProcAddress`로 찾아야 하고, 위 코드는 그렇게 고친 뒤 컴파일됐습니다. 확장 명세는 `EGL_LINUX_DMA_BUF_EXT`일 때 context는 `EGL_NO_CONTEXT`, buffer는 `NULL`이어야 한다고 적습니다.
+`eglCreateImageKHR`·`glEGLImageTargetTexture2DOES`를 직접 부르면 Debian의 libglvnd `libEGL`·`libGLESv2`에 link할 때 `undefined reference`가 납니다. 확장 함수라 `eglGetProcAddress`로 찾아야 하고, 위 코드는 그렇게 고친 뒤 컴파일됐습니다. 확장 명세는 `EGL_LINUX_DMA_BUF_EXT`일 때 context는 `EGL_NO_CONTEXT`, buffer는 `NULL`이어야 한다고 적습니다.
 
 ### Shader에서 YUV 그대로 sample
 
@@ -228,7 +228,7 @@ int show_dmabuf(int drm_fd, int dma_fd, uint32_t crtc_id, uint32_t conn_id, drmM
 }
 ```
 
-libdrm 2.4.124로 컴파일만 했습니다. 이전 판은 NV12의 UV plane(`handles[1]`, `offsets[1]`)을 비워 두었는데, NV12는 두 plane을 모두 넘겨야 합니다. display controller가 NV12와 그 pitch를 지원해야 이 framebuffer를 scan out할 수 있습니다.
+libdrm 2.4.124로 컴파일만 했습니다. NV12는 UV plane(`handles[1]`, `offsets[1]`)까지 두 plane을 모두 넘겨야 합니다. display controller가 NV12와 그 pitch를 지원해야 이 framebuffer를 scan out할 수 있습니다.
 
 ### libcamera
 
@@ -258,7 +258,7 @@ for (auto &req : reqs) camera->queueRequest(req.get());
 
 ### GStreamer — Jetson NVMM
 
-caps의 `(memory:NVMM)`은 NVIDIA buffer 경로입니다. DeepStream 문서대로 `nvinfer`는 `NvDsBatchMeta`가 붙은 batch buffer를 받으므로 앞에 `nvstreammux`가 필요합니다([12-09](/blog/embedded/modern-recipes/part12-09-jetson)). 이전 판의 pipeline은 `nvstreammux`가 빠져 있었습니다. 이 글에서는 Jetson이 없어 pipeline을 실행하지 않았습니다.
+caps의 `(memory:NVMM)`은 NVIDIA buffer 경로입니다. DeepStream 문서대로 `nvinfer`는 `NvDsBatchMeta`가 붙은 batch buffer를 받으므로 앞에 `nvstreammux`가 필요합니다([12-09](/blog/embedded/modern-recipes/part12-09-jetson)). 이 글에서는 Jetson이 없어 pipeline을 실행하지 않았습니다.
 
 ## 측정 / 성능 비교
 
