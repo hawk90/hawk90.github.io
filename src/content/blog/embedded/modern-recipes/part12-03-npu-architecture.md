@@ -108,7 +108,7 @@ TFLite(LiteRT) quantization 명세는 INT8 값과 실수의 관계를 다음 식
 real_value = (int8_value - zero_point) × scale
 ```
 
-같은 명세는 weight를 per-axis(Conv의 per-channel) 또는 per-tensor로, zero-point를 0으로 두고, activation은 per-tensor·asymmetric으로 둡니다. 이전 판의 `q = round((x - zero_point) / scale)`와 `x = (q + zero_point) × scale`은 이 정의와 맞지 않아 고쳤습니다(정의를 뒤집으면 `q = round(x / scale) + zero_point`). 양자화의 자세한 절차와 실행 예는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)에서 다룹니다.
+같은 명세는 weight를 per-axis(Conv의 per-channel) 또는 per-tensor로, zero-point를 0으로 두고, activation은 per-tensor·asymmetric으로 둡니다. 정의를 뒤집으면 `q = round(x / scale) + zero_point`입니다. 양자화의 자세한 절차와 실행 예는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)에서 다룹니다.
 
 ## 자주 보는 함정
 
