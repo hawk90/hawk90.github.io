@@ -11,13 +11,15 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Mutex = 누구나 못 들어오게 막는 문 + 누가 들어가 있는지 명패."** 명패가 있어서 priority inheritance와 owner-only release가 가능합니다.
+> **"Mutex는 남이 못 들어오게 막는 문에, 누가 안에 있는지 적은 명패를 단 것입니다."** 명패가 있어서 priority inheritance와 owner-only release가 가능합니다.
 
 ## 어떤 상황에서 쓰나
 
-두 task가 같은 SPI bus, 같은 sensor의 shadow buffer, 같은 flash sector에 접근할 때 mutex가 필요합니다. 한 task가 transaction을 시작했는데 다른 task가 도중에 끼어들면 byte stream이 섞이고, sensor 보정값이 깨지고, flash write가 부분 실패로 끝납니다.
+두 task가 같은 SPI bus, 같은 buffer, 같은 flash sector를 쓸 때 mutex로 한 번에 한 task만 들어가게 합니다. 한 task의 transaction 도중 다른 task가 끼어들면 두 transaction의 byte가 섞입니다.
 
-함정은 mutex 대신 binary semaphore를 쓰는 것입니다. 코드는 비슷하지만 priority inheritance가 없어 Mars Pathfinder 사고가 작은 board에서도 똑같이 재현됩니다.
+실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3` + `heap_4`, `configASSERT` 정의, QEMU 11.1.3 `mps2-an385` `-icount shift=5`). 아래 코드 중 `spi_xfer()`, `log_err()`, `write_raw()` 같은 함수는 애플리케이션 함수이고, 실행한 코드는 "측정" 절에 있습니다.
+
+mutex 대신 binary semaphore를 쓰면 코드는 거의 같지만 priority inheritance가 없습니다. 아래 측정에서 그 차이가 우선순위 높은 task의 대기 18 tick과 68 tick으로 나타났습니다.
 
 ## 핵심 개념
 
@@ -25,16 +27,16 @@ topics: ["embedded"]
 |------|-------|-------------------|
 | owner 추적 | yes | no |
 | priority inheritance | yes | no |
-| ISR에서 give | 금지 | 가능 |
+| ISR에서 사용 | 불가(`semphr.h` 703행: "Mutex type semaphores cannot be used from within interrupt service routines") | `xSemaphoreGiveFromISR()` |
 | recursive 옵션 | 있음 | 없음 |
 | 용도 | mutual excl. | signal |
 
 Owner 추적이 핵심입니다. Mutex는 "누가 잠갔는지"를 기억하므로 그 task에게만 release 권한이 있고, 더 높은 priority의 task가 기다리면 owner의 priority를 일시적으로 올려 빨리 끝내게 합니다.
 
-| hold time이 길면 | PI가 있어도 jitter 증가 |
+| 상황 | 결과 |
 |---|---|
-| nested lock 두 개 이상 | deadlock 위험 (lock order 필요) |
-| ISR에서 mutex | 금지 (owner가 없으므로) |
+| hold time이 길면 | PI가 있어도 기다리는 task는 hold time만큼 기다림 |
+| 여러 mutex를 다른 순서로 잡음 | deadlock (아래 lock ordering) |
 
 ## 코드 / 실제 사용 예
 
@@ -57,7 +59,7 @@ int main(void) {
 }
 ```
 
-Take와 give를 쌍으로 묶고, timeout을 두어 deadlock이 영구화되지 않도록 합니다. `portMAX_DELAY`는 디버깅이 끝난 코드에만 씁니다.
+Take와 give를 쌍으로 묶고, timeout을 두어 lock을 못 얻은 경우를 알 수 있게 합니다.
 
 ### RAII 스타일 (C++ scope guard)
 
@@ -79,7 +81,7 @@ void do_spi(void) {
 }
 ```
 
-C++을 쓰는 환경에서는 `std::lock_guard` 같은 패턴을 그대로 적용할 수 있습니다. Release 누락이 원천 차단됩니다.
+C++이면 scope를 벗어날 때 소멸자가 give하므로, 중간 `return`에서 give를 빠뜨리는 실수가 없어집니다.
 
 ### Static mutex
 
@@ -92,7 +94,7 @@ void init(void) {
 }
 ```
 
-`*Static` 변종은 heap을 사용하지 않고 미리 할당된 storage에 mutex를 만듭니다. 양산 firmware의 표준 선택입니다.
+`*Static` 변종은 heap 대신 호출자가 넘긴 `StaticSemaphore_t`에 mutex를 만듭니다.
 
 ### Recursive mutex
 
@@ -118,7 +120,7 @@ int main(void) {
 }
 ```
 
-같은 task가 여러 번 take 할 수 있고, 같은 수만큼 give 해야 풀립니다. 보통은 비재귀로 설계가 가능한지 먼저 고민하는 것이 좋습니다.
+같은 task가 여러 번 take 할 수 있고, 같은 수만큼 give 해야 풀립니다. 비재귀 mutex를 같은 task가 두 번 take하면 두 번째 take가 자기 자신을 기다립니다.
 
 ### Priority inheritance 시연
 
@@ -134,7 +136,7 @@ void task_low(void *arg) {       /* priority 1 */
 
 void task_med(void *arg) {       /* priority 3 */
     for (;;) {
-        busy_work(100);           /* PI 없으면 Low를 영원히 preempt */
+        busy_work(100);           /* without PI this preempts Low */
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
@@ -148,7 +150,7 @@ void task_high(void *arg) {      /* priority 5 */
 }
 ```
 
-PI가 켜진 FreeRTOS mutex라면 Low가 대기 중인 높은 priority를 반영해 잠시 boost될 수 있어 release를 앞당깁니다. PI가 없으면 중간 priority task가 끼어들어 High의 대기가 길어질 수 있습니다.
+FreeRTOS mutex는 High가 기다리기 시작하면 lock을 쥔 Low의 priority를 High의 priority로 올리므로, Med가 ready가 되어도 Low가 먼저 돌아 lock을 놓습니다. binary semaphore에는 이 상속이 없어 Med가 Low를 밀어냅니다. 아래 측정이 이 구조를 돌린 결과입니다.
 
 ### Timeout으로 deadlock 감지
 
@@ -160,7 +162,7 @@ if (xSemaphoreTake(m, pdMS_TO_TICKS(200)) != pdTRUE) {
 }
 ```
 
-`portMAX_DELAY`는 양산 펌웨어에서는 가능한 한 피하고, 합리적인 timeout과 fallback path를 둡니다.
+timeout은 그 lock의 정상 hold time보다 길게 두고, 넘으면 기록하고 transaction을 포기합니다.
 
 ### Lock ordering 규칙
 
@@ -179,24 +181,102 @@ void transfer(account_t *a, account_t *b, int amount) {
 
 여러 mutex를 잡는 모든 코드가 같은 순서로 잡으면 deadlock이 발생할 수 없습니다.
 
-## 측정 / 성능 비교
+## 측정
 
-```text
-연산                             시간 (Cortex-M4 72 MHz)
-mutex take (uncontended)         측정 필요
-mutex give (no waiter)           측정 필요
-mutex take (PI boost 발생)       측정 필요
-recursive take                   측정 필요
-mutex contended → 다음 깨움      측정 필요
+### Priority inheritance: mutex와 binary semaphore
+
+Low(우선순위 1)가 lock을 잡고 20 tick의 일을 하는 동안, High(5)가 tick 2에 lock을 청하고 Med(3)가 tick 3부터 50 tick을 계산합니다. lock을 mutex와 binary semaphore로 바꿔 High가 기다린 tick을 쟀습니다.
+
+```c
+/* pi.c: Low (prio 1) holds the lock for 20 ticks of work, High (prio 5)
+   asks for it at tick 2, Med (prio 3) computes 50 ticks from tick 3.
+   Lock is a mutex, or a binary semaphore with -DUSE_BINARY. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+
+static SemaphoreHandle_t lock;
+static void spin(TickType_t n) {                 /* n ticks of CPU work */
+    TickType_t done = 0, last = xTaskGetTickCount();
+    while (done < n) { TickType_t now = xTaskGetTickCount();
+        if (now != last) { done++; last = now; } }
+}
+
+static void low(void *a) { (void)a;
+    xSemaphoreTake(lock, portMAX_DELAY);
+    spin(20);                                    /* counts only ticks it ran */
+    xSemaphoreGive(lock);
+    for (;;) vTaskDelay(1000);
+}
+static void med(void *a) { (void)a; vTaskDelay(3); spin(50); for (;;) vTaskDelay(1000); }
+static void high(void *a) { (void)a;
+    vTaskDelay(2);
+    TickType_t t0 = xTaskGetTickCount();
+    xSemaphoreTake(lock, portMAX_DELAY);
+    pr("%s: High asked at tick %u, got it at tick %u (waited %u)\n",
+#ifdef USE_BINARY
+       "binary semaphore",
+#else
+       "mutex",
+#endif
+       (unsigned)t0, (unsigned)xTaskGetTickCount(), (unsigned)(xTaskGetTickCount() - t0));
+    hosted_exit(0);
+}
+
+int main(void) {
+#ifdef USE_BINARY
+    lock = xSemaphoreCreateBinary(); xSemaphoreGive(lock);
+#else
+    lock = xSemaphoreCreateMutex();
+#endif
+    xTaskCreate(low, "L", 256, NULL, 1, NULL);
+    xTaskCreate(med, "M", 256, NULL, 3, NULL);
+    xTaskCreate(high, "H", 256, NULL, 5, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
 ```
 
-PI boost 비용은 port와 scheduler 설정에 따라 측정합니다. Hold time이 길수록 lock 설계 자체가 latency에 미치는 영향도 함께 봅니다.
+```bash
+./build.sh pi.c              && qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel pi.elf
+./build.sh pi.c -DUSE_BINARY && qemu-system-arm ... -kernel pi.elf
+```
 
 ```text
-PI on vs off (Mars Pathfinder 재현, Med busy_work 100 ms)
-PI on              High wait  = 50 ms
-PI off             High wait  = 영구 굶음
+mutex: High asked at tick 2, got it at tick 20 (waited 18)
+binary semaphore: High asked at tick 2, got it at tick 70 (waited 68)
 ```
+
+mutex에서는 Low가 High의 우선순위를 물려받아 남은 18 tick을 Med보다 먼저 끝냈고, binary semaphore에서는 Med의 50 tick이 끼어 High가 68 tick을 기다렸습니다. QEMU icount의 tick이라 보드의 시간은 아니지만 두 설정의 차이는 Med의 50 tick 그대로입니다.
+
+### Owner가 아닌 task의 give
+
+```c
+/* nonowner.c: task A takes a mutex, task B gives it */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+static SemaphoreHandle_t m;
+static void a(void *p) { (void)p; xSemaphoreTake(m, portMAX_DELAY); pr("A took the mutex\n"); for (;;) vTaskDelay(1000); }
+static void b(void *p) { (void)p; vTaskDelay(1); pr("B gives it\n"); xSemaphoreGive(m); pr("B: give returned\n"); hosted_exit(0); }
+int main(void) {
+    m = xSemaphoreCreateMutex();
+    xTaskCreate(a, "A", 256, NULL, 2, NULL);
+    xTaskCreate(b, "B", 256, NULL, 1, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
+```
+
+```text
+A took the mutex
+B gives it
+ASSERT failed: tasks.c line 6755
+```
+
+mutex give는 priority 상속을 되돌리는 `xTaskPriorityDisinherit()`을 거치고, 그 첫머리의 `configASSERT( pxTCB == pxCurrentTCB )`(`tasks.c` 6755행)가 give하는 task가 owner인지 검사합니다.
 
 ## 자주 보는 함정
 
@@ -204,30 +284,30 @@ PI off             High wait  = 영구 굶음
 
 ```c
 void IRQ(void) {
-    xSemaphoreTakeFromISR(m, ...);   /* 존재하지 않음 */
+    xSemaphoreGiveFromISR(m, &hp);   /* m is a mutex */
 }
 ```
 
-Mutex는 owner가 task이므로 ISR이 사용할 수 없습니다. ISR과 task 사이 신호는 semaphore나 notification으로 합니다.
+`xSemaphoreTakeFromISR()`·`xSemaphoreGiveFromISR()` 매크로는 있지만, `semphr.h`는 두 매크로 설명에 "Mutex type semaphores (those created using a call to xSemaphoreCreateMutex()) must not be used with this macro"라고 적고(562–563·655–656행), mutex 생성 함수 설명(703행)에는 "Mutex type semaphores cannot be used from within interrupt service routines"라고 적습니다. `queue.c`의 `xQueueGiveFromISR()`은 누가 쥐고 있는 mutex면 `configASSERT`로 멈춥니다. ISR과 task 사이 신호는 semaphore나 notification으로 합니다.
 
 > Owner가 아닌 task가 give
 
 ```c
-/* task A가 take, task B가 give */
-xSemaphoreGive(spi_mutex);   /* error 반환 — 풀리지 않음 */
+/* task A took it, task B gives */
+xSemaphoreGive(spi_mutex);
 ```
 
-FreeRTOS는 error를 반환만 하고 silently 무시합니다. 디버깅 시 mutex가 영영 안 풀리면 owner 확인부터 합니다.
+위 측정처럼 `configASSERT`가 있으면 `tasks.c` 6755행에서 멈춥니다. 개발 빌드에서 `configASSERT`를 켜 두면 이 실수가 처음 실행에서 드러납니다.
 
 > 긴 hold time
 
 ```c
 xSemaphoreTake(m, ...);
-printf_to_uart(big);    /* 수십 ms */
+printf_to_uart(big);    /* slow UART output */
 xSemaphoreGive(m);
 ```
 
-PI가 있어도 hold가 길면 jitter가 망가집니다. 공유 자원 접근만 lock 안에 두고, 가공과 로깅은 밖에서 합니다.
+PI가 있어도 기다리는 task는 hold time만큼 기다립니다(위 측정의 18 tick). 공유 자원 접근만 lock 안에 두고, 가공과 로깅은 밖에서 합니다.
 
 > Recursive를 기본으로
 
@@ -235,7 +315,7 @@ PI가 있어도 hold가 길면 jitter가 망가집니다. 공유 자원 접근�
 SemaphoreHandle_t m = xSemaphoreCreateRecursiveMutex();   /* 무조건 recursive */
 ```
 
-Recursive는 비재귀로 표현 가능한 구조까지 모호하게 만듭니다. 호출 그래프를 다시 보면 비재귀로 풀리는 경우가 많습니다.
+recursive mutex는 같은 task가 몇 번 잡았는지 세므로, 잡고 놓는 짝이 호출 경로마다 맞는지 따로 확인해야 합니다. 같은 task의 재진입이 실제로 필요한 경로에만 씁니다.
 
 > Timeout 없이 portMAX_DELAY 남용
 
@@ -243,16 +323,16 @@ Recursive는 비재귀로 표현 가능한 구조까지 모호하게 만듭니�
 xSemaphoreTake(m, portMAX_DELAY);   /* 모든 곳에서 무한 대기 */
 ```
 
-Deadlock이 발생해도 reset 외에 빠져나올 길이 없습니다. 운영 환경에서는 timeout과 logging을 항상 둡니다.
+deadlock이 나면 그 task는 영원히 기다리고, 기록도 남지 않습니다. timeout을 두고 넘으면 기록합니다.
 
 ## 정리
 
 - Mutex의 본질은 owner 추적입니다. 그 위에 PI, owner-only release, recursive가 얹힙니다.
 - ISR은 mutex를 쓰지 않습니다. semaphore나 task notification으로 신호합니다.
-- Hold time은 µs 단위로 유지하고, 가공은 lock 밖에서 합니다.
+- Hold time은 짧게, 가공은 lock 밖에서 합니다. PI는 중간 우선순위의 끼어들기를 막을 뿐 hold time 자체는 줄이지 않습니다.
 - 여러 mutex를 잡을 때는 글로벌한 lock order 규칙을 정해 deadlock을 막습니다.
 - Recursive는 마지막 수단입니다. 가능하면 비재귀로 설계합니다.
-- 양산은 static 변종에 합리적 timeout과 디버깅 로깅을 표준화합니다.
+- 위 측정에서 PI는 High의 대기를 68 → 18 tick으로 줄였고, owner가 아닌 give는 `configASSERT`가 잡았습니다.
 
 다음 편은 **Queue 활용**입니다. Producer-consumer, by-value와 by-pointer, backpressure를 다룹니다.
 

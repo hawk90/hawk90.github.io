@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 RTOS 없는 펌웨어에서 "100 ms 뒤 LED 끄기"나 "센서 응답을 100 ms까지 기다리기" 같은 시간 처리가 필요할 때 씁니다. 명령어 개수로 시간을 맞추는 busy loop은 클럭을 바꾸면 길이가 같이 바뀌고, 도는 동안 다른 일을 못 합니다. SysTick이 세는 tick은 클럭 설정에서 계산한 reload 값으로 주기가 정해집니다.
 
-이 글의 코드는 STM32F407(Cortex-M4) 기준입니다. 레지스터 동작은 Arm [Cortex-M4 Devices Generic User Guide (DUI 0553A)](https://developer.arm.com/documentation/dui0553/a/)의 4.4절 "System timer, SysTick", 코드의 이름은 [CMSIS 5.9.0 `core_cm4.h`](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)와 [cmsis-device-f4 v2.6.9 `stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)를 따릅니다. 클럭은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`(8 MHz HSE, SYSCLK = HCLK = 168 MHz)를 그대로 쓴다고 둡니다. 우선순위 숫자의 의미는 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)의 Priority 절을 전제로 합니다.
+이 글의 코드는 STM32F407(Cortex-M4) 기준입니다. 레지스터 동작은 Arm [Cortex-M4 Devices Generic User Guide (DUI 0553A)](https://developer.arm.com/documentation/dui0553/a/)의 4.4절 "System timer, SysTick", 코드의 이름은 [CMSIS 5.9.0 `core_cm4.h`](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)와 [cmsis-device-f4 v2.6.9 `stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)를 따릅니다. 클럭은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`(8 MHz HSE, SYSCLK = HCLK = 168 MHz)를 그대로 쓴다고 가정합니다. 우선순위 숫자의 의미는 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)의 Priority 절을 전제로 합니다.
 
 ## 핵심 개념
 
@@ -101,6 +101,42 @@ systick_init_1ms(168000000u);
 
 `SystemCoreClockUpdate()`를 불러도 바로 맞지는 않습니다. 이 함수는 PLL 입력을 `HSE_VALUE` 상수로 계산하는데, 정의하지 않으면 기본값이 25000000입니다([L50-L52](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Source/Templates/system_stm32f4xx.c#L50-L52), [L220-L255](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Source/Templates/system_stm32f4xx.c#L220-L255)). 8 MHz crystal에 PLL_M = 8, PLL_N = 336, PLL_P = 2인 4-04 설정에서는 (25000000 / 8) × 336 / 2 = 525,000,000이 나옵니다. `SystemCoreClock`을 쓰려면 빌드에 `HSE_VALUE=8000000`을 정의하고 클럭 전환 뒤 `SystemCoreClockUpdate()`를 부릅니다. 이 글은 클럭을 인자로 넘겨 그 의존을 없앴습니다.
 
+이 계산은 ST 코드를 직접 돌려 확인했습니다. QEMU의 F4 RCC 모델은 `PLLCFGR`·`CFGR`에 쓴 값을 그대로 돌려주므로, 4-04가 쓰는 값과 "PLL로 전환됨"(`SWS = PLL`)을 써 넣고 cmsis-device-f4 템플릿의 `SystemCoreClockUpdate()`를 불렀습니다.
+
+```c
+/* scc_test.c */
+/* feed SystemCoreClockUpdate() the 4-04 register values (QEMU's RCC model stores them as written) */
+#include "stm32f4xx.h"
+void __libc_init_array(void) { }
+static void sh_write0(const char *s) {
+    register uint32_t r0 __asm("r0") = 0x04; register const char *r1 __asm("r1") = s;
+    __asm volatile ("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory");
+}
+static void sh_dec(uint32_t v) { char b[12]; int i = 11; b[i] = 0; do { b[--i] = '0' + v % 10; v /= 10; } while (v); sh_write0(&b[i]); }
+static void sh_exit(void) {
+    register uint32_t r0 __asm("r0") = 0x18; register uint32_t r1 __asm("r1") = 0x20026;
+    __asm volatile ("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory");
+}
+int main(void) {
+    sh_write0("SystemCoreClock before update = "); sh_dec(SystemCoreClock); sh_write0("\n");
+    RCC->PLLCFGR = (8u << 0) | (336u << 6) | (0u << 16) | RCC_PLLCFGR_PLLSRC_HSE | (7u << 24);
+    RCC->CFGR = (5u << 10) | (4u << 13) | RCC_CFGR_SWS_PLL;   /* SWS = PLL, as after the switch */
+    SystemCoreClockUpdate();
+    sh_write0("after SystemCoreClockUpdate() = "); sh_dec(SystemCoreClock); sh_write0("\n");
+    sh_exit();
+    return 0;
+}
+```
+
+```text
+== build flags: (none)
+SystemCoreClock before update = 16000000
+after SystemCoreClockUpdate() = 525000000
+== build flags: -DHSE_VALUE=8000000
+SystemCoreClock before update = 16000000
+after SystemCoreClockUpdate() = 168000000
+```
+
 ### 2. delay_ms
 
 ```c
@@ -112,11 +148,11 @@ void delay_ms(uint32_t ms) {
 }
 ```
 
-`__WFI()`는 프로세서를 sleep으로 보냅니다. DUI 0553A 2.5.2절 "Wakeup from sleep mode"에 따르면 프로세서는 보통 예외 진입이 가능한 우선순위의 예외가 오면 깨어납니다. SysTick 말고 다른 인터럽트로 깨어나도 조건을 다시 검사하므로 결과는 같습니다. PRIMASK가 1일 때의 예외는 아래 "자주 보는 함정"에서 다룹니다.
+`__WFI()`는 프로세서를 sleep으로 보냅니다. DUI 0553A 2.5.2절 "Wakeup from sleep mode"는 "Normally, the processor wakes up only when it detects an exception with sufficient priority to cause exception entry"라고 적습니다. SysTick 말고 다른 인터럽트로 깨어나도 조건을 다시 검사하므로 결과는 같습니다. PRIMASK가 1일 때의 예외는 아래 "자주 보는 함정"에서 다룹니다.
 
 이 delay의 해상도는 1 tick입니다. `start`를 읽는 순간은 tick 사이 어디쯤이므로 첫 증가는 0 ms 초과 1 ms 이하 뒤에 옵니다. 조건을 마지막으로 검사한 직후, `__WFI()`를 실행하기 전에 n번째 증가가 오면 WFI는 다음 인터럽트까지 잠듭니다. DUI 0553A 3.12.12절 "WFI"에 따르면 WFI는 인터럽트가 와서 처리되거나, PRIMASK로 막힌 인터럽트가 pending되거나, 디버그 진입 요청이 있을 때까지 실행을 멈춥니다. 다른 인터럽트가 없으면 다음 tick까지 1 ms를 더 잡니다. 따라서 `delay_ms(n)`은 n − 1 ms 초과 n + 1 ms 이하를 기다리고(ISR 지연 제외), `delay_ms(0)`은 조건이 처음부터 거짓이라 바로 반환하며, `delay_ms(1)`은 0 ms 초과 2 ms 이하를 기다립니다. 최소 n ms를 보장해야 하면 `delay_ms(n + 1)`을 부릅니다.
 
-`g_jiffies`가 `volatile`이어야 하는 이유는 C11 6.7.3p7입니다. volatile 객체를 가리키는 식은 추상 기계 규칙대로 평가해야 하므로 루프를 돌 때마다 메모리에서 다시 읽습니다. `volatile`이 없으면 컴파일러는 ISR이 값을 바꾼다는 것을 모르므로 읽기를 루프 밖으로 옮길 수 있고, 그러면 루프가 끝나지 않습니다.
+`g_jiffies`가 `volatile`이어야 하는 이유는 C11 6.7.3p7입니다. volatile 객체를 가리키는 식은 추상 기계 규칙대로 평가해야 하므로 매 반복 메모리에서 다시 읽습니다. `volatile`을 빼고 GCC 16.2 `-O2`로 빌드해 보면, 몸체가 빈 `while ((g_jiffies - start) < ms) { }`는 `g_jiffies`를 한 번만 읽고 `b.n` 자기 자신으로 도는 무한 loop가 됩니다. 위 `delay_ms()`는 같은 조건에서도 `wfi` 뒤마다 `ldr`로 다시 읽었는데, CMSIS의 `__WFI()`가 `"memory"` clobber를 가진 asm이라 compiler가 메모리 값이 바뀔 수 있다고 보기 때문입니다. 이것은 우연한 보호이므로, 측정 절의 `millis()` polling처럼 barrier가 없는 loop까지 생각하면 `volatile`이 필요합니다.
 
 ### 3. Timeout 패턴
 
@@ -151,7 +187,7 @@ int wait_sensor(void) {
 
 ### 4. Microsecond delay — DWT cycle counter
 
-`delay_ms`의 해상도가 1 tick이므로 µs 단위는 DWT의 clock cycle counter `CYCCNT`로 셉니다. `dwt_init()`(DEMCR `TRCENA` → `CYCCNT = 0` → `CYCCNTENA`)은 [Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)의 "DWT Cycle Counter — Cortex-M3 이상" 절 코드를 그대로 씁니다.
+`delay_ms`의 해상도가 1 tick이므로 µs 단위는 DWT의 clock cycle counter `CYCCNT`로 셉니다. `dwt_init()`(DEMCR `TRCENA` → `CYCCNT = 0` → `CYCCNTENA`)은 [Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)의 "DWT Cycle Counter — 구현 확인" 절 코드를 그대로 씁니다.
 
 ```c
 void delay_us_dwt(uint32_t us, uint32_t cpu_hz) {
@@ -219,6 +255,112 @@ void SysTick_Handler(void) {
 ```
 
 이 handler는 1절의 `SysTick_Handler`를 대신합니다. 같은 이름의 함수를 둘 두면 링크 오류가 납니다. pulse 간격은 1 ms여야 하고, 다르면 위 표의 1 tick 열과 맞춰 봅니다.
+
+### QEMU에서 tick 주기와 delay 범위 재기
+
+QEMU 11.1.3의 `netduinoplus2`는 SYSCLK를 168 MHz로 둡니다(`hw/arm/netduinoplus2.c`의 `SYSCLK_FRQ 168000000ULL`). 그래서 이 글의 `systick_init_1ms(168000000u)`를 그대로 돌릴 수 있습니다. 시간 기준으로는 TIM2를 씁니다. QEMU의 TIM2 모델은 timer clock을 1 GHz로 받으므로(`stm32f405_soc.c`), `PSC = 999`면 `CNT`가 1 µs마다 하나씩 늡니다. 실제 칩의 TIM2 clock(84 MHz)과는 다르므로 이 기준은 QEMU 안에서만 씁니다. 아래 프로그램은 이 글의 코드 블록(`time_reached`, `g_jiffies`·`systick_init_1ms`·`SysTick_Handler`, `delay_ms`, timeout, `task_100hz`)을 `post_code.inc`로 그대로 include합니다.
+
+```c
+/* systick_test.c */
+/* the post's SysTick code on QEMU netduinoplus2 (SYSCLK 168 MHz), TIM2 as a 1 us reference */
+#include "stm32f4xx.h"
+void __libc_init_array(void) { }
+static void sh_write0(const char *s) {
+    register uint32_t r0 __asm("r0") = 0x04; register const char *r1 __asm("r1") = s;
+    __asm volatile ("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory");
+}
+static void sh_dec(uint32_t v) { char b[12]; int i = 11; b[i] = 0; do { b[--i] = '0' + v % 10; v /= 10; } while (v); sh_write0(&b[i]); }
+static void sh_exit(void) {
+    register uint32_t r0 __asm("r0") = 0x18; register uint32_t r1 __asm("r1") = 0x20026;
+    __asm volatile ("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory");
+}
+static int sensor_flag;
+int sensor_ready(void) { return sensor_flag; }
+static uint32_t work_calls;
+static void do_work(void) { work_calls++; }
+
+#include "post_code.inc"
+
+static uint32_t us(void) { return TIM2->CNT; }      /* QEMU TIM2 clock is 1 GHz: PSC 999 -> 1 us */
+
+static uint32_t ten_ticks_us(void) {
+    uint32_t j = g_jiffies; while (g_jiffies == j) { }
+    uint32_t t0 = us(); j = g_jiffies; while (g_jiffies - j < 10) { }
+    return us() - t0;
+}
+
+int main(void) {
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    TIM2->PSC = 999; TIM2->ARR = 0xFFFFFFFF; TIM2->EGR = TIM_EGR_UG; TIM2->CR1 = TIM_CR1_CEN;
+
+    systick_init_1ms(168000000u);
+    sh_write0("LOAD=167999, CLKSOURCE=1 : 10 ticks = "); sh_dec(ten_ticks_us()); sh_write0(" us\n");
+    for (uint32_t n = 0; n <= 2; n++) {
+        uint32_t lo = 0xFFFFFFFF, hi = 0;
+        for (int k = 0; k < 20; k++) {
+            for (volatile int d = 0; d < 997 * k; d++) { }       /* vary the phase */
+            uint32_t t0 = us(); delay_ms(n); uint32_t dt = us() - t0;
+            if (dt < lo) { lo = dt; }
+            if (dt > hi) { hi = dt; }
+        }
+        sh_write0("delay_ms("); sh_dec(n); sh_write0("): "); sh_dec(lo); sh_write0(".."); sh_dec(hi); sh_write0(" us\n");
+    }
+    timeout_t t; timeout_start(&t, 3);
+    sh_write0("wait_sensor() with no sensor = "); sh_write0(wait_sensor() == -1 ? "-1 (timed out)\n" : "0\n");
+
+    {   /* the post's example: now = 0xFFFFFFF0, deadline = now + 0x20 wrapped to 0x10 */
+        volatile uint32_t now = 0xFFFFFFF0u, deadline = 0xFFFFFFF0u + 0x20u;
+        sh_write0("now=0xFFFFFFF0 deadline=0x10: (now >= deadline) = "); sh_dec(now >= deadline);
+        sh_write0(", time_reached = "); sh_dec(time_reached(now, deadline));
+        now += 0x20u;
+        sh_write0("; 0x20 ticks later time_reached = "); sh_dec(time_reached(now, deadline)); sh_write0("\n");
+    }
+
+    next_run = g_jiffies; work_calls = 0;
+    __disable_irq(); g_jiffies += 35; __enable_irq();    /* pretend one call came 35 ms late */
+    for (int i = 0; i < 10; i++) task_100hz();
+    sh_write0("task_100hz after a 35 ms gap: do_work() x "); sh_dec(work_calls); sh_write0("\n");
+
+    SysTick->CTRL = 0; SysTick->LOAD = 16000u - 1u; SysTick->VAL = 0;
+    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
+    sh_write0("LOAD=15999 (SystemCoreClock 16 MHz): 10 ticks = "); sh_dec(ten_ticks_us()); sh_write0(" us\n");
+
+    SysTick->CTRL = 0; SysTick->LOAD = 168000u - 1u; SysTick->VAL = 0;
+    SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;   /* CLKSOURCE = 0 */
+    sh_write0("LOAD=167999, CLKSOURCE=0 : 10 ticks = "); sh_dec(ten_ticks_us()); sh_write0(" us\n");
+    sh_exit();
+    return 0;
+}
+```
+
+```bash
+T=cmsis-device-f4/Source/Templates
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -ffreestanding -nostdlib -O2 -Wall \
+    -DSTM32F405xx -I. -ICMSIS_6/CMSIS/Core/Include -Icmsis-device-f4/Include \
+    -T stm32f411.ld -o systick_test.elf $T/gcc/startup_stm32f405xx.s $T/system_stm32f4xx.c systick_test.c
+qemu-system-arm -M netduinoplus2 -nographic -semihosting -kernel systick_test.elf \
+    -serial null -monitor none -icount shift=0,sleep=off
+```
+
+```text
+LOAD=167999, CLKSOURCE=1 : 10 ticks = 10000 us
+delay_ms(0): 0..0 us
+delay_ms(1): 863..994 us
+delay_ms(2): 1887..2000 us
+wait_sensor() with no sensor = -1 (timed out)
+now=0xFFFFFFF0 deadline=0x10: (now >= deadline) = 1, time_reached = 0; 0x20 ticks later time_reached = 1
+task_100hz after a 35 ms gap: do_work() x 4
+LOAD=15999 (SystemCoreClock 16 MHz): 10 ticks = 952 us
+LOAD=167999, CLKSOURCE=0 : 10 ticks = 80000 us
+```
+
+같은 명령을 두 번 돌려 출력이 같은 것을 확인했습니다. `sleep=off` 없이 `-icount`만 쓰면 WFI 동안 virtual clock이 실제 시간에 묶여 실행마다 delay 측정값이 달라졌으므로 이 옵션을 붙였습니다.
+
+- 1 ms tick 10개가 정확히 10,000 µs입니다.
+- `delay_ms(1)`은 863~994 µs, `delay_ms(2)`는 1,887~2,000 µs로 위에서 계산한 범위(n − 1 ms 초과 n + 1 ms 이하) 안에 있었고, `delay_ms(0)`은 바로 돌아왔습니다. 20번의 측정에서 위상을 바꿨지만 n ms를 넘는 경우(WFI가 tick 하나를 더 기다리는 경우)는 나오지 않았습니다.
+- wrap 예: `now >= deadline`은 바로 참(1)이지만 `time_reached`는 0이고, 0x20 tick 뒤에 1이 됩니다.
+- `task_100hz`는 35 ms 늦게 불렸을 때 `do_work()`를 네 번 연달아 실행해 밀린 횟수를 따라잡았습니다.
+- 아래 표의 첫째·셋째 행도 그대로 나왔습니다. `LOAD = 15999`는 10 tick이 952 µs(tick ≈ 95.2 µs), `CLKSOURCE = 0`은 80,000 µs(tick 8 ms)입니다. QEMU의 F4 모델은 SysTick reference clock을 "HCLK / 8"로 두고(`stm32f405_soc.c`), Linux v6.12 `drivers/clk/clk-stm32f4.c`도 `systick`을 `ahb_div`의 1/8 고정 비율로 등록합니다.
 
 ## 자주 보는 함정
 

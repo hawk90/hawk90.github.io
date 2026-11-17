@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-ADC 변환 완료나 무선 패킷 수신을 ISR에서 task로 넘기는 코드, 그리고 DMA channel 4개처럼 개수가 정해진 자원을 여러 task가 나눠 쓰는 코드를 FreeRTOS로 짤 때의 글입니다. 이 글이 답하는 질문은 셋입니다. Binary·counting semaphore·task notification 중 무엇을 고르는가, 각각 어디서 event를 잃는가, ISR 쪽 실수가 어떻게 드러나는가입니다.
+ADC 변환 완료나 무선 패킷 수신을 ISR에서 task로 넘기는 코드, 그리고 DMA channel 4개처럼 개수가 정해진 자원을 여러 task가 나눠 쓰는 코드를 FreeRTOS로 짤 때 읽는 글입니다. 이 글이 답하는 질문은 셋입니다. Binary·counting semaphore·task notification 중 무엇을 고르는가, 각각 어디서 event를 잃는가, ISR 쪽 실수가 어떻게 드러나는가입니다.
 
 Task와 scheduler의 동작은 [6-03: RTOS Scheduler 동작 분석](/blog/embedded/modern-recipes/part6-03-scheduler-internals)을, ISR에서 부를 수 있는 API의 일반 규칙은 [6-09: ISR-Safe API 설계](/blog/embedded/modern-recipes/part6-09-isr-api)를 전제로 합니다. 코드는 STM32F407(CMSIS device header)과 FreeRTOS-Kernel V11.2.0의 GCC `ARM_CM4F` port를 기준으로 하고, API 이름과 동작은 V11.2.0의 [`semphr.h`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/semphr.h)와 [`tasks.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c)를 따릅니다. `process_sample()`·`pending_packets()`처럼 정의를 보이지 않은 함수는 애플리케이션 쪽 함수입니다.
 
@@ -190,6 +190,87 @@ FreeRTOS 문서([Task Notifications](https://www.freertos.org/Documentation/02-K
 - **보내는 쪽이 받는 task를 모름.** `vTaskNotifyGiveFromISR()`은 task handle을, `xSemaphoreGiveFromISR()`은 semaphore handle을 받습니다. Semaphore를 쓰면 driver는 어느 task가 처리하는지 몰라도 되고, 처리 task를 바꿔도 ISR 코드는 그대로입니다.
 - **ISR이 받는 쪽.** Notification을 받는 함수는 task용뿐이고 `FromISR` 변종이 없습니다. `xSemaphoreTakeFromISR()`은 있지만 block time 인자가 없어 count가 0이면 바로 `pdFALSE`를 돌려주고, `semphr.h`는 이것이 ISR이 자원 풀에서 하나를 가져갈 때 정도에만 쓸모 있다고 적습니다([L656-675](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/semphr.h#L656-L675)).
 - **넘침 감지.** `vTaskNotifyGiveFromISR()`은 notification 값을 상한 검사 없이 하나 올립니다([tasks.c L8252](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L8252)). Counting semaphore는 max에서 `errQUEUE_FULL`을 돌려주므로 위 `pkt_dropped`처럼 잃은 event를 셀 수 있습니다.
+
+## 측정 — 한 번에 여러 event가 들어올 때
+
+위 세 방식이 event를 얼마나 잃는지 QEMU에서 돌렸습니다. 실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3` port, QEMU 11.1.3 `mps2-an385` `-icount shift=5`). 위 코드의 STM32F407 `ADC_IRQHandler`·`EXTI0_IRQHandler` 대신 `mps2-an385`의 CMSDK TIMER0(10 ms 주기, IRQ 8)을 쓰고, 인터럽트 한 번에 event 3개를 give하는 일을 10번 합니다. 받는 task는 1 tick씩 기다리며 150 tick 동안 받습니다.
+
+```c
+/* evcount.c: TIMER0 IRQ (10 ms) reports 3 events per interrupt to a task.
+   -DKIND=0 binary semaphore, 1 counting semaphore (max 64), 2 task notification */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+#ifndef KIND
+#define KIND 1
+#endif
+#define TIMER0_CTRL   (*(volatile uint32_t *)0x40000000)
+#define TIMER0_RELOAD (*(volatile uint32_t *)0x40000008)
+#define TIMER0_INTCLR (*(volatile uint32_t *)0x4000000C)
+#define NVIC_ISER0    (*(volatile uint32_t *)0xE000E100)
+#define NVIC_IPR8     (*(volatile uint8_t  *)0xE000E408)
+
+static SemaphoreHandle_t sem;
+static TaskHandle_t rx;
+static volatile uint32_t sent, failed;
+
+void TIMER0_IRQHandler(void) {
+    BaseType_t hp = pdFALSE;
+    TIMER0_INTCLR = 1;
+    if (sent >= 30) return;                     /* 10 interrupts x 3 events */
+    for (int i = 0; i < 3; i++) {
+        sent++;
+#if KIND == 2
+        vTaskNotifyGiveFromISR(rx, &hp);
+#else
+        if (xSemaphoreGiveFromISR(sem, &hp) != pdTRUE) failed++;
+#endif
+    }
+    portYIELD_FROM_ISR(hp);
+}
+
+static void receiver(void *arg) {
+    (void)arg;
+    uint32_t got = 0;
+    NVIC_IPR8 = 6u << 5; NVIC_ISER0 = 1u << 8;
+    TIMER0_RELOAD = 25000000u / 100u; TIMER0_CTRL = (1u << 3) | 1u;
+    while (xTaskGetTickCount() < 150) {
+#if KIND == 2
+        got += ulTaskNotifyTake(pdFALSE, 1) ? 1 : 0;   /* decrement by one */
+#else
+        if (xSemaphoreTake(sem, 1) == pdTRUE) got++;
+#endif
+    }
+    pr("%s: events sent %u, give failed %u, taken %u\n",
+       KIND == 0 ? "binary  " : KIND == 1 ? "counting" : "notify  ",
+       (unsigned)sent, (unsigned)failed, (unsigned)got);
+    hosted_exit(0);
+}
+
+int main(void) {
+#if KIND == 0
+    sem = xSemaphoreCreateBinary();
+#elif KIND == 1
+    sem = xSemaphoreCreateCounting(64, 0);
+#endif
+    xTaskCreate(receiver, "rx", 256, NULL, 2, &rx);
+    vTaskStartScheduler();
+    return 0;
+}
+```
+
+```bash
+for k in 0 1 2; do ./build.sh evcount.c -DKIND=$k && qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel evcount.elf; done
+```
+
+```text
+binary  : events sent 30, give failed 20, taken 10
+counting: events sent 30, give failed 0, taken 30
+notify  : events sent 30, give failed 0, taken 30
+```
+
+binary semaphore는 한 인터럽트의 세 give 가운데 첫 번째만 성공해 30개 중 10개만 받았고, 나머지 20번의 give는 `pdFALSE`였습니다. counting semaphore(max 64)와 `ulTaskNotifyTake(pdFALSE, …)`로 하나씩 줄이는 notification은 30개를 모두 받았습니다.
 
 ## 자주 보는 함정
 

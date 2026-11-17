@@ -11,56 +11,48 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"여러 실행 흐름의 마감과 blocking 요구를 함께 검토해야 RTOS 도입 여부를 판단할 수 있습니다."** Task 한두 개, 주기 하나면 super-loop이 더 단순할 수 있습니다.
+> **"RTOS가 주는 것은 blocking API이고, 내는 값은 stack·heap·context switch입니다."** 동시에 기다려야 하는 흐름이 여럿일 때 그 값을 치를 만한지 숫자로 보고 정합니다.
 
 ## 어떤 상황에서 쓰나
 
-새 board를 받으면 가장 먼저 부딪히는 결정이 *RTOS를 쓸 것인가*입니다. Datasheet에 FreeRTOS가 포함되어 있으니 일단 켜는 팀이 많지만, 실제로 super-loop으로 충분한 펌웨어가 RTOS로 잘못 가서 더 복잡해지는 경우도 흔합니다.
+새 board에서 RTOS를 켤지 정해야 할 때입니다. 가속도 센서 한 개를 100 Hz로 읽어 UART로 보내기만 하는 펌웨어는 main loop 하나로 충분합니다. 디스플레이 갱신, 통신 stack, motor 제어, 사용자 입력이 각자 마감을 가지면 main loop 안에서 서로의 대기를 state machine으로 쪼개야 하고, 그 지점에서 RTOS의 blocking API가 값어치를 합니다.
 
-가속도 센서 한 개를 100 Hz로 읽고 UART로 송신만 하는 펌웨어는 task가 늘어도 한 마디로 정리됩니다. 반면 디스플레이 업데이트, BLE link layer, motor PID, 사용자 입력이 동시에 마감을 가지는 product는 super-loop으로 짤 때마다 latency가 무너집니다. 어디에서 갈리는지 미리 알면 후회를 줄일 수 있습니다.
+이 글은 두 구조를 코드로 비교하고, 같은 일을 FreeRTOS로 했을 때 늘어나는 flash·RAM을 실제 빌드로 잽니다. 실행 환경은 [PRTOS 1-01](/blog/embedded/rtos/practical-internals/part1-01-why-rtos)과 같습니다: FreeRTOS-Kernel V11.2.0 `ARM_CM3` port + `heap_4`, arm-none-eabi-gcc 16.2.0 `-O2`, QEMU 11.1.3 `mps2-an385`(Cortex-M3) `-icount shift=5`. `pr()`은 UART0 출력, `hosted_exit()`은 semihosting 종료 함수입니다. QEMU 결과는 실제 보드의 시간이나 cycle이 아닙니다.
 
 ## 핵심 개념
 
-판단 기준은 동시에 살아있는 마감의 수입니다.
+판단 기준은 동시에 기다리는 흐름의 수입니다.
 
-| 조건 | 권장 구조 |
+| 조건 | 구조 |
 |------|-----------|
-| 실행 흐름이 적고 blocking이 거의 없음 | super-loop + ISR 검토 |
-| 몇 개의 짧은 주기와 명확한 상태 전이 | super-loop + state machine 검토 |
-| 여러 독립 흐름과 blocking/동시성 요구 | RTOS 검토 |
-| HW 차원의 동시성 (BLE, USB stack) | RTOS 또는 bare-metal stack |
+| 흐름이 적고 기다림이 거의 없음 | super-loop + ISR flag |
+| 짧은 주기 몇 개와 명확한 상태 전이 | super-loop + state machine |
+| 서로 독립인 흐름이 각자 기다려야 함 | RTOS |
+| vendor 통신 stack(BLE, USB 등)이 특정 구조를 요구 | 그 stack의 요구를 따름 |
 
-RTOS가 주는 것은 time-slicing이 아니라 blocking primitive입니다. `wait_for_event(timeout)`을 한 줄로 쓰는 능력이 본질이고, 그 대가로 stack 메모리와 context-switch 시간을 지불합니다.
-
-비용을 숫자로 보면 결정이 쉽습니다.
-
-| 항목 | super-loop | FreeRTOS (4 task) |
-|------|------------|---------------------|
-| Flash 추가 | 0 | kernel·port·설정에 따라 달라짐 |
-| RAM 추가 | 0 | task stack·queue·heap 설정에 따라 달라짐 |
-| context switch | 없음 | MCU·port·빌드 옵션에 따라 달라짐 |
-| 디버깅 난이도 | 낮음 | 중간 (race, deadlock) |
-| 소스 재사용 | 낮음 | 높음 (driver 표준화) |
+RTOS가 주는 것은 "기다리는 동안 다른 일을 하는" 코드를 순차 코드처럼 쓰는 능력입니다. `xQueueReceive(q, &m, portMAX_DELAY)` 한 줄이 state machine의 상태 하나를 대신합니다. 그 대가로 task마다 stack이, kernel 객체마다 heap이, 전환마다 context switch가 듭니다.
 
 ## 코드 / 실제 사용 예
 
-### Super-loop 한 장
+아래 1~4절은 구조를 보이는 발췌라 `hw_init()`, `process_sensor()` 같은 애플리케이션 함수는 정의하지 않았습니다. 실행한 코드는 "측정" 절에 전부 있습니다.
+
+### 1. Super-loop
 
 ```c
 int main(void) {
     hw_init();
     while (1) {
-        if (sensor_ready())   process_sensor();
-        if (button_pressed()) handle_button();
+        if (sensor_ready())    process_sensor();
+        if (button_pressed())  handle_button();
         if (uart_rx_pending()) parse_command();
-        wfi();   /* 아무 ISR도 없으면 sleep */
+        __WFI();               /* sleep until the next interrupt */
     }
 }
 ```
 
-마감이 하나일 때는 이 구조가 가장 빠르고 가장 적게 틀립니다. ISR에서 flag만 세워두고 main loop이 dispatch하면 jitter도 ISR latency 수준에 가깝게 유지됩니다.
+ISR은 flag만 세우고 main loop이 처리합니다. 한 처리 함수가 오래 걸리면 다른 flag의 처리도 그만큼 늦어지는 것이 이 구조의 한계입니다.
 
-### Super-loop + state machine
+### 2. Super-loop + state machine
 
 ```c
 typedef enum { IDLE, MEASURING, REPORTING } state_t;
@@ -82,9 +74,9 @@ void tick_1ms(void) {
 }
 ```
 
-State machine 하나로 짧은 비동기 흐름까지 처리할 수 있습니다. 반응 시간이 ms 수준이면 RTOS 도입의 비용이 이점을 압도하기 쉽습니다.
+ADC를 기다리는 동안 다른 일을 하려고 "기다림"을 상태 하나(MEASURING)로 쪼갰습니다. 기다리는 곳이 늘수록 상태도 늘어납니다.
 
-### RTOS로 갈아탔을 때
+### 3. 같은 일을 RTOS로
 
 ```c
 void task_sensor(void *arg) {
@@ -103,12 +95,11 @@ void task_uart(void *arg) {
 }
 ```
 
-ADC가 끝날 때까지 기다리는 코드를 동기처럼 쓸 수 있다는 점이 RTOS의 진짜 가치입니다. State machine 펼침이 더 이상 필요 없어집니다.
+기다림이 `portMAX_DELAY`로 막히는 호출 한 줄이 되고, 상태 변수가 사라집니다.
 
-### Hybrid 구조
+### 4. Hybrid — ISR은 짧게, 처리는 task에서
 
 ```c
-/* RTOS task가 큰 그림을, ISR이 빠른 반응을 담당 */
 void TIM2_IRQHandler(void) {
     BaseType_t hp = pdFALSE;
     xSemaphoreGiveFromISR(motor_tick, &hp);
@@ -118,78 +109,205 @@ void TIM2_IRQHandler(void) {
 void task_motor(void *arg) {
     for (;;) {
         xSemaphoreTake(motor_tick, portMAX_DELAY);
-        pid_step();    /* 200 µs 안에 끝내야 함 */
+        pid_step();
     }
 }
 ```
 
-정밀 timing이 필요한 부분은 ISR 또는 hardware timer로, 흐름 제어는 RTOS task로 분리하는 패턴이 보편적입니다.
+ISR은 semaphore만 주고, 계산은 우선순위가 높은 task가 합니다. ISR에서는 이름이 `FromISR`로 끝나는 API만 씁니다(아래 함정 참고).
 
-## 측정 / 성능 비교
+## 측정
 
-Cortex-M4 72 MHz에서 측정한 예시입니다. 실제 값은 compiler, optimization, tick 설정, ISR 부하와 port에 따라 달라집니다.
+### RTOS가 더하는 flash·RAM
 
-| 시나리오 | super-loop | FreeRTOS |
-|----------|------------|----------|
-| ISR → main loop dispatch | 측정 필요 | 측정 필요 |
-| event → task wake | n/a | 측정 필요 |
-| 4개 동시 마감 시 worst jitter | workload 의존 | workload 의존 |
+task 넷(stack 128 word = 512 B씩)과 queue 하나(8 × 4 B)를 만든 FreeRTOS 빌드와, 같은 "일 네 개"를 flag로 도는 super-loop 빌드를 비교했습니다. heap 사용량은 scheduler가 돈 뒤 `xPortGetMinimumEverFreeHeapSize()`로 읽었습니다.
 
-마감이 하나일 때는 super-loop이 빠르지만, 동시 마감이 많아질수록 RTOS의 우선순위 기반 스케줄링이 jitter를 크게 줄입니다.
+```c
+/* rtos4.c: four tasks with 512-byte stacks and one queue, then report heap use */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
 
-```text
-RAM 사용량 (4 task, stack 512 B씩)
-super-loop                  1.2 KB
-FreeRTOS (heap_4 + 4 task)  5.6 KB
+static QueueHandle_t q;
+static void worker(void *arg) { (void)arg; for (;;) vTaskDelay(10); }
+static void reporter(void *arg) {
+    (void)arg;
+    vTaskDelay(5);
+    pr("heap total %u, free now %u, min ever free %u\n", (unsigned)configTOTAL_HEAP_SIZE,
+       (unsigned)xPortGetFreeHeapSize(), (unsigned)xPortGetMinimumEverFreeHeapSize());
+    hosted_exit(0);
+}
+int main(void) {
+    q = xQueueCreate(8, sizeof(uint32_t));
+    for (int i = 0; i < 3; i++) xTaskCreate(worker, "w", 128, NULL, 1, NULL);  /* 128 words = 512 B */
+    xTaskCreate(reporter, "r", 128, NULL, 2, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
 ```
 
-RAM이 16 KB 이하인 MCU에서는 RTOS task 4개도 무거울 수 있습니다.
+```c
+/* superloop.c: the same "four jobs" as flags polled in one loop */
+#include <stdint.h>
+extern void pr(const char *, ...); extern void hosted_exit(int);
+static volatile uint32_t flags;
+static void job(int i) { (void)i; }
+int main(void) {
+    flags = 0xF;
+    for (int n = 0; n < 1; n++)
+        for (int i = 0; i < 4; i++) if (flags & (1u << i)) { flags &= ~(1u << i); job(i); }
+    pr("superloop done\n");
+    hosted_exit(0);
+    return 0;
+}
+```
+
+```bash
+# build.sh = arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -ffreestanding -nostdlib
+#            + tasks.c queue.c list.c timers.c event_groups.c port.c heap_4.c
+./build.sh rtos4.c && qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel rtos4.elf
+# superloop.elf links no kernel; stubs.c = empty SVC/PendSV/SysTick handlers for the vector table
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -ffreestanding -nostdlib -fno-builtin -T link.ld \
+    -o superloop.elf startup.c io.c superloop.c stubs.c -lgcc
+arm-none-eabi-size rtos4.elf superloop.elf
+```
+
+```text
+heap total 65536, free now 60496, min ever free 60496
+   text	   data	    bss	    dec	    hex	filename
+  18200	      4	  65960	  84164	  148c4	rtos4.elf
+   1272	      0	     12	   1284	    504	superloop.elf
+```
+
+| 항목 | super-loop | FreeRTOS (task 4개) |
+|------|-----------:|--------------------:|
+| text (flash) | 1,272 B | 18,200 B |
+| heap에서 실제로 쓴 양 | 0 | 65,536 − 60,496 = 5,040 B |
+| heap 밖 정적 변수(bss − heap, 대부분 kernel) | 12 B | 65,960 − 65,536 = 424 B |
+
+5,040 B에는 사용자 task 넷과 queue 외에 scheduler가 만드는 idle task와 timer service task(이 설정에서 stack 256 word씩), timer queue가 들어 있습니다. `configTOTAL_HEAP_SIZE`(64 KiB)는 정적 배열로 bss에 잡히므로, RAM 예산은 bss 전체가 아니라 실제 heap 사용량에 여유를 더해 heap 크기를 정한 값으로 봅니다. flash 18,200 B에는 이 빌드가 넣은 `timers.c`·`event_groups.c`와 `configUSE_TRACE_FACILITY` 같은 설정이 포함돼 있어, 설정을 바꾸면 이 숫자도 바뀝니다.
+
+### ISR에서 일반 API를 부르면
+
+TIMER0(CMSDK timer, 10 ms 주기) 인터럽트에서 queue에 값을 넣는 코드를 `xQueueSend()`와 `xQueueSendFromISR()` 두 가지로 빌드했습니다.
+
+```c
+/* isr_misuse.c: TIMER0 IRQ sends to a queue with xQueueSend (wrong) or
+   xQueueSendFromISR (right), selected by -DUSE_FROM_ISR */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+
+#define TIMER0_CTRL     (*(volatile uint32_t *)0x40000000)   /* CMSDK timer 0 */
+#define TIMER0_RELOAD   (*(volatile uint32_t *)0x40000008)
+#define TIMER0_INTCLR   (*(volatile uint32_t *)0x4000000C)
+#define NVIC_ISER0      (*(volatile uint32_t *)0xE000E100)
+#define NVIC_IPR8       (*(volatile uint8_t  *)0xE000E408)   /* IRQ 8 = TIMER0 */
+
+static QueueHandle_t q;
+static uint32_t n;
+
+void TIMER0_IRQHandler(void) {
+    TIMER0_INTCLR = 1;
+    n++;
+#ifdef USE_FROM_ISR
+    BaseType_t woken = pdFALSE;
+    xQueueSendFromISR(q, &n, &woken);
+    portYIELD_FROM_ISR(woken);
+#else
+    xQueueSend(q, &n, 0);                         /* not an ISR API */
+#endif
+}
+
+static void consumer(void *arg) {
+    (void)arg;
+    uint32_t v;
+    for (int i = 0; i < 3; i++) {
+        xQueueReceive(q, &v, portMAX_DELAY);
+        pr("got %u at tick %u\n", (unsigned)v, (unsigned)xTaskGetTickCount());
+    }
+    hosted_exit(0);
+}
+
+static void start_timer(void *arg) {
+    (void)arg;
+    NVIC_IPR8 = 6u << 5;                          /* below configMAX_SYSCALL_INTERRUPT_PRIORITY (5<<5) */
+    NVIC_ISER0 = 1u << 8;
+    TIMER0_RELOAD = 25000000u / 100u;             /* 10 ms at the 25 MHz CMSDK clock */
+    TIMER0_CTRL = (1u << 3) | 1u;                 /* IRQ enable, timer enable */
+    vTaskDelete(NULL);
+}
+
+int main(void) {
+    q = xQueueCreate(4, sizeof(uint32_t));
+    xTaskCreate(consumer, "c", 256, NULL, 2, NULL);
+    xTaskCreate(start_timer, "s", 256, NULL, 1, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
+```
+
+```bash
+./build.sh isr_misuse.c                 && qemu-system-arm ... -kernel isr_misuse.elf
+./build.sh isr_misuse.c -DUSE_FROM_ISR  && qemu-system-arm ... -kernel isr_misuse.elf
+```
+
+```text
+# xQueueSend() in the ISR
+ASSERT failed: portable/GCC/ARM_CM3/port.c line 438
+# xQueueSendFromISR() in the ISR
+got 1 at tick 10
+got 2 at tick 20
+got 3 at tick 30
+```
+
+`xQueueSend()`는 안에서 `taskENTER_CRITICAL()`을 쓰고, Cortex-M3 port의 `vPortEnterCritical()`은 처음 들어갈 때 `configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 )`로 지금 인터럽트 안인지 검사합니다(`portable/GCC/ARM_CM3/port.c` 438행). 이 빌드는 `configASSERT`를 정의했으므로 첫 인터럽트에서 그 줄이 걸렸습니다. `FromISR` 버전은 10 ms 간격(tick 10, 20, 30)으로 값을 전달했습니다.
 
 ## 자주 보는 함정
 
-> "RTOS는 무조건 좋다"는 가정
+> ⚠️ 기능 하나짜리 펌웨어에 task 여럿
 
 ```c
-/* 단순 LED blink 펌웨어에 task 5개를 만든 코드 */
 xTaskCreate(blink_red,   ...);
 xTaskCreate(blink_green, ...);
 ```
 
-기능이 하나뿐인 펌웨어는 RTOS를 얹는 순간 디버깅·resource·전력 소모가 모두 늘어납니다. 정말 동시에 살아있어야 할 일이 무엇인지 먼저 세어봅니다.
+위 측정에서 task 넷과 queue 하나가 heap 5,040 B와 flash 16,928 B를 더했습니다. 동시에 기다려야 할 일이 실제로 몇 개인지 먼저 셉니다.
 
-> Task당 stack을 추정 없이 설정
-
-```c
-xTaskCreate(t, "t", 128, NULL, 1, NULL);   /* 너무 작음 */
-```
-
-`uxTaskGetStackHighWaterMark`로 측정 없이 추정하면 overflow가 양산 후에 터집니다. 8-09편의 분석 절차를 같이 적용합니다.
-
-> ISR에서 RTOS API를 잘못 호출
+> ⚠️ Task stack을 재지 않고 정함
 
 ```c
-void IRQ(void) { xQueueSend(q, &v, 0); }  /* FromISR 누락 */
+xTaskCreate(t, "t", 128, NULL, 1, NULL);   /* 128 words: measured? */
 ```
 
-`*FromISR` 버전을 쓰지 않으면 critical section이 어긋나 deadlock이 발생합니다. RTOS 도입 전에 ISR-safe API 규약을 먼저 익혀야 합니다.
+`uxTaskGetStackHighWaterMark()`로 실행 중 최소 여유를 재서 정합니다. 절차는 [8-09](/blog/embedded/modern-recipes/part8-09-stack-analysis)에 있습니다.
 
-> Heap 사용량 폭주
+> ⚠️ ISR에서 `FromISR`이 아닌 API
+
+```c
+void IRQ(void) { xQueueSend(q, &v, 0); }  /* not an ISR API */
+```
+
+위 실행처럼 `configASSERT`가 있으면 port.c 438행에서 걸립니다. `configASSERT`를 끄면 이 검사가 사라지므로 개발 빌드에서는 켜 둡니다.
+
+> ⚠️ heap을 쓰는 생성 함수만 씀
 
 ```c
 xTaskCreate(...);     /* dynamic */
 xQueueCreate(...);    /* dynamic */
 ```
 
-가능하면 `*Static` 변종을 써서 양산 firmware의 heap 사용량을 0으로 만듭니다. Heap fragmentation 자체가 사라집니다.
+`task.h`는 `xTaskCreate()`가 heap에서 메모리를 잡는 것과 달리 `xTaskCreateStatic()`은 "allows a task to be created without using any dynamic memory allocation"이라고 적습니다. 객체를 모두 `*Static`으로 만들면 heap 크기를 정할 필요가 없어집니다.
 
 ## 정리
 
-- 동시에 살아있는 마감의 수가 1~2개면 super-loop이 거의 항상 더 안전합니다.
-- RTOS의 본질은 time-slicing이 아니라 blocking primitive입니다.
-- Flash·RAM 비용은 kernel, port, 설정, task 수와 stack 크기를 실제 map 파일로 확인합니다.
-- Hybrid 구조(ISR + task)는 timing critical 부분에 가장 단순한 답입니다.
-- Static API와 stack 측정은 RTOS를 도입한 다음에 가장 먼저 챙겨야 할 항목입니다.
-- 결정이 애매하면 super-loop으로 시작하고, jitter가 망가질 때 RTOS로 옮깁니다.
+- RTOS의 값어치는 **blocking API**입니다. 기다림을 상태 변수 대신 호출 한 줄로 씁니다.
+- 이 빌드에서 task 4개 + queue 1개의 비용은 **flash 18,200 B(super-loop 1,272 B), heap 5,040 B**였습니다.
+- ISR에서는 **`FromISR` API만** 씁니다. `configASSERT`가 있으면 Cortex-M3 port가 잘못된 호출을 잡습니다.
+- task stack은 **high water mark로 재서** 정하고, 가능하면 **`*Static` 생성**을 씁니다.
+- 동시에 기다리는 흐름이 하나둘이면 super-loop로 시작하고, state machine이 기다림 때문에 불어날 때 RTOS로 옮깁니다.
 
 다음 편은 **Task 설계 패턴**입니다. Periodic, event-driven, state machine을 어떤 기준으로 고를지 다룹니다.
 

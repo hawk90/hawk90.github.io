@@ -12,116 +12,112 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Priority Inversion = High task가 Low 잠금 자원 대기 + Medium에 차단됨"** 1997년 Mars Pathfinder를 정지시켰던 bug입니다.
+> **"Priority inversion은 High가 Low의 lock을 기다리는 동안, lock과 무관한 Medium이 Low를 밀어내 High가 Medium만큼 더 기다리는 상황입니다."** FreeRTOS mutex는 Low의 우선순위를 High로 올려 Medium의 끼어들기를 막습니다.
+
+이 글은 현장에서 inversion을 알아보고 막는 쪽에 집중합니다. Mars Pathfinder의 경과, priority ceiling protocol의 정의와 증명, chained inheritance는 [PRTOS 3-04](/blog/embedded/rtos/practical-internals/part3-04-priority-inversion)가 1차 자료(Reeves, DDJ 1999; Sha·Rajkumar·Lehoczky, IEEE Trans. Computers 1990)로 다룹니다. 실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3`, QEMU 11.1.3 `mps2-an385` `-icount shift=5`).
 
 ## 시나리오
 
-세 task가 시간축에서 어떻게 얽히는지 timeline으로 보면 한눈에 들어옵니다.
+![Priority inversion timeline — High가 Low의 mutex를 기다리는 동안 Medium에 막힘](/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg)
 
-![Priority inversion timeline — High이 Low의 mutex를 기다리는 동안 Medium에 차단됨](/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg)
+| 시점 | 일어나는 일 |
+|---|---|
+| 1 | L(낮음)이 mutex를 잡고 일을 시작 |
+| 2 | H(높음)가 깨어나 같은 mutex를 청하고 block |
+| 3 | M(중간)이 깨어나 L을 밀어내고 실행 |
+| 4 | M이 끝날 때까지 L은 돌지 못하고, 그동안 H도 기다림 |
 
-```text
-Task H (high) — periodic, 10 ms deadline
-Task M (medium) — 일반 작업
-Task L (low) — log writer, mutex 보유
+M은 mutex와 아무 관계가 없는데 H를 기다리게 합니다. [6-05](/blog/embedded/modern-recipes/part6-05-mutex-usage)의 측정에서 binary semaphore로는 H가 68 tick(M의 50 tick 포함), mutex로는 18 tick을 기다렸습니다.
 
-t=0:  L take(mtx) → 시작
-t=1:  H runnable → preempt L, H 실행
-t=2:  H take(mtx) → block (L 보유 중)
-t=2:  L ready, but M now CPU 점유 (L 못 가짐)
-t=10: M 계속 진행 → H deadline miss
-```
+Mars Pathfinder(1997)의 반복 reset도 이 구조였습니다. PRTOS 1-03이 Reeves의 원문과 Jones의 정리로 옮긴 대로, 높은 우선순위의 bus management task가 낮은 우선순위의 meteorological data task가 쥔 mutex를 기다리는 동안 중간 우선순위의 communications task가 돌았고, watchdog이 이를 잡아 시스템을 reset했습니다. 수정은 VxWorks mutex 생성 인자의 priority inheritance 옵션을 켜는 것이었습니다.
 
-Medium task는 lock과 무관한데도 결과적으로 *high task를 블록*합니다.
+## 해결 1: Priority inheritance
 
-## Mars Pathfinder (1997)
+FreeRTOS에서 `configUSE_MUTEXES`가 1이면 `xSemaphoreCreateMutex()`로 만든 mutex에 priority inheritance가 걸립니다. H가 block하는 순간 `tasks.c`의 `xTaskPriorityInherit()`이 holder의 우선순위를 H의 우선순위로 올리고, holder가 mutex를 놓아 쥔 mutex가 하나도 남지 않을 때 `xTaskPriorityDisinherit()`이 원래 값으로 되돌립니다(`tasks.c`의 "Only disinherit if no other mutexes are held"). 두 함수에는 `traceTASK_PRIORITY_INHERIT()`·`traceTASK_PRIORITY_DISINHERIT()` hook이 있어 이 순간을 기록할 수 있습니다.
 
-**NASA의 Sojourner rover 시스템:**
-
-- Bus management task (high)
-- Comm task (medium) — frequent
-- Weather task (low) — info_bus mutex 보유
-
-**순환:**
-
-- Weather 작업 중 → bus mgmt preempt
-- Bus mgmt → mutex 시도 → block
-- Comm 빈번 → CPU 점유
-- Weather 미실행 → mutex 못 풀음
-- Bus mgmt deadline miss → watchdog reset
-
-매 며칠마다 *system reset*이 일어났습니다. 지구에서 원격으로 debug를 진행했고, priority inheritance를 활성화해 문제를 해결했습니다.
-
-## Tony Hoare의 회상
-
-```text
-"Priority Inheritance was implemented in VxWorks but disabled by default
- because of overhead concerns. We had to push the update."
-```
-
-VxWorks의 `selectPriorityInherit`를 활성화해 문제를 해결했습니다.
-
-## 해결 1: Priority Inheritance (PI)
-
-**Low task가 mutex 보유 중 High task가 same mutex 대기:**
-
-- → Low task의 priority가 *High 수준으로 boost*
-- → Medium이 preempt 못 함
-- → Low 빨리 완료 → mutex give → High 진행
-
-FreeRTOS PI mutex (`xSemaphoreCreateMutex`):
+### 측정 — 상속이 일어나는 순간 보기
 
 ```c
-SemaphoreHandle_t mtx = xSemaphoreCreateMutex();   /* PI 자동 활성 */
-
-xSemaphoreTake(mtx, portMAX_DELAY);   /* High waiting → Low boost */
-critical();
-xSemaphoreGive(mtx);   /* boost 복원 */
+/* pitrace.h: EXTRA_CONFIG recording priority inheritance events */
+extern volatile unsigned pi_events, pi_last_prio, pi_restore_prio;
+#define traceTASK_PRIORITY_INHERIT( pxTCB, uxPrio )    do { pi_events++; pi_last_prio = (uxPrio); } while (0)
+#define traceTASK_PRIORITY_DISINHERIT( pxTCB, uxPrio ) do { pi_restore_prio = (uxPrio); } while (0)
 ```
 
-POSIX:
+```c
+/* pitrace.c: watch priority inheritance happen.
+   L (prio 1) holds a mutex for 20 ticks of work; H (prio 5) waits for it
+   from tick 2; a prio-6 observer reads L's priority at tick 5. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+volatile unsigned pi_events, pi_last_prio, pi_restore_prio;
+
+static SemaphoreHandle_t m;
+static TaskHandle_t hl;
+static void spin(TickType_t n) {
+    TickType_t done = 0, last = xTaskGetTickCount();
+    while (done < n) { TickType_t now = xTaskGetTickCount(); if (now != last) { done++; last = now; } }
+}
+static void low(void *a) { (void)a;
+    xSemaphoreTake(m, portMAX_DELAY);
+    spin(20);
+    xSemaphoreGive(m);
+    pr("L after give: priority %u, restored to %u\n", (unsigned)uxTaskPriorityGet(NULL), pi_restore_prio);
+    hosted_exit(0);
+}
+static void high(void *a) { (void)a;
+    vTaskDelay(2);
+    xSemaphoreTake(m, portMAX_DELAY);
+    pr("H got the mutex at tick %u\n", (unsigned)xTaskGetTickCount());
+    xSemaphoreGive(m);
+    vTaskDelete(NULL);
+}
+static void observer(void *a) { (void)a;
+    vTaskDelay(5);
+    pr("tick 5: L priority %u (base 1), inherit events %u, inherited %u\n",
+       (unsigned)uxTaskPriorityGet(hl), pi_events, pi_last_prio);
+    vTaskDelete(NULL);
+}
+int main(void) {
+    m = xSemaphoreCreateMutex();
+    xTaskCreate(low, "L", 256, NULL, 1, &hl);
+    xTaskCreate(high, "H", 256, NULL, 5, NULL);
+    xTaskCreate(observer, "O", 256, NULL, 6, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
+```
+
+```bash
+./build.sh pitrace.c -I. -DEXTRA_CONFIG='"pitrace.h"' && qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel pitrace.elf
+```
+
+```text
+tick 5: L priority 5 (base 1), inherit events 1, inherited 5
+H got the mutex at tick 20
+L after give: priority 1, restored to 1
+```
+
+H가 tick 2에 block한 뒤 tick 5에 읽은 L의 우선순위는 5였고, 상속 hook은 한 번 불렸습니다. L이 남은 일을 끝내고 tick 20에 mutex를 놓자 H가 받았고, L의 우선순위는 1로 돌아왔습니다. 현장에서는 같은 hook에 시각과 holder 이름을 남기면, 어느 mutex가 언제 얼마나 우선순위를 올렸는지 trace로 볼 수 있습니다.
+
+POSIX 환경(예: Linux)에서는 mutex attribute로 같은 동작을 고릅니다.
 
 ```c
+pthread_mutexattr_t attr;
+pthread_mutexattr_init(&attr);
 pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
 pthread_mutex_init(&mtx, &attr);
 ```
 
-## Chain Inheritance
+POSIX의 `pthread_mutexattr_setprotocol()` 정의는 `PTHREAD_PRIO_INHERIT`에서 mutex를 쥔 thread가 자기 우선순위와 자기가 쥔 이 protocol의 mutex 중 어느 것이든 기다리는 thread의 가장 높은 우선순위 중 높은 쪽으로 실행된다고 정합니다.
 
-```text
-L1 보유 mtx_A, L2 보유 mtx_B
-L1 mtx_B 대기 → L2 boost
-H mtx_A 대기 → L1·L2 둘 다 boost
-```
+## 해결 2: Priority ceiling
 
-체인 길이가 N이면 boost propagation과 ready-list 처리가 추가됩니다. 비용은 RTOS·port·체인 구조에 따라 측정해야 합니다.
+각 mutex에 "그 mutex를 쓸 수 있는 task 중 가장 높은 우선순위"를 ceiling으로 미리 정하고, 그 ceiling을 기준으로 lock을 다룹니다. Sha·Rajkumar·Lehoczky(1990)의 PCP는 ceiling 규칙으로 deadlock과 chained blocking을 막는다는 것을 증명했고, 그 정의와 PI와의 비교는 PRTOS 3-04에 있습니다. FreeRTOS V11.2.0 mutex에는 ceiling protocol이 없습니다.
 
-자동차 ASIL-D에서는 *chain depth를 제한*합니다(보통 3 이하).
-
-## 해결 2: Priority Ceiling Protocol (PCP)
-
-각 mutex에 *ceiling priority*를 미리 지정한다. *ceiling = mutex를 사용할 가능성 있는 모든 task 중 최고 priority*.
-
-- Take 시 — task priority가 ceiling 수준으로 *즉시 boost*
-- Give 시 — 원래 priority 복원
-
-VxWorks와 INTEGRITY, 일부 µC/OS는 PCP를 지원합니다. 덕분에 WCET 분석이 *훨씬 쉬워집니다*.
-
-### Immediate vs Original PCP
-
-**Immediate PCP (Sha 1990):**
-
-- Take 즉시 ceiling boost — 다른 mutex 대기 안 함
-
-**Original PCP:**
-
-- Ceiling만큼 boost되어 *다른 lower priority task만* preempt 가능
-
-Immediate와 Original 방식의 선택과 지원 여부는 RTOS 구현마다 다릅니다. 둘의 차이와 실제 지원 범위를 문서와 소스로 확인합니다.
-
-## 해결 3: Priority Ceiling Emulation (PCE)
-
-Linux PREEMPT_RT의 mutex/priority protocol 지원은 kernel API와 설정에 따라 확인해야 하며, robust mutex와 priority ceiling을 같은 기능으로 간주하면 안 됩니다.
+POSIX에서는 `PTHREAD_PRIO_PROTECT`가 이 계열입니다. POSIX 정의는 이 protocol의 mutex를 하나 이상 쥔 thread가 "shall execute at the higher of its priority or the highest of the priority ceilings of all the non-robust mutexes owned by this thread and initialized with this attribute, regardless of whether other threads are blocked on any of these non-robust mutexes or not"라고 정합니다(robust mutex에도 같은 문장이 있습니다). 기다리는 thread가 있든 없든 lock을 잡는 순간 ceiling으로 올라갑니다.
 
 ```c
 pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
@@ -129,134 +125,79 @@ pthread_mutexattr_setprioceiling(&attr, 90);
 pthread_mutex_init(&mtx, &attr);
 ```
 
-Take 시점에 *ceiling인 90으로 boost*되어 우선순위가 자동으로 통제됩니다.
+## ISR과 mutex
 
-## 진단 — Tracealyzer / SystemView
+ISR은 task가 아니라 mutex의 owner가 될 수 없고, `semphr.h`는 mutex에 대해 "Mutex type semaphores cannot be used from within interrupt service routines"라고 적습니다. ISR에서 task로 알릴 때는 semaphore나 task notification([6-04](/blog/embedded/modern-recipes/part6-04-semaphore-usage))을 씁니다.
 
-Trace 화면에서는 다음과 같이 확인할 수 있습니다.
+## 예방 — 설계 규칙
 
-- Task L이 "running" 상태로 priority boost와 함께 표시됩니다.
-- Mutex가 L에 의해 잡혀 있다고 보입니다.
-- Task H는 "blocked on mutex" 상태로 표시됩니다.
-
-이렇게 하면 priority inversion을 직접 시각적으로 확인할 수 있습니다.
-
-```c
-/* Debug — boost 횟수 측정 */
-struct mutex_stats {
-    uint32_t boost_count;
-    uint32_t max_boost_ms;
-};
-```
-
-## ISR과 Priority Inversion
-
-ISR이 H가 잡고 있는 mutex를 만나면 ISR에는 priority 개념이 없으므로 *단순 block이 아니라 ISR-blocked-task* 상황이 된다. 일반적으로 *ISR은 mutex를 잡지 않는다*.
-
-ISR과 task 사이에는 *semaphore*(signaling)를 씁니다. Mutex는 *task 간에만* 사용합니다.
-
-## 예방 — Design Rule
-
-1. **Short critical section**을 μs 단위로 유지합니다.
-2. Sleep이나 IO 중에는 **mutex를 잡지 않습니다**.
-3. **Lock ordering**으로 deadlock과 chain inheritance를 제한합니다.
-4. **PI mutex**를 사용합니다(해당 RTOS의 mutex 구현과 설정 확인).
+1. 공유 자원은 binary semaphore가 아니라 **mutex**로 보호합니다(PI가 걸림).
+2. mutex를 쥔 채로 **기다리는 호출**(I/O 완료 대기, 다른 queue 대기)을 하지 않습니다. holder가 block해 있으면 우선순위를 올려도 돌지 못합니다.
+3. 보호 구간은 **짧게** 둡니다. PI는 H의 대기를 Low의 남은 보호 구간으로 묶을 뿐, 0으로 만들지 않습니다(위 측정의 18 tick).
+4. 여러 mutex는 **같은 순서로** 잡습니다. PI는 deadlock을 막지 못합니다.
 
 ```c
-/* 회피 */
-xSemaphoreTake(&mtx, portMAX_DELAY);
-read_file();   /* ← seconds */
-xSemaphoreGive(&mtx);
-
-/* Good */
+/* avoid: I/O inside the lock */
+xSemaphoreTake(mtx, portMAX_DELAY);
 read_file();
-xSemaphoreTake(&mtx, portMAX_DELAY);
+xSemaphoreGive(mtx);
+
+/* better: I/O outside, only the update inside */
+read_file();
+xSemaphoreTake(mtx, portMAX_DELAY);
 update_var();
-xSemaphoreGive(&mtx);
-```
-
-## Automotive — Lock 사용 자제
-
-**ASIL-D ECU:**
-
-- Mutex 자제, double buffer 또는 lock-free
-- 사용 시 *Immediate PCP* + WCET 분석
-- 일부 코드는 *mutex 자체 금지*
-
-자동차에서는 *예측 가능성*이 *throughput*보다 우선합니다.
-
-## Boeing 787 Bug
-
-**2015 — 787 시스템:**
-
-- 248일 후 RTOS counter overflow
-- → priority inversion-like 상태로 fail
-
-테스트되지 않은 long-run path는 *WCET 분석에 반드시 포함*해야 합니다. 단기 테스트만으로는 잡히지 않습니다.
-
-## WCET 분석
-
-```text
-Task H budget: 예시값 — 시스템 요구사항으로 산정
-Mutex hold worst case (Low): 측정·분석 필요
-Inheritance chain depth: 실제 lock graph로 산정
-Total worst case wait: WCET·스케줄링 분석 필요
-
-H의 deadline 충족 여부는 측정된 WCET와 모든 blocking 항을 합산해 판단
-```
-
-aiT와 Bound-T 같은 *정적 WCET 도구*를 활용합니다. 자동차와 항공 분야의 표준입니다.
-
-## 자주 하는 실수
-
-> ⚠️ Non-PI mutex 사용
-
-```c
-SemaphoreHandle_t mtx = xSemaphoreCreateBinary();   /* ← PI 없음 — semaphore */
-```
-
-대신 `xSemaphoreCreateMutex`를 써야 PI가 자동으로 동작합니다.
-
-> ⚠️ Long task in mutex
-
-```c
-xSemaphoreTake(mtx, ...);
-http_request();   /* seconds — high task block */
 xSemaphoreGive(mtx);
 ```
 
-이때는 데이터를 미리 fetch해 두고 critical section을 짧게 유지해야 합니다.
+## 자주 하는 실수
 
-> ⚠️ ISR이 mutex 사용
-
-```c
-ISR: xSemaphoreTake(mtx, 0);   /* ✗ */
-```
-
-ISR에서는 mutex 대신 semaphore를 써야 합니다.
-
-> ⚠️ Priority 계층 잘못 설계
+> ⚠️ binary semaphore로 공유 자원을 보호
 
 ```c
-Task H priority 5
-Task M priority 5    /* ← same priority → preempt 없음, FIFO */
+SemaphoreHandle_t mtx = xSemaphoreCreateBinary();   /* no priority inheritance */
 ```
 
-이런 경우에는 priority를 명확히 다르게 지정해야 합니다.
+`semphr.h`는 binary semaphore에 priority inheritance가 없다고 적고, 6-05의 측정에서 H의 대기가 18 tick에서 68 tick으로 늘었습니다. `xSemaphoreCreateMutex()`를 씁니다.
+
+> ⚠️ lock 안에서 오래 걸리는 일
+
+```c
+xSemaphoreTake(mtx, portMAX_DELAY);
+http_request();
+xSemaphoreGive(mtx);
+```
+
+H는 이 요청이 끝날 때까지 기다립니다. 데이터는 lock 밖에서 가져오고, lock 안에서는 갱신만 합니다.
+
+> ⚠️ ISR에서 mutex
+
+```c
+void ISR(void) { xSemaphoreTakeFromISR(mtx, &hp); }   /* mtx is a mutex */
+```
+
+위 "ISR과 mutex" 절에서 본 대로, ISR에서는 semaphore나 notification을 씁니다.
+
+> ⚠️ 마감이 다른 task에 같은 우선순위
+
+```c
+/* Task H priority 5, Task M priority 5 */
+```
+
+같은 우선순위면 preemption과 time slicing 설정에 따라 tick마다 번갈아 돌아, H의 일이 M과 CPU를 나눕니다([6-02](/blog/embedded/modern-recipes/part6-02-task-design)의 측정에서 3 tick → 6 tick). 마감이 다르면 우선순위를 나눕니다.
 
 ## 정리
 
-- Priority Inversion은 **Low가 보유 + Medium이 preempt = High가 block**되는 상황입니다.
-- Mars Pathfinder는 1997년에 *원격 patch로 해결*했습니다.
-- **PI mutex**는 보유자 priority를 동적으로 boost합니다.
-- **PCP**는 컴파일 타임 ceiling을 활용해 더 단순한 분석이 가능합니다.
-- Chain inheritance는 depth 제한이 필요합니다.
-- ASIL-D에서는 *lock 자체를 자제*하고 double buffer를 선호합니다.
+- Priority inversion은 **Low가 쥔 lock을 High가 기다리는 동안 Medium이 Low를 밀어내는** 구조입니다.
+- FreeRTOS mutex는 **holder를 기다리는 task의 우선순위로 올렸다가**, 쥔 mutex가 하나도 남지 않게 give할 때 되돌립니다. 위 실행에서 L의 우선순위는 1 → 5 → 1로 바뀌었습니다.
+- `traceTASK_PRIORITY_INHERIT()` hook으로 **상속이 일어난 시점을 기록**할 수 있습니다.
+- ceiling 계열(PCP, `PTHREAD_PRIO_PROTECT`)은 lock을 잡는 순간 ceiling으로 올립니다. FreeRTOS mutex에는 없습니다.
+- 예방은 **mutex 사용, lock 안에서 기다리지 않기, 짧은 보호 구간, 일정한 lock 순서**입니다.
 
-다음 편은 **Memory Barrier**입니다.
+다음 편은 **Timer Wheel 분석**입니다.
 
 ## 관련 항목
 
-- [2-02: Lock-Free Ring](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
-- [2-04: Memory Barrier](/blog/embedded/modern-recipes/part2-10-memory-barrier)
-- [RTOS 3-04: Priority Inversion](/blog/embedded/rtos/practical-internals/part3-04-priority-inversion)
+- [PRTOS 3-04: Priority Inversion](/blog/embedded/rtos/practical-internals/part3-04-priority-inversion)
+- [PRTOS 3-05: Priority Inheritance](/blog/embedded/rtos/practical-internals/part3-05-priority-inheritance)
+- [6-05: Mutex 활용](/blog/embedded/modern-recipes/part6-05-mutex-usage)
+- [9-01: Lock-Free Ring](/blog/embedded/modern-recipes/part9-01-lock-free-ring)

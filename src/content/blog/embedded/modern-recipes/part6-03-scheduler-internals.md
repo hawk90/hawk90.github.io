@@ -11,193 +11,232 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Scheduler는 매 tick과 매 yield마다 ready list의 가장 높은 priority를 고르는 단순한 루프입니다."** 그 단순함을 이해해야 priority 역전과 jitter의 원인을 즉시 짚을 수 있습니다.
+> **"FreeRTOS scheduler는 tick, block, unblock, yield 때 ready list에서 가장 높은 우선순위를 고릅니다."** preemption을 끄면 그 선택이 다음 yield까지 미뤄지고, tickless idle을 켜면 기다리는 동안 tick 인터럽트 자체가 사라집니다.
 
 ## 어떤 상황에서 쓰나
 
-설계는 깨끗한데 양산 직전에 jitter가 튀어 디버깅을 시작할 때, scheduler의 동작을 정확히 알면 5분 만에 원인이 보입니다. "왜 우선순위 5짜리 task가 100 µs를 기다리지?"라는 질문에 답하려면 context switch가 언제 일어나는지, idle task가 무슨 일을 하는지 알아야 합니다.
+우선순위가 높은 task가 생각보다 늦게 돌 때, 전환이 언제 일어나는지 알아야 원인을 좁힐 수 있습니다. 전력이 문제일 때는 1 ms마다 들어오는 tick 인터럽트가 sleep을 깨우는지 봐야 합니다.
 
-또 한 가지 흔한 상황은 전력입니다. 1 ms마다 tick interrupt가 들어와 sleep을 깨우면 µA 단위 절전이 불가능합니다. Tickless idle이 어떻게 작동하는지 알면 sleep 정책을 설계할 수 있습니다.
+이 글은 FreeRTOS-Kernel V11.2.0 `ARM_CM3` port의 tick 처리와 PendSV context switch를 소스로 읽고, preemptive·cooperative 차이와 tickless idle의 tick 인터럽트 수를 QEMU에서 돌려 봅니다. 실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(QEMU 11.1.3 `mps2-an385` `-icount shift=5`, `configTICK_RATE_HZ` 1000). QEMU의 tick은 가상 시간이라 실제 보드의 시간이 아닙니다.
 
 ## 핵심 개념
 
-일반적인 preemptive RTOS에서 scheduler가 다시 실행될 수 있는 대표 시점은 다음과 같습니다.
+scheduler가 다음 task를 다시 고르는 때는 넷입니다.
 
-1. **Tick interrupt** — 설정한 tick — delay 만료와 time-slice 처리
-2. **Task가 block** — delay, queue wait, semaphore take
-3. **Task가 unblock** — ISR이나 다른 task가 깨움
-4. **`yield` / `yield_from_isr`** — 명시적 양보
+1. **Tick 인터럽트**: delay가 끝난 task를 ready로 옮기고, time slicing이면 같은 우선순위끼리 바꿉니다.
+2. **Task가 block**: delay, queue 대기, semaphore 대기.
+3. **Task가 unblock**: ISR이나 다른 task가 queue·semaphore로 깨움.
+4. **명시적 yield**: `taskYIELD()`, `portYIELD_FROM_ISR()`.
 
-이 네 시점에서만 가장 높은 priority의 ready task를 골라 실행합니다. 그 사이에는 현재 task가 계속 돕니다.
-
-| 방식 | 동작 |
+| 설정 | 동작 |
 |------|------|
-| preemptive | higher priority가 ready 되면 즉시 빼앗음 |
-| cooperative | yield하지 않으면 영원히 안 바뀜 |
-| time-slice | 같은 priority에서 tick마다 round-robin |
-
-FreeRTOS·Zephyr·ThreadX 모두 preemptive/cooperative와 time-slice 동작이 설정·port에 따라 달라집니다. Cooperative에서는 yield 없는 task가 다른 task 실행을 지연시킬 수 있습니다.
+| `configUSE_PREEMPTION` 1 | 더 높은 우선순위가 ready가 되면 그 자리에서 전환 |
+| `configUSE_PREEMPTION` 0 (cooperative) | 지금 task가 block하거나 yield할 때까지 전환하지 않음 |
+| `configUSE_TIME_SLICING` 1 | `configUSE_PREEMPTION` 1일 때, 같은 우선순위 ready task끼리 tick마다 전환(`tasks.c` 4861행) |
 
 ## 코드 / 실제 사용 예
 
-### Tick interrupt → scheduler 호출
+### Tick 인터럽트
+
+`ARM_CM3` port의 `xPortSysTickHandler()`(`portable/GCC/ARM_CM3/port.c` 491행) 본문입니다.
 
 ```c
-void SysTick_Handler(void) {
-    portTICK_HOOK();
-    if (xTaskIncrementTick() != pdFALSE) {
-        portYIELD_FROM_ISR(pdTRUE);   /* 더 높은 task가 깨었으면 switch */
+portDISABLE_INTERRUPTS();
+traceISR_ENTER();
+{
+    /* Increment the RTOS tick. */
+    if( xTaskIncrementTick() != pdFALSE )
+    {
+        traceISR_EXIT_TO_SCHEDULER();
+
+        /* A context switch is required.  Context switching is performed in
+         * the PendSV interrupt.  Pend the PendSV interrupt. */
+        portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
+    }
+    else
+    {
+        traceISR_EXIT();
     }
 }
+portENABLE_INTERRUPTS();
 ```
 
-매 tick마다 `xTaskIncrementTick`이 delay 만료와 time-slice를 확인합니다. 더 높은 priority가 깨면 ISR 종료 직후 PendSV로 context switch가 일어납니다.
+`xTaskIncrementTick()`이 전환이 필요하다고 하면 SysTick handler는 전환을 하지 않고 PendSV만 걸어 둡니다. 전환은 PendSV 인터럽트에서 일어납니다.
+
+### PendSV context switch
+
+같은 파일의 `xPortPendSVHandler()`가 하는 일입니다.
+
+1. `mrs r0, psp`로 지금 task의 stack pointer를 읽고, `stmdb r0!, {r4-r11}`로 r4–r11을 그 stack에 저장합니다. r0–r3, r12, lr, pc, xPSR은 예외 진입 때 hardware가 이미 쌓았습니다.
+2. `bl vTaskSwitchContext`로 다음 task를 고릅니다(앞뒤로 BASEPRI를 올렸다 내림).
+3. 새 task의 stack pointer에서 `ldmia r0!, {r4-r11}`로 r4–r11을 꺼내고, `msr psp, r0`로 PSP를 바꿉니다.
+4. `bx r14`로 예외에서 돌아가며 hardware가 나머지 register를 꺼냅니다.
+
+hardware 쪽 비용(예외 진입·복귀·tail-chaining cycle)과 FPU context는 [PRTOS 2-04](/blog/embedded/rtos/practical-internals/part2-04-context-switch)가 Cortex-M4 TRM으로 정리합니다.
 
 ### Cooperative 모드
 
-```c
-#define configUSE_PREEMPTION  0
+`configUSE_PREEMPTION`을 0으로 두면 우선순위가 높은 task가 ready가 되어도, 지금 task가 block하거나 yield할 때까지 전환하지 않습니다. 우선순위 2 task가 tick 5에 깨어나려는 동안 우선순위 1 task가 30 tick 동안 계산한 뒤 `taskYIELD()`하는 프로그램을 두 설정으로 돌렸습니다.
 
-void task_a(void *arg) {
-    for (;;) {
-        do_work();
-        taskYIELD();    /* 명시적으로 양보해야 함 */
-    }
+```c
+/* coop.c: a prio-2 task wakes at tick 5 while a prio-1 task computes for
+   about 30 ticks and then yields. Build with -DconfigUSE_PREEMPTION_OVERRIDE=0
+   for cooperative scheduling. */
+#include "FreeRTOS.h"
+#include "task.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+
+static void worker(void *arg) {                     /* prio 1 */
+    (void)arg;
+    TickType_t t0 = xTaskGetTickCount();
+    while (xTaskGetTickCount() - t0 < 30) { }       /* long computation */
+    pr("worker yields at tick %u\n", (unsigned)xTaskGetTickCount());
+    taskYIELD();
+    for (;;) vTaskDelay(100);
+}
+
+static void urgent(void *arg) {                     /* prio 2 */
+    (void)arg;
+    vTaskDelay(5);                                  /* wants to run at tick 5 */
+    pr("urgent runs at tick %u (preemption %d)\n", (unsigned)xTaskGetTickCount(), configUSE_PREEMPTION);
+    hosted_exit(0);
+}
+
+int main(void) {
+    xTaskCreate(worker, "w", 256, NULL, 1, NULL);
+    xTaskCreate(urgent, "u", 256, NULL, 2, NULL);
+    vTaskStartScheduler();
+    return 0;
 }
 ```
 
-`configUSE_PREEMPTION = 0`이면 현재 task가 block하거나 yield할 때까지 scheduler 전환이 제한됩니다. 단순한 control loop라도 모든 경로가 양보하는지 검증해야 합니다.
-
-### Time-slice
-
-```c
-#define configUSE_TIME_SLICING   1
-#define configTICK_RATE_HZ       1000
-
-/* 같은 priority task의 tick 기반 교대는 port/config와 ready 상태에 따름 */
-xTaskCreate(task_x, "x", 1024, NULL, 2, NULL);
-xTaskCreate(task_y, "y", 1024, NULL, 2, NULL);
+```bash
+./build.sh coop.c                                    # configUSE_PREEMPTION 1
+./build.sh coop.c -DconfigUSE_PREEMPTION_OVERRIDE=0  # cooperative
+qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel coop.elf
 ```
 
-`configUSE_TIME_SLICING`을 켜면 같은 priority의 ready task들이 tick마다 회전합니다. 끄면 한 task가 끝까지 다 돕니다.
+```text
+urgent runs at tick 5 (preemption 1)
+worker yields at tick 30
+urgent runs at tick 30 (preemption 0)
+```
+
+preemptive에서는 tick 5에 바로 돌았고, cooperative에서는 worker가 양보한 tick 30까지 기다렸습니다. cooperative에서 양보하지 않는 loop가 있으면 우선순위와 상관없이 다른 task가 돌지 못합니다.
 
 ### Idle hook과 sleep
 
 ```c
 void vApplicationIdleHook(void) {
-    /* 다른 task가 ready 될 때까지 sleep */
-    __WFI();
+    __WFI();        /* sleep until the next interrupt */
 }
 ```
 
-Idle task는 실행 가능한 더 높은 priority task가 없을 때 동작하는 가장 낮은 priority의 task입니다. WFI(Wait For Interrupt)는 port와 interrupt 설정에 맞게 사용해야 합니다.
+idle task는 우선순위 0이라 다른 task가 모두 block일 때만 돕니다. `configUSE_IDLE_HOOK`이 1이면 idle loop가 이 hook을 부릅니다. WFI로 자도 tick 인터럽트가 1 ms마다 깨웁니다.
 
 ### Tickless idle
 
-```c
-#define configUSE_TICKLESS_IDLE   1
-#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP  2   /* tick 이상 sleep 가능하면 */
+`configUSE_TICKLESS_IDLE`을 1로 두면 idle 상태에서 port의 `vPortSuppressTicksAndSleep()`이 SysTick을 길게 다시 맞추고 잠든 뒤, 깨어나서 지난 tick 수를 보정합니다. task 하나가 `vTaskDelay(100)` 하는 동안 SysTick handler가 몇 번 들어오는지 셌습니다. 세는 방법은 port.c가 SysTick handler 첫머리에서 부르는 `traceISR_ENTER()`를 counter 증가로 정의한 것입니다.
 
-/* FreeRTOS가 자동으로 tick interrupt를 끄고 RTC로 깨움 */
+```c
+/* count.h: EXTRA_CONFIG that counts SysTick handler entries */
+extern volatile unsigned systick_entries;
+#define traceISR_ENTER() (systick_entries++)
 ```
 
-깨어날 task가 충분히 늦다면 port가 tick을 보정하며 저전력 모드로 들어갈 수 있습니다. 절전 효과와 wake-up clock은 MCU port와 tickless 구현을 확인해 측정합니다.
+```c
+/* tickless.c: one task sleeps 100 ticks; count SysTick interrupts.
+   Build with and without -DconfigUSE_TICKLESS_IDLE=1. */
+#include "FreeRTOS.h"
+#include "task.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+volatile unsigned systick_entries;
 
-### Context switch 코드 (Cortex-M)
+static void sleeper(void *arg) {
+    (void)arg;
+    vTaskDelay(1);                                  /* align to a tick */
+    unsigned n0 = systick_entries; TickType_t t0 = xTaskGetTickCount();
+    vTaskDelay(100);
+    pr("tickless=%d: %u ticks passed, %u SysTick interrupts\n", configUSE_TICKLESS_IDLE,
+       (unsigned)(xTaskGetTickCount() - t0), systick_entries - n0);
+    hosted_exit(0);
+}
 
-PendSV에서 호출되는 핵심 4단계.
+int main(void) {
+    xTaskCreate(sleeper, "s", 256, NULL, 1, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
+```
 
-1. **현재 task의 SP 저장** — R0~R12, LR, PSR은 HW가 자동 push
-2. **ready list에서 다음 task 선택** — `prvSelectHighestPriorityTask`
-3. **다음 task의 SP 복원**
-4. **exception return** — HW가 R0~R12, LR, PSR 자동 pop
+```bash
+./build.sh tickless.c -I. -DEXTRA_CONFIG='"count.h"'
+./build.sh tickless.c -I. -DEXTRA_CONFIG='"count.h"' -DconfigUSE_TICKLESS_IDLE=1
+```
 
-Cortex-M은 exception entry/return에서 일부 register를 hardware가 저장·복원합니다. 전체 비용은 port, FPU 사용, compiler와 clock에 따라 측정해야 합니다.
+```text
+tickless=0: 100 ticks passed, 100 SysTick interrupts
+tickless=1: 100 ticks passed, 1 SysTick interrupts
+```
 
-### Yield 패턴
+두 경우 모두 100 tick이 지났고, SysTick 인터럽트는 100번과 1번이었습니다. 전력 차이는 그 MCU의 sleep 전류와 깨어나는 횟수로 정해지므로 보드에서 재야 합니다.
+
+### Yield로 일 나누기
 
 ```c
-/* 큰 작업을 잘게 나눠 다른 task가 끼어들 여지를 만듦 */
 for (int i = 0; i < N; i += CHUNK) {
     process_chunk(i);
     taskYIELD();
 }
 ```
 
-Cooperative 환경이나 같은 priority의 worker들 사이에서 fairness를 만들 때 씁니다. Preemptive에서는 보통 필요 없습니다.
-
-## 측정 / 성능 비교
-
-Cortex-M4 72 MHz, FreeRTOS 10.5에서 측정하는 예시 항목입니다. 아래 수치는 특정 port·빌드·측정 방법 없이는 일반값으로 사용할 수 없습니다.
-
-```text
-이벤트                         시간
-tick handler                  측정 필요
-xTaskIncrementTick             측정 필요
-context switch (PendSV)        측정 필요
-ISR → task wake (전체)         측정 필요
-xQueueSend → receiver 깨움     측정 필요
-```
-
-Tick handler overhead는 tick rate와 port 설정에 따라 누적됩니다. Latency와 전력 요구에 맞춰 tick rate와 tickless를 측정해 선택합니다.
-
-```text
-전력 (STM32L4, 80 MHz active)
-tick 1 kHz, idle hook 없음        측정 필요
-tick 1 kHz + WFI in idle hook     측정 필요
-tickless idle                     측정 필요
-```
-
-WFI와 tickless의 효과는 MCU clock tree, peripheral, wake source와 측정 조건에 따라 크게 달라집니다.
+cooperative 설정이나, 같은 우선순위 task 사이에서 tick을 기다리지 않고 순서를 넘길 때 씁니다. preemptive에서는 더 높은 우선순위 task가 알아서 끼어들므로 이 목적의 yield는 필요 없습니다.
 
 ## 자주 보는 함정
 
-> Tick rate를 올리면 jitter가 좋아진다는 오해
+> ⚠️ Tick rate를 올리면 jitter가 줄어든다는 기대
 
 ```c
 #define configTICK_RATE_HZ   10000   /* 0.1 ms */
 ```
 
-tick rate를 10배로 올리면 overhead도 10배입니다. Tick rate는 가장 짧은 delay 정밀도만 결정합니다. Jitter는 context switch와 priority가 결정합니다.
+tick rate를 10배로 올리면 SysTick handler도 10배 자주 돕니다. tick rate는 `vTaskDelay()` 같은 시간 단위의 해상도를 정할 뿐이고, ISR에서 깨운 task는 tick을 기다리지 않고 `portYIELD_FROM_ISR()`로 바로 전환됩니다.
 
-> Idle hook에서 무거운 작업
+> ⚠️ Idle hook에서 무거운 작업
 
 ```c
 void vApplicationIdleHook(void) {
-    log_to_flash();   /* 다른 task가 굶음 */
+    log_to_flash();
 }
 ```
 
-Idle hook은 다른 모든 task가 block일 때만 도는 곳입니다. 긴 작업을 넣으면 latency를 가늠할 수 없습니다.
+idle hook은 우선순위 0에서 돕니다. 여기서 막히면 idle task가 하는 일(삭제된 task의 메모리 정리 등)도 미뤄지고, tickless idle에도 들어가지 못합니다.
 
-> Cooperative에서 무한 루프
+> ⚠️ Cooperative에서 양보 없는 loop
 
 ```c
 for (;;) {
-    do_work();    /* yield 없음 */
+    do_work();    /* no yield, no block */
 }
 ```
 
-Cooperative와 yield 없음이 만나면 전체 시스템이 정지합니다. Watchdog이 없으면 reset도 안 됩니다.
+위 실행처럼 cooperative에서는 이 task가 양보할 때까지 다른 task가 돌지 못합니다. 이 loop가 끝나지 않으면 시스템 전체가 멈춥니다.
 
-> ISR 안에서 너무 많은 task 깨움
+> ⚠️ ISR에서 많은 task를 깨움
 
 ```c
 for (int i = 0; i < N; i++)
     xSemaphoreGiveFromISR(s[i], &hp);
 ```
 
-ISR이 길어지면 다른 ISR과 task가 모두 지연됩니다. ISR에서는 flag만 세우고 worker task가 N개를 처리하도록 합니다.
+ISR이 길어지면 그 사이 같거나 낮은 우선순위 인터럽트와 모든 task가 기다립니다. ISR에서는 하나만 깨우고, 깨어난 task가 나머지를 처리합니다.
 
 ## 정리
 
-- Scheduler는 tick, block, unblock, yield 네 시점에서만 호출됩니다.
-- Preemptive 기본에 같은 priority에 한해 time-slice가 표준입니다.
-- Cortex-M의 context switch는 HW 도움으로 1~3 µs 수준입니다.
-- Tick rate는 정밀도를, priority는 jitter를 결정합니다. 둘은 별개입니다.
-- Idle hook의 WFI 한 줄이 mA 단위 전력 차이를 만듭니다.
-- Tickless idle은 RTC wake-up이 정확해야 안전합니다.
-- ISR은 항상 짧게 유지하고, 무거운 일은 task로 넘깁니다.
+- 전환 시점은 **tick, block, unblock, yield** 넷입니다. SysTick은 전환이 필요하면 **PendSV만 걸고**, PendSV가 r4–r11을 저장·복원합니다.
+- **cooperative**(`configUSE_PREEMPTION` 0)에서는 높은 우선순위 task도 지금 task의 yield를 기다립니다. 위 실행에서는 tick 5에서 30으로 늦어졌습니다.
+- **tickless idle**은 100 tick 대기 동안 SysTick 인터럽트를 100번에서 1번으로 줄였습니다.
+- tick rate는 시간 해상도를, 우선순위와 ISR 길이는 응답 지연을 정합니다.
 
 다음 편은 **Semaphore 활용**입니다. Binary, counting, resource pool 패턴을 정리합니다.
 

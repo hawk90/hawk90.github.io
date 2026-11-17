@@ -2,7 +2,7 @@
 title: "환경 센서 활용 — BME280 온습압·SHT3x 비교"
 slug: "embedded/modern-recipes/part5-08-environmental-sensors"
 date: 2026-04-14T09:56:00
-description: "BME280·SHT3x — I2C·SPI 센서 driver 패턴."
+description: "BME280 SPI driver(calibration 읽기·보상식)와 SHT3x I2C driver(CRC-8·single shot)를 datasheet 기준으로 작성하고 host에서 보상식과 CRC를 검증합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 56
 tags: [recipes, peripheral, sensor]
@@ -12,285 +12,380 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"센서 raw value는 그냥 ADC count입니다. 계수와 compensation 공식이 datasheet에 있습니다."** 그걸 따라 적용하면 °C / %RH / hPa가 됩니다.
+> **"센서의 raw 값은 ADC count이고, °C·hPa·%RH로 바꾸는 식과 계수는 datasheet와 chip 안에 있습니다."** BME280은 chip마다 다른 calibration word를 읽어 보상식에 넣고, SHT3x는 고정된 변환식과 CRC-8로 값을 검사합니다.
 
 ## 어떤 상황에서 쓰나
 
-날씨 스테이션, 실내 공기 monitor, drone barometric altimeter, refrigeration logger, 산업 공정 monitor — *온도·습도·기압 측정*은 임베디드의 기본 임무. BME280 (Bosch) 한 chip이 셋을 모두 측정하고 I2C/SPI를 지원합니다. SHT3x (Sensirion)는 온습도만 측정하며, 정확도·동작 범위는 정확한 variant와 측정 조건을 datasheet에서 확인해야 합니다.
+실내 공기 monitor, 기상 기록기, 냉장 logger처럼 온도·습도·기압을 읽어야 하는 곳에 씁니다. Bosch BME280은 한 chip에서 셋을 재고 I2C와 SPI를 모두 지원합니다. Sensirion SHT3x-DIS는 온도·습도를 재고 I2C로만 통신합니다.
 
-이 글은 BME280 SPI driver와 SHT3x I2C driver를 모두 작성합니다.
+이 글은 STM32F407에서 BME280을 SPI로, SHT3x를 I2C로 읽는 driver를 씁니다. 수치는 Bosch BME280 datasheet BST-BME280-DS001-10 Rev 1.1(May 2015)과 Sensirion SHT3x-DIS datasheet Version 7(December 2022)에서 가져왔습니다. ARM 쪽 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall -Wextra` 경고 없이 빌드되고, calibration 해석·온도 보상식·CRC는 host에서 돌려 확인했습니다. 센서로 한 측정은 없습니다.
 
 ## 핵심 개념
 
-### BME280 chip
+### BME280
 
-```text
-Bosch BME280:
-  Temperature/humidity/pressure: range와 accuracy는 variant·조건별 datasheet 확인
+| 항목 | datasheet 값 |
+|---|---|
+| Operating range | -40…+85 °C, 0…100 % rel. humidity, 300…1100 hPa |
+| Interface | "I²C (up to 3.4 MHz) and SPI (3 and 4 wire, up to 10 MHz)" |
+| I2C 주소 | "111011x": SDO를 GND에 두면 0x76, VDDIO에 두면 0x77 |
+| SPI mode | mode '00'과 '11'을 자동 선택 |
+| SPI 주소 byte | bit 7이 RW("RW = '0' for write and RW = '1' for read"), 나머지 7 bit가 register 주소 |
 
-I2C address: 일반적으로 0x76 또는 0x77 (SDO 연결에 따라, module 확인)
-SPI: mode·최대 속도는 BME280 datasheet와 board 배선 조건 확인
-```
+### Register map
 
-### Register map (요약)
+datasheet Table 18(memory map)과 5.4절 register 설명에서 이 글이 쓰는 것만 옮겼습니다.
 
-| Address | 이름 | 역할 |
+| Address | 이름 | 내용 |
 |---------|------|------|
-| 0xD0 | id | chip ID = 0x60 |
-| 0xE0 | reset | 0xB6 write → soft reset |
-| 0xF2 | ctrl_hum | humidity oversampling |
-| 0xF4 | ctrl_meas | temp/pressure oversampling, mode |
-| 0xF5 | config | standby, filter |
-| 0xF7-FE | data | raw temp, pressure, humidity (총 8 byte) |
-| 0x88-A1 | calib1 | T, P calibration |
-| 0xE1-F0 | calib2 | H calibration |
+| 0xD0 | id | chip_id, "which is 0x60" (5.4.1) |
+| 0xE0 | reset | 0xB6을 쓰면 power-on-reset 절차로 reset |
+| 0xF3 | status | im_update[0]: calibration을 NVM에서 image register로 복사하는 중이면 1 |
+| 0xF2 | ctrl_hum | osrs_h[2:0]. "only become effective after a write operation to 'ctrl_meas'" |
+| 0xF4 | ctrl_meas | osrs_t[2:0] (bit 7:5), osrs_p[2:0] (bit 4:2), mode[1:0] (11 = normal) |
+| 0xF5 | config | t_sb[2:0] (bit 7:5), filter[2:0] (bit 4:2). "Writes to the 'config' register in normal mode may be ignored." |
+| 0xF7–0xFE | data | press (20 bit), temp (20 bit), hum (16 bit) |
+| 0x88–0xA1 | calib00..25 | dig_T1..T3, dig_P1..P9, dig_H1 |
+| 0xE1–0xE7 | calib26.. | dig_H2..H6 |
 
-### Compensation 공식
+config는 normal mode에서 쓴 값이 무시될 수 있습니다. sleep mode는 power on reset 뒤 기본값이지만, MCU만 reset되면 센서는 이전 mode를 그대로 유지하므로, 아래 코드는 Bosch SensorAPI의 `bme280_init()`처럼 먼저 0xB6으로 soft reset해 sleep으로 돌리고, start-up time(tstartup 2 ms)과 im_update가 0이 되기를 기다린 뒤 config를 쓰고 마지막에 ctrl_meas로 normal mode에 들어갑니다. data는 datasheet 4.1절 "Data register shadowing"대로 0xF7부터 한 번의 burst read로 읽어야 한 측정의 값끼리 섞이지 않습니다.
 
-raw ADC → 실제 값 변환은 *Bosch가 제공하는 fixed-point 또는 float 공식*. datasheet appendix에 있습니다.
+### Calibration word
 
-```c
-// 단순화된 float 공식 (실제는 더 복잡)
-double t_fine;
-double compensate_temp(int32_t adc_T, const calib_t *c) {
-    double var1 = (((double)adc_T) / 16384.0 - ((double)c->T1) / 1024.0) * c->T2;
-    double var2 = ((((double)adc_T) / 131072.0 - ((double)c->T1) / 8192.0) *
-                   (((double)adc_T) / 131072.0 - ((double)c->T1) / 8192.0)) * c->T3;
-    t_fine = var1 + var2;
-    return t_fine / 5120.0;   // °C
-}
-```
+datasheet Table 16은 calibration word의 위치와 type을 정합니다.
 
-손으로 안 짭니다. Bosch BME280 driver (GitHub `BoschSensortec/BME280_driver`)를 *그대로 사용*.
+| word | 주소 | type |
+|---|---|---|
+| dig_T1 | 0x88 / 0x89 | unsigned short |
+| dig_T2, dig_T3 | 0x8A–0x8D | signed short |
+| dig_P1 | 0x8E / 0x8F | unsigned short |
+| dig_P2..dig_P9 | 0x90–0x9F | signed short |
+| dig_H1 | 0xA1 | unsigned char |
+| dig_H2 | 0xE1 / 0xE2 | signed short |
+| dig_H3 | 0xE3 | unsigned char |
+| dig_H4 | 0xE4 → [11:4], 0xE5[3:0] → [3:0] | signed short |
+| dig_H5 | 0xE5[7:4] → [3:0], 0xE6 → [11:4] | signed short |
+| dig_H6 | 0xE7 | signed char |
 
-### SHT3x — CRC가 들어간 I2C
+모두 little-endian(낮은 주소가 [7:0])이고, dig_H4·dig_H5만 12 bit가 0xE5를 나눠 씁니다.
 
-SHT3x는 *모든 measurement에 CRC-8 byte*. error detection.
+### 보상식
 
-```text
-Read response: [MSB] [LSB] [CRC]
+datasheet 4.2.3절은 정수 보상식을 주면서 "it is strongly advised to use the API available from Bosch Sensortec"라고 덧붙입니다. 온도 식은 짧아 아래 코드에 옮겼고, 결과는 0.01 °C 단위("Output value of '5123' equals 51.23 DegC")입니다. 같은 계산에서 나오는 `t_fine`이 기압·습도 식의 입력이 되므로 온도를 항상 먼저 보상합니다. 기압(64-bit, Q24.8 Pa)과 습도(Q22.10 %RH) 식은 4.2.3절의 `BME280_compensate_P_int64()`·`bme280_compensate_H_int32()`를 그대로 쓰거나, Bosch [BME280_SensorAPI](https://github.com/boschsensortec/BME280_SensorAPI)(v3.5.1, BSD-3-Clause)의 `bme280_get_sensor_data()`를 씁니다.
 
-CRC-8 polynomial: 0x31
-init: 0xFF
-```
+### SHT3x-DIS
 
-CRC가 안 맞으면 *재시도*. I2C noise 환경에서 중요.
+| 항목 | datasheet 값 |
+|---|---|
+| I2C 주소 | 0x44 (ADDR → logic low, default), 0x45 (logic high) |
+| fSCL | 0 ~ 1000 kHz |
+| Single shot, high repeatability, clock stretching disabled | command 0x2400 |
+| tMEAS,h (high repeatability) | typ 12.5 ms, max 15 ms (2.4 ~ 5.5 V), max 15.5 ms (2.15 ~ 2.4 V) |
+| 읽기 | T MSB, T LSB, CRC, RH MSB, RH LSB, CRC |
+| CRC | CRC-8, polynomial 0x31, initialization 0xFF, final XOR 0x00, "CRC (0xBEEF) = 0x92" |
+| 변환 | T = −45 + 175 × S_T / (2^16 − 1) °C, RH = 100 × S_RH / (2^16 − 1) % |
+
+clock stretching을 끈 command에서는 "the sensor responds to a read header with a not acknowledge (NACK), if no data is present"이므로, tMEAS가 지나기 전에 읽으면 주소 byte에서 NACK가 납니다.
 
 ## 코드 예제
 
-### 1. BME280 SPI driver
+`spi_init_master()`·`spi_xfer8()`은 [4-08](/blog/embedded/modern-recipes/part4-08-spi-driver), `i2c_write()`·`i2c_read()`는 [4-09](/blog/embedded/modern-recipes/part4-09-i2c-driver), `delay_ms()`는 [4-06](/blog/embedded/modern-recipes/part4-06-systick-timer)의 것입니다. 4-08의 SPI1은 BR = 3(5.25 MHz)이면 BME280의 10 MHz 상한 안이고, 4-09의 400 kHz는 SHT3x의 1000 kHz 안입니다.
+
+### 1. BME280 SPI register 접근
 
 ```c
-#include "bme280_defs.h"
-
-// CS=PA4
-#define CS_LOW()  GPIOA->BSRR = (1u << (4+16))
-#define CS_HIGH() GPIOA->BSRR = (1u << 4)
-
-static uint8_t bme_read(uint8_t reg) {
-    uint8_t v;
-    CS_LOW();
-    spi_xfer8(reg | 0x80);   // read = bit7 set
-    v = spi_xfer8(0xFF);
-    while (SPI1->SR & SPI_SR_BSY);
-    CS_HIGH();
-    return v;
-}
+// CS=PA4 (4-08 spi_init_master() makes it an output, high)
+#define CS_LOW()  (GPIOA->BSRR = (1u << (4+16)))
+#define CS_HIGH() (GPIOA->BSRR = (1u << 4))
 
 static void bme_read_n(uint8_t reg, uint8_t *buf, uint16_t n) {
     CS_LOW();
-    spi_xfer8(reg | 0x80);
+    spi_xfer8(reg | 0x80);                 // RW = 1: read
     for (uint16_t i = 0; i < n; i++) buf[i] = spi_xfer8(0xFF);
     while (SPI1->SR & SPI_SR_BSY);
     CS_HIGH();
 }
 
+static uint8_t bme_read(uint8_t reg) {
+    uint8_t v;
+    bme_read_n(reg, &v, 1);
+    return v;
+}
+
 static void bme_write(uint8_t reg, uint8_t val) {
     CS_LOW();
-    spi_xfer8(reg & 0x7F);   // write = bit7 clear
+    spi_xfer8(reg & 0x7F);                 // RW = 0: write
     spi_xfer8(val);
     while (SPI1->SR & SPI_SR_BSY);
     CS_HIGH();
 }
+```
 
-// Calibration
+### 2. Calibration 해석과 온도 보상
+
+```c
+/* bme280_cal.h */
+#include <stdint.h>
+
 typedef struct {
     uint16_t T1; int16_t T2, T3;
     uint16_t P1; int16_t P2, P3, P4, P5, P6, P7, P8, P9;
-    uint8_t H1; int16_t H2; uint8_t H3;
-    int16_t H4, H5; int8_t H6;
+    uint8_t  H1; int16_t H2; uint8_t H3;
+    int16_t  H4, H5; int8_t H6;
 } bme_calib_t;
 
-static bme_calib_t cal;
+#define U16(b, i) ((uint16_t)((b)[i] | ((b)[(i) + 1] << 8)))
+#define S16(b, i) ((int16_t)U16(b, i))
 
-void bme_init(void) {
-    if (bme_read(0xD0) != 0x60) {
-        printf("BME280 not found!\n");
-        return;
-    }
-
-    // Read calibration
-    uint8_t buf[26];
-    bme_read_n(0x88, buf, 26);
-    cal.T1 = buf[0]  | (buf[1]  << 8);
-    cal.T2 = buf[2]  | (buf[3]  << 8);
-    cal.T3 = buf[4]  | (buf[5]  << 8);
-    cal.P1 = buf[6]  | (buf[7]  << 8);
-    // ... P2-P9, H1
-    cal.H1 = buf[25];
-
-    bme_read_n(0xE1, buf, 7);
-    cal.H2 = buf[0] | (buf[1] << 8);
-    cal.H3 = buf[2];
-    cal.H4 = (buf[3] << 4) | (buf[4] & 0xF);
-    cal.H5 = (buf[5] << 4) | (buf[4] >> 4);
-    cal.H6 = buf[6];
-
-    // Configuration: humidity ×1, temp ×1, pressure ×1, normal mode
-    bme_write(0xF2, 0x01);            // ctrl_hum
-    bme_write(0xF4, (1<<5)|(1<<2)|3); // ctrl_meas: T×1, P×1, normal
-    bme_write(0xF5, (4<<5)|(0<<2));   // config 예: standby/filter 설정은 datasheet 확인
+/* a = 26 bytes from 0x88, h = 7 bytes from 0xE1 (Table 16) */
+static void bme_parse_calib(const uint8_t *a, const uint8_t *h, bme_calib_t *c) {
+    c->T1 = U16(a, 0);  c->T2 = S16(a, 2);  c->T3 = S16(a, 4);
+    c->P1 = U16(a, 6);  c->P2 = S16(a, 8);  c->P3 = S16(a, 10);
+    c->P4 = S16(a, 12); c->P5 = S16(a, 14); c->P6 = S16(a, 16);
+    c->P7 = S16(a, 18); c->P8 = S16(a, 20); c->P9 = S16(a, 22);
+    c->H1 = a[25];                                   /* 0xA1 */
+    c->H2 = S16(h, 0);                               /* 0xE1/0xE2 */
+    c->H3 = h[2];                                    /* 0xE3 */
+    c->H4 = (int16_t)(((int8_t)h[3] * 16) | (h[4] & 0x0F));   /* 0xE4[11:4], 0xE5[3:0] */
+    c->H5 = (int16_t)(((int8_t)h[5] * 16) | (h[4] >> 4));     /* 0xE6[11:4], 0xE5[7:4] */
+    c->H6 = (int8_t)h[6];                            /* 0xE7 */
 }
 
-void bme_read_measurements(float *temp_c, float *pres_hpa, float *rh) {
-    uint8_t buf[8];
-    bme_read_n(0xF7, buf, 8);
-
-    int32_t adc_P = ((int32_t)buf[0] << 12) | ((int32_t)buf[1] << 4) | (buf[2] >> 4);
-    int32_t adc_T = ((int32_t)buf[3] << 12) | ((int32_t)buf[4] << 4) | (buf[5] >> 4);
-    int32_t adc_H = ((int32_t)buf[6] << 8)  |  buf[7];
-
-    *temp_c   = compensate_temp(adc_T, &cal);
-    *pres_hpa = compensate_pres(adc_P, &cal) / 100.0;
-    *rh       = compensate_humid(adc_H, &cal);
+/* datasheet 4.2.3: 0.01 degC; t_fine feeds the P and H formulas */
+static int32_t t_fine;
+static int32_t bme_comp_T(int32_t adc_T, const bme_calib_t *c) {
+    int32_t var1 = ((((adc_T >> 3) - ((int32_t)c->T1 << 1))) * ((int32_t)c->T2)) >> 11;
+    int32_t var2 = (((((adc_T >> 4) - ((int32_t)c->T1)) *
+                      ((adc_T >> 4) - ((int32_t)c->T1))) >> 12) * ((int32_t)c->T3)) >> 14;
+    t_fine = var1 + var2;
+    return (t_fine * 5 + 128) >> 8;
 }
 ```
 
-(`compensate_*` 함수는 Bosch reference에서 그대로 가져옴.)
+`(int8_t)h[3] * 16`은 Bosch SensorAPI의 `parse_humidity_calib_data()`처럼 12 bit 값의 상위 byte를 부호 있는 값으로 읽고 왼쪽으로 4 bit 옮깁니다.
 
-### 2. SHT3x I2C driver
+### 3. BME280 초기화와 측정
 
 ```c
-#define SHT3X_ADDR 0x44   // 또는 0x45
+#include "bme280_cal.h"
 
-static uint8_t crc8(const uint8_t *data, size_t n) {
+static bme_calib_t cal;
+
+int bme_init(void) {
+    if (bme_read(0xD0) != 0x60) return -1;           // chip_id
+
+    bme_write(0xE0, 0xB6);                           // soft reset -> sleep mode
+    delay_ms(3);                                     // > 2 ms (tstartup, delay_ms per 4-06)
+    while (bme_read(0xF3) & 0x01) { }                // im_update: NVM copy in progress
+
+    uint8_t a[26], h[7];
+    bme_read_n(0x88, a, sizeof a);
+    bme_read_n(0xE1, h, sizeof h);
+    bme_parse_calib(a, h, &cal);
+
+    // sleep mode after the soft reset: config is not ignored here
+    bme_write(0xF5, (5u << 5) | (0u << 2));          // t_sb = 1000 ms, filter off
+    bme_write(0xF2, 0x01);                           // osrs_h = x1
+    bme_write(0xF4, (1u << 5) | (1u << 2) | 3u);     // osrs_t = x1, osrs_p = x1, normal
+    return 0;
+}
+
+void bme_read_raw(int32_t *adc_P, int32_t *adc_T, int32_t *adc_H) {
+    uint8_t b[8];
+    bme_read_n(0xF7, b, 8);                          // one burst: shadowing
+    *adc_P = ((int32_t)b[0] << 12) | ((int32_t)b[1] << 4) | (b[2] >> 4);
+    *adc_T = ((int32_t)b[3] << 12) | ((int32_t)b[4] << 4) | (b[5] >> 4);
+    *adc_H = ((int32_t)b[6] << 8)  |  b[7];
+}
+
+int32_t bme_temp_centi(void) {
+    int32_t p, t, h;
+    bme_read_raw(&p, &t, &h);
+    return bme_comp_T(t, &cal);                      // 2345 = 23.45 degC
+}
+```
+
+### 4. SHT3x I2C driver
+
+```c
+/* sht3x_crc.h */
+#include <stddef.h>
+#include <stdint.h>
+
+/* CRC-8, poly 0x31, init 0xFF, no reflection, final XOR 0x00 (Table 20) */
+static uint8_t sht_crc8(const uint8_t *data, size_t n) {
     uint8_t crc = 0xFF;
     for (size_t i = 0; i < n; i++) {
         crc ^= data[i];
-        for (int j = 0; j < 8; j++) {
-            crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
-        }
+        for (int j = 0; j < 8; j++)
+            crc = (crc & 0x80) ? (uint8_t)((crc << 1) ^ 0x31) : (uint8_t)(crc << 1);
     }
     return crc;
 }
 
-int sht3x_read(float *temp_c, float *rh) {
-    // Trigger single shot, high repeatability
-    uint8_t cmd[] = {0x24, 0x00};
-    i2c_write(SHT3X_ADDR, cmd, 2);
-
-    delay_ms(20);   // high repeatability: max 15.5 ms
-
-    uint8_t buf[6];
-    i2c_read(SHT3X_ADDR, buf, 6);
-
-    // Check CRC
-    if (crc8(&buf[0], 2) != buf[2] || crc8(&buf[3], 2) != buf[5])
+/* 6 bytes: T MSB, T LSB, CRC, RH MSB, RH LSB, CRC */
+static int sht_decode(const uint8_t b[6], int32_t *t_centi, int32_t *rh_centi) {
+    if (sht_crc8(&b[0], 2) != b[2] || sht_crc8(&b[3], 2) != b[5])
         return -1;
-
-    uint16_t t_raw = (buf[0] << 8) | buf[1];
-    uint16_t h_raw = (buf[3] << 8) | buf[4];
-
-    *temp_c = -45.0f + 175.0f * t_raw / 65535.0f;
-    *rh     = 100.0f * h_raw / 65535.0f;
+    uint32_t st  = ((uint32_t)b[0] << 8) | b[1];
+    uint32_t srh = ((uint32_t)b[3] << 8) | b[4];
+    *t_centi  = -4500 + (int32_t)((17500u * st) / 65535u);   // 0.01 degC
+    *rh_centi = (int32_t)((10000u * srh) / 65535u);          // 0.01 %RH
     return 0;
 }
 ```
 
-SHT3x의 변환식은 비교적 단순한 곱셈·덧셈이지만, command·repeatability·variant별 timing은 datasheet를 따른다.
-
-### 3. 평균과 outlier 필터
-
-센서는 *noise spike*가 있을 수 있습니다. moving average나 median filter를 적용할 수 있지만, 응답 지연과 애플리케이션 요구사항을 함께 정합니다.
-
 ```c
-#define BUF 16
-static float temp_buf[BUF];
-static int buf_idx;
+#include "sht3x_crc.h"
+#define SHT3X_ADDR 0x44                  // ADDR pin low
 
-float temp_smooth(float new) {
-    temp_buf[buf_idx++] = new;
-    if (buf_idx >= BUF) buf_idx = 0;
+int sht3x_read(int32_t *t_centi, int32_t *rh_centi) {
+    const uint8_t cmd[2] = {0x24, 0x00}; // single shot, high repeatability, no stretching
+    if (i2c_write(SHT3X_ADDR, cmd, 2) != 0) return -1;
 
-    // sort copy, take median
-    float sorted[BUF];
-    memcpy(sorted, temp_buf, sizeof(sorted));
-    for (int i = 1; i < BUF; i++) {
-        float k = sorted[i]; int j = i - 1;
-        while (j >= 0 && sorted[j] > k) { sorted[j+1] = sorted[j]; j--; }
-        sorted[j+1] = k;
-    }
-    return sorted[BUF/2];
+    delay_ms(17);                        // > 16 ms (4-06): covers tMEAS,h max 15.5 ms
+
+    uint8_t b[6];
+    if (i2c_read(SHT3X_ADDR, b, 6) != 0) return -1;   // NACK if not ready
+    return sht_decode(b, t_centi, rh_centi);
 }
 ```
 
+변환식을 정수로 옮기면서 0.01 단위로 잘랐습니다. `17500u * st`의 최대값은 17500 × 65535 = 1,146,862,500으로 `uint32_t`에 들어갑니다.
+
 ## 측정 / 동작 확인
 
-설치 환경과 datasheet operating range 안에서 값이 예상한 방향으로 변하는지 확인합니다.
+### host에서 calibration·보상식·CRC 확인
 
-**정상 측정:**
+보드 없이 확인할 수 있는 세 가지를 host에서 돌렸습니다.
 
-- T = 23.4 °C
-- P = 1013.2 hPa
-- RH = 47.3 %
+1. **CRC**: datasheet Table 20의 예 "CRC (0xBEEF) = 0x92"를 `sht_crc8()`이 재현하는지, 그리고 CRC가 틀린 byte열을 `sht_decode()`가 거부하는지.
+2. **calibration 해석**: 임의의 calibration word(실제 chip 값이 아니라 이 글이 고른 값, dig_H4·H5는 음수 포함)를 Table 16 배치대로 byte에 써 넣은 뒤 `bme_parse_calib()`이 같은 word를 돌려주는지.
+3. **온도 보상**: 정수 식 `bme_comp_T()`와 datasheet 8.1절의 double 식 `BME280_compensate_T_double()`이 같은 입력에서 0.01 °C 안에서 맞는지. 2의 calibration으로 adc_T를 300000부터 700000까지 1000 간격으로 넣습니다.
 
-**이상 측정:**
+```c
+/* sensor_host.c */
+#include <stdio.h>
+#include "bme280_cal.h"
+#include "sht3x_crc.h"
 
-- T = -40.0 °C (sensor 미연결 또는 spi 오류)
-- T = +85.0 °C (calibration 잘못)
-- P = 0 (i2c address 잘못)
+/* datasheet 8.1 double-precision temperature */
+static double comp_T_double(int32_t adc_T, const bme_calib_t *c) {
+    double var1 = ((double)adc_T / 16384.0 - (double)c->T1 / 1024.0) * (double)c->T2;
+    double var2 = ((double)adc_T / 131072.0 - (double)c->T1 / 8192.0) *
+                  ((double)adc_T / 131072.0 - (double)c->T1 / 8192.0) * (double)c->T3;
+    return (var1 + var2) / 5120.0;
+}
 
-검증: *손으로 sensor를 잡으면* 온도가 1-2°C 올라야 함. *입김*을 불면 RH가 80%+로 튐. 안 변하면 sensor가 동작 안 함.
+static void put16(uint8_t *b, int i, int v) { b[i] = (uint8_t)v; b[i + 1] = (uint8_t)(v >> 8); }
+
+int main(void) {
+    const uint8_t beef[2] = {0xBE, 0xEF};
+    printf("crc8(BEEF) = 0x%02X\n", sht_crc8(beef, 2));
+
+    uint8_t s[6] = {0x66, 0x66, 0, 0x80, 0x00, 0};
+    s[2] = sht_crc8(&s[0], 2); s[5] = sht_crc8(&s[3], 2);
+    int32_t t, rh;
+    int r = sht_decode(s, &t, &rh);
+    printf("sht 0x6666/0x8000: rc=%d T=%ld.%02ld C RH=%ld.%02ld %%\n",
+           r, (long)t / 100, (long)t % 100, (long)rh / 100, (long)rh % 100);
+    s[4] ^= 1;
+    printf("sht with flipped bit: rc=%d\n", sht_decode(s, &t, &rh));
+
+    const bme_calib_t want = {28000, 26000, 50, 36000, -10500, 3000, 7000, -50,
+                              -7, 9900, -10230, 4285, 75, 360, 0, -300, -1000, 30};
+    uint8_t a[26] = {0}, h[7] = {0};
+    put16(a, 0, want.T1); put16(a, 2, want.T2); put16(a, 4, want.T3);
+    put16(a, 6, want.P1); put16(a, 8, want.P2); put16(a, 10, want.P3);
+    put16(a, 12, want.P4); put16(a, 14, want.P5); put16(a, 16, want.P6);
+    put16(a, 18, want.P7); put16(a, 20, want.P8); put16(a, 22, want.P9);
+    a[25] = want.H1; put16(h, 0, want.H2); h[2] = want.H3;
+    h[3] = (uint8_t)(want.H4 >> 4);
+    h[4] = (uint8_t)((want.H4 & 0x0F) | ((want.H5 & 0x0F) << 4));
+    h[5] = (uint8_t)(want.H5 >> 4);
+    h[6] = (uint8_t)want.H6;
+    bme_calib_t got;
+    bme_parse_calib(a, h, &got);
+    /* compare field by field: struct padding is not part of the data */
+    int same = got.T1 == want.T1 && got.T2 == want.T2 && got.T3 == want.T3 &&
+               got.P1 == want.P1 && got.P2 == want.P2 && got.P3 == want.P3 &&
+               got.P4 == want.P4 && got.P5 == want.P5 && got.P6 == want.P6 &&
+               got.P7 == want.P7 && got.P8 == want.P8 && got.P9 == want.P9 &&
+               got.H1 == want.H1 && got.H2 == want.H2 && got.H3 == want.H3 &&
+               got.H4 == want.H4 && got.H5 == want.H5 && got.H6 == want.H6;
+    printf("calib round trip: %s (H4=%d H5=%d)\n", same ? "ok" : "MISMATCH",
+           got.H4, got.H5);
+
+    double maxdiff = 0;
+    for (int32_t adc = 300000; adc <= 700000; adc += 1000) {
+        double d = bme_comp_T(adc, &got) / 100.0 - comp_T_double(adc, &got);
+        if (d < 0) d = -d;
+        if (d > maxdiff) maxdiff = d;
+    }
+    printf("T int vs double, 401 points: max |diff| = %.4f C\n", maxdiff);
+    printf("adc_T=500000 -> int %ld, double %.4f C\n",
+           (long)bme_comp_T(500000, &got), comp_T_double(500000, &got));
+    return 0;
+}
+```
+
+```bash
+clang -O2 -Wall -o sensor_host sensor_host.c && ./sensor_host
+```
+
+```text
+crc8(BEEF) = 0x92
+sht 0x6666/0x8000: rc=0 T=25.00 C RH=50.00 %
+sht with flipped bit: rc=-1
+calib round trip: ok (H4=-300 H5=-1000)
+T int vs double, 401 points: max |diff| = 0.0052 C
+adc_T=500000 -> int 1612, double 16.1186 C
+```
+
+CRC 예제값 0x92가 나오고, 0x6666(26214)은 65535의 정확히 0.4이므로 T = 25.0000 °C이고, 0x8000은 50.0008 %RH로 잘려 50.00이 됩니다. bit 하나를 뒤집으면 -1입니다. calibration은 음수 dig_H4·H5까지 같은 word로 돌아오고, 정수 온도 식은 401개 입력에서 double 식과 최대 0.0052 °C 차이로 출력 1 LSB(0.01 °C)보다 작습니다. 이 calibration 값은 실제 chip 값이 아니므로 16.12 °C라는 결과 자체에는 의미가 없습니다.
+
+### 보드에서
+
+`bme_init()`이 -1이면 chip_id 0x60을 못 읽은 것이므로 SPI 배선과 CS부터 봅니다. SHT3x에서 `i2c_read()`가 실패하면, 주소(ADDR 핀)와 대기 시간을 봅니다. 대기가 tMEAS보다 짧으면 datasheet대로 NACK가 나므로, 이 경우는 실패가 정상 동작입니다.
 
 ## 자주 보는 함정
 
-> ⚠️ Calibration data를 읽지 않음
+> ⚠️ calibration을 읽지 않고 raw 값을 씀
 
-raw ADC만 출력해서 *나쁜 값*. 항상 calibration 먼저 읽고 compensation 적용.
+BME280의 raw 값은 chip마다 다른 calibration word를 거쳐야 단위가 생깁니다. `bme_init()`에서 0x88·0xE1 두 구간을 다 읽습니다.
 
-> ⚠️ SHT3x command 후 *대기 안 함*
+> ⚠️ 온도보다 기압·습도를 먼저 보상
 
-15 ms 안 기다리고 read하면 *이전 measurement* 또는 *NACK*. delay 필수.
+기압·습도 식은 온도 식이 남긴 `t_fine`을 씁니다. 같은 burst에서 읽은 adc_T로 `bme_comp_T()`를 먼저 부릅니다.
 
-> ⚠️ I2C pull-up 약함
+> ⚠️ normal mode에서 config를 바꿈
 
-400 kHz fast mode에 internal pull-up만 쓰면 *rise time 부족*. 4.7 kΩ external.
+datasheet는 "Writes to the 'config' register in normal mode may be ignored."라고 적습니다. config를 바꾸려면 ctrl_meas로 sleep mode(mode = 00)에 넣고 쓴 뒤 다시 normal로 돌립니다.
 
-> ⚠️ Self-heating
+> ⚠️ ctrl_hum만 쓰고 끝냄
 
-센서 자체 *발열로 측정 오차*. continuous mode + high oversampling이면 +0.5°C 오차. *intermittent mode* (1초 한 번 측정 후 sleep) 권장.
+ctrl_hum은 ctrl_meas를 쓸 때 적용됩니다. 습도 oversampling을 바꾸면 ctrl_meas도 한 번 다시 씁니다.
 
-> ⚠️ Calibration overflow
+> ⚠️ data를 register마다 따로 읽음
 
-float이 아닌 *int 공식*에서 overflow. Bosch reference의 `int32_t`·`int64_t` 형식 정확히 따라야.
+0xF7–0xFE를 여러 번에 나눠 읽으면 그 사이 새 측정이 들어와 기압·온도·습도가 서로 다른 측정에서 올 수 있습니다. datasheet 4.1절대로 burst read 한 번으로 읽습니다.
 
-> ⚠️ CRC를 무시
+> ⚠️ SHT3x CRC를 건너뜀
 
-I2C error가 가끔 발생. CRC 안 보면 *spike value*가 정상으로 보고됨.
+CRC가 틀린 값은 버리고 다시 읽습니다. 위 host 실행에서 bit 하나를 뒤집은 byte열은 `sht_decode()`가 -1로 거부합니다.
 
 ## 정리
 
-- BME280 = **T + P + H 통합**, I2C/SPI 둘 다, calibration + compensation 공식 필수.
-- SHT3x = T + H, *CRC-8 byte*가 모든 measurement에 포함.
-- **Bosch driver를 그대로 사용**, compensation 공식 직접 안 짬.
-- **moving average + median filter**로 spike 제거.
-- **외부 pull-up 4.7 kΩ**, **400 kHz fast mode** 안전.
+- BME280은 chip_id가 **0x60**이고, SPI는 bit 7이 RW이며, calibration은 **0x88–0xA1·0xE1–0xE7**(Table 16)에 있습니다.
+- 설정 순서는 **sleep에서 config → ctrl_hum → ctrl_meas(normal)**입니다.
+- 온도 보상은 4.2.3절 정수 식으로 **`t_fine`을 먼저** 만들고, 기압·습도는 datasheet 식이나 Bosch SensorAPI로 계산합니다.
+- SHT3x는 **0x2400** single shot, **tMEAS,h max 15 ms**, CRC-8 **0x31/0xFF**를 씁니다.
+- host에서 **CRC 예제값, calibration 해석, 정수·double 온도 식 일치**를 확인했습니다.
 
-다음 편은 **IMU (가속도·자이로·지자기)**입니다. MPU6050, BMI270 driver와 sensor fusion 입력 단계를 다룹니다.
+다음 편은 **IMU 센서**입니다. MPU-6050 초기화·14 byte burst read·Data Ready 인터럽트와 complementary filter를 다룹니다.
 
 ## 관련 항목
 
 - [4-08: SPI 드라이버](/blog/embedded/modern-recipes/part4-08-spi-driver)
 - [4-09: I2C 드라이버](/blog/embedded/modern-recipes/part4-09-i2c-driver)
 - [5-09: IMU 센서](/blog/embedded/modern-recipes/part5-09-imu-sensor)
-- 9-05: PID 제어 기본

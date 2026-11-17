@@ -40,29 +40,29 @@
 }
 \draw[sig] (0.5 + 16*0.25 - 0.13, \ysck) -- (8.5, \ysck);
 
-% MOSI: byte cells (address A5, then data 01)
+% MOSI: byte cells (command A5, then arg 01); valid before each byte's first rising edge (mode 0)
 \node[lbl, anchor=east] at (-0.3, \ymosi + 0.3) {MOSI};
-\draw[cell] (0.5, \ymosi) rectangle (2.5, \ymosi + 0.6);
-\node[bitlbl] at (1.5, \ymosi + 0.3) {0xA5 (cmd)};
-\draw[cell] (2.6, \ymosi) rectangle (4.5, \ymosi + 0.6);
-\node[bitlbl] at (3.55, \ymosi + 0.3) {0x01 (arg)};
+\draw[cell] (0.2, \ymosi) rectangle (2.4, \ymosi + 0.6);
+\node[bitlbl] at (1.3, \ymosi + 0.3) {0xA5 (cmd)};
+\draw[cell] (2.42, \ymosi) rectangle (4.42, \ymosi + 0.6);
+\node[bitlbl] at (3.42, \ymosi + 0.3) {0x01 (arg)};
 % Lines for idle
-\draw[sigm] (-0.5, \ymosi + 0.3) -- (0.5, \ymosi + 0.3);
-\draw[sigm] (4.5, \ymosi + 0.3) -- (8.5, \ymosi + 0.3);
+\draw[sigm] (-0.5, \ymosi + 0.3) -- (0.2, \ymosi + 0.3);
+\draw[sigm] (4.42, \ymosi + 0.3) -- (8.5, \ymosi + 0.3);
 
 % MISO: only second byte returns data, first is 0x00 (idle)
 \node[lbl, anchor=east] at (-0.3, \ymiso + 0.3) {MISO};
-\draw[cell] (0.5, \ymiso) rectangle (2.5, \ymiso + 0.6);
-\node[bitlbl] at (1.5, \ymiso + 0.3) {0x00};
-\draw[cell] (2.6, \ymiso) rectangle (4.5, \ymiso + 0.6);
-\node[bitlbl] at (3.55, \ymiso + 0.3) {0x42 (data)};
-\draw[sigs] (-0.5, \ymiso + 0.3) -- (0.5, \ymiso + 0.3);
-\draw[sigs] (4.5, \ymiso + 0.3) -- (8.5, \ymiso + 0.3);
+\draw[cell] (0.2, \ymiso) rectangle (2.4, \ymiso + 0.6);
+\node[bitlbl] at (1.3, \ymiso + 0.3) {0x00};
+\draw[cell] (2.42, \ymiso) rectangle (4.42, \ymiso + 0.6);
+\node[bitlbl] at (3.42, \ymiso + 0.3) {0x42 (data)};
+\draw[sigs] (-0.5, \ymiso + 0.3) -- (0.2, \ymiso + 0.3);
+\draw[sigs] (4.42, \ymiso + 0.3) -- (8.5, \ymiso + 0.3);
 
 % Annotation arrows
 \draw[->, draw=focusc, line width=0.4pt]
   (1.5, -0.4) -- (1.5, \ymosi - 0.05);
-\node[bitlbl, text=focusc, anchor=north] at (1.5, -0.4) {address byte};
+\node[bitlbl, text=focusc, anchor=north] at (1.5, -0.4) {command byte};
 
 \draw[->, draw=focusc, line width=0.4pt]
   (3.55, -0.4) -- (3.55, \ymiso - 0.05);

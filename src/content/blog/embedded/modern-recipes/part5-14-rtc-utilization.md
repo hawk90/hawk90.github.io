@@ -21,7 +21,7 @@ topics: ["embedded"]
 이 글의 기준은 다음과 같습니다.
 
 - 부품: STM32F407, RTC clock = LSE 32.768 kHz
-- 레지스터 동작: [RM0090 Rev 22](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) 26장(RTC)과 7장(RCC)
+- 레지스터 동작(st.com이 응답하지 않아, Rev 22 본문을 옮긴 [stm32.dirba.io 판](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/26-real-time-clock-rtc/)으로 대조): [RM0090 Rev 22](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) 26장(RTC)과 7장(RCC)
 - 레지스터 이름: [cmsis-device-f4 v2.6.9 `stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)
 - 확인용 `main`이 쓰는 함수: UART로 retarget한 `_write`([3-07: C 런타임](/blog/embedded/modern-recipes/part3-07-c-runtime)), [4-06: SysTick 타이머](/blog/embedded/modern-recipes/part4-06-systick-timer)의 "delay_ms" 절 `delay_ms`
 
@@ -87,8 +87,9 @@ TAMPFLT = `00`(edge 검출)에서 TAMP1TRG = 0이면 rising edge가 event입니�
 static void rtc_unlock(void) { RTC->WPR = 0xCA; RTC->WPR = 0x53; }
 static void rtc_lock(void)   { RTC->WPR = 0xFF; }   /* wrong key re-enables protection */
 
-/* ISR flags are rc_w0 and INIT is the only rw bit, so every ISR access below
-   is a plain write: 1 in a flag position has no effect. */
+/* ISR event flags are rc_w0, status bits are read-only and INIT is the only
+   rw bit, so every ISR access below is a plain write: 1 in any other
+   position has no effect. */
 static void rtc_enter_init(void) {
     RTC->ISR = 0xFFFFFFFFu;                  /* INIT = 1 (LL_RTC_EnableInitMode) */
     while (!(RTC->ISR & RTC_ISR_INITF));
@@ -108,7 +109,7 @@ static uint32_t from_bcd(uint32_t v) { return (v >> 4) * 10u + (v & 0xFu); }
 static uint32_t to_bcd(uint32_t v)   { return ((v / 10u) << 4) | (v % 10u); }
 ```
 
-WPR key 없이 쓸 수 있는 것은 ISR[13:8], TAFCR, BKPxR뿐이고, 나머지 RTC 레지스터는 key 두 바이트를 써야 열립니다(RM0090 26.3.5 "RTC register write protection"). RTC_ISR에서 rw bit는 INIT 하나이고 flag는 모두 rc_w0입니다(RM0090 26.6.4). 그래서 세 helper 모두 `|=`·`&=` 대신 값을 직접 씁니다. 읽기와 쓰기 사이에 다른 flag가 서면 `|=`·`&=`는 그 flag에 읽어 둔 0을 다시 써서 지워 버리지만, 직접 쓰기는 다른 flag 자리에 1을 쓰므로 영향이 없습니다. `rtc_set`의 초기화 구간에 TAMP1F나 ALRAF가 서도 남는 이유입니다. 쓰는 값은 [HAL v1.8.3 `stm32f4xx_ll_rtc.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Inc/stm32f4xx_ll_rtc.h)의 `LL_RTC_EnableInitMode`·`LL_RTC_DisableInitMode`, [`stm32f4xx_hal_rtc.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Inc/stm32f4xx_hal_rtc.h)의 `__HAL_RTC_ALARM_CLEAR_FLAG`와 같습니다.
+WPR key 없이 쓸 수 있는 것은 ISR[13:8], TAFCR, BKPxR뿐이고, 나머지 RTC 레지스터는 key 두 바이트를 써야 열립니다(RM0090 26.3.5 "RTC register write protection"). RTC_ISR에서 rw bit는 INIT 하나이고, 나머지는 rc_w0 flag(TAMP2F~ALRAF, RSF)이거나 읽기 전용(r) status bit입니다(RM0090 26.6.4). 그래서 세 helper 모두 `|=`·`&=` 대신 값을 직접 씁니다. 읽기와 쓰기 사이에 다른 flag가 서면 `|=`·`&=`는 그 flag에 읽어 둔 0을 다시 써서 지워 버리지만, 직접 쓰기는 다른 flag 자리에 1을 쓰므로 영향이 없습니다. `rtc_set`의 초기화 구간에 TAMP1F나 ALRAF가 서도 남는 이유입니다. 쓰는 값은 [HAL v1.8.3 `stm32f4xx_ll_rtc.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Inc/stm32f4xx_ll_rtc.h)의 `LL_RTC_EnableInitMode`·`LL_RTC_DisableInitMode`, [`stm32f4xx_hal_rtc.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Inc/stm32f4xx_hal_rtc.h)의 `__HAL_RTC_ALARM_CLEAR_FLAG`와 같습니다.
 
 ### 2. LSE 활성화 + RTC init
 
