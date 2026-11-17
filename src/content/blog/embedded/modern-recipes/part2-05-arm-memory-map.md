@@ -155,7 +155,7 @@ MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;   // keep the default
 __DSB(); __ISB();
 ```
 
-이 글의 이전 판은 `MPU_RASR_S_Msk | MPU_RASR_B_Msk`만 켜고 `MPU->CTRL = MPU_CTRL_ENABLE_Msk`로 끝냈습니다. 그 코드에는 두 가지 문제가 있습니다. 첫째, Table B3-13에서 TEX=000, C=0, B=1은 Normal non-cacheable이 아니라 "Shared device"입니다. 둘째, PRIVDEFENA 없이 MPU를 켜면 region에 들지 않은 주소, 곧 코드와 stack까지 접근할 수 없게 됩니다. AP도 0(no access)입니다. 두 버전을 `mps2-an500`에서 CMSIS 5.9.0 `core_cm7.h`로 빌드해 돌린 결과입니다.
+`MPU_RASR_S_Msk | MPU_RASR_B_Msk`만 켜고 `MPU->CTRL = MPU_CTRL_ENABLE_Msk`로 끝내는 설정에는 두 가지 문제가 있습니다. 첫째, Table B3-13에서 TEX=000, C=0, B=1은 Normal non-cacheable이 아니라 "Shared device"입니다. 둘째, PRIVDEFENA 없이 MPU를 켜면 region에 들지 않은 주소, 곧 코드와 stack까지 접근할 수 없게 됩니다. AP도 0(no access)입니다. 두 버전을 `mps2-an500`에서 CMSIS 5.9.0 `core_cm7.h`로 빌드해 돌린 결과입니다.
 
 ```text
 ### mpu-post.elf (post's original code) on mps2-an500
