@@ -39,7 +39,7 @@ torch.onnx.export(model, dummy, "resnet50.onnx",
                   opset_version=17)
 ```
 
-이전 판의 `pretrained=True`는 지금의 torchvision API인 `weights=`로 바꿨습니다. 위의 `weights=None` 호출은 torch 2.15에서 그대로 돌지만, 결과물이 예전 exporter와 다릅니다.
+torchvision은 `pretrained=` 대신 `weights=`를 씁니다. 위의 `weights=None` 호출은 torch 2.15에서 그대로 돌지만, 결과물이 예전 exporter와 다릅니다.
 
 ```text
 UserWarning ... 'dynamic_axes' is not recommended when dynamo=True ... Supply the 'dynamic_shapes' argument
@@ -118,7 +118,7 @@ ONNX Runtime main의 `include/onnxruntime/core/graph/constants.h`에 정의된 �
 | `SNPEExecutionProvider` | Qualcomm SNPE |
 | `XnnpackExecutionProvider` | XNNPACK |
 
-이전 판의 `NNAPIExecutionProvider`·`SnpeExecutionProvider`는 철자가 틀렸고, `ROCMExecutionProvider`·`ACLExecutionProvider`는 현재 main의 `constants.h`와 `onnxruntime/core/providers/` 디렉터리에 없어 뺐습니다.
+`NNAPIExecutionProvider`·`SnpeExecutionProvider`가 아니라 `NnapiExecutionProvider`·`SNPEExecutionProvider`가 맞는 철자이고, `ROCMExecutionProvider`·`ACLExecutionProvider`는 현재 main의 `constants.h`와 `onnxruntime/core/providers/` 디렉터리에 없습니다.
 
 providers 목록은 **앞에 있는 EP부터** node를 가져갑니다. 앞 EP가 지원하지 않는 node만 뒤로 넘어갑니다. 목록에 그 build에 없는 EP를 적으면 오류가 아니라 경고만 나고 빠집니다.
 
@@ -150,7 +150,7 @@ sess = ort.InferenceSession("resnet50.onnx",
 
 CoreML EP가 graph 전체를 node 하나로 가져가면 CPU EP보다 10배 넘게 빨랐습니다. 순서를 `CPU`, `CoreML`로 바꾸면 CPU EP가 모든 node를 먼저 가져가 CoreML은 하나도 받지 못했습니다. CPU EP 대비 최대 절대 오차는 `CPUOnly`에서 5.3e-05, 나머지 설정에서 0.25~1.05였고, 이 글에서는 그 원인을 따로 확인하지 않았습니다. 실제 모델에서는 정확도 지표로 다시 비교합니다.
 
-이전 판의 option 이름은 CoreML EP가 받지 않습니다. 그대로 넣은 결과입니다.
+flag 이름인 `COREML_FLAG_USE_CPU_ONLY` 등을 provider option 문자열로 넣으면 CoreML EP가 받지 않습니다. 그대로 넣은 결과입니다.
 
 ```text
 EP Error .../coreml_options.cc:68 ... Unknown option: COREML_FLAG_USE_CPU_ONLY
@@ -233,7 +233,7 @@ com.microsoft;1;FusedConv
            --enable_reduced_operator_type_support
 ```
 
-같은 파일의 help는 `--minimal_build`를 "Create a minimal build supporting only ORT format models"라고 설명합니다. 그래서 minimal build에는 위의 `.ort` 파일을 넘겨야 합니다. 이전 판의 "전체 50 MB, mobile 5 MB"는 출처가 없어 뺐습니다. 비교 기준으로, 이 글의 Linux aarch64 1.32.0 wheel에서 Python 확장 module `onnxruntime_pybind11_state…so`는 28,477,456 byte였습니다.
+같은 파일의 help는 `--minimal_build`를 "Create a minimal build supporting only ORT format models"라고 설명합니다. 그래서 minimal build에는 위의 `.ort` 파일을 넘겨야 합니다. 크기 비교 기준으로, 이 글의 Linux aarch64 1.32.0 wheel에서 Python 확장 module `onnxruntime_pybind11_state…so`는 28,477,456 byte였습니다.
 
 ## Quantization
 
