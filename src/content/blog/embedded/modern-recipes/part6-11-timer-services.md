@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 이 글은 MCU·RTOS에서 타이머 모듈을 직접 고르거나 짜는 독자를 기준으로 합니다. RTOS software timer API를 쓰는 법은 [6-08: RTOS Software Timer 활용](/blog/embedded/modern-recipes/part6-08-software-timer)에서 다뤘고, 여기서는 그 아래의 자료구조를 비용으로 비교합니다.
 
-타이머 모듈은 세 연산을 제공합니다. 타이머 시작(add), 정지(cancel), 그리고 하드웨어 tick마다 만료를 확인하는 bookkeeping입니다. Varghese·Lauck의 1987년 논문([SOSP '87, pp. 25–38](https://doi.org/10.1145/41457.37504))은 이 세 연산의 비용을 기준으로 타이머 자료구조를 Scheme 1~7로 나눴고, 이 글의 비교도 그 번호를 따릅니다. 논문 서론의 예는 연결 200개에 연결마다 타이머 3개를 둔 서버이고, 기존 알고리즘은 타이머 하나를 시작하거나 유지하는 데 O(n)이 걸려 n이 크면 비싸다는 것이 논문의 문제 제기입니다. 만료 전에 취소되는 타이머가 많으면 tick 처리만이 아니라 시작·정지 비용도 중요해집니다. Linux 커널 주석도 timeout 타이머(네트워킹, disk I/O)는 대부분 만료 전에 취소된다고 적습니다([`kernel/time/timer.c` v6.6 L83-L87](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L83-L87)).
+타이머 모듈은 세 연산을 제공합니다. 타이머 시작(add), 정지(cancel), 그리고 하드웨어 tick마다 만료를 확인하는 bookkeeping입니다. Varghese·Lauck의 1987년 논문([SOSP '87, pp. 25–38](https://doi.org/10.1145/41457.37504))은 이 세 연산의 비용을 기준으로 타이머 자료구조를 Scheme 1~7로 나눴고, 이 글의 비교도 그 번호를 따릅니다. 논문 서론의 예는 연결 200개에 연결마다 타이머 3개를 둔 서버이고, 논문은 기존 알고리즘이 타이머 하나를 시작하거나 유지하는 데 O(n)이 걸려 n이 크면 비싸다는 점을 문제로 듭니다. 만료 전에 취소되는 타이머가 많으면 tick 처리만이 아니라 시작·정지 비용도 중요해집니다. Linux 커널 주석도 timeout 타이머(네트워킹, disk I/O)는 대부분 만료 전에 취소된다고 적습니다([`kernel/time/timer.c` v6.6 L83-L87](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L83-L87)).
 
 ## 정렬 리스트와 트리
 
@@ -125,7 +125,7 @@ void tick(void)
 
 두 번째 확장(Scheme 7)은 시계처럼 단위가 다른 배열 여러 개를 둡니다. 논문의 예는 일(100칸)·시(24칸)·분(60칸)·초(60칸) 배열 244칸으로 100일까지의 타이머를 표현합니다. 먼 타이머는 높은 단위 배열에 들어갔다가, 그 칸에 도달하면 나머지 시간만큼 낮은 배열로 옮겨집니다. 이 이동을 Linux는 cascade라고 부릅니다.
 
-Linux v4.7의 `timer_list`가 이 구조입니다(`CONFIG_BASE_SMALL`이 아닐 때, [`timer.c` v4.7 L64-L94](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L64-L94)). 첫 배열 tv1은 `TVR_BITS = 8`로 256칸, 나머지 tv2~tv5는 `TVN_BITS = 6`으로 64칸입니다. 단위와 범위는 이 비트 수에서 나오며, 아래 ms 값은 HZ = 1000(1 jiffy = 1 ms)일 때의 환산입니다.
+Linux v4.7의 `timer_list`가 이 구조입니다(`CONFIG_BASE_SMALL`이 아닐 때, [`timer.c` v4.7 L64-L95](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L64-L95)). 첫 배열 tv1은 `TVR_BITS = 8`로 256칸, 나머지 tv2~tv5는 `TVN_BITS = 6`으로 64칸입니다. 단위와 범위는 이 비트 수에서 나오며, 아래 ms 값은 HZ = 1000(1 jiffy = 1 ms)일 때의 환산입니다.
 
 | 배열 | 칸 수 | 한 칸의 단위 | 들어가는 남은 시간 (jiffy, 32비트 counter) | HZ = 1000 환산 |
 | --- | ---: | --- | --- | --- |
@@ -259,11 +259,11 @@ void run_one_tick(void)
 }
 ```
 
-이 코드에는 동시성 보호가 없습니다. 논문도 VAX 구현의 명령 수에서 인터럽트 우선순위를 내리고 올리는 동기화 비용을 뺐는데, 어느 타이머 알고리즘에나 필요하고 비용이 기계마다 다르다는 이유입니다(p. 32). v4.7 `__run_timers`는 slot을 옮기고 타이머를 떼어 내는 동안 인터럽트를 끈 채 `base->lock`을 잡고, 콜백을 부를 때만 풀었다가 다시 잡습니다([v4.7 L1190-L1245](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L1190-L1245)). `run_one_tick`을 SysTick ISR에서 부르면 콜백도 ISR 안에서 돌므로 콜백이 길수록 그 ISR이 길어지고, task에서 부르는 `add_timer`·`del_timer`는 SysTick을 막은 구간 안에서 불러야 리스트가 깨지지 않습니다(이 글의 유도).
+이 코드에는 동시성 보호가 없습니다. 논문도 VAX 구현의 명령 수에서 인터럽트 우선순위를 내리고 올리는 동기화 비용을 뺐는데, 어느 타이머 알고리즘에나 필요하고 비용이 기계마다 다르다는 이유입니다(p. 33). v4.7 `__run_timers`는 slot을 옮기고 타이머를 떼어 내는 동안 인터럽트를 끈 채 `base->lock`을 잡고, 콜백을 부를 때만 풀었다가 다시 잡습니다([v4.7 L1190-L1245](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L1190-L1245)). `run_one_tick`을 SysTick ISR에서 부르면 콜백도 ISR 안에서 돌므로 콜백이 길수록 그 ISR이 길어지고, task에서 부르는 `add_timer`·`del_timer`는 SysTick을 막은 구간 안에서 불러야 리스트가 깨지지 않습니다(이 글의 유도).
 
 ### 경계값 검사
 
-표의 범위가 코드와 맞는지는 배열 경계마다 타이머를 걸어 보면 확인됩니다. 아래 코드를 위 두 블록과 같은 파일 끝에 붙여 호스트에서 `cc -std=c11 -O2`로 컴파일합니다(`timer_ticks`가 `static`이라 같은 파일이어야 합니다). `0x7fffffff` 경우는 2^31 tick을 돌리므로 시간이 걸립니다.
+표의 범위가 코드와 맞는지는 배열 경계마다 타이머를 걸어 보면 확인됩니다. 아래 코드를 위 두 블록과 같은 파일 끝에 붙여 호스트에서 `cc -std=c11 -O2`로 컴파일합니다(`timer_ticks`가 `static`이라 같은 파일이어야 합니다). `0x7fffffff` 경우는 2^31 tick을 돌립니다. Apple clang 21.0.0(`cc -std=c11 -O2 -Wall -Wextra`, 경고 없음)으로 빌드해 Apple Silicon Mac에서 돌렸을 때 전체 실행이 user 4.71초였습니다.
 
 ```c
 #include <stdio.h>
@@ -321,7 +321,7 @@ int main(void)
 }
 ```
 
-통과하면 `all checks passed`를 출력합니다. `FAIL`이 `exact` 반복문 줄에서 나오면 배열이나 칸 선택이 틀려 만료 tick이 어긋나거나 타이머가 사라진 것입니다. `fire_after(512)` 줄에서 나오면 cascade를 tv1 처리보다 늦게 한 것입니다. `exact`의 만료 tick은 모두 256의 배수가 아니라서 이 순서를 가르지 못하므로, 256 경계에서 시작한 512 tick 타이머로 따로 봅니다. `0x80000000u` 줄에서 나오면 과거 판정이 빠져 2^31 이상이 tv5에 들어간 것입니다.
+위 환경에서 실행 결과는 `all checks passed` 한 줄이었습니다. `FAIL`이 `exact` 반복문 줄에서 나오면 배열이나 칸 선택이 틀려 만료 tick이 어긋나거나 타이머가 사라진 것입니다. `fire_after(512)` 줄에서 나오면 cascade를 tv1 처리보다 늦게 한 것입니다. `exact`의 만료 tick은 모두 256의 배수가 아니라서 이 순서를 가르지 못하므로, 256 경계에서 시작한 512 tick 타이머로 따로 봅니다. `0x80000000u` 줄에서 나오면 과거 판정이 빠져 2^31 이상이 tv5에 들어간 것입니다.
 
 ### Hashed wheel과의 비용 비교
 
@@ -329,7 +329,7 @@ tv1의 한 칸에 든 타이머는 모두 그 tick에 만료되므로, hashed wh
 
 이 글의 두 코드에 1 tick = 1 ms, 10초 timeout(10,000 tick)을 넣으면(이 글의 유도) 차이가 구체적으로 보입니다. Hashed wheel(M = 256)에서는 10,000 = 39 × 256 + 16이라 만료 전에 slot을 39번 지나며 비교합니다. Hierarchical 코드에서는 tv2에 들어갔다가 만료 전 256 tick 안에서 한 번 tv1로 옮겨집니다. 만료 전에 취소되는 timeout이라면 hierarchical 쪽은 만료 256 tick 전보다 먼저 취소될 때 옮기는 비용이 0이고, hashed 쪽은 취소 전까지 지난 바퀴 수만큼 이미 비교했습니다.
 
-메모리는 반대입니다. 포인터가 4바이트인 32비트 Arm MCU([AAPCS32 2025Q4, Data Types](https://github.com/ARM-software/abi-aa/blob/2025Q4/aapcs32/aapcs32.rst))에서 이 글의 코드 기준으로 slot 배열은 정렬 리스트가 head 포인터 하나(4 B), hashed wheel이 256 × 4 = 1,024 B, hierarchical이 (256 + 4 × 64) × 4 = 2,048 B입니다. 타이머 노드는 앞 두 코드가 12 B, `pprev`를 더한 hierarchical이 16 B입니다.
+메모리는 반대입니다. 포인터가 4바이트인 32비트 Arm MCU([AAPCS32 2025Q4, Data Types](https://github.com/ARM-software/abi-aa/blob/2025Q4/aapcs32/aapcs32.rst))에서 이 글의 코드 기준으로 slot 배열은 정렬 리스트가 head 포인터 하나(4 B), hashed wheel이 256 × 4 = 1,024 B, hierarchical이 (256 + 4 × 64) × 4 = 2,048 B입니다. 타이머 노드는 앞 두 코드가 12 B, `pprev`를 더한 hierarchical이 16 B입니다. 같은 선언을 `arm-none-eabi-gcc` 16.2.0 `-mcpu=cortex-m4 -O2`로 컴파일해 `sizeof` 값을 `.data`에 넣고 `objdump -s`로 읽으면 12·16·1,024·2,048이 나옵니다.
 
 ## Cascade 없는 Wheel — Linux v4.8
 
@@ -356,7 +356,7 @@ Cascade가 없으므로 tick에는 level마다 현재 bucket 하나만 꺼냅니
 
 Tickless idle로 다음 만료까지 tick을 멈추려면, 타이머 모듈이 가장 이른 만료 시각을 바로 답해야 합니다. 정렬 리스트는 맨 앞 원소가 답입니다. FreeRTOS V11.1.0 timer daemon은 현재 리스트 맨 앞의 만료 값을 읽고([`prvGetNextExpireTime`, `timers.c` L844-L868](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/timers.c#L844-L868)) 그 시각까지 command queue에서 block합니다([L820](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/timers.c#L820)). `configUSE_TICKLESS_IDLE`을 켜면 커널은 block된 task 중 가장 빨리 깨어날 시각에서 잠들 수 있는 tick 수를 구합니다([`prvGetExpectedIdleTime`, `tasks.c` L3894-L3951](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/tasks.c#L3894-L3951)).
 
-Wheel에는 그런 원소가 없습니다. 이 글의 hierarchical 코드로 답하려면 tv1부터 비어 있지 않은 slot을 찾아야 하고, 상위 배열의 칸은 한 칸이 여러 tick을 덮으므로 그 칸 리스트의 `expires`까지 훑어야 합니다. Linux v6.6은 bucket마다 비트 하나인 `pending_map`을 두고, 더 이른 bucket에 타이머가 들어오면 캐시한 `next_expiry`를 바로 고칩니다([`enqueue_timer`, L596-L625](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L596-L625)). bucket의 마지막 타이머가 빠질 때만 다시 계산하라고 표시하고([L885-L896](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L885-L896)), 그 계산은 level마다 `find_next_bit`로 비트맵을 찾습니다([`__next_timer_interrupt`, L1789-L1877](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L1789-L1877)). Cascade 없는 wheel은 bucket의 만료 시각(`bucket_expiry`)이 곧 답이라 bucket 안을 훑지 않습니다. 이 글의 코드에 비트맵을 더하면 slot 512개에 512비트(64 B)가 들고, 상위 배열은 칸 안을 훑는 대신 그 칸이 cascade되는 tick을 깨어날 시각으로 쓸 수 있습니다(이 글의 유도). 칸 안의 타이머는 모두 그 tick 이후에 만료되므로 일찍 깰 수는 있어도 늦게 깨지는 않습니다.
+Wheel에는 그런 원소가 없습니다. 이 글의 hierarchical 코드로 답하려면 tv1부터 비어 있지 않은 slot을 찾아야 하고, 상위 배열의 칸은 한 칸이 여러 tick을 덮으므로 그 칸 리스트의 `expires`까지 훑어야 합니다. Linux v6.6은 bucket마다 비트 하나인 `pending_map`을 두고, 더 이른 bucket에 타이머가 들어오면 캐시한 `next_expiry`를 바로 고칩니다([`enqueue_timer`, L596-L626](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L596-L626)). bucket의 마지막 타이머가 빠질 때만 다시 계산하라고 표시하고([L885-L896](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L885-L896)), 그 계산은 level마다 `find_next_bit`로 비트맵을 찾습니다([`next_pending_bucket`·`__next_timer_interrupt`, L1789-L1877](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L1789-L1877)). Cascade 없는 wheel은 bucket의 만료 시각(`bucket_expiry`)이 곧 답이라 bucket 안을 훑지 않습니다. 이 글의 코드에 비트맵을 더하면 slot 512개에 512비트(64 B)가 들고, 상위 배열은 칸 안을 훑는 대신 그 칸이 cascade되는 tick을 깨어날 시각으로 쓸 수 있습니다(이 글의 유도). 칸 안의 타이머는 모두 그 tick 이후에 만료되므로 일찍 깰 수는 있어도 늦게 깨지는 않습니다.
 
 ## 자주 하는 실수
 
