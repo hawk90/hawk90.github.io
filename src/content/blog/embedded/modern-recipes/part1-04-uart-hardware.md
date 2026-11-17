@@ -24,7 +24,7 @@ topics: ["embedded"]
 - 커널 클럭: HSI 64 MHz를 USART1 커널 클럭으로 고르고(RCC `USART16SEL` = 011 `hsi_ker_ck`, RM0433 p.417) USART 프리스케일러는 분주하지 않는다고 둡니다. 아래 계산의 `usart_ker_ck_pres`는 모두 64 MHz입니다.
 - 쪽수·표 번호는 2026-10-11에 위 판과 대조했습니다.
 
-## 프레임: 형식이 허용 오차 표의 행을 정한다
+## 프레임 형식과 허용 오차 표의 행
 
 ![UART 8N1 frame — start + 8 data + stop](/images/blog/modern-recipes/diagrams/part1-04-uart-frame-8n1.svg)
 
@@ -64,7 +64,7 @@ RM0433 48.5.8(p.2035~2036)은 송신기 오차 DTRA(송신 측 발진기 포함)
 
 ## BRR: 버림이 아니라 반올림
 
-`OVER8` = 0이면 baud = `usart_ker_ck_pres` / USARTDIV이고(48.5.7, p.2034) BRR에는 USARTDIV를 그대로 씁니다. USARTDIV는 16 이상이어야 합니다(p.2035). 정수 나눗셈은 나머지를 버리므로 BRR이 작아지고, 실제 baud는 항상 목표보다 높은 쪽으로 어긋납니다.
+`OVER8` = 0이면 baud = `usart_ker_ck_pres` / USARTDIV이고(48.5.7, p.2034) BRR에는 USARTDIV를 그대로 씁니다. USARTDIV는 16 이상이어야 합니다(p.2035). 정수 나눗셈은 나머지를 버리므로 BRR이 작아지고, 실제 baud는 나누어떨어지지 않는 한 목표보다 높은 쪽으로 어긋납니다.
 
 ```c
 /* usart_ker_ck_pres = 64 MHz, OVER8 = 0, target 115200 baud */
@@ -124,13 +124,20 @@ USART1->CR1 |= USART_CR1_RTOIE;
 USART1->CR1 |= USART_CR1_UE;
 ```
 
+이 절의 BRR 두 줄과 위 FIFO 설정은 한 함수로 묶어 `cmsis-device-h7` v1.9.0 헤더로 경고 없이 빌드했습니다(`arm-none-eabi-gcc` 16.2.0). 비트 이름이 모두 이 헤더에 있다는 확인이고, 보드에서 실행하지는 않았습니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -O2 -ffreestanding -DSTM32H743xx \
+  -I cmsis-device-h7/Include -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c fifo.c
+```
+
 921600 baud에서 문자 하나는 10.85 µs마다 들어옵니다. FIFO 없이 문자마다 인터럽트를 받으면 그 간격이 10.85 µs이고, 임계값을 1/2(8개)로 두면 연속 수신 중에는 인터럽트 한 번에 8개를 읽으므로 간격이 86.8 µs로 늘어납니다. 버스트가 끝나면 마지막 stop bit 뒤 20비트 시간, 즉 21.7 µs 뒤에 `RTOF` 인터럽트에서 남은 문자를 읽습니다. FIFO 모드에서도 RXFIFO가 가득 찬 상태로 시프트 레지스터의 다음 문자가 옮겨 갈 차례가 되면 overrun(`ORE`)이 납니다(p.2030). 인터럽트·DMA 수신 드라이버 구조는 [4-07: UART 드라이버 구현](/blog/embedded/modern-recipes/part4-07-uart-driver)에서 다룹니다(STM32F4 USART 기준).
 
 ## 정리
 
 - 허용 오차는 프레임 형식으로 행을 고릅니다. parity를 붙인 8E1·8O1은 M = 01이라 8N1보다 작습니다.
 - BRR은 반올림해서 구합니다. 그래도 상대편이 정확한 baud로 보내면 양자화 오차가 남고, baud가 높을수록 커집니다(3 Mbaud에서 +1.59%).
-- HSI를 쓸지는 내부 RC(HSI)로 통신해도 되나 절의 판정 표에서 온도 범위와 프레임 형식으로 고릅니다.
+- HSI를 쓸지는 「내부 RC(HSI)로 통신해도 되나」 절의 판정 표에서 온도 범위와 프레임 형식으로 고릅니다.
 - FIFO 임계값으로 인터럽트를 줄이면, 임계값에 못 미치는 버스트 꼬리는 receiver timeout으로 읽습니다.
 
 ## 수정 이력

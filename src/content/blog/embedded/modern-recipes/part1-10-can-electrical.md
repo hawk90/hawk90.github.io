@@ -78,7 +78,7 @@ SLLA270 4장은 ISO 11898 고속 규격의 사양이 "최대 1 Mbps, 버스 길�
 | 100 kbit/s | 500 m |
 | 50 kbit/s | 1000 m |
 
-이 길이를 묶는 것은 arbitration입니다. Bosch의 F. Hartwich·A. Bassemir, [The Configuration of the CAN Bit Timing](http://www.oertel-halle.de/files/cia99paper.pdf)(6th iCC, 1999, 제3자 사본) 2절은 bitwise arbitration과 수신 노드의 dominant ACK 때문에 송신 노드가 자기와 동기된 다른 노드의 dominant 비트를 같은 비트 안에서 받아야 한다고 설명합니다. 다른 노드가 보낸 dominant 에지가 너무 늦게 돌아오면 송신 노드가 recessive를 sampling해 bit error를 내고, error flag로 그 frame을 깨뜨립니다. SLLA270 4.9절도 가장 먼 두 노드 사이를 *갔다 돌아오는* 지연의 합을 계산하고, 첫 비트의 입사파가 sampling보다 *충분히 먼저*("long before") 송신 노드로 돌아와야 한다고 설명합니다.
+이 길이를 묶는 것은 arbitration입니다. Bosch의 F. Hartwich·A. Bassemir, [The Configuration of the CAN Bit Timing](http://www.oertel-halle.de/files/cia99paper.pdf)(6th iCC, 1999, 제3자 사본) 2절은 bitwise arbitration과 수신 노드의 dominant ACK 때문에 송신 노드가 자기와 동기된 다른 노드의 dominant 비트를 같은 비트 안에서 받아야 한다고 설명합니다. 다른 노드가 보낸 dominant 에지가 너무 늦게 돌아오면 송신 노드가 recessive를 sampling해 bit error를 내고, error flag로 그 frame을 깨뜨립니다. SLLA270 4.1·4.9절도 가장 먼 두 노드 사이를 *갔다 돌아오는* 지연의 합을 계산하고, 첫 비트의 입사파가 sampling보다 *충분히 먼저*("long before") 송신 노드로 돌아와야 한다고 설명합니다.
 
 이 예산을 TCAN1042-Q1 값으로 직접 계산해 보겠습니다. 재료는 세 가지입니다.
 
@@ -110,8 +110,8 @@ sample point 비율은 Linux 커널 CAN 계층이 bitrate만 받고 sample point
 
 이 글은 판정선을 두 개 둡니다.
 
-- **필요조건 (sample point 선)**: 왕복이 nominal sample point 전에 끝난다. oscillator 편차를 0으로 본 값입니다.
-- **설계 기준 (PROP_SEG 선)**: 왕복이 PROP_SEG 길이 이하다. Bosch 사양과 Hartwich 논문의 조건입니다.
+- **필요조건 (sample point 선)**: 왕복이 nominal sample point 전에 끝나야 합니다. oscillator 편차를 0으로 본 값입니다.
+- **설계 기준 (PROP_SEG 선)**: 왕복이 PROP_SEG 길이 이하여야 합니다. Bosch 사양과 Hartwich 논문의 조건입니다.
 
 1 Mbit/s · 75%에서 sample point 선으로 길이를 풀면 기준선 max로 (750 − 500) / 10 ns/m = 25 m, typ로 (750 − 320) / 10 = 43 m입니다. 가장 덜 보수적인 LOOP1 · 컨트롤러 한 번의 max로도 (750 − 395) / 10 = 35.5 m입니다. 그래서 ISO 11898(1993년판)의 40 m는 이 필요조건부터 typ 지연으로만 통과하고, 데이터시트 max 지연으로는 컨트롤러 지연을 몇 번 세든 실패합니다. 40 m 판정을 가르는 입력은 transceiver 지연을 typ로 넣느냐 max로 넣느냐입니다. PROP_SEG 선은 컨트롤러가 PROP_SEG를 몇 TQ까지 낼 수 있느냐에 달려 있어서, 아래 「실제 사용 예」에서 bxCAN으로 숫자를 냅니다. 500 kbit/s · 100 m와 250 kbit/s · 200 m는 기준선 max를 넣어도 왕복이 sample point보다 각각 250 ns, 1000 ns 먼저 끝납니다.
 
@@ -122,7 +122,7 @@ SLLA270 4.9절이 "지연을 합한 뒤 oscillator 편차에 대한 여유를 �
 
 PROP_SEG 선으로 길이를 정하면 oscillator 여유는 길이에서 따로 빼지 않고, 남은 PHASE_SEG·SJW가 허용하는 df로 확인합니다. PROP_SEG를 늘리면 PHASE_SEG에 남는 TQ가 줄고, 남은 TQ를 PHASE_SEG1과 PHASE_SEG2에 고르게 나누지 않으면 조건 I의 min과 SJW 상한이 작은 쪽에 묶여 df가 더 줄어듭니다.
 
-절연 소자를 넣으면 예산이 바로 늘어납니다. SLLA270 4.9절의 예시는 10 m 버스에서 TI 디지털 isolator(17 ns)를 네 번 거치는 경로로 618 ns를 냅니다. 1 Mbit/s · 75% sample point인 750 ns 가운데 대부분입니다.
+절연 소자를 넣으면 왕복 지연이 바로 늘어납니다. SLLA270 4.9절의 예시는 10 m 버스에서 TI 디지털 isolator(17 ns)를 네 번 거치는 경로로 618 ns를 냅니다. 1 Mbit/s · 75% sample point인 750 ns의 대부분을 차지합니다.
 
 ### 4) Common-mode 전압과 공통 GND
 
@@ -145,7 +145,7 @@ SLLA270 4.12절은 노드 간 기준 GND 차이를 최소로 유지하라고 하
 
 BTR 레지스터는 BRP[9:0], TS1[19:16], TS2[22:20], SJW[25:24] 필드로 되어 있습니다(STM32CubeF4 CMSIS 헤더 [`stm32f407xx.h`](https://github.com/STMicroelectronics/cmsis_device_f4/blob/v2.6.11/Include/stm32f407xx.h)의 `CAN_BTR_*_Pos`, v2.6.11 태그). Linux bxCAN 드라이버는 각 필드에 값−1을 쓰고, 허용 범위를 tseg1 1~16, tseg2 1~8, SJW 최대 4, prescaler 1~1024로 둡니다([`drivers/net/can/bxcan.c` L183-L193](https://github.com/torvalds/linux/blob/v7.3-rc6/drivers/net/can/bxcan.c#L183-L193), v7.3-rc6). 한 비트는 `1 + tseg1 + tseg2` TQ이고, sample point는 `(1 + tseg1) / (1 + tseg1 + tseg2)`입니다.
 
-### PROP_SEG는 TS1 안의 예산이다
+### TS1 안의 PROP_SEG 예산
 
 bxCAN에는 PROP_SEG 필드가 따로 없습니다. 같은 드라이버는 `prop_seg + phase_seg1`을 합쳐 TS1 필드 하나에 씁니다([bxcan.c L669-L673](https://github.com/torvalds/linux/blob/v7.3-rc6/drivers/net/can/bxcan.c#L669-L673)). Hartwich 논문 5절도 대부분의 CAN 구현이 `Prop_Seg + Phase_Seg1`의 합을 TSEG1 하나로 받는다고 적었습니다. 하드웨어 입장에서 TS1은 한 덩어리이고, 그 가운데 얼마를 지연 보상 몫으로 볼지는 설계자가 정하는 예산 분할입니다.
 
@@ -224,6 +224,17 @@ static const uint32_t can_btr_1m =
     | ((CAN_TSEG2 - 1u) << CAN_BTR_TS2_Pos)
     | ((CAN_SJW   - 1u) << CAN_BTR_SJW_Pos);   /* = 0x011A0002 */
 ```
+
+상수가 실제로 0x011A0002가 되는지는 `cmsis_device_f4` 헤더로 빌드해 확인했습니다. 상수를 돌려주는 함수 하나를 붙여 `arm-none-eabi-gcc` 16.2.0 `-O2 -mcpu=cortex-m4 -mthumb -ffreestanding -DSTM32F407xx`로 컴파일하면(표준 라이브러리 없이 `stdint.h`를 쓰려면 `-ffreestanding`이 필요합니다) literal pool에 그 값이 그대로 들어갑니다.
+
+```text
+00000000 <get_btr>:
+   0:	4800      	ldr	r0, [pc, #0]	@ (4 <get_btr+0x4>)
+   2:	4770      	bx	lr
+   4:	011a0002 	.word	0x011a0002
+```
+
+위 「42 MHz에서 가능한 비트 구성」 표도 같은 조건(PHASE_SEG2 ≥ 2, tseg1 ≤ 16, SJW = min(4, PHASE_SEG1), Hartwich 4절의 df 두 조건, 고정 지연 500 ns)으로 모든 분할을 나열하는 Python 스크립트로 다시 만들어 여섯 행이 그대로 나오는 것을 확인했습니다. 스크립트는 PROP_SEG가 같은 714 ns에서 df가 더 작은 2×21 · 15+1+4(±0.186%)도 함께 내놓는데, 같은 시간에 df가 큰 3×14 · 10+1+2에 밀리므로 표에서는 뺐습니다.
 
 이 설정의 sample point는 6/7 ≈ 85.7%(857 ns)이고 PROP_SEG 선은 643 ns입니다. 40 m를 대 보면 기준선 max 왕복 900 ns와 LOOP1 max 870 ns는 sample point 선부터 넘습니다. 컨트롤러 지연을 한 번 센 LOOP1 max 795 ns와 typ 왕복 720 ns(LOOP1 typ 700 ns)는 sample point 선은 통과하지만 PROP_SEG 선을 넘습니다. 판정은 실패입니다. 이 값을 init mode에서 `CAN1->BTR`에 쓰는 순서와 filter·송신 코드는 [5-10: CAN 통신 구현](/blog/embedded/modern-recipes/part5-10-can-communication)에 있습니다.
 

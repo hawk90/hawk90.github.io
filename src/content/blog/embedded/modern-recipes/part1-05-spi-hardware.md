@@ -13,7 +13,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SPI는 master가 만든 SCK에 맞춰 MOSI와 MISO로 한 비트씩 동시에 주고받는 동기식 직렬 버스입니다."** STM32F407 SPI1과 W25Q32JV를 3.3 V로 붙이면 두 부품의 fSCK 사양은 42 MHz를 허용하지만, 읽기 경로의 MISO 타이밍 예산이 42 MHz에서 모자라 먼저 걸립니다.
+> **"SPI는 master가 만든 SCK에 맞춰 MOSI와 MISO로 한 비트씩 동시에 주고받는 동기식 직렬 버스입니다."** STM32F407 SPI1과 W25Q32JV를 3.3 V로 붙이면 두 부품의 fSCK 사양은 42 MHz를 허용하지만, 읽기 경로의 MISO 타이밍 예산이 42 MHz에서 모자라, 실제 상한은 이쪽이 정합니다.
 
 이 글은 STM32F407의 SPI1에 Winbond W25Q32JV SPI flash를 붙일 때 어떤 모드를 쓰고, 명령을 CS로 어떻게 묶고, SCK를 어디까지 올릴 수 있는지를 두 부품의 데이터시트 수치로 판정합니다. 레지스터 맵을 읽을 줄 알고 [1-04: UART 하드웨어 동작 분석](/blog/embedded/modern-recipes/part1-04-uart-hardware)의 비동기 직렬 개념을 아는 독자를 가정합니다.
 
@@ -38,7 +38,7 @@ SCK·MOSI·MISO·CS#는 W25Q32JV에서 각각 CLK·DI·DO·/CS입니다(W25Q32JV
 
 ![SPI Mode 0 — SCK idle low, sample at rising edge](/images/blog/modern-recipes/diagrams/part1-05-spi-mode0.svg)
 
-Linux 문서는 많은 디바이스가 mode 0과 3을 함께 지원하는 이유를 "they don't care about polarity, and always clock data in/out on rising clock edges"라고 적습니다. W25Q32JV는 이 설명과 입력 쪽만 맞습니다. DI는 CLK rising edge에서 받지만 DO는 falling edge에서 내보냅니다(4.2절, 6.1절). master는 rising edge에서 MISO를 sample하므로, flash가 falling edge에서 바꾼 DO는 SCK low 구간 반주기 안에 master 입력에 자리 잡아야 합니다. 이 반주기가 아래 "SCK 상한" 절의 MISO 예산입니다.
+Linux 문서는 많은 디바이스가 mode 0과 3을 함께 지원하는 이유를 "they don't care about polarity, and always clock data in/out on rising clock edges"라고 적습니다. W25Q32JV는 이 설명 중 입력 쪽만 맞습니다. DI는 CLK rising edge에서 받지만 DO는 falling edge에서 내보냅니다(4.2절, 6.1절). master는 rising edge에서 MISO를 sample하므로, flash가 falling edge에서 바꾼 DO는 SCK low 구간 반주기 안에 master 입력에 자리 잡아야 합니다. 이 반주기가 아래 "SCK 상한" 절의 MISO 예산입니다.
 
 비트 순서와 프레임 길이도 맞춥니다. W25Q32JV는 명령·주소·데이터를 MSB first로 주고받고(8절), STM32F407 `SPI_CR1`은 `LSBFIRST` = 0이 MSB first, `DFF` = 0이 8비트 프레임입니다(RM0090 28.5.1, reset 값 `0x0000`).
 
@@ -63,7 +63,7 @@ SCK 상한 후보는 controller 분주기, controller의 fSCK 사양, slave의 f
 
 SPI1 SCK는 fPCLK2를 `BR[2:0]`로 나눈 값, 즉 fPCLK2 / 2^(BR+1)입니다(RM0090 28.5.1). DS8626 Table 55의 값은 `OSPEEDR` = `10`, 부하 30 pF, 0.5 VDD 측정점 조건이고 "characterization - not tested in production"입니다. W25Q32JV 9.6절 값은 9.5절의 부하 30 pF, 출력 기준 0.5 VCC 조건입니다.
 
-표만 보면 42 MHz가 통과합니다. 읽기 경로를 보면 결과가 다릅니다. Mode 0·3에서 flash는 SCK falling edge 뒤 tCLQV 안에 DO를 내고, master는 다음 rising edge보다 tsu(MI) 먼저 MISO가 안정되어 있어야 합니다(DS8626 Figure 41). 둘을 SCK low 구간에서 빼면 SCK가 flash까지 가는 지연과 DO가 MCU로 돌아오는 지연의 합에 남는 시간이 나옵니다.
+표만 보면 42 MHz가 통과합니다. 읽기 경로를 보면 결과가 다릅니다. Mode 0·3에서 flash는 SCK falling edge 뒤 tCLQV 안에 DO를 내고, master는 다음 rising edge보다 tsu(MI) 먼저 MISO가 안정되어 있어야 합니다(DS8626의 SPI master mode 타이밍 그림). 둘을 SCK low 구간에서 빼면 SCK가 flash까지 가는 지연과 DO가 MCU로 돌아오는 지연의 합에 남는 시간이 나옵니다.
 
 | 항목 | `BR` = `000` (42 MHz) | `BR` = `001` (21 MHz) | 출처 |
 | --- | --- | --- | --- |
@@ -124,6 +124,21 @@ static void w25q_read_id(uint8_t id[3]) {
 | --- | --- | --- | --- |
 | W25Q32JV-IQ/JQ | `0xEF` | `0x40` | `0x16` |
 | W25Q32JV-IM/JM | `0xEF` | `0x70` | `0x16` |
+
+보드에서는 실행하지 않았고, QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 같은 코드를 돌려 보았습니다. 이 머신에는 SPI 컨트롤러 모델(`hw/ssi/stm32f2xx_spi.c`, 아래 행 번호는 v11.1.0 소스 기준)이 있고, QEMU의 SPI flash 모델 `m25p80`에는 JEDEC ID `0xef4016`인 `w25q32`가 있습니다(`hw/block/m25p80.c` 355행). `-device w25q32,bus=ssi`로 붙이면 QEMU가 이름이 같은 SSI 버스 중 0x40015400의 컨트롤러를 고르므로, 테스트 파일에서만 `SPI1`을 그 주소로 다시 정의하고 위 코드를 그대로 `#include`했습니다. GPIO는 모델링되지 않아 `cs_low()`·`cs_high()`는 효과가 없고, CS 입력을 연결하지 않은 `m25p80`은 계속 선택된 상태입니다.
+
+```bash
+qemu-system-arm -M netduinoplus2 -nographic -semihosting-config enable=on,target=native \
+  -device w25q32,bus=ssi -trace m25p80_command_decoded -kernel spi.elf
+```
+
+```text
+m25p80_command_decoded new command:0x9f
+m25p80_command_decoded new command:0x0
+JEDEC ID: 16 00 00
+```
+
+flash 모델은 `0x9F`를 Read JEDEC ID로 해석했지만 결과는 `EF 40 16`이 아닙니다. QEMU 11.1의 `stm32f2xx_spi_read()`는 `DR`을 읽을 때도 `stm32f2xx_spi_transfer()`를 불러 바이트를 한 번 더 내보내므로(같은 파일 84~87행), `spi_xfer()` 한 번이 버스에서는 전송 두 번이 되어 응답이 밀립니다. 실제 STM32F407에서는 `DR` 읽기가 전송을 일으키지 않으므로(RM0090 28.3.5의 full-duplex 설명대로 전송은 `DR` 쓰기가 시작), 이 결과는 QEMU 모델의 특성입니다. 이 실행으로 확인한 것은 코드가 빌드되고 `0x9F` 명령이 flash까지 간다는 데까지입니다.
 
 ## 전송 시간 하한
 

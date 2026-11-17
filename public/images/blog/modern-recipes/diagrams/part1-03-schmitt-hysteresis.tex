@@ -6,24 +6,31 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
 
-\node[font=\sffamily\bfseries\large] at (4,3.0) {Schmitt Trigger Hysteresis};
+\node[font=\sffamily\bfseries\large] at (3.5,4.1) {Schmitt trigger 전달 특성};
 
-% Output waveform — high level then drops at V_IL threshold
-\draw[focus, line width=0.7pt]
-  (0,0) -- (0,1.4) -- (3.5,1.4) -- (3.5,0) -- (8,0);
+% axes
+\draw[->, draw=edgec] (0,0) -- (7.2,0) node[font=\scriptsize, right] {$V_\mathrm{in}$};
+\draw[->, draw=edgec] (0,0) -- (0,3.4) node[font=\scriptsize, above] {$V_\mathrm{out}$};
 
-% Threshold annotations
-\draw[mutec, dashed, line width=0.3pt] (1.0,-0.3) -- (1.0,1.8);
-\node[caption, anchor=north] at (1.0,-0.3) {$V_{IH}$};
+% thresholds
+\draw[mutec, dashed, line width=0.3pt] (2.5,-0.2) -- (2.5,3.0);
+\node[caption, anchor=north] at (2.5,-0.25) {$V_{T-}$};
+\draw[mutec, dashed, line width=0.3pt] (4.5,-0.2) -- (4.5,3.0);
+\node[caption, anchor=north] at (4.5,-0.25) {$V_{T+}$};
 
-\draw[mutec, dashed, line width=0.3pt] (3.5,-0.3) -- (3.5,1.8);
-\node[caption, anchor=north] at (3.5,-0.3) {$V_{IL}$};
+% rising path: low until V_T+, then high
+\draw[focus, line width=0.9pt, -{Stealth[length=2mm]}] (0.3,0.3) -- (4.5,0.3) -- (4.5,2.6) -- (6.8,2.6);
+% falling path: high until V_T-, then low
+\draw[draw=hibord, line width=0.9pt, -{Stealth[length=2mm]}] (6.8,2.75) -- (2.5,2.75) -- (2.5,0.15) -- (0.3,0.15);
 
-% Hysteresis band annotation
-\draw[<->, line width=0.4pt, draw=focusc] (1.0,1.9) -- (3.5,1.9);
-\node[caption, anchor=south, text=focusc] at (2.25,1.9) {hysteresis ($V_{IH} > V_{IL}$)};
+\node[font=\sffamily\scriptsize, text=focusc, anchor=west] at (4.6,1.4) {입력 상승: $V_{T+}$에서 1};
+\node[font=\sffamily\scriptsize, text=hibord, anchor=east] at (2.4,1.4) {입력 하강: $V_{T-}$에서 0};
+
+% hysteresis band
+\draw[<->, line width=0.4pt, draw=focusc] (2.5,3.25) -- (4.5,3.25);
+\node[caption, anchor=south, text=focusc] at (3.5,3.3) {$V_\mathrm{hys} = V_{T+} - V_{T-}$};
 
 \end{tikzpicture}
 \end{document}

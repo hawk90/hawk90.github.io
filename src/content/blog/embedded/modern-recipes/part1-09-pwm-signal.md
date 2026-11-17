@@ -20,7 +20,7 @@ RM0090 §7.2(216쪽)에 따르면 STM32F405/407의 AHB 최대 주파수는 168 M
 
 PWM은 고정 주기의 사각파이고, 한 주기 중 high 구간의 비율이 duty입니다. 출력이 0과 `V_H` 사이를 오가면 한 주기 평균은 duty × `V_H`입니다. 타이머가 정하는 것은 이 duty를 몇 단계로 나눌 수 있는가이고, 아래 절들이 그 단계 수를 계산합니다.
 
-![PWM duty 50% vs 75% — duty 비율이 평균 전압](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
+![PWM duty 50% vs 75% — duty 비율이 평균 전압을 정함](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
 
 ## Edge-aligned와 center-aligned — 주기와 duty 단계
 
@@ -101,7 +101,34 @@ dead-time은 tick 수로 고정되어 있으므로, PWM 주파수를 다섯 배 
 - 주기: 8400 tick = 50 µs (20 kHz).
 - CH1이 내려간 뒤 CH1N이 올라가기까지, CH1N이 내려간 뒤 CH1이 올라가기까지의 간격: 각각 250 ns.
 - CCR = 2100일 때 CH1 high 폭: 2 × 2100 − 42 = 4158 tick = 24.75 µs.
-- CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라짐.
+- CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라집니다.
+
+보드에서 재지는 않았습니다. 대신 위 정의(center-aligned 카운트, PWM mode 1, OCx·OCxN의 rising edge를 DT tick 늦추는 dead-time)를 그대로 옮긴 Verilog 행동 모델을 Icarus Verilog 13.0으로 돌려, 예상값이 정의에서 실제로 나오는지 확인했습니다. TIM1 회로가 아니라 RM0090 정의의 모델이라는 점이 이 확인의 한계입니다. 핵심 부분은 다음과 같습니다.
+
+```verilog
+always @(posedge clk) begin
+  // center-aligned: 0..ARR-1 up, then ARR..1 down
+  if (up) begin if (cnt == ARR - 1) begin cnt <= ARR; up <= 0; end else cnt <= cnt + 1; end
+  else    begin if (cnt == 1)       begin cnt <= 0;   up <= 1; end else cnt <= cnt - 1; end
+  // PWM mode 1: up -> 1 while CNT < CCR, down -> 0 while CNT > CCR
+  oref <= up ? (cnt < CCR) : !(cnt > CCR);
+  // dead-time: each output rises only after oref has held for DT ticks
+  if (oref) begin dly_n <= 0; ocn <= 0; if (dly_p < DT) dly_p <= dly_p + 1; else oc  <= 1; end
+  else      begin dly_p <= 0; oc  <= 0; if (dly_n < DT) dly_n <= dly_n + 1; else ocn <= 1; end
+end
+```
+
+ARR = 4200, DT = 42에서 CCR을 바꿔 가며 네 주기씩 잰 결과입니다(`iverilog -g2012 -o pwm pwm_tb.v && vvp -n pwm`).
+
+```text
+CCR=2100: OCx pulses in 4 periods=4, OCx high=4158 ticks (24.75 us), OCxN high=4158 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=22: OCx pulses in 4 periods=4, OCx high=2 ticks (0.01 us), OCxN high=8314 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=21: OCx pulses in 4 periods=0, OCx high=0 ticks (0.00 us), OCxN high=8316 ticks, gaps OCxN->OCx=42 OCx->OCxN=25266 ticks
+CCR=4178: OCx pulses in 4 periods=4, OCx high=8314 ticks (49.49 us), OCxN high=2 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=4179: OCx pulses in 4 periods=4, OCx high=8316 ticks (49.50 us), OCxN high=0 ticks, gaps OCxN->OCx=29466 OCx->OCxN=42 ticks
+```
+
+CCR = 2100에서 CH1 high 폭 4158 tick(24.75 µs)과 두 출력 사이 42 tick(250 ns) 간격이 위 예상값과 같습니다. CCR = 22에서는 2 tick짜리 OCx 펄스가 남고 21에서 사라지며, 반대쪽은 4178에서 2 tick이 남고 4179에서 OCxN이 사라집니다. gap 칸의 큰 값은 한쪽 출력이 없어서 이전 에지와의 간격이 잡힌 것입니다.
 
 ## 정리
 

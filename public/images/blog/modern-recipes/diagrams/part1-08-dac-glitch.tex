@@ -14,23 +14,23 @@
 
 \node[font=\sffamily\bfseries\small, anchor=south] at (3.5, 4.2) {DAC code 0x7FFF → 0x8000 (모든 비트 toggle)};
 
-% Reference lines for low/settled levels
+% Reference line: before and after differ by only 1 LSB
 \draw[ref] (0, 2.5) -- (7, 2.5);
 
-% Waveform: low → glitch spike → settled
+% Waveform: level -> glitch spike at major carry -> back to ~ same level (+1 LSB)
 \draw[sig]
-  (0, 1.5) -- (2.5, 1.5)                                 % low (before)
-  -- (2.5, 3.6) -- (2.7, 3.6) -- (2.7, 1.2) -- (2.9, 1.2)  % glitch spike
-  .. controls (3.4, 1.9) and (3.6, 3.0) ..               % oscillating
-  (4.0, 2.5)                                              % settled
-  -- (7, 2.5);                                            % settled tail
+  (0, 2.45) -- (2.5, 2.45)
+  -- (2.6, 3.6) -- (2.75, 1.4) -- (2.9, 3.0)
+  .. controls (3.1, 2.1) and (3.3, 2.7) ..
+  (3.6, 2.5)
+  -- (7, 2.5);
 
 % Annotations
-\node[ann, text=warnbord] at (2.75, 3.95) {↑ glitch};
-\node[ann, text=okbord] at (5, 2.85) {settled};
+\node[ann, text=warnbord] at (2.95, 3.75) {glitch (면적 = nV-s)};
+\node[ann, text=okbord] at (4.6, 2.85) {+1 LSB 위치에 정착};
 
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-0.2, 0.3)
-  {V\_out shows brief glitch when all bits flip, then settles after a few μs};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-0.2, 0.6)
+  {코드는 1 LSB만 바뀌지만 모든 비트가 뒤집혀 순간 spike가 생김 (개념도, 실측 아님)};
 
 \end{tikzpicture}
 \end{document}

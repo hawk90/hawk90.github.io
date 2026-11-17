@@ -2,7 +2,7 @@
 title: "임베디드 디버깅 마인드셋 — 가설·격리·재현·이분탐색"
 slug: "embedded/modern-recipes/part10-01-debug-mindset"
 date: 2026-04-19T09:00:00
-description: "가설-검증 사이클·binary search·changelog·rubber duck — 임베디드 디버깅의 사고 도구."
+description: "증상·모델·가설·측정을 분리하는 사이클, git bisect run 실행 예, 간헐 버그의 반복 횟수 계산, 두 조건식의 codegen 비교로 임베디드 디버깅의 사고 도구를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 111
 tags: [recipes, debugging, methodology]
@@ -21,7 +21,7 @@ topics: ["embedded"]
 
 ## 핵심 개념
 
-좋은 디버거는 다음 다섯 가지를 항상 분리해 둡니다.
+디버깅에서 다음 다섯 가지를 따로 적어 두면, 어디서 막혔는지가 보입니다.
 
 1. **증상 (Symptom)** — 실제로 관찰된 것
 2. **모델 (Model)** — 코드가 어떻게 동작한다고 *내가 믿는지*
@@ -29,23 +29,19 @@ topics: ["embedded"]
 4. **가설 (Hypothesis)** — 모순을 만들 수 있는 *구체적* 원인
 5. **측정 (Measurement)** — 가설을 깨거나 굳힐 단 한 번의 관찰
 
-대부분의 막다른 디버깅은 *모델*을 의심하지 않는 데서 옵니다. "이 ISR은 분명 enable 되어 있다"는 *믿음*이지 *측정*이 아닙니다. 코드를 한 번 더 읽지 말고 NVIC pending register를 직접 찍어야 합니다.
+막힌 디버깅에서 흔히 빠지는 것은 *모델*을 의심하는 단계입니다. "이 ISR은 분명 enable 되어 있다"는 *믿음*이지 *측정*이 아닙니다. 코드를 한 번 더 읽는 대신, 디버거로 NVIC의 enable·pending 레지스터 값을 직접 읽어 봅니다(구체적인 레지스터와 읽는 법은 [10-07](/blog/embedded/modern-recipes/part10-07-interrupt-debugging)).
 
 ## 가설-검증 사이클
 
-```text
-[관찰] LED가 깜빡이지 않는다.
+LED가 깜빡이지 않는 경우를 예로 한 사이클을 적어 보면 다음과 같습니다. 모델은 "main()의 while loop가 GPIOC의 LED 핀을 1 ms마다 토글한다"입니다.
 
-[모델] main()의 while loop가 GPIO를 1ms마다 토글한다.
+| 단계 | 가설 | 측정 | 결과 |
+| --- | --- | --- | --- |
+| A | main()에 진입하지 못한다 | main() 첫 줄에서 LED를 켠다 | 켜짐 → 기각 |
+| B | GPIOC 클럭이 꺼져 있다 | 디버거로 `RCC->AHB1ENR` bit 2(GPIOCEN)를 읽는다 | 1 → 기각 |
+| C | LED가 GPIOC가 아닌 다른 포트에 있다 | 회로도를 본다 | GPIOA → 채택 |
 
-[가설 A] main()에 진입조차 못한다.
-  측정: 시작 직후 LED ON. → 진입은 한다.
-[가설 B] GPIOC clock이 disable.
-  측정: RCC->AHB1ENR bit 2 = 1. → enable 됨.
-[가설 C] LED는 GPIOC가 아닌 GPIOA에 있다.
-  측정: 회로도 확인. → 맞다, GPIOA.
-[수정] HAL_GPIO_TogglePin(GPIOA, ...) → 동작.
-```
+마지막 행에서 바뀐 것은 코드가 아니라 모델입니다. 코드는 처음부터 모델대로 동작했고, 모델이 회로와 달랐습니다. STM32F4에서 `RCC_AHB1ENR`의 bit 2가 GPIOC enable이라는 것은 `cmsis_device_f4`의 `RCC_AHB1ENR_GPIOCEN_Pos`(2)에서 확인할 수 있습니다.
 
 각 가설은 *측정 가능*하고 *YES/NO*로 답이 나와야 합니다. "뭔가 이상하다"는 가설이 아닙니다.
 
@@ -60,11 +56,35 @@ git bisect good v1.2.0          # 이건 정상
 # git이 중간 commit으로 checkout
 # 빌드·테스트
 git bisect good                 # 또는 bad
-# ... log2(N)번 반복
+# ... 반복
 git bisect reset
 ```
 
-50 commit 범위라면 log₂(50) ≈ 6번이면 범인 commit을 찾습니다. 측정 가능한 *재현 절차*가 있어야 합니다. 안정적으로 재현되지 않는 버그라면 bisect는 안 됩니다.
+판정을 스크립트로 만들 수 있으면 `git bisect run`이 반복을 대신합니다. `git help bisect`에 따르면 스크립트가 0으로 끝나면 good, 1~127(125 제외)이면 bad이고, 125는 그 commit을 건너뜁니다. 50개 commit 중 37번째에서 설정값이 바뀌는 장난감 저장소를 만들어 돌려 봤습니다(git 2.54.0).
+
+```bash
+cat ../test.sh
+#!/bin/sh
+grep -q "TIMEOUT_MS 10" config.h      # 0 = good, 1 = bad
+
+git bisect start HEAD v1.2.0 && git bisect run ../test.sh
+```
+
+```text
+Bisecting: 24 revisions left to test after this (roughly 5 steps)
+running '../test.sh'
+Bisecting: 12 revisions left to test after this (roughly 4 steps)
+running '../test.sh'
+Bisecting: 5 revisions left to test after this (roughly 3 steps)
+running '../test.sh'
+Bisecting: 2 revisions left to test after this (roughly 2 steps)
+running '../test.sh'
+Bisecting: 0 revisions left to test after this (roughly 1 step)
+running '../test.sh'
+78ba5b6598a9cb834d13a0f576c005b4e8de51f6 is the first bad commit
+```
+
+good(v1.2.0, 1번) 뒤의 49개 commit을 테스트 다섯 번으로 줄였습니다. log₂(49) ≈ 5.6이니 다섯~여섯 번입니다. 이 방법은 테스트가 같은 commit에서 늘 같은 답을 낼 때만 성립합니다. 간헐 버그라면 한 commit에서 good이 나와도 정말 good인지 모르므로, 아래 「재현부터 안정시키기」의 반복 횟수를 테스트 스크립트 안에 넣어야 bisect가 의미를 갖습니다.
 
 ## Code Search — 공간 이분 탐색
 
@@ -82,34 +102,34 @@ void process(uint8_t *buf, size_t n) {
 
 ## Changelog 우선 확인
 
-"어제는 됐다"가 출발점이면 가장 먼저 `git log --since=yesterday`와 `git diff HEAD@{1.day} HEAD`를 봅니다.
+"어제는 됐다"가 출발점이면 가장 먼저 최근 며칠의 log와 diff를 봅니다.
 
 ```bash
 git log --since="2 days ago" --oneline
 git diff HEAD@{2.days} -- src/
 ```
 
-코드 변경이 없는데 문제가 생겼다면 *환경*이 바뀐 것입니다.
+`HEAD@{2.days}`는 reflog 기준이라, 이틀 전에 이 저장소의 HEAD가 가리키던 commit입니다. commit 날짜가 아니라 내 작업 사본의 이력을 보므로 "어제 내 보드에서 돌던 코드"와 비교하는 데 맞습니다.
 
-- Toolchain 버전
-- 외부 라이브러리 update
-- 하드웨어 교체
-- OS 업데이트
-- Power supply, USB cable
+코드 변경이 없는데 결과가 달라졌다면 코드 밖의 무언가가 바뀐 것입니다. 기록해 두고 비교할 항목은 다음과 같습니다.
 
-이쪽이 의외로 흔합니다. USB 케이블 한 쪽 핀이 닿지 않아 SPI flash 쓰기가 가끔 실패하는 사례, 보드를 다른 USB 포트에 꽂으니 전류 부족으로 reset 되는 사례 모두 자주 봅니다.
+- toolchain 버전(`arm-none-eabi-gcc --version`)
+- 외부 라이브러리·SDK 버전
+- 보드 revision과 부착 부품
+- 호스트 OS·디버그 프로브 펌웨어
+- 전원(어댑터·USB 포트·케이블)
 
 ## Rubber Duck Debugging
 
-문제를 *소리 내어* 다른 사람에게 설명하면 절반은 설명 도중에 답이 나옵니다. 들어 줄 사람이 없으면 노란 고무 오리에게 말합니다.
+문제를 *소리 내어* 다른 사람에게 설명하면 설명하는 도중에 답이 나오곤 합니다. 들어 줄 사람이 없으면 노란 고무 오리에게 말합니다.
 
 > "이 ISR이 안 들어와요. NVIC enable 했고, IRQn 번호 맞고, priority도 5로 줬고, GPIO interrupt mask 풀었고... 잠깐, EXTI line mask 풀었나? 안 풀었네."
 
-말로 옮기는 순간 머릿속 모델의 빈 칸이 드러납니다. 코드 리뷰 부탁 메시지를 길게 적다가 *보내기 전*에 스스로 답을 찾는 일이 잦은 이유도 같습니다.
+말로 옮기는 순간 머릿속 모델의 빈 칸이 드러납니다. 위 예에서 빠진 것은 EXTI line mask였고, 이는 앞 절의 "모델" 칸에 적었어야 할 단계 하나였습니다.
 
 ## 재현부터 안정시키기
 
-간헐적 버그는 *재현 가능한 최소 절차*를 찾는 데 많은 시간이 들 수 있습니다.
+간헐 버그는 측정 한 번의 비용이 재현 빈도에 묶여 있습니다. 먼저 재현 절차를 안정시킵니다.
 
 - [ ] 어떤 조건에서 발생?
 - [ ] 발생 빈도?
@@ -117,27 +137,33 @@ git diff HEAD@{2.days} -- src/
 - [ ] 보드 reset 후에도 재현?
 - [ ] 동일 시퀀스를 자동화 가능?
 
-자동화된 재현 스크립트가 만들어지면 디버깅의 절반은 끝난 것입니다. 1시간에 한 번 발생하던 race를 1분에 한 번으로 줄이면 측정 한 번이 60배 싸집니다.
+1시간에 한 번 발생하던 race를 1분에 한 번으로 줄이면 측정 한 번이 60배 싸집니다.
 
-## "어제는 됐다"의 함정
+반복 횟수도 계산합니다. 1회 실행에서 실패할 확률이 p일 때 n번 돌려 한 번이라도 실패를 볼 확률은 1 − (1 − p)^n입니다. 1000번에 3번 실패하는 버그(p = 0.003)를 95% 확률로 한 번 이상 보려면 998번이 필요합니다. 반대로 고친 뒤 n번 연속 통과했다면, 남은 실패 확률의 95% 상한은 대략 3/n입니다("rule of three").
 
-"어제와 오늘이 같은 코드, 같은 환경"이라는 것은 가정일 뿐입니다. 현실에서는 반드시 한 가지가 다르고, 그 한 가지가 무엇인지 찾아내는 것이 일의 전부입니다.
+```text
+p=0.003: runs needed to see >=1 failure with 95%: 998
+p=0.004: runs needed to see >=1 failure with 95%: 748
+p=0.005: runs needed to see >=1 failure with 95%: 598
+0 failures in 100 runs -> 95% upper bound on p = 0.02951 (rule of three 0.03000)
+0 failures in 1000 runs -> 95% upper bound on p = 0.00299 (rule of three 0.00300)
+0 failures in 10000 runs -> 95% upper bound on p = 0.00030 (rule of three 0.00030)
+P(100 clean runs | p=0.003) = 0.74
+```
 
-`git status`, `git diff`, toolchain version, board revision, 충전 케이블, 외부 sensor, OS update를 모두 확인합니다. 가장 자주 잡히는 범인은 *내가 모르게 바뀐* 것입니다.
+p = 0.003인 버그는 고치지 않아도 100번 연속 통과할 확률이 74%입니다. 100번 통과로는 이 버그가 사라졌다고 말할 수 없고, 0.3% 수준을 배제하려면 1000번 단위가 필요합니다.
 
 ## 디버깅 노트 작성
 
-긴 디버깅 세션은 *기록 없이는* 진척이 없습니다.
+긴 디버깅 세션은 기록이 없으면 같은 가설을 두 번 검증하게 됩니다. 노트에는 증상(빈도 포함), 환경(위 목록), 그리고 가설마다 검증 방법과 결과를 남깁니다. 아래는 SPI flash 쓰기가 간헐적으로 실패하는 경우를 가정한 양식입니다. 결과 칸은 실제로 측정한 뒤에 채우는 자리입니다.
 
-실제 노트는 이런 모양입니다. 2026년 5월 16일에 겪은 "SPI flash 간헐 쓰기 실패" 건을 예로 들면, 증상은 1000회 중 3~5회 erase 후 verify 불일치였고 환경은 STM32F407 + W25Q64에 SPI1을 21 MHz로 돌리던 상황이었습니다. 가설은 세 개를 세워 차례로 검증했습니다.
+| 가설 | 검증 방법 | 기각 조건 |
+|------|-----------|-----------|
+| A. SCK가 너무 빠르다 | 분주를 한 단계 낮춰 같은 횟수 반복 | 실패 빈도가 그대로 |
+| B. 쓰기 뒤 WIP 비트를 기다리지 않는다 | 상태 레지스터 polling을 넣고 반복 | 실패 빈도가 그대로 |
+| C. 쓰기 중 전원 전압이 떨어진다 | 스코프로 flash VCC를 trigger | 실패 시점에 변동 없음 |
 
-| 가설 | 검증 방법 | 결과 |
-|------|-----------|------|
-| A. clock이 너무 빠르다 | 5 MHz로 낮춤 | 그래도 발생. 기각 |
-| B. WIP bit를 안 기다린다 | 대기 코드 추가 | 그래도 발생. 기각 |
-| C. VCC 전압이 dip 한다 | 오실로스코프로 관찰. 3.27V → 3.05V dip 확인 | decoupling cap 0.1µF 추가 후 1만 회 fail 없음. 해결 |
-
-다음에 같은 류 버그를 만나면 이 노트가 30분을 살려 줍니다.
+각 행의 "같은 횟수 반복"은 위 계산대로 실패 빈도를 구별할 만큼이어야 합니다. 원래 1000번에 3~5번 실패했다면, 기각 판정에도 1000번 단위가 필요합니다. SCK와 WIP의 근거는 [1-05: SPI 하드웨어](/blog/embedded/modern-recipes/part1-05-spi-hardware)에 있습니다.
 
 ## "수정"이 진짜 수정인지 확인
 
@@ -149,27 +175,39 @@ if (status & 0x01) handle();
 if ((status & 0x01) != 0) handle();
 ```
 
-이 둘은 동일합니다. 동작이 바뀌었다면 다른 원인이 있습니다. *수정으로 문제가 사라졌다*는 것과 *수정이 원인을 고쳤다*는 것은 다릅니다. Heisenbug(인터럽트·timing 류)는 우연히 사라질 수 있으니, 같은 조건에서 *왜* 안 일어나는지 설명할 수 있어야 진짜 수정입니다.
+C11(N1570) 6.8.4.1은 `if`의 첫 문장이 "조건식이 0과 같지 않을 때" 실행된다고 정하므로 두 줄은 같은 의미이고, 컴파일러도 같은 코드를 냅니다. `arm-none-eabi-gcc` 16.2.0 `-mcpu=cortex-m4 -mthumb`로 두 함수를 컴파일한 결과에서 비교·분기 부분만 옮겼습니다(-O0의 prologue·epilogue도 두 함수가 같습니다).
 
-## 측정 도구의 hierarchy
+```text
+-O0                              -O2
+a: and.w r3, r3, #1              a: lsls r3, r0, #31
+   cmp   r3, #0                     bmi.n  6 <a+0x6>
+   beq.n 16 <a+0x16>                bx     lr
+b: and.w r3, r3, #1              b: lsls r3, r0, #31
+   cmp   r3, #0                     bmi.n  12 <b+0x6>
+   beq.n 34 <b+0x16>                bx     lr
+```
 
-부담 낮음 → 부담 큼:
+명령은 분기 주소만 다르고 같습니다. 이런 변경 뒤 동작이 바뀌었다면 다른 원인이 있습니다. *수정으로 문제가 사라졌다*는 것과 *수정이 원인을 고쳤다*는 것은 다릅니다. 위 확률 계산처럼 간헐 버그는 고치지 않아도 한동안 안 보일 수 있으니, 같은 조건에서 *왜* 안 일어나는지 설명할 수 있어야 진짜 수정입니다.
 
-1. printf / log
-2. LED toggle
-3. GPIO pulse + 오실로스코프
-4. SWO / RTT trace
-5. Logic analyzer
-6. JTAG halt + 메모리 dump
-7. ETM trace
+## 측정 도구 고르기
 
-가장 작은 부담으로 가장 큰 정보를 얻을 도구를 고릅니다. printf로 race가 사라지면 GPIO pulse로 옮겨 갑니다. Halt가 race를 망가뜨리면 RTT로 옮겨 갑니다.
+도구마다 프로그램의 실행을 건드리는 방식이 다릅니다. 측정이 버그를 바꾸는지를 기준으로 고릅니다.
+
+| 도구 | 프로그램에 끼치는 것 | 함께 보는 글 |
+| --- | --- | --- |
+| printf / log | 출력 코드 실행 시간, 버퍼·UART 대기 | [10-11: 로깅 시스템](/blog/embedded/modern-recipes/part10-11-logging-system) |
+| GPIO pulse + 스코프·logic analyzer | 레지스터 쓰기 한두 번 | [10-10: 통신 프로토콜 분석](/blog/embedded/modern-recipes/part10-10-protocol-analyzer) |
+| SWO / RTT | ITM 쓰기 또는 RAM 버퍼 쓰기, 코어는 멈추지 않음 | [10-09: 타이밍/race 진단](/blog/embedded/modern-recipes/part10-09-timing-race-diag) |
+| breakpoint halt + 메모리 읽기 | 코어 정지. 정지 중에도 주변장치·외부 세계는 진행 | [10-03: GDB 원격 디버깅](/blog/embedded/modern-recipes/part10-03-gdb-remote-debug) |
+| ETM 명령 trace | 코어 밖 trace 하드웨어가 기록 | [10-09](/blog/embedded/modern-recipes/part10-09-timing-race-diag) |
+
+printf를 넣었더니 race가 사라지면 GPIO pulse처럼 끼치는 것이 작은 쪽으로 옮기고, halt가 상황을 바꾸면 코어를 멈추지 않는 RTT나 trace로 옮깁니다.
 
 ## 자주 보는 함정
 
 > 코드를 의심하기 전에 회로를 의심
 
-GPIO 토글이 안 보이면 *코드*보다 *핀*을 먼저 의심합니다. 멀티미터로 핀에 신호가 뜨는지부터 봅니다.
+GPIO 토글이 안 보이면 위 LED 예처럼 핀 배정부터 확인합니다. 회로도의 핀 이름과 코드의 포트·핀 번호를 맞춰 보고, 스코프나 멀티미터로 그 핀에 신호가 나오는지 봅니다.
 
 > 두 가지를 동시에 바꾸기
 
@@ -179,27 +217,27 @@ GPIO 토글이 안 보이면 *코드*보다 *핀*을 먼저 의심합니다. 멀
 [결과]   동작. → 어느 쪽이 원인인지 알 수 없음.
 ```
 
-한 번에 한 변수만 바꿉니다. 두 가지를 같이 바꾸고 동작하면 *어느 쪽도 진짜 원인이 아닐* 가능성이 큽니다.
+한 번에 한 변수만 바꿉니다. 두 가지를 같이 바꾸고 동작하면, 원인이 변경 1인지 변경 2인지 둘의 조합인지 구별할 수 없습니다. 다음에 둘 중 하나를 되돌려야 할 때 근거가 없습니다.
 
 > "오늘은 됐으니 됐다"
 
-같은 절차로 100번 동작하기 전에는 *해결되지 않은* 것입니다. 간헐 버그는 다음 주 production에서 다시 나옵니다.
+몇 번 통과했는지보다, 원래 실패 빈도를 배제할 만큼 반복했는지가 기준입니다. 위 계산대로 1000번에 3번 실패하던 버그는 100번 연속 통과해도 남아 있을 확률이 74%입니다.
 
 > 너무 깊이 파기
 
-10분 들여다보고 답이 안 보이면 한 발 물러섭니다. 산책, 잠깐의 다른 작업, 동료에게 설명. 머릿속 모델을 한 번 비워야 다른 가설이 보입니다.
+같은 가설을 반복해서 들여다보고 있다면 노트의 "모델" 칸으로 돌아갑니다. 동료에게 설명하거나 잠시 다른 작업을 하다 돌아오면, 모델의 빈 칸을 다시 볼 기회가 생깁니다.
 
 ## 정리
 
 - 디버깅은 *가설을 깨는* 일입니다. 코드를 고치기 전에 모델을 측정합니다.
 - 가설은 항상 YES/NO로 답이 나와야 합니다.
-- git bisect로 *시간 이분 탐색*, print binary search로 *공간 이분 탐색*.
-- 환경 변화(toolchain, 케이블, USB 포트)를 항상 먼저 의심합니다.
-- 재현 절차를 자동화하면 측정 한 번이 수십 배 싸집니다.
-- 디버깅 노트는 future-you를 위한 최고의 선물입니다.
+- `git bisect run`은 49개 commit을 테스트 다섯 번으로 줄였습니다. 테스트가 결정적일 때만 씁니다.
+- 코드가 그대로인데 결과가 바뀌면 toolchain·라이브러리·보드·전원을 기록과 비교합니다.
+- 간헐 버그의 반복 횟수는 실패 확률로 정합니다. p = 0.003을 95%로 한 번 보려면 998번입니다.
+- 디버깅 노트에는 가설마다 검증 방법과 기각 조건을 남깁니다.
 - "수정으로 사라졌다"는 *왜 사라졌는지*를 설명할 수 있어야 진짜 수정입니다.
 
-다음 편은 **하드폴트 분석**입니다.
+다음 편은 **JTAG·SWD가 안 붙을 때**입니다.
 
 ## 관련 항목
 

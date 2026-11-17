@@ -95,7 +95,7 @@ Eye diagram은 여러 비트 구간을 겹쳐 rise/fall time, overshoot, ringing
 
 캡처 시간도 판정에 들어갑니다. PRBS31의 최악 run은 패턴 한 주기(약 2³¹비트)에 한 번 나옵니다. 매뉴얼의 예는 3.125 Gbps에서 0.687 s이고(56쪽), 이 조합의 최대 권장 속도 100 Mbps(비트 10 ns)에서는 10 ns × 2³¹ ≈ 21.5 s입니다. 이보다 짧게 쌓은 eye는 최악 구간을 담았다는 보장이 없으므로 판정에 쓰지 않습니다.
 
-eye가 문턱 안으로 닫히면 송신단 pre-emphasis·de-emphasis를 검토하는데, SN65LVDS31·SN65LVDS32 데이터시트에는 이 기능 항목이 없습니다. Owner's Manual 표 7-9(65쪽)에 따르면 pre-emphasis는 edge마다 overshoot를 더하고 수신 eye 열림은 PE가 없을 때와 같으며 전력이 늘고, de-emphasis는 정착 진폭을 DE 비율만큼 줄입니다. VOD 247 mV 드라이버에 표의 대표값 −3 dB de-emphasis를 걸면 정착 진폭은 247 × 10^(−3/20) ≈ 175 mV이고, 손실 없는 선로에서 남는 예산은 147 mV에서 75 mV로 줄어듭니다.
+eye가 문턱 안으로 닫히면 송신단 pre-emphasis·de-emphasis를 검토하는데, SN65LVDS31·SN65LVDS32 데이터시트에는 이 기능 항목이 없습니다. Owner's Manual 65쪽 본문과 표 7-9에 따르면 pre-emphasis는 edge마다 overshoot를 더하고 수신 eye 열림은 PE가 없을 때와 같으며 전력이 늘고, de-emphasis는 정착 진폭을 DE 비율만큼 줄입니다. VOD 247 mV 드라이버에 표의 대표값 −3 dB de-emphasis를 걸면 정착 진폭은 247 × 10^(−3/20) ≈ 175 mV이고, 손실 없는 선로에서 남는 예산은 147 mV에서 75 mV로 줄어듭니다.
 
 ## 코드 / 실제 사용 예
 
@@ -121,6 +121,22 @@ IBUFDS #(
 
 Xilinx UNISIM 시뮬레이션 모델 [`OBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/OBUFDS.v)는 `bufif0(O, I, GTS)`와 `notif0(OB, I, GTS)`로, 전역 3-state 신호 `GTS`가 0일 때 `O`에 `I`를, `OB`에 `I`의 반전을 내보냅니다. [`IBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/IBUFDS.v)는 `I` = 1·`IB` = 0이면 `O` = 1, `I` = 0·`IB` = 1이면 `O` = 0을 내고, 두 입력이 모두 z(열림)이면 `O`를 x로 둡니다(`DQS_BIAS` = "TRUE"일 때만 0). 아래 "입력이 열렸을 때의 출력"의 SN65LVDS32처럼 열린 입력에서 HIGH를 내는 동작은 이 시뮬레이션 모델에 없습니다.
 
+위 두 인스턴스를 그 커밋의 `OBUFDS.v`·`IBUFDS.v`·`glbl.v`와 함께 Icarus Verilog 13.0으로 돌려 이 동작을 확인했습니다. `glbl.v`는 `GTS`를 `TOC_WIDTH` = 0 뒤 바로 0으로 내리고, 전역 reset `GSR`은 `ROC_WIDTH` = 100000 시간 단위(테스트벤치 timescale 1 ps에서 100 ns) 동안 잡으므로, 그 뒤인 200 ns에 입력을 바꿨습니다.
+
+```bash
+iverilog -g2012 -s tb -s glbl -o lv tb.v OBUFDS.v IBUFDS.v glbl.v && vvp -n lv
+```
+
+```text
+OBUFDS I=0 -> O=0 OB=1
+OBUFDS I=1 -> O=1 OB=0
+IBUFDS I=1 IB=0 -> O=1
+IBUFDS I=0 IB=1 -> O=0
+IBUFDS I=z IB=z -> O=x
+```
+
+마지막 줄이 열린 입력에서 x가 나오는 경우입니다. 이 x가 뒤 로직으로 퍼지면, 보드에서는 HIGH로 고정될 수신기 동작을 시뮬레이션은 다르게 보여 줍니다.
+
 같은 라이브러리의 양방향 버퍼 모델 [`IOBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/IOBUFDS.v)는 `IOSTANDARD`가 `LVDS_25`이면 "100 Ω 차동에 최적화된 고정 임피던스 구조이고, turn-around 타이밍 요구가 없는 point-to-point 전송 전용이며, 버스 구조라면 BLVDS를 쓰라"는 DRC 경고를 냅니다. 위 "전류 모드 드라이버와 100 Ω 종단"의 100 Ω 전제가 FPGA 쪽 I/O 표준에도 들어 있습니다.
 
 ## 자주 보는 함정
@@ -131,7 +147,7 @@ Owner's Manual(9쪽)은 일부 업체 데이터시트가 LVDS(또는 pseudo-LVDS
 
 > ⚠️ 입력이 열렸을 때의 출력
 
-SN65LVDS32의 fail-safe는 open-circuit만 다룹니다(SLLS262R 1절, 10.3.2절). 드라이버가 high-impedance가 되거나 케이블이 빠져 입력 전류가 거의 없으면, 각 선을 300 kΩ으로 VCC에 끌어올리고 약 2.3 V 문턱의 AND 게이트가 이를 감지해 출력을 HIGH로 둡니다. 데이터시트는 종단 Rt를 그림 10처럼 A–B 사이에 달면 이 기능에 영향이 없지만, 접지로 DC 전류를 흘리는 다른 종단 회로는 pull-up 전류를 이겨 fail-safe를 무력화할 수 있다고 씁니다(16쪽). 외부 bias로 idle 상태를 정하는 방식은 [1-11](/blog/embedded/modern-recipes/part1-11-rs485-rs422)의 fail-safe biasing을 봅니다.
+SN65LVDS32의 fail-safe는 데이터시트가 "Open-Circuit Fail-Safe"라고 부르는 기능입니다(SLLS262R 1절, 10.3.2절). 드라이버가 high-impedance가 되거나 케이블이 빠져 입력 전류가 거의 없으면, 각 선을 300 kΩ으로 VCC에 끌어올리고 약 2.3 V 문턱의 AND 게이트가 이를 감지해 출력을 HIGH로 둡니다. 데이터시트는 종단 Rt를 그림 10처럼 A–B 사이에 달면 이 기능에 영향이 없지만, 접지로 DC 전류를 흘리는 다른 종단 회로는 pull-up 전류를 이겨 fail-safe를 무력화할 수 있다고 씁니다(16쪽). 외부 bias로 idle 상태를 정하는 방식은 [1-11](/blog/embedded/modern-recipes/part1-11-rs485-rs422)의 fail-safe biasing을 봅니다.
 
 ## 정리
 

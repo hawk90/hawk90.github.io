@@ -15,7 +15,7 @@ lastVerified: 2026-10-11
 
 > **"비트 수는 SNR의 상한만 정하고, 실제 선택은 채널당 rate와 source 저항이 정합니다."** 여러 채널을 빠르게 돌리면 SAR, 채널당 rate가 낮아도 되고 노이즈가 작아야 하면 Σ-Δ이며, MCU 내장 SAR는 sampling cycle 수가 허용 source 저항을 정합니다.
 
-이 글은 세 가지를 답합니다. 비트 수가 SNR을 얼마나 정하는가, SAR와 Σ-Δ 중 무엇을 고르는가, MCU 내장 SAR에 source를 직결해도 되는가. 옴의 법칙과 RC 시정수는 안다고 가정합니다. 인용한 자료의 판과 링크는 「참고 자료」에 모았습니다.
+이 글은 세 가지 질문에 답합니다. 비트 수가 SNR을 얼마나 정하는가, SAR와 Σ-Δ 중 무엇을 고르는가, MCU 내장 SAR에 source를 직결해도 되는가. 옴의 법칙과 RC 시정수는 안다고 가정합니다. 인용한 자료의 판과 링크는 「참고 자료」에 모았습니다.
 
 ## 핵심 개념
 
@@ -51,11 +51,11 @@ SNR (dB) = 6.02 × N + 1.76
 
 | 부품 (구조, 해상도) | 단일 채널 최대 rate | 8채널 순환 시 채널당 rate | ENOB (데이터시트 typ, 조건) |
 | --- | --- | --- | --- |
-| STM32F407 (내장 SAR, 12 bit) | 2 MS/s (f_ADC = 30 MHz, t_S = 3 cycles, single ADC) | 138.9 kS/s (t_S = 15 cycles: 30 MHz ÷ (27 cycles × 8)) | TBD |
+| STM32F407 (내장 SAR, 12 bit) | 2 MS/s (f_ADC = 30 MHz, t_S = 3 cycles, single ADC) | 138.9 kS/s (t_S = 15 cycles: 30 MHz ÷ (27 cycles × 8)) | 데이터시트에 없음 |
 | ADS8326 (외장 SAR, 16 bit) | 250 kS/s | 해당 없음 (입력 1쌍) | 14.69 (SINAD 90 dB, I grade, 5 V_PP 2 kHz sine, V_REF = 5 V, f_SAMPLE = 250 kHz) |
 | ADS1256 (Σ-Δ, 24 bit) | 30 kS/s | 546.75 S/s (Table 14의 4374 Hz ÷ 8) | 19.8 (입력 단락 rms 노이즈 기준, 30 kSPS, PGA 1, buffer on, V_REF = 2.5 V, AVDD = 5 V, 25 °C) |
 
-- STM32F407의 단일 채널 rate는 DS8626 Rev 12 Table 67 값입니다. 8채널 값은 RM0090의 T_conv = sampling time + 12 cycles를 채널 수만큼 더해 이 글이 계산했습니다. scan mode는 한 채널 변환이 끝나면 다음 채널을 자동으로 변환합니다(RM0090 13.3.8). 15 cycles를 고른 이유는 [Source impedance와 sampling time](#source-impedance와-sampling-time)에 있습니다. DS8626에는 ENOB나 SINAD 항목이 없어서 TBD로 뒀습니다.
+- STM32F407의 단일 채널 rate는 DS8626 Rev 12 Table 67 값입니다. 8채널 값은 RM0090의 T_conv = sampling time + 12 cycles를 채널 수만큼 더해 이 글이 계산했습니다. scan mode는 한 채널 변환이 끝나면 다음 채널을 자동으로 변환합니다(RM0090 13.3.8). 15 cycles를 고른 이유는 [Source impedance와 sampling time](#source-impedance와-sampling-time)에 있습니다. DS8626에는 ENOB나 SINAD 항목이 없어서 그 칸은 비워 두었습니다.
 - ENOB 두 값은 정의가 다릅니다. ADS8326은 SINAD에서 구한 값이고(10 kHz 입력에서는 14.28), ADS1256은 입력을 단락하고 잰 rms 노이즈로 ln(FSR / rms noise) / ln 2를 계산한 값입니다(SBAS288K Table 2). 왜곡이 들어가지 않은 값이라 ADS8326과 같은 잣대로 비교할 수 없습니다. 데이터시트의 ENOB를 비교하기 전에 어느 정의인지부터 봅니다.
 
 8채널이면 채널당 rate는 F407이 ADS1256의 약 254배입니다. 입력 필터 요구도 다릅니다. F407을 위 조건으로 돌리면 채널당 f_s/2가 69.4 kHz이므로, 그 위를 줄이는 아날로그 LPF가 채널마다 필요합니다. ADS1256은 디지털 필터가 30 kSPS 설정에서 −3 dB 대역폭 6106 Hz의 LPF로 동작하고(SBAS288K Table 12), 이 응답이 modulator rate f_CLKIN/4(1.92 MHz)의 배수마다 반복됩니다. 데이터시트는 그 반복 주파수 위에 큰 노이즈가 있으면 외부 필터로 제거하라고 하고, 그 필터를 간단한 RC 필터로 할 수 있다고 적습니다(SBAS288K Figure 25).
@@ -82,7 +82,7 @@ Table 67의 입력값에는 조건이 붙어 있습니다. C_ADC는 4 pF typ입�
 
 1.8 V 동작점에서 3 cycles는 R_AIN = 0이어도 1/4 LSB 기준을 만족하지 못합니다. R_ADC 하나만으로 상한을 넘기 때문에 op-amp buffer로 source 저항을 낮춰도 이 행은 살아나지 않습니다. buffer가 살리는 것은 15·28 cycles 행입니다. source 저항이 14.8 kΩ보다 큰 센서도 buffer를 거치면 15 cycles를 쓸 수 있습니다.
 
-30 MHz 동작점은 R_AIN과 R_ADC의 합만 정해집니다. 3 cycles에서는 합이 2.1 kΩ 이하여야 하는데, DS8626이 3.3 V의 R_ADC를 주지 않으므로 buffer를 달아도 3 cycles가 이 기준을 만족하는지는 이 데이터시트로 판정할 수 없습니다. 비교 표의 8채널 계산에 15 cycles를 쓴 것은 이 때문입니다.
+30 MHz 동작점에서는 R_AIN과 R_ADC의 합만 정해집니다. 3 cycles에서는 합이 2.1 kΩ 이하여야 하는데, DS8626이 3.3 V의 R_ADC를 주지 않으므로 buffer를 달아도 3 cycles가 이 기준을 만족하는지는 이 데이터시트로 판정할 수 없습니다. 비교 표의 8채널 계산에 15 cycles를 쓴 것은 이 때문입니다.
 
 ## 코드 / 실제 사용 예
 
@@ -127,6 +127,14 @@ float adc_to_volt(uint16_t code, float vref) {
 - `0b111`은 480 cycles입니다(RM0090 13.13.5 `ADC_SMPR2`). R_AIN 상한이 Table 67의 50 kΩ까지 올라가는 대신, 30 MHz에서 T_conv는 492 cycles = 16.4 µs입니다(Table 67 t_CONV 최대값과 같음).
 - ADON 뒤 첫 변환 전에 power-up time t_STAB(Table 67 최대 3 µs)을 기다립니다. 반복 한 번이 HCLK 한 cycle 이상 걸리므로 360회 반복은 120 MHz에서 3 µs 이상입니다.
 - 1 LSB = V_REF+/2^n는 DS8626 Figure 49의 정의입니다. 그래서 4095가 아니라 4096으로 나눕니다.
+
+위 코드는 `cmsis_device_f4` 헤더로 다음과 같이 경고 없이 빌드됩니다(`arm-none-eabi-gcc` 16.2.0). 보드에서는 실행하지 않았습니다. QEMU 11.1의 STM32F405 ADC 모델(`hw/adc/stm32f2xx_adc.c`)은 `ADON`과 `SWSTART`가 켜져 있을 때 `DR`을 읽으면 이전 값에 7을 더한 가짜 값을 돌려주고 `SWSTART`를 지우며(그 밖에는 0), `SR`의 `EOC`는 세우지 않으므로, `adc_read()`의 `EOC` 대기 루프가 끝나지 않아 QEMU 실행으로는 확인할 것이 없습니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O2 \
+  -ffreestanding -DSTM32F407xx -I cmsis_device_f4/Include \
+  -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c adc.c
+```
 
 연속 변환을 DMA로 메모리에 쌓는 코드는 [4-10: 임베디드 DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)의 "ADC → memory" 절에 있습니다.
 

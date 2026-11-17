@@ -22,12 +22,12 @@
 \node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (7.4, 0.9) {(read status command)};
 
 \node[ann, font=\ttfamily\scriptsize] at (1.5, -0.2) {MOSI: 0x00};
-\node[ann, font=\ttfamily\scriptsize] at (4.5, -0.2) {MISO: 0x02};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (7.4, -0.2) {(status byte = WIP)};
+\node[ann, font=\ttfamily\scriptsize] at (4.5, -0.2) {MISO: 0x03};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (7.4, -0.2) {(BUSY=1, WEL=1)};
 
 % Setup label
 \node[font=\sffamily\footnotesize, anchor=west] at (-0.2, 3.5)
-  {신호 4개: MOSI, MISO, SCLK, CS \quad 설정: 8 bits/transfer, MSB first, CPOL, CPHA};
+  {신호 4개: MOSI, MISO, SCK, CS \quad 설정: 8 bits/transfer, MSB first, CPOL, CPHA};
 
 \end{tikzpicture}
 \end{document}
