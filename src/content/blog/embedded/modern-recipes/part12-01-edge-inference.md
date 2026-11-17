@@ -403,7 +403,7 @@ AGX Orin의 275 TOPS는 sparse이고 GPU·DLA 합이며, dense GPU 칸은 85 TOP
 
 ### 수정 이력
 
-- 2026-10-11: 하드웨어 표·EP 목록·TensorRT sparsity 조건을 각 1차 자료와 다시 대조하고 확인 날짜를 붙였습니다. ONNX Runtime IoT/Edge/Mobile 열에 Qualcomm QNN이 있다고 적었던 것을 바로잡았습니다(QNN은 GPU 열에 있습니다). Pipeline buffer 수를 상태 나열로 다시 셌습니다(이전 판의 "6개 이상"을 5개로 정정). 128 MAC NPU를 약 180 MHz로 돈다고 적었던 역산을, 페이지의 core clock과 나란히 놓고 46 GOPS가 식과 맞지 않는다는 서술로 바꿨습니다. Alif 값을 dense로 본 것이 추정임을 밝히고, 배율을 162배로 고쳤습니다. 결과 구조체·`FRAME_DUMP`·출하 빌드 검사와 store-and-forward 예제를 더했습니다.
+- 2026-10-11: 하드웨어 표·EP 목록·TensorRT sparsity 조건을 각 1차 자료와 다시 대조하고 확인 날짜를 붙였습니다. ONNX Runtime IoT/Edge/Mobile 열에 Qualcomm QNN이 있다고 적었던 것을 바로잡았습니다(QNN은 GPU 열에 있습니다). Pipeline buffer 수를 상태 나열로 다시 셌습니다(5개). 128 MAC NPU를 약 180 MHz로 돈다고 적었던 역산을, 페이지의 core clock과 나란히 놓고 46 GOPS가 식과 맞지 않는다는 서술로 바꿨습니다. Alif 값을 dense로 본 것이 추정임을 밝히고, 배율을 162배로 고쳤습니다. 결과 구조체·`FRAME_DUMP`·출하 빌드 검사와 store-and-forward 예제를 더했습니다.
 - 2026-10-11 (2차): 개발용 노트북에서 실행한 출력과 그 환경 표를 모두 지우고, 처리량·지연은 코드의 설계값과 구조로 셈한 값으로 바꿨습니다. 같은 이유로 NEON 정규화 비교 절을 지웠습니다(SIMD는 [8-07 SIMD](/blog/embedded/modern-recipes/part8-07-simd)가 다룹니다). 다시 열어 보지 못한 Ethos-U55 TRM 기반 서술(AXI manager 구성, clock 입력)을 지웠습니다. 결과 구조체 크기를 AAPCS64 규칙으로 셈했습니다. Raspberry Pi·Hailo 출처를 product brief로 바꾸고(Raspberry Pi 두 문서는 발행 월을 표기합니다), Vela·TFLM 링크를 태그·커밋에 고정했습니다.
 - 2026-10-11 (3차): stage latency 측정, 3-stage pipeline 코드, 처리량·지연 셈, buffer 수 절을 다음 편 [12-02 Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)으로 옮겼습니다. 이 글은 추론을 어디서 할지를 정하는 내용만 남깁니다.
 
