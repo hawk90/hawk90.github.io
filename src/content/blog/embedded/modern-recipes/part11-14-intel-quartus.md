@@ -2,7 +2,7 @@
 title: "Intel Quartus 사용법 — Platform Designer·Nios II·HLS"
 slug: "embedded/modern-recipes/part11-14-intel-quartus"
 date: 2026-04-20T09:13:00
-description: "Intel Quartus Prime·Platform Designer(Qsys)·Nios II soft processor·Intel HLS·partial reconfig 사용법."
+description: "Quartus를 설치할 수 없고 Altera 문서도 받지 못한 환경에서, 어느 FPGA toolchain에서나 쓰는 HDL과 testbench를 Icarus·Verilator로 시뮬레이션한 범위를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 136
 tags: [recipes, fpga, quartus, intel, altera]
@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 Quartus는 이 글을 쓴 환경(Apple Silicon Mac, Debian arm64 guest)에 설치할 수 없어 실행하지 않았습니다. 버전이 붙은 Intel/Altera 공식 문서도 확인하려 했지만, `intel.com/content/www/us/en/docs/programmable/...` 아래 Quartus·Nios II 문서 URL은 현재 404 redirect 또는 403을 돌려주고, 옮겨 간 `docs.altera.com`은 JavaScript 앱이라 본문을 받아 올 수 없었습니다.
 
-그래서 이전 판에 있던 다음 내용은 1차 자료로 확인하지 못해 뺐습니다.
+그래서 다음 내용은 1차 자료로 확인하지 못해 다루지 않습니다.
 
 - edition(Lite/Standard/Pro)별 지원 device 목록
 - Nios II/e·/s·/f의 LE 수와 pipeline 구성
@@ -87,7 +87,7 @@ top_tb.v:11: $finish called at 10000 (1s)
 
 `led`는 100 clock(2 µs)마다 1씩 증가합니다. 첫 변화가 2,000 ns가 아니라 1,990 ns인 것은 clock이 0에서 시작해 첫 상승 edge가 10 ns에 오기 때문입니다. `top.vcd`를 GTKWave 같은 viewer로 열면 같은 내용을 파형으로 봅니다.
 
-이전 판의 testbench에는 `wire [1:0] led;` 선언이 없었습니다. Verilog는 선언하지 않은 이름을 1-bit implicit net으로 만들기 때문에, Icarus는 컴파일은 하되 다음 경고를 냅니다.
+testbench에서 `wire [1:0] led;` 선언을 빼면 어떻게 되는지 보겠습니다. Verilog는 선언하지 않은 이름을 1-bit implicit net으로 만들기 때문에, Icarus는 컴파일은 하되 다음 경고를 냅니다.
 
 ```text
 top_tb_orig.v:5: warning: Port 2 (led) of module top expects 2 bit(s), given 1.
