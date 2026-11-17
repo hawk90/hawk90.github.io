@@ -29,6 +29,10 @@ jedec_standards:
   - JESD79-4     # DDR4
   - JESD79-5     # DDR5
   - JESD270      # HBM4 base number
+  - JESD235D     # HBM/HBM2(E) current revision, Published Mar 2021 — jedec.org/standards-documents/docs/jesd235a (fetched 2026-11-16)
+  - JESD238B     # HBM3 revision family; page shows JESD238B.01, Published Apr 2025 — jedec.org/standards-documents/docs/jesd238a (fetched 2026-11-16)
+  - JESD250D     # GDDR6, Published May 2023 — jedec.org/standards-documents/docs/jesd250 (fetched 2026-11-16)
+  - JESD270-4A   # HBM4 Version 1.1, Published Dec 2025 — jedec.org/standards-documents/docs/jesd270-4 (fetched 2026-11-16)
   - JESD270-4    # HBM4 — JEDEC 2025-04 확정. https://www.jedec.org/news/pressreleases/jedec%C2%AE-and-industry-leaders-collaborate-release-jesd270-4-hbm4-standard-advancing
   # Note: HBM3E는 별도 표준 번호 없이 JESD238 update로 다룸
   # HBM4는 2025-04 JESD270-4로 확정 (JESD235 계열 아님)

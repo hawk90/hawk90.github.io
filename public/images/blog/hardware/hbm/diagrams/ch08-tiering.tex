@@ -16,12 +16,12 @@
 \node[tier=hibord, minimum width=60mm, minimum height=12mm] (t1) at (0, 6.0) {Tier 1: HBM\\\scriptsize(per accelerator 80--256 GB)};
 \node[note] at (3.5, 6.0) {bandwidth 3.35--8 TB/s};
 
-\node[tier=clibord, minimum width=80mm, minimum height=12mm] (t2) at (0, 4.0) {Tier 2: CXL-attached DRAM\\\scriptsize(TB 단위)};
+\node[tier=clibord, minimum width=80mm, minimum height=12mm] (t2) at (0, 4.0) {Tier 2: CXL-attached DRAM};
 \node[note] at (4.5, 4.0) {PCIe 5.0 x16 link: 64 GB/s};
 
-\node[tier=impbord, minimum width=100mm, minimum height=12mm] (t3) at (0, 2.0) {Tier 3: NVMe SSD\\\scriptsize(수십 TB)};
+\node[tier=impbord, minimum width=100mm, minimum height=12mm] (t3) at (0, 2.0) {Tier 3: NVMe SSD};
 
-\node[tier=absbord, minimum width=120mm, minimum height=12mm] (t4) at (0, 0) {Tier 4: 네트워크 메모리 풀 (UALink, RDMA)};
+\node[tier=absbord, minimum width=120mm, minimum height=12mm] (t4) at (0, 0) {Tier 4: 다른 가속기의 메모리 (UALink)};
 
 \node[font=\sffamily\bfseries\small, text=inkc] at (0, 9.2) {AI 가속기의 메모리 tiering};
 

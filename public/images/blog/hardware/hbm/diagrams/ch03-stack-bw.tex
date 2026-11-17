@@ -11,7 +11,7 @@
   \draw[draw=mutec] (-0.08,\v/300) -- (12.8,\v/300);
   \node[font=\sffamily\footnotesize,text=mutec,anchor=east] at (-0.2,\v/300) {\v};
 }
-\foreach \x/\v/\name/\yr in {1/128/HBM/2015,3/307.2/HBM2/2018,5/409.6/HBM2E/2020,7/819.2/HBM3/2022,9/1228.8/HBM3E/2024,11/2048/HBM4/2025} {
+\foreach \x/\v/\name/\yr in {1/128/HBM/(gen 1),3/307.2/HBM2/2018,5/409.6/HBM2E/2020,7/819.2/HBM3/2022,9/1228.8/HBM3E/2024,11/2048/HBM4/2025} {
   \draw[draw=absbord,fill=absfill] (\x-0.35,0) rectangle (\x+0.35,\v/300);
   \node[font=\sffamily\scriptsize,text=inkc,anchor=south] at (\x,\v/300+0.12) {\v};
   \node[font=\sffamily\footnotesize,text=inkc,align=center,anchor=north] at (\x,-0.2) {\name\\[2pt]\yr};
