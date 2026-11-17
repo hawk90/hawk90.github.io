@@ -1,5 +1,5 @@
 ---
-title: "Intel Quartus 사용법 — Platform Designer·Nios II·HLS"
+title: "Intel Quartus로 넘어가기 전 — 어느 toolchain에서나 쓰는 HDL과 testbench"
 slug: "embedded/modern-recipes/part11-14-intel-quartus"
 date: 2026-04-20T09:13:00
 description: "Quartus를 설치할 수 없고 Altera 문서도 받지 못한 환경에서, 어느 FPGA toolchain에서나 쓰는 HDL과 testbench를 Icarus·Verilator로 시뮬레이션한 범위를 정리합니다."
