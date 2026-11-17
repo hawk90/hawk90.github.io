@@ -30,7 +30,7 @@ QEMU는 cycle을 흉내 내지 않으므로, 아래의 Cortex-M 비교는 시간
 
 1. 모델은 `.tflite`(FlatBuffer) 그대로 flash에 둡니다. `GetModel()`은 복사나 parsing 없이 그 버퍼를 가리킵니다.
 2. 입력·출력·중간 tensor는 모두 사용자가 넘긴 **tensor arena** 안에 놓입니다. `AllocateTensors()`가 arena 안에서 tensor 위치를 정하고, 수명이 겹치지 않는 tensor는 같은 자리를 다시 씁니다.
-3. op 구현은 `MicroMutableOpResolver<N>`에 **필요한 것만** 등록합니다. 이전 판의 `AllOpsResolver`는 현재 저장소에 없습니다(`all_ops_resolver.h` 파일 자체가 없습니다).
+3. op 구현은 `MicroMutableOpResolver<N>`에 **필요한 것만** 등록합니다. `AllOpsResolver`는 현재 저장소에 없습니다(`all_ops_resolver.h` 파일 자체가 없습니다).
 4. Cortex-M용 최적화 kernel은 `OPTIMIZED_KERNEL_DIR=cmsis_nn`으로 빌드할 때 들어갑니다.
 
 ## 모델 변환 흐름
@@ -228,7 +228,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESS
 
 > ⚠️ 입력 양자화 부호
 
-이 모델의 입력은 int8, scale 0.007843, zero_point -1입니다. 실수 입력 `x`는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)의 LiteRT 식 `real = (q - zero_point) × scale`을 뒤집은 `q = round(x / scale) + zero_point`로 바꿉니다. 이전 판처럼 `- zero_point`로 쓰면 zero_point만큼 어긋납니다. 저장소 예제는 uint8 이미지를 넣을 때 128을 빼서 int8로 바꿉니다.
+이 모델의 입력은 int8, scale 0.007843, zero_point -1입니다. 실수 입력 `x`는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)의 LiteRT 식 `real = (q - zero_point) × scale`을 뒤집은 `q = round(x / scale) + zero_point`로 바꿉니다. `- zero_point`로 쓰면 zero_point만큼 어긋납니다. 저장소 예제는 uint8 이미지를 넣을 때 128을 빼서 int8로 바꿉니다.
 
 ## 정리
 
