@@ -86,7 +86,7 @@ dma_rx_start(rx_buffer, RX_LEN);
 (void)*(volatile uint8_t *)&rx_buffer[RX_LEN - 32];         /* last line -> cache */
 ```
 
-DMA는 주소 증가 모드로 두고, 이 read는 DMA가 마지막 line에 쓰기 전에 실행되어야 합니다. 완료 뒤 (2)를 빼고 `rx_buffer[RX_LEN - 32]`~`rx_buffer[RX_LEN - 1]`을 읽으면, 그 line이 그사이 evict되지 않은 한 DMA가 받은 값 대신 0xAA가 나와야 합니다. (2)를 넣으면 받은 값이 나와야 합니다.
+DMA는 주소 증가 모드로 두고, 이 read는 DMA가 마지막 line에 쓰기 전에 실행되어야 합니다. 위 TRM 규칙대로라면 완료 뒤 (2)를 빼고 `rx_buffer[RX_LEN - 32]`~`rx_buffer[RX_LEN - 1]`을 읽을 때, 그 line이 그사이 evict되지 않은 한 DMA가 받은 값 대신 0xAA가 보이고, (2)를 넣으면 받은 값이 보입니다. 이 재현은 D-cache와 DMA가 있는 실제 Cortex-M7 보드가 필요해 이번에 돌리지 못했습니다. QEMU로 대신할 수 없는 이유는 아래 "QEMU에서 빌드·실행해 보기"에 있습니다.
 
 **Memory → peripheral (CPU가 채우고 DMA가 내보냄).** 시작 전에 clean을 한 번 합니다.
 
@@ -120,6 +120,33 @@ DMA는 메모리를 읽으므로 CPU가 쓴 값이 dirty line에만 있으면 �
 Reset 직후 CCR 값은 0x00040200으로 DC(bit 16)와 IC(bit 17)가 0, 즉 두 cache가 모두 꺼져 있습니다(TRM 표 3-1, CMSIS `SCB_CCR_DC_Pos`·`SCB_CCR_IC_Pos`). TRM 4.1.3절은 enable 전에 cache를 invalidate하지 않으면 동작이 UNPREDICTABLE이라고 적습니다. CMSIS 5.9.0의 `SCB_EnableICache()`·`SCB_EnableDCache()`는 cache 전체를 invalidate한 뒤 CCR 비트를 세우고 `__DSB()`·`__ISB()`를 실행하므로 이 요구를 함께 처리합니다.
 
 ## 코드 / 실제 사용 예
+
+### QEMU에서 빌드·실행해 보기
+
+위 수신 코드(`rx_start`·`rx_complete`)와 아래 MPU region 코드를 CMSIS 5.9.0 `core_cm7.h`로 묶어 arm-none-eabi-gcc 16.2.0으로 빌드하고, QEMU 11.1.3 `mps2-an500`(Cortex-M7)에서 실행했습니다. `dma_rx_start`는 이 모델에 DMA가 없어 빈 stub입니다. 하네스는 [2-03](/blog/embedded/modern-recipes/part2-03-arm-registers)의 "QEMU에서 직접 돌려 보기"와 같고, device header `an500.h`만 `__CM7_REV`·`__ICACHE_PRESENT 1U`·`__DCACHE_PRESENT 1U`를 정의하고 `core_cm7.h`를 include하도록 바꿨습니다. `__DCACHE_PRESENT`가 1이 아니면 CMSIS의 cache 함수는 빈 함수로 컴파일됩니다. 빌드가 된다는 것은 이 글의 CMSIS 함수 이름과 필드 이름이 5.9.0 헤더와 맞는다는 뜻입니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -ffreestanding -O1 -g \
+  -I. -Iharness -ICMSIS_5/CMSIS/Core/Include -nostdlib -T harness/link.ld \
+  harness/startup.c harness/semi.c cache.c -o cache.elf
+qemu-system-arm -M mps2-an500 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native,userspace=on -kernel cache.elf
+```
+
+```text
+CCR at reset = 0x00000200
+CLIDR = 0x00000000
+CCR after SCB_Enable*Cache = 0x00000200
+process: rx_buffer[0] = 0x00000000
+probe after invalidate without clean = 0x22222222
+RASR(1) = 0x1308001F
+MPU CTRL = 0x00000005
+SHCSR.MEMFAULTENA = 0x00000001
+```
+
+앞 세 줄이 QEMU로 cache 동작을 검증할 수 없는 이유입니다. TRM 표 3-1의 CCR reset 값은 0x00040200인데 이 모델은 0x00000200을 돌려주고, CLIDR이 0(cache 없음)이며, `SCB_EnableDCache()` 뒤에도 CCR.DC·IC가 0으로 남습니다. 다섯째 줄도 같은 이야기입니다. Write-back cache라면 clean 없이 invalidate한 `0x22222222`가 사라져야 하지만, cache가 없는 모델이라 그대로 남습니다.
+
+뒤 세 줄은 MPU 쪽 확인입니다. RASR 0x1308001F는 XN(bit 28)·AP=011·TEX=001·SIZE=15·ENABLE이고, `ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk)` 뒤 CTRL은 PRIVDEFENA(bit 2)·ENABLE(bit 0)인 0x5, SHCSR의 MEMFAULTENA는 1입니다. 아래 절이 설명하는 `ARM_MPU_Enable`의 동작 그대로입니다.
 
 ### MPU non-cacheable region
 

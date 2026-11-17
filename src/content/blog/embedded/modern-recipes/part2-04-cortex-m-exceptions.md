@@ -13,7 +13,7 @@ lastVerified: 2026-10-11
 
 ## 한 줄 요약
 
-> **"우선순위 숫자가 예외 경로를 정합니다."** 어떤 IRQ가 실행 중인 handler에 끼어들지는 NVIC의 group priority와 mask register가 정하고, 끼어들지 못한 IRQ는 pending으로 남았다가 tail-chaining으로 이어 받습니다. 같은 숫자라도 칩에 구현된 priority bit 수에 따라 레지스터에 들어가는 값이 달라집니다.
+> **"우선순위 숫자가 예외 경로를 정합니다."** 어떤 IRQ가 실행 중인 handler에 끼어들지는 NVIC의 group priority와 mask register가 정하고, 끼어들지 못한 IRQ는 pending으로 남았다가, 실행 중인 handler가 끝나면 tail-chaining으로 이어서 처리됩니다. 같은 숫자라도 칩에 구현된 priority bit 수에 따라 레지스터에 들어가는 값이 달라집니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -68,7 +68,7 @@ floating-point 연산을 쓰는 중이면 S0~S15·FPSCR 자리를 더한 frame�
 
 handler가 끝날 때 진입 조건을 만족하는 pending 예외가 있으면 stack pop을 건너뛰고 바로 다음 handler로 갑니다(tail-chaining, UG 2.3.7). Cortex-M4 TRM 3.9.1은 메모리에 wait state가 없을 때 진입(IRQ assert → ISR 첫 명령)이 최대 12 cycle이고, 복귀도 마찬가지로 12 cycle, tail-chaining은 zero wait state 메모리에서 6 cycle이라고 적습니다. 복귀한 뒤 다시 진입하는 경로는 이 값으로 최대 24 cycle이고 tail-chaining은 6 cycle이므로, 줄어드는 양은 최대 18 cycle입니다. TRM이 진입을 최댓값으로만 주기 때문에 이 계산에서 고정된 절감량은 나오지 않습니다.
 
-STM32F407의 flash는 HCLK와 전원 전압에 맞춰 wait state(`FLASH_ACR` LATENCY)를 설정하고 읽습니다([stm32f4xx_hal_rcc.c v1.8.5 L605-L607](https://github.com/STMicroelectronics/stm32f4xx_hal_driver/blob/v1.8.5/Src/stm32f4xx_hal_rcc.c#L605-L607)). LATENCY를 0이 아닌 값으로 둔 구성에서 flash의 vector와 handler를 읽으면 위 조건 밖이고, 그때의 cycle 수는 TRM에 없습니다. 그래서 아래 예제 표에는 cycle 수를 적지 않았습니다.
+STM32F407의 flash는 HCLK와 전원 전압에 맞춰 wait state(`FLASH_ACR` LATENCY)를 설정하고 읽습니다([stm32f4xx_hal_rcc.c v1.8.5 L605-L607](https://github.com/STMicroelectronics/stm32f4xx_hal_driver/blob/v1.8.5/Src/stm32f4xx_hal_rcc.c#L605-L607)). LATENCY를 0이 아닌 값으로 두고 flash에서 vector와 handler를 읽는 구성은 TRM의 zero wait state 조건을 벗어나고, 그때의 cycle 수는 TRM에 없습니다. 그래서 아래 예제 표에는 cycle 수를 적지 않았습니다.
 
 먼저 들어온 예외의 stacking 중에 더 높은 우선순위 예외가 오면, 프로세서는 stacking을 그대로 계속하고 vector fetch만 새 예외로 바꿉니다(late-arrival). 저장할 상태가 두 예외에 대해 같기 때문입니다. 원래 예외의 handler 첫 명령이 execute 단계에 들어가기 전까지 late-arrival로 받을 수 있고, 원래 예외는 pending으로 남았다가 tail-chaining 규칙으로 처리됩니다(UG 2.3.7). TRM 3.9.1과 UG 2.3.7 모두 late-arrival 전환의 cycle 수는 적지 않습니다.
 
@@ -112,6 +112,51 @@ handler 이름을 vector에 잇는 weak alias와 peripheral flag clear는 [4-05:
 | EXTI0도 7로 둔 경우, USART1 handler 실행 중 EXTI0 assert | 기다림. USART1 handler가 끝난 뒤 tail-chaining으로 시작 | 같은 group 7은 선점 없음 |
 | Thread mode에서 BASEPRI = 0x30(`3 << 4`)인 구간에 USART1·EXTI0 assert | USART1은 pending으로 남고 BASEPRI를 0으로 되돌린 뒤 진입. EXTI0은 바로 진입 | 0x70 ≥ 0x30은 차단, 0x20 < 0x30은 통과 |
 
+### QEMU로 표의 순서 확인하기
+
+STM32F407 보드 없이 위 표의 순서만 확인하려고 QEMU 11.1.3의 `mps2-an386`(Cortex-M4) 모델에서 같은 시나리오를 돌렸습니다. EXTI0 역할은 IRQ0(우선순위 2), USART1 역할은 IRQ1(우선순위 7)이 맡고, 각 handler가 진입·퇴장과 IPSR을 semihosting으로 찍습니다. 툴체인은 arm-none-eabi-gcc 16.2.0, 헤더는 이 글이 인용한 CMSIS 5.9.0의 `core_cm4.h`입니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -ffreestanding -O1 -g \
+  -Iharness -ICMSIS_5/CMSIS/Core/Include -nostdlib -T harness/link.ld \
+  harness/startup.c harness/semi.c prio.c -o prio.elf
+qemu-system-arm -M mps2-an386 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native,userspace=on -kernel prio.elf
+```
+
+```text
+implemented priority mask (IP[0] after 0xFF) = 0x000000FF
+AIRCR = 0xFA050000
+[1] LO running, HI pended (2 < 7)
+  LO enter, IPSR = 0x00000011
+  HI enter, IPSR = 0x00000010
+  HI exit
+  LO: after pending HI
+  LO exit
+[2] HI running, LO pended (7 > 2)
+  HI enter, IPSR = 0x00000010
+  HI: LO pended, HI continues
+  HI exit
+  LO enter, IPSR = 0x00000011
+  LO exit
+[3] both at 7, LO running, HI pended
+  LO enter, IPSR = 0x00000011
+  LO: after pending HI
+  LO exit
+  HI enter, IPSR = 0x00000010
+  HI exit
+[4] BASEPRI = 3 << (8 - __NVIC_PRIO_BITS), pend both
+  HI enter, IPSR = 0x00000010
+  HI exit
+  BASEPRI -> 0
+  LO enter, IPSR = 0x00000011
+  LO exit
+```
+
+[1]은 표의 선점, [2]는 끝난 뒤 이어 받기, [3]은 같은 group끼리 선점하지 않는 경우, [4]는 BASEPRI 행입니다. IPSR 16·17은 IRQ0·IRQ1에 16을 더한 exception 번호입니다. AIRCR은 UG Table 4-12의 reset 값 0xFA050000 그대로라 PRIGROUP이 0입니다.
+
+첫 줄은 이 모델이 priority 8 bit를 모두 구현한다는 뜻입니다. STM32F407이라면 같은 probe가 0xF0을 돌려줘야 하므로, QEMU 결과로 칩의 `__NVIC_PRIO_BITS`를 대신할 수는 없습니다. 이 실행은 순서만 확인한 것이고 cycle 수는 재지 않았습니다.
+
 ### Bootloader에서 application으로 넘기기
 
 bootloader를 0x08000000에, application을 0x08010000에 link한 구성의 예입니다. 0x08010000은 하위 9 bit가 0이라 0x200의 배수이고, "Vector table" 절의 512 byte 정렬을 만족합니다. `main()`처럼 Thread mode에서 호출합니다. handler 안에서 부르면 exception return을 거치지 않으므로 application이 Handler mode로 시작합니다(UG 2.3.7 Exception return).
@@ -145,6 +190,33 @@ static void jump_to_app(void)
 - **MSP를 새 table의 word 0으로 둡니다.** ST GCC startup의 `Reset_Handler`는 첫 명령에서 `ldr sp, =_estack`으로 MSP를 다시 쓰므로([startup L61](https://github.com/STMicroelectronics/cmsis_device_f4/blob/v2.6.9/Source/Templates/gcc/startup_stm32f407xx.s#L61)) 이 startup에서는 결과가 같습니다. 첫 명령 전에 stack을 쓰는 startup에는 이 단계가 필요합니다.
 - **PRIMASK를 0으로 되돌립니다.** PRIMASK의 0은 reset 값입니다(UG Table 2-2). 함수 호출로 넘어가면 reset이 일어나지 않으므로 `__disable_irq()` 상태가 그대로 application에 넘어가고, application이 `__enable_irq()`를 부르기 전까지 설정 가능한 예외가 하나도 진입하지 못합니다.
 
+같은 함수를 QEMU `mps2-an386`에서 실제로 돌렸습니다. bootloader를 0x00000000, application을 0x00010000에 link하고(`-device loader,file=app.elf`로 함께 적재), IRQ 범위만 이 모델의 vector table에 맞춰 `FPU_IRQn` 대신 31을 썼습니다. bootloader는 SysTick과 IRQ0을 켜고, disable 상태의 IRQ1을 pending시킨 채 점프합니다. 하네스의 `Reset_Handler`는 SP를 다시 쓰지 않으므로 `__set_MSP(app[0])`이 그대로 application의 stack이 됩니다.
+
+```text
+boot: IRQ0 handler
+boot: ISPR[0] before jump = 0x00000002
+boot: app[0] (MSP) = 0x20010000
+boot: app[1] (Reset) = 0x000100C3
+app: VTOR = 0x00010000
+app: MSP = 0x2000FFF0
+app: PRIMASK = 0x00000000
+app: SysTick CTRL = 0x00000000
+app: ISER[0] = 0x00000000
+app: ISPR[0] = 0x00000000
+app: IRQ1 enabled
+app: IRQ0 handler
+```
+
+`ICPR`을 지우는 줄만 뺀 빌드(`-DSKIP_ICPR`)에서는 application이 IRQ1을 enable하는 순간 bootloader 시절의 요청으로 handler에 들어갑니다.
+
+```text
+app: ISPR[0] = 0x00000002
+app: IRQ1 handler (stale request from the bootloader)
+app: IRQ1 enabled
+```
+
+`app[1]`의 bit 0이 1(`0x000100C3`)인 것이 앞 절의 Thumb bit이고, IRQ0이 application의 handler로 가는 것이 VTOR 전환의 결과입니다.
+
 application 쪽에서는 `SystemInit()`을 봅니다. 템플릿은 `USER_VECT_TAB_ADDRESS`를 정의했을 때만 `SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET`을 쓰고, `VECT_TAB_OFFSET`의 기본값은 0입니다([system_stm32f4xx.c L94-L111](https://github.com/STMicroelectronics/cmsis_device_f4/blob/v2.6.9/Source/Templates/system_stm32f4xx.c#L94-L111), [L179-L181](https://github.com/STMicroelectronics/cmsis_device_f4/blob/v2.6.9/Source/Templates/system_stm32f4xx.c#L179-L181)). `USER_VECT_TAB_ADDRESS`만 켜고 offset을 0x10000으로 바꾸지 않으면 VTOR가 0x08000000, 곧 bootloader의 table로 돌아갑니다. 둘 다 그대로 두면 `SystemInit()`은 VTOR를 건드리지 않고 bootloader가 쓴 값이 남습니다.
 
 ## 자주 보는 함정
@@ -158,6 +230,20 @@ uint8_t saved = NVIC->IP[EXTI0_IRQn];
 NVIC->IP[EXTI0_IRQn] = 0xFF;
 uint8_t implemented_mask = NVIC->IP[EXTI0_IRQn];
 NVIC->IP[EXTI0_IRQn] = saved;
+```
+
+이 코드는 CMSIS 5.9.0의 필드 이름 `IP`를 씁니다. CMSIS_6(commit `69b5aa3`)의 `core_cm4.h`는 같은 배열을 `IPR[240U]`로 바꿨으므로, CMSIS 6으로 옮기면 그대로는 컴파일되지 않습니다.
+
+```text
+prio.c:17:27: error: 'NVIC_Type' has no member named 'IP'; did you mean 'IPR'?
+```
+
+앞의 9 << 5 계산도 QEMU 하네스에서 확인했습니다. 3-bit 설정으로 `NVIC_SetPriority(IRQn, 9)`를 부르면 레지스터에 0x20이 들어가고 `NVIC_GetPriority`는 1을 돌려줍니다.
+
+```text
+  with 4 bits: IP = 0x00000090
+  NVIC_SetPriority(LO, 9) with __NVIC_PRIO_BITS=3: IP = 0x00000020
+  NVIC_GetPriority(LO) = 0x00000001
 ```
 
 > ⚠️ subpriority만 쓰는 grouping

@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"`-O` 레벨은 컴파일러에게 얼마나 적극적으로 변환할지를 알려 줍니다."** 임베디드는 보통 `-Os`(크기) 또는 `-O2`(속도)에서 시작합니다.
+> **"`-O` 레벨은 컴파일러에게 얼마나 적극적으로 변환할지를 알려 줍니다."** 같은 함수도 `-O0`의 31줄 assembly가 `-O2`에서 12줄이 되고, 어느 레벨이 가장 작은지는 실제로 빌드해 봐야 압니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -21,21 +21,23 @@ topics: ["embedded"]
 - 디버깅이 안 될 정도로 변수가 사라졌을 때
 - LTO를 적용했더니 갑자기 코드가 깨질 때
 
+이 글의 출력은 Debian 13 arm64 guest의 `gcc-arm-none-eabi` 14.2.rel1(GCC 14.2.1, `-mcpu=cortex-m4 -mthumb`)과 host용 GCC 14.2.0·GDB 16.3에서 직접 뽑았습니다. 각 레벨의 정의는 GCC 매뉴얼 "Options That Control Optimization"에서 옮겼습니다.
+
 ## 핵심 개념
 
 ### 1) -O 레벨
 
-| 레벨 | 의미 | 일반 사용 |
+| 레벨 | GCC 매뉴얼의 설명 | 일반 사용 |
 | --- | --- | --- |
-| `-O0` | 거의 최적화 없음 | 디버그용 (gdb-friendly) |
-| `-O1` | 기본 최적화 | 빌드·크기 절충 |
-| `-O2` | 더 많은 일반 최적화 | release에서 흔히 사용 |
-| `-O3` | 더 공격적인 최적화(대상에 따라 vectorization 포함) | 측정한 핫스팟 |
-| `-Os` | 크기 중심 최적화 | flash 제약이 있는 빌드 |
-| `-Og` | 디버그 친화 + 일부 최적화 | 개발 중 |
-| `-Ofast` | `-O3` + math 표준 위반 허용 | 측정 후 사용 |
+| `-O0` | 기본값. "completely disables most optimization passes" | 디버그 |
+| `-O1` | 크기와 실행 시간을 줄이되 "optimizations that take a great deal of compilation time"은 하지 않음 | 빌드·크기 절충 |
+| `-O2` | `-O1` + 더 많은 최적화. GCC 14는 여기서 `-ftree-loop-vectorize`·`-ftree-slp-vectorize`도 켬 | release에서 흔히 사용 |
+| `-O3` | `-O2` + `-fipa-cp-clone`, `-floop-interchange`, `-fpeel-loops` 등 | 측정한 핫스팟 |
+| `-Os` | `-O2`에서 코드 크기를 늘리기 쉬운 옵션(`-falign-functions` 등)을 뺌 | flash 제약이 있는 빌드 |
+| `-Og` | "Optimize while keeping in mind debugging experience" | 개발 중 |
+| `-Ofast` | `-O3` + `-ffast-math`, `-fallow-store-data-races` 등 표준 위반 허용 | 측정 후 사용 |
 
-각 레벨은 사실 수십 개의 개별 옵션(`-finline-functions` 등)의 묶음입니다.
+각 레벨은 개별 `-f` 옵션의 묶음입니다. 매뉴얼은 정확한 목록을 `-Q --help=optimizers`로 확인하라고 적고, target과 GCC 구성에 따라 조금씩 다르다고 덧붙입니다. vectorization은 `-O3`만의 특징이 아닙니다. GCC 14 매뉴얼의 `-O2` 목록에 이미 `-ftree-loop-vectorize`가 있습니다.
 
 ### 2) 각 레벨의 효과 비교
 
@@ -47,90 +49,175 @@ int sum(const int *arr, int n) {
 }
 ```
 
+`arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O<level> -S sum.c`에서 지시어를 뺀 명령만 남겼습니다.
+
 `-O0`:
+
 ```asm
 sum:
-    push    {r4, r5, r7, lr}
-    mov     r5, r0
-    mov     r4, r1
-    movs    r2, #0           @ s = 0
-    str     r2, [r7, #4]
-    movs    r2, #0
-    str     r2, [r7]         @ i = 0
-.L3:
-    ldr     r2, [r7]
-    cmp     r2, r4
-    bge     .L2
-    ...
+	push	{r7}
+	sub	sp, sp, #20
+	add	r7, sp, #0
+	str	r0, [r7, #4]
+	str	r1, [r7]
+	movs	r3, #0
+	str	r3, [r7, #12]
+	movs	r3, #0
+	str	r3, [r7, #8]
+	b	.L2
+	ldr	r3, [r7, #8]
+	lsls	r3, r3, #2
+	ldr	r2, [r7, #4]
+	add	r3, r3, r2
+	ldr	r3, [r3]
+	ldr	r2, [r7, #12]
+	add	r3, r3, r2
+	str	r3, [r7, #12]
+	ldr	r3, [r7, #8]
+	adds	r3, r3, #1
+	str	r3, [r7, #8]
+	ldr	r2, [r7, #8]
+	ldr	r3, [r7]
+	cmp	r2, r3
+	blt	.L3
+	ldr	r3, [r7, #12]
+	mov	r0, r3
+	adds	r7, r7, #20
+	mov	sp, r7
+	pop	{r7}
+	bx	lr
 ```
 
-`-O2`:
+`-O2` (`-O3`도 `cmp` operand 순서만 다르고 같음):
+
 ```asm
 sum:
-    cmp     r1, #0
-    ble     .L4
-    mov     r3, #0
-    mov     r2, #0
-.L3:
-    ldr     ip, [r0, r3, lsl #2]
-    add     r2, r2, ip
-    add     r3, r3, #1
-    cmp     r3, r1
-    bne     .L3
-    mov     r0, r2
-    bx      lr
+	cmp	r1, #0
+	ble	.L4
+	subs	r3, r0, #4
+	add	r1, r3, r1, lsl #2
+	movs	r0, #0
+	ldr	r2, [r3, #4]!
+	cmp	r3, r1
+	add	r0, r0, r2
+	bne	.L3
+	bx	lr
+	movs	r0, #0
+	bx	lr
 ```
 
-`-O0`에서는 최적화가 거의 없어 source 대응이 쉬운 편이고, `-O2`에서는 register allocation과 dead-code 제거 등이 적극적으로 적용됩니다. 실제 stack/register 배치는 코드와 compiler에 따라 달라집니다.
+`-Os`:
+
+```asm
+sum:
+	push	{r4, lr}
+	movs	r3, #0
+	mov	r2, r0
+	mov	r0, r3
+	cmp	r3, r1
+	blt	.L3
+	pop	{r4, pc}
+	ldr	r4, [r2, r3, lsl #2]
+	adds	r3, r3, #1
+	add	r0, r0, r4
+	b	.L2
+```
+
+`-O0`은 `s`와 `i`를 매번 stack(`[r7, #12]`, `[r7, #8]`)에 저장하고 다시 읽습니다. `-O2`는 둘을 register에 두고 index 대신 post-increment 주소(`ldr r2, [r3, #4]!`)로 바꿨습니다. `-Os`는 `n == 0`을 위한 별도 반환 경로를 두지 않아 명령 수가 줄었습니다. Cortex-M4에는 벡터 명령이 없으므로 `-O3`에서도 이 루프는 벡터화되지 않았습니다(MVE가 있는 Cortex-M55의 경우는 [2-01](/blog/embedded/modern-recipes/part2-01-cortex-m-comparison) 참고).
 
 ### 3) `-Os` — 크기 최적화
 
-코드 크기를 줄이는 방향으로 최적화합니다. `-O2`와 비교한 크기·속도 차이는 코드, target, compiler 버전에 따라 달라지므로 실제 빌드로 측정해야 합니다.
+CRC-32, insertion sort, Q15 FIR, 문자열→정수 변환을 담은 작은 `work.c`를 레벨마다 object로 컴파일해 `.text` 크기를 쟀습니다.
 
-**hello.c 빌드 결과:** toolchain, linker script, C library, target 옵션에 따라 달라집니다.
+| 레벨 | `work.o` text (byte) |
+| --- | ---: |
+| `-O0` | 456 |
+| `-O1` | 288 |
+| `-O2` | 284 |
+| `-O3` | 344 |
+| `-Os` | 196 |
+| `-Og` | 256 |
+
+이 코드에서는 `-Os`가 가장 작고, `-O3`는 `-O2`보다 21% 컸습니다. 숫자는 이 코드와 이 GCC의 결과일 뿐이라, 실제 프로젝트에서는 map 파일([3-10](/blog/embedded/modern-recipes/part3-10-map-file-analysis))로 다시 봅니다. 속도는 QEMU로 잴 수 없어 이 글에서는 비교하지 않았습니다.
 
 ### 4) `-Og` — 디버그 친화
 
-`-O0`은 너무 느리고, `-O2`는 변수가 사라져 디버깅이 어렵습니다. `-Og`는 그 사이 절충입니다.
+GCC 매뉴얼은 `-Og`를 "the optimization level of choice for the standard edit-compile-debug cycle"이라고 부르고, `-O0`과 달리 `-fvar-tracking-assignments`·`-fvar-tracking`을 켜서 함수 앞뒤의 디버그 정보를 더 잘 다룬다고 적습니다.
 
-- 가능한 범위에서 source와 대응하기 쉬운 최적화
-- 디버깅을 고려한 최적화 조합
-- 최적화로 인해 변수·실행 순서가 달라질 수 있음
+그렇다고 `-Og`가 항상 변수를 더 잘 보여 주는 것은 아닙니다. host GCC 14.2.0으로 아래 함수를 `-O2 -g`와 `-Og -g`로 빌드하고 GDB 16.3에서 `break scale`, `info locals`를 실행했습니다.
 
-개발 중에는 `-Og -g3`이 가장 편합니다.
+```c
+__attribute__((noinline)) int scale(int v) {
+    int doubled = v * 2;
+    int result = doubled + 3;
+    return result;
+}
+```
+
+```text
+### -O2 -g
+Breakpoint 1, scale (v=1) at opt.c:5
+5	    return result;
+doubled = 2
+result = 5
+### -Og -g
+Breakpoint 1, scale (v=1) at opt.c:3
+3	    int doubled = v * 2;
+doubled = <optimized out>
+result = <optimized out>
+```
+
+`-O2`는 3~4행을 합쳐 breakpoint가 5행에 걸렸고, DWARF location 정보로 두 값을 복원했습니다. `-Og`는 3행, 곧 값을 계산하기 전에 멈춰 둘 다 `<optimized out>`입니다. `<optimized out>`은 레벨만이 아니라 *어디서 멈췄는지*에 달려 있으므로, 한 줄 더 진행(`next`)하고 다시 보는 것이 첫 번째 확인입니다.
 
 ### 5) LTO (Link-Time Optimization)
 
-`-flto`로 활성화합니다. 모든 `.o` 파일을 합쳐서 최적화하므로, file 경계를 넘는 inline·dead code 제거가 가능합니다.
+`-flto`로 활성화합니다. 각 `.o`에 중간 표현을 넣어 두고 link 단계에서 다시 최적화하므로, file 경계를 넘는 inline과 미사용 함수 제거가 가능합니다.
 
-```bash
-arm-none-eabi-gcc -O2 -flto -c a.c -o a.o
-arm-none-eabi-gcc -O2 -flto -c b.c -o b.o
-arm-none-eabi-gcc -O2 -flto a.o b.o -o app.elf
+```c
+/* a.c */
+int helper(int x) { return x * 3 + 1; }
+int unused_helper(int x) { return x - 7; }
+/* b.c */
+int helper(int x);
+int app(int y) { return helper(y) + helper(y + 1); }
+int main(void) { return app(4); }
 ```
 
-크기와 속도에 영향을 줄 수 있지만 방향과 폭은 프로그램·toolchain·linker 옵션에 따라 측정해야 합니다. 단점은 빌드 시간 증가와 일부 hardware-specific 코드(예: 잘못 제약된 인라인 어셈블리)에서 문제가 드러날 수 있다는 점입니다.
+```text
+$ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O2 -nostdlib -Wl,-e,main a.c b.c -o nolto.elf
+$ arm-none-eabi-nm nolto.elf | grep " T "
+00008014 T app
+00008008 T helper
+00008000 T main
+00008010 T unused_helper
+$ arm-none-eabi-gcc ... -flto a.c b.c -o lto.elf
+$ arm-none-eabi-nm lto.elf | grep " T "
+00008000 T main
+$ arm-none-eabi-objdump -d lto.elf
+00008000 <main>:
+    8000:	201d      	movs	r0, #29
+    8002:	4770      	bx	lr
+```
+
+LTO 없이는 `b.c`가 `a.c`의 `helper`를 inline할 수 없고, `--gc-sections`도 없어 `unused_helper`까지 함수 네 개가 모두 남습니다. LTO를 켜면 `helper(4) + helper(5) = 13 + 16 = 29`를 link 단계에서 계산해 `main`이 상수 29를 반환하는 두 명령만 남았습니다.
 
 ### 6) PGO (Profile-Guided Optimization)
 
-실제 실행 profile을 모아 컴파일러에 알려주는 기법입니다. target에서 profile을 수집하거나 대표 workload를 host에서 재현할 수 있는지에 따라 적용 가능성이 달라집니다.
+실행 profile을 모아(`-fprofile-generate`) 다시 컴파일(`-fprofile-use`)하는 기법입니다. 이 글에서는 실행하지 않았습니다.
 
 ## 코드 / 실제 사용 예
 
-함수별 최적화 옵션 제어:
+함수별 최적화 제어입니다. 아래 코드는 `arm-none-eabi-gcc -O2 -Wall -c`로 경고 없이 컴파일됐고, `small_helper`는 inline되어 `nm`에 `debug_me`·`never_inline_me`만 남았습니다. GCC 매뉴얼은 `optimize` attribute에 대해 "should be used for debugging purposes only. It is not suitable in production code"라고 적으므로, 속도가 중요한 함수를 `optimize("O3")`로 올리는 대신 그 파일만 다른 옵션으로 빌드합니다.
 
 ```c
-// 이 함수만 -O3로 (속도 critical)
-__attribute__((optimize("O3")))
-void hot_loop(void) {
-    for (int i = 0; i < N; i++) /* ... */;
-}
+#define N 64
+volatile int sink[N];
 
 // 디버깅 중 이 함수만 -O0로
 __attribute__((optimize("O0")))
 void debug_me(void) {
     int x = 5;
-    // breakpoint
+    sink[0] = x;   // breakpoint
 }
 
 // inline 강제 또는 금지
@@ -138,10 +225,10 @@ static inline __attribute__((always_inline))
 int small_helper(int x) { return x + 1; }
 
 __attribute__((noinline))
-void never_inline_me(void) { ... }
+void never_inline_me(void) { for (int i = 0; i < N; i++) sink[i] = small_helper(i); }
 ```
 
-빌드 옵션 표준 예시:
+빌드 옵션 예시:
 
 ```makefile
 # Debug
@@ -149,59 +236,69 @@ CFLAGS_DEBUG = -Og -g3 -DDEBUG
 
 # Release
 CFLAGS_RELEASE = -Os -g3 -flto -ffunction-sections -fdata-sections
+LDFLAGS_RELEASE = -flto -Wl,--gc-sections
 
 # Profile/measure
 CFLAGS_PROFILE = -O2 -g3
-# -pg/other profiling options require target runtime support
 ```
+
+`work.c`를 `-Os`와 `-Os -g3`로 각각 컴파일해 `.text`만 뽑아 비교하면 두 결과의 md5가 같았습니다(`cbdbc13a…`). `-g3`는 이 코드의 기계어를 바꾸지 않았고, object에는 `.debug_*` section만 늘어 `size -A`의 합계가 281에서 21,894 byte가 됐습니다. debug section은 flash 이미지에 들어가지 않으므로([3-03](/blog/embedded/modern-recipes/part3-03-elf-format)) release 빌드에도 붙여 두고 flash 이미지는 `objcopy`로 뽑을 수 있습니다.
 
 ## 측정 / 비교
 
-| 옵션 | hello.c 크기 (Cortex-M4) | speed (relative) |
-| --- | --- | --- |
-| `-O0` ~ `-O3`, `-Os`, `-flto` | 크기와 속도는 코드·target·toolchain별 측정 필요 |
-
-| 옵션 | 디버깅 친화 |
+| 옵션 | 이 글에서 확인한 것 |
 | --- | --- |
-| `-O0` | 최고 |
-| `-Og` | 좋음 |
-| `-O2` | 변수 자주 사라짐 |
-| `-Os` | 인라인 적어 step-through OK, 변수는 사라짐 |
-| `-O3 -flto` | 어려움 |
+| `-O0` → `-O2` | `sum` 31줄 → 12줄, `work.o` 456 → 284 byte |
+| `-O3` | Cortex-M4에서 `sum`은 `-O2`와 같음, `work.o`는 344 byte로 더 큼 |
+| `-Os` | `work.o` 196 byte로 가장 작음 |
+| `-Og` | breakpoint가 값 계산 전 줄에 걸려 `<optimized out>` |
+| `-flto` | file 경계 너머 inline·상수 계산, 미사용 함수 제거 |
+| `-Ofast` | `isnan()` 검사가 사라짐 (아래 함정) |
 
 ## 자주 보는 함정
 
 > ⚠️ `-O0`으로만 빌드하고 release
 
-`-O0`은 release 옵션과 크기·속도가 크게 다를 수 있습니다. release 후보는 target 요구사항에 맞춰 `-Os`, `-O2` 등을 측정해 선택합니다.
+위 표처럼 `-O0`의 `work.o`는 `-Os`의 2.3배였습니다. 개발 중 `-O0`으로만 확인하고 release를 다른 레벨로 내면, 크기·타이밍·드러나는 버그가 모두 달라집니다. release 레벨로 빌드한 이미지로 시험합니다.
 
-> ⚠️ `-O2` 후 변수가 optimized out
+> ⚠️ `-O2`에서 변수가 `<optimized out>`
 
-gdb에서 `<optimized out>`이 보입니다. `volatile`를 붙이거나 `-Og`로 디버깅.
+4)절처럼 멈춘 위치에 따라 다릅니다. 같은 함수에서 `-O2`는 값을 보여 주고 `-Og`는 못 보여 준 경우도 있었습니다. 한 줄 진행해 보거나, 그 함수만 `__attribute__((optimize("O0")))`로 빌드합니다.
 
-> ⚠️ LTO로 inline assembly가 깨짐
+> ⚠️ LTO로 드러나는 숨은 의존
 
-asm constraint가 부정확하거나 compiler 가정을 위반하면 LTO에서 문제가 드러날 수 있습니다. asm constraint를 검증하고, 필요하면 해당 함수/파일을 빌드 시스템에서 LTO 제외(`-fno-lto`)하거나 `noinline` 등 실제 지원되는 속성을 사용합니다.
+LTO는 file 경계를 넘어 inline하고 쓰이지 않는 함수를 지웁니다. 위 실행처럼 `unused_helper`가 사라졌는데, 어떤 함수를 이름으로만(예: 링커 script의 `ENTRY`나 assembly에서) 참조하는 코드라면 `__attribute__((used))`와 linker의 `KEEP`으로 표시해야 합니다. 문제가 되는 파일만 `-fno-lto`로 뺄 수도 있습니다.
 
 > ⚠️ `-Ofast` 사용 후 NaN 처리 깨짐
 
-`-Ofast`는 `-ffast-math`를 포함, IEEE 표준 위반 허용. NaN, Inf 처리에 의존하는 코드는 깨짐.
+GCC 매뉴얼대로 `-Ofast`는 `-ffast-math`를 켜고, `-ffast-math`가 켜는 `-ffinite-math-only`는 "arguments and results are not NaNs or +-Infs"라고 가정합니다. host GCC 14.2.0에서 실행 중에 0/0을 만드는 프로그램을 돌린 결과입니다.
 
-> ⚠️ `volatile`이 부족해 HW 접근 reorder
+```c
+double z = argc - 1;            /* 0.0 at runtime, unknown to the compiler */
+double x = z / z;               /* NaN */
+printf("isnan(x) = %d, x != x = %d\n", isnan(x), x != x);
+```
 
-peripheral register는 반드시 `volatile`로 선언해야 하지만, `volatile`만으로 CPU·DMA·다중 코어 간 memory ordering이나 atomicity가 보장되지는 않습니다. 필요한 경우 target의 barrier/동기화 primitive도 사용해야 합니다.
+```text
+$ gcc -O2 nan.c -o nan-O2 -lm && ./nan-O2
+isnan(x) = 1, x != x = 1
+$ gcc -Ofast nan.c -o nan-Ofast -lm && ./nan-Ofast
+isnan(x) = 0, x != x = 0
+```
 
-> ⚠️ Inline 함수가 너무 작아도 inline 안 됨
+값은 NaN인데 `-Ofast`에서는 검사가 0을 돌려줍니다. 센서 값의 NaN을 걸러 내는 코드가 이렇게 조용히 무력화됩니다.
 
-`-Os`에서는 inline 결정이 달라질 수 있습니다. 필요하면 `always_inline`을 신중히 사용하고, compiler 버전에 맞는 inline 관련 옵션/parameter를 확인합니다.
+> ⚠️ `volatile`이 부족해 HW 접근이 사라짐
+
+peripheral register 접근에 `volatile`이 없으면 최적화 레벨에 따라 쓰기 자체가 없어집니다([2-05](/blog/embedded/modern-recipes/part2-05-arm-memory-map)의 `send_plain` codegen). `volatile`은 컴파일러만 막고 CPU·DMA 간 순서는 barrier가 맡습니다([2-10](/blog/embedded/modern-recipes/part2-10-memory-barrier)).
 
 ## 정리
 
-- `-O` 레벨은 컴파일러 최적화의 적극성을 정합니다.
-- release는 `-Os`, `-O2` 등 후보를 target workload로 비교하고 debug는 `-Og` 등을 선택합니다.
-- `-O3`의 vectorization과 LTO 효과는 target·compiler·코드에 따라 확인합니다.
-- 함수별 attribute로 개별 최적화 제어 가능.
-- `volatile`, inline 제어, debug 친화를 옵션 선택의 함정에 주의.
+- `-O` 레벨은 개별 최적화 옵션의 묶음이고, GCC 14에서는 `-O2`부터 loop vectorization이 켜집니다.
+- 이 글의 코드에서는 `-Os`가 가장 작았고 `-O3`는 `-O2`보다 컸습니다. 크기와 속도는 코드별로 측정합니다.
+- `<optimized out>`은 레벨뿐 아니라 멈춘 위치에 달려 있습니다.
+- LTO는 file 경계를 넘는 inline과 상수 계산까지 하지만, 이름으로만 쓰는 함수는 표시해 두어야 합니다.
+- `-Ofast`는 `isnan()` 같은 검사를 무력화할 수 있습니다.
 
 다음 편에서는 **맵 파일 분석**을 다룹니다. 빌드 후 메모리 사용을 한눈에 보는 방법입니다.
 

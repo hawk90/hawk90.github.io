@@ -62,7 +62,7 @@ arm-none-eabi-gcc -T app.ld -Wl,--gc-sections -Wl,-Map=app.map \
 
 ### Linker script and memory map
 
-예시 map의 24-40행입니다. `.text`의 나머지 input section은 뺐습니다.
+예시 map의 24-41행입니다. `.text`의 나머지 input section은 뺐습니다.
 
 ```text
 Linker script and memory map
@@ -197,6 +197,85 @@ ComBusy             0x4               serial.o
 ### ELF 도구와 맞춰 볼 때
 
 크기 순 심볼 목록(`nm --size-sort`)과 section 크기(`size -A`)를 ELF에서 직접 읽는 법은 [ELF 파일 구조](/blog/embedded/modern-recipes/part3-03-elf-format)에, bloaty 같은 크기 분석 도구는 [임베디드 코드 크기 최적화](/blog/embedded/modern-recipes/part8-10-code-size-optimization)에 있습니다. map과 숫자를 맞춰 볼 때는 `size -A`의 `Total`이 아니라 section별 줄을 비교합니다. `size -A`는 flag가 있는 section을 모두 한 번씩 더하므로([`binutils/size.c`](https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=binutils/size.c;hb=binutils-2_45)의 `sysv_internal_printer`), `Total`에는 `.comment`·`.ARM.attributes`·`.debug_*` 같은 non-alloc section이 들어가고, Flash(초기값)와 SRAM을 둘 다 차지하는 `.data`는 한 번만 들어갑니다.
+
+### 직접 만들어 보기 — 작은 프로젝트의 map
+
+위 예시는 남이 만든 map이라, 같은 절들을 직접 만들어 확인했습니다. Debian 13 arm64 guest의 `gcc-arm-none-eabi` 14.2.rel1(GNU ld 2.44)로 Cortex-M0+(`-mcpu=cortex-m0plus`, 하드웨어 나눗셈이 없어 `/`가 libgcc를 부름)용 파일 다섯 개를 빌드했습니다. `main.c`는 `gpio_init()`과 archive의 `drv_scale()`을 부르고, `gpio.c`에는 아무도 부르지 않는 `gpio_unused()`가 있으며, `libdrv.a`에는 `drv_scale.o`(정수 나눗셈)와 아무도 부르지 않는 `drv_log.o`가 들어 있습니다. linker script는 [3-04](/blog/embedded/modern-recipes/part3-04-linker-script-basics)의 STM32F4 script입니다.
+
+```bash
+C="arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O1"
+$C -c -ffunction-sections -fdata-sections main.c -o main.o
+$C -c -ffunction-sections -fdata-sections gpio.c -o gpio.o
+$C -c startup.c -o startup.o
+$C -c -ffunction-sections -fdata-sections drv_scale.c -o drv_scale.o
+$C -c -ffunction-sections -fdata-sections drv_log.c -o drv_log.o
+arm-none-eabi-ar rcs libdrv.a drv_scale.o drv_log.o
+$C -nostartfiles -T app.ld -Wl,--gc-sections -Wl,-Map=app.map -Wl,--print-memory-usage \
+    startup.o main.o gpio.o libdrv.a -lgcc -o app.elf
+```
+
+`--print-memory-usage`는 링크하면서 바로 영역별 사용량을 찍습니다.
+
+```text
+Memory region         Used Size  Region Size  %age Used
+           FLASH:         544 B         1 MB      0.05%
+            SRAM:        1608 B       128 KB      1.23%
+```
+
+map의 절 머리는 다음 순서로 나왔습니다. `-fno-common`이 기본인 GCC 14라 `Allocating common symbols`는 없고, `--gc-sections`가 지운 section이 있어 `Discarded input sections`가 있습니다.
+
+```text
+1:Archive member included to satisfy reference by file (symbol)
+9:Discarded input sections
+29:Memory Configuration
+36:Linker script and memory map
+```
+
+`Archive member` 절은 앞에서 설명한 연쇄를 그대로 보여 줍니다. `main.o`가 `drv_scale`을 참조해 `drv_scale.o`가 들어오고, 그것의 `__aeabi_idiv` 때문에 libgcc의 `_divsi3.o`가, 다시 그것의 `__aeabi_idiv0` 때문에 `_dvmd_tls.o`가 들어왔습니다. 아무도 참조하지 않은 `drv_log.o`는 archive에서 꺼내지지 않아 map 어디에도 나오지 않았습니다.
+
+```text
+libdrv.a(drv_scale.o)         main.o (drv_scale)
+/usr/lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp/libgcc.a(_divsi3.o)
+                              libdrv.a(drv_scale.o) (__aeabi_idiv)
+/usr/lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp/libgcc.a(_dvmd_tls.o)
+                              /usr/lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp/libgcc.a(_divsi3.o) (__aeabi_idiv0)
+```
+
+`gpio_unused`는 `gpio.o`가 링크에 들어왔는데도 지워졌습니다. map의 `Discarded input sections` 절과 `--print-gc-sections`의 stderr에 같은 section이 나옵니다.
+
+```text
+ .text.gpio_unused
+                0x00000000        0xc gpio.o
+
+ld: removing unused section '.text.gpio_unused' in file 'gpio.o'
+```
+
+`-ffunction-sections`로 section 이름이 길어지면 input section 줄은 이름 다음에서 줄을 바꾸므로, 파일 이름으로 grep할 때는 앞 줄도 함께 봅니다(`grep -B1`).
+
+```text
+$ sed -n '/^Linker script and memory map/,/^OUTPUT(/p' app.map | grep -v '^LOAD' | grep -B1 'gpio\.o$'
+ .text.gpio_init
+                0x0800002c       0x14 gpio.o
+--
+ .bss.gpio_shadow
+                0x20000004       0x40 gpio.o
+```
+
+`main.c`만 `-fcommon`으로 다시 컴파일하면 초기값 없는 전역 `ticks`가 common 심볼이 되어 `Allocating common symbols` 절이 생기고, `.bss` 안에 `COMMON` input section으로 들어갑니다.
+
+```text
+Allocating common symbols
+Common symbol       size              file
+
+ticks               0x4               main-common.o
+```
+
+archive를 object 앞에 두면 이 프로젝트에서도 링크가 실패합니다.
+
+```text
+$ arm-none-eabi-gcc ... libdrv.a startup.o main.o gpio.o -lgcc -o bad.elf
+main.c:(.text.main+0xc): undefined reference to `drv_scale'
+```
 
 ## 자주 보는 함정
 

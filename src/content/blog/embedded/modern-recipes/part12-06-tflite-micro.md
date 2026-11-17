@@ -11,349 +11,232 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"TFLite Micro는 *MCU에 들어가는 ML runtime*입니다."** 메모리 100 KB대, no malloc, no OS 의존, INT8 quantized model이 기본입니다.
+> **"TFLite Micro는 MCU에서 `.tflite` 모델을 돌리는 runtime입니다."** 실행 중 메모리는 미리 잡은 tensor arena 한 덩어리에서만 쓰고, 필요한 op만 resolver에 등록합니다. 같은 person detection 모델을 Cortex-M4에서 CMSIS-NN kernel로 돌리자 실행 명령어 수가 22분의 1로 줄었습니다.
+
+## 이 글의 실행 환경
+
+- TFLite Micro: `tensorflow/tflite-micro` 저장소 commit `2c13ceb`(2026-11-13).
+- 모델: 저장소의 `person_detect.tflite`(300,568 byte). [12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)에서 Vela에 넣은 것과 같은 파일입니다(sha256 `808cfdfc…`).
+- host 실행: Debian 13 arm64 guest, g++ 14.2.0.
+- Cortex-M4 실행: 같은 guest의 Debian `arm-none-eabi-gcc` 14.2.1로 빌드하고, macOS의 QEMU 11.1.3 `mps2-an386`(Cortex-M4F)에서 semihosting으로 돌렸습니다.
+
+QEMU는 cycle을 흉내 내지 않으므로, 아래의 Cortex-M 비교는 시간이 아니라 **실행된 명령어 수**입니다. 명령어 수는 QEMU TCG plugin으로 셌습니다.
 
 ## 어떤 상황에서 쓰나
 
-Cortex-M4/M7/M33/M55, RISC-V MCU, ESP32 등 제한된 RAM의 MCU에서 작은 신경망을 실행할 때 선택되는 runtime입니다. 지원 op·delegate·toolchain은 target별로 확인합니다.
+수백 KB RAM의 Cortex-M MCU에서 작은 신경망(키워드 검출, 사람 검출 등)을 OS 없이 돌릴 때입니다. 저장소의 예제가 그 크기를 보여 줍니다. `micro_speech` test는 arena를 28,600 byte(소스 주석상 xtensa p6 기준)로, `person_detection`은 136 KB로 잡혀 있습니다.
 
-ARM Ethos-U NPU와 결합하면 Cortex-M55 + Ethos-U55 같은 *MCU급* AI inference가 됩니다. Battery로 24/7 always-on inference가 가능합니다.
+## 핵심 개념
 
-## 핵심 개념 — 디자인 원칙
-
-1. No dynamic memory after init (no `malloc`/`free`)
-2. Single `.tflite` model을 flash에 binary로 둠
-3. Tensor arena 한 덩어리 메모리에서 inference 동안 reuse
-4. Op resolver로 *사용 op만* link → flash 절약
-5. C++ static link
-
-이 원칙이 *실시간 + 결정적 + 작은 memory* 환경에 맞습니다.
+1. 모델은 `.tflite`(FlatBuffer) 그대로 flash에 둡니다. `GetModel()`은 복사나 parsing 없이 그 버퍼를 가리킵니다.
+2. 입력·출력·중간 tensor는 모두 사용자가 넘긴 **tensor arena** 안에 놓입니다. `AllocateTensors()`가 arena 안에서 tensor 위치를 정하고, 수명이 겹치지 않는 tensor는 같은 자리를 다시 씁니다.
+3. op 구현은 `MicroMutableOpResolver<N>`에 **필요한 것만** 등록합니다. `AllOpsResolver`는 현재 저장소에 없습니다(`all_ops_resolver.h` 파일 자체가 없습니다).
+4. Cortex-M용 최적화 kernel은 `OPTIMIZED_KERNEL_DIR=cmsis_nn`으로 빌드할 때 들어갑니다.
 
 ## 모델 변환 흐름
 
+Keras 모델을 INT8 `.tflite`로 바꾸는 API는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)에서 LiteRT 문서와 대조한 것과 같습니다. 이 글의 환경에는 TensorFlow가 없어 이 단계는 실행하지 않았고, 아래 실행은 저장소에 이미 있는 INT8 모델을 썼습니다.
+
 ```python
-import tensorflow as tf
-
-# Train
-model = tf.keras.Sequential([...])
-model.compile(...)
-model.fit(...)
-
-# Quantize to INT8
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.representative_dataset = rep_data_gen
 converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
 converter.inference_input_type  = tf.int8
 converter.inference_output_type = tf.int8
-
 tflite_model = converter.convert()
-with open('model.tflite', 'wb') as f:
-    f.write(tflite_model)
 ```
-
-`.tflite`는 FlatBuffer format. 그대로 MCU flash에 둡니다.
 
 ## .tflite → C array
 
 ```bash
-xxd -i model.tflite > model.h
+xxd -i person_detect.tflite > model.h
 ```
 
-```c
-unsigned char model_tflite[] = {
-    0x1c, 0x00, 0x00, 0x00, 0x54, 0x46, 0x4c, 0x33,
-    /* ... */
-};
-unsigned int model_tflite_len = 24512;
+```text
+unsigned char person_detect_tflite[] = {
+  0x1c, 0x00, 0x00, 0x00, 0x54, 0x46, 0x4c, 0x33, 0x00, 0x00, 0x00, 0x00,
+...
+unsigned int person_detect_tflite_len = 300568;
 ```
 
-이 array가 MCU flash에 들어갑니다.
+4~7번째 byte `0x54 0x46 0x4c 0x33`은 FlatBuffer file identifier `TFL3`입니다. TFLite Micro의 Makefile은 같은 일을 `generate_cc_arrays.py`로 하는데, 이 script가 Pillow를 import하므로 Debian에서는 `python3-pil`이 없으면 person detection 빌드가 멈춥니다.
 
-## TFLite Micro Basics
+## TFLite Micro 기본 코드
 
-```c
-#include "tensorflow/lite/micro/all_ops_resolver.h"
+저장소의 `examples/person_detection/main_functions.cc`를 따라 쓴 최소 코드입니다. 아래 측정은 모두 이 구조의 프로그램으로 했습니다.
+
+```cpp
 #include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/schema/schema_generated.h"
-#include "model.h"
-
-// 1. Memory arena
-constexpr int kArenaSize = 100 * 1024;
-alignas(16) static uint8_t tensor_arena[kArenaSize];
-
-// 2. Model
-static const tflite::Model *model = nullptr;
-
-// 3. Interpreter
-static tflite::MicroInterpreter *interp = nullptr;
-
-void setup(void) {
-    model = tflite::GetModel(model_tflite);
-    if (model->version() != TFLITE_SCHEMA_VERSION) {
-        MicroPrintf("Model schema version mismatch\n");
-        return;
-    }
-
-    static tflite::AllOpsResolver resolver;
-    static tflite::MicroInterpreter static_interp(
-        model, resolver, tensor_arena, kArenaSize);
-    interp = &static_interp;
-
-    TfLiteStatus status = interp->AllocateTensors();
-    if (status != kTfLiteOk) {
-        MicroPrintf("AllocateTensors failed\n");
-        return;
-    }
-}
-
-void loop(void) {
-    // Get input tensor
-    TfLiteTensor *input = interp->input(0);
-
-    // Fill input (INT8)
-    for (int i = 0; i < input->bytes; i++) {
-        input->data.int8[i] = sample_input[i];
-    }
-
-    // Invoke
-    if (interp->Invoke() != kTfLiteOk) return;
-
-    // Read output
-    TfLiteTensor *output = interp->output(0);
-    int8_t max_value = output->data.int8[0];
-    int max_index = 0;
-    for (int i = 1; i < output->dims->data[1]; i++) {
-        if (output->data.int8[i] > max_value) {
-            max_value = output->data.int8[i];
-            max_index = i;
-        }
-    }
-    MicroPrintf("class=%d score=%d\n", max_index, max_value);
-}
-```
-
-이게 *전체*입니다. Malloc 없음. OS 없음.
-
-## Tensor Arena 크기
-
-Arena는 *intermediate tensor + scratch buffer*를 담는 단일 영역입니다.
-
-**크기 결정:**
-
-1. 처음에 넉넉히 (예: 200 KB)
-2. `AllocateTensors` 후 `interp->arena_used_bytes()` 호출
-3. 실제 사용량 확인
-4. 그 + 10% 정도로 줄임
-
-**예시:**
-
-| 모델 | Arena |
-|------|-------|
-| Person Detection 96×96 | ~70 KB |
-| Speech Commands tiny | ~10 KB |
-| Keyword Spotter | ~15 KB |
-| Visual Wake Word | ~50 KB |
-
-## Op Resolver 최적화
-
-`AllOpsResolver`는 모든 op를 link해 flash가 큽니다. 사용하는 op만 명시:
-
-```c
+#include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/system_setup.h"
+#include "tensorflow/lite/micro/models/person_detect_model_data.h"
+#include "tensorflow/lite/micro/examples/person_detection/testdata/person_image_data.h"
 
-static tflite::MicroMutableOpResolver<8> resolver;
-resolver.AddConv2D();
-resolver.AddDepthwiseConv2D();
-resolver.AddFullyConnected();
-resolver.AddSoftmax();
-resolver.AddRelu();
-resolver.AddMaxPool2D();
-resolver.AddReshape();
-resolver.AddQuantize();
+constexpr int kArenaSize = 136 * 1024;
+alignas(16) static uint8_t arena[kArenaSize];
+
+int main() {
+  tflite::InitializeTarget();
+  const tflite::Model *model = tflite::GetModel(g_person_detect_model_data);
+  if (model->version() != TFLITE_SCHEMA_VERSION) {     // 3 in micro_interpreter.h
+    MicroPrintf("schema %d != %d", model->version(), TFLITE_SCHEMA_VERSION);
+    return 1;
+  }
+
+  static tflite::MicroMutableOpResolver<5> r;          // only the ops this graph uses
+  r.AddAveragePool2D(); r.AddConv2D(); r.AddDepthwiseConv2D(); r.AddReshape(); r.AddSoftmax();
+
+  static tflite::MicroInterpreter interp(model, r, arena, kArenaSize);
+  if (interp.AllocateTensors() != kTfLiteOk) { MicroPrintf("AllocateTensors failed"); return 1; }
+  MicroPrintf("arena_used_bytes %u", (unsigned)interp.arena_used_bytes());
+
+  TfLiteTensor *in = interp.input(0);                  // int8 [1, 96, 96, 1]
+  for (size_t i = 0; i < in->bytes; i++) in->data.int8[i] = (int8_t)g_person_image_data[i];
+  if (interp.Invoke() != kTfLiteOk) return 1;
+
+  TfLiteTensor *out = interp.output(0);                // int8 [1, 2]: no_person, person
+  MicroPrintf("no_person %d person %d", out->data.int8[0], out->data.int8[1]);
+  return 0;
+}
 ```
 
-`AllOpsResolver`가 200 KB이면 `MutableOpResolver`로 30 KB까지 줄어듭니다.
+실제로 돌린 프로그램은 이 구조에 결과 출력용 `printf`를 더한 것이고, Cortex-M 빌드에서는 `MicroPrintf` 출력을 받으려고 `RegisterDebugLogCallback()`으로 출력 함수를 등록했습니다. malloc도, OS 호출도 없습니다. op 다섯 개(`AVERAGE_POOL_2D`, `CONV_2D`, `DEPTHWISE_CONV_2D`, `RESHAPE`, `SOFTMAX`)는 저장소 예제가 이 모델에 등록하는 목록 그대로입니다.
+
+host에서 저장소의 test를 먼저 돌리면 빌드 환경이 맞는지 확인할 수 있습니다.
+
+```bash
+make -f tensorflow/lite/micro/tools/make/Makefile -j4 test_person_detection_test
+```
+
+```text
+person data.  person score: 113, no person score: -113
+no person data.  person score: -57, no person score: 57
+~~~ALL TESTS PASSED~~~
+```
+
+## Tensor arena 크기
+
+크기는 넉넉히 잡고 `AllocateTensors()` 뒤 `arena_used_bytes()`로 실제 사용량을 본 다음 줄입니다. person detection 모델에서 잰 값입니다.
+
+| 빌드 | arena 지정 | `arena_used_bytes()` |
+|------|-----------:|---------------------:|
+| host (aarch64, g++) | 139,264 | 85,024 |
+| Cortex-M4, reference kernel | 139,264 | 82,292 |
+| Cortex-M4, CMSIS-NN kernel | 139,264 | 82,308 |
+
+같은 모델이라도 target과 kernel에 따라 값이 다르므로, 최종 크기는 target 빌드에서 잽니다. Cortex-M4 reference kernel 빌드에서 64 KB arena로 줄이면 `AllocateTensors()`가 실패하고 무엇이 모자란지 출력합니다(host에서는 `available 36032, missing: 19264`).
+
+```text
+Failed to resize buffer. Requested: 55296, available 38656, missing: 16640
+AllocateTensors with 64 KB arena -> error
+```
+
+실패는 조용히 지나가지 않고 `kTfLiteError`로 돌아옵니다.
+
+## Op resolver
+
+resolver에서 필요한 op 하나를 빼면 `AllocateTensors()`가 실패합니다. 위 코드에서 `AddSoftmax()`만 지운 결과입니다.
+
+```text
+Didn't find op for builtin opcode 'SOFTMAX'
+Failed to get registration from op code SOFTMAX
+AllocateTensors failed
+```
+
+모델에 어떤 op가 있는지 모르면 이 메시지로 하나씩 확인하거나, [12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)처럼 Vela·모델 검사 도구로 op 목록을 먼저 뽑습니다.
 
 ## CMSIS-NN — Cortex-M 최적화 kernel
 
-CMSIS-NN은 ARM이 제공하는 *Cortex-M용 최적화된 NN kernel*. TFLite Micro에 통합됩니다.
+`cortex_m_generic` README의 빌드 형식을 따라 Cortex-M4F용 library를 reference kernel과 CMSIS-NN kernel로 한 번씩 만들었습니다. `TARGET_TOOLCHAIN_ROOT`를 주지 않으면 Makefile이 Arm GCC를 따로 내려받습니다.
 
 ```bash
-# CMake build
-make -f tensorflow/lite/micro/tools/make/Makefile \
-     TARGET=cortex_m_generic \
-     TARGET_ARCH=cortex-m7+fp \
-     OPTIMIZED_KERNEL_DIR=cmsis_nn \
-     hello_world
+make -f tensorflow/lite/micro/tools/make/Makefile -j4 TARGET=cortex_m_generic \
+     TARGET_ARCH=cortex-m4+fp TARGET_TOOLCHAIN_ROOT=/usr/bin/ microlite
+make -f tensorflow/lite/micro/tools/make/Makefile -j4 TARGET=cortex_m_generic \
+     TARGET_ARCH=cortex-m4+fp TARGET_TOOLCHAIN_ROOT=/usr/bin/ OPTIMIZED_KERNEL_DIR=cmsis_nn microlite
 ```
 
-CMSIS-NN은 target에 맞는 optimized INT8 kernels를 제공할 수 있습니다. 가속 폭은 core·compiler·tensor shape·memory layout으로 측정합니다.
-
-## Ethos-U Delegate
-
-Ethos-U NPU와 결합하려면 모델을 *Vela*로 변환:
+두 library에 위 프로그램을 link해 QEMU `mps2-an386`에서 돌렸습니다. 둘 다 `[no_person, person] = [-113, 113]`으로 host test와 같은 답을 냈습니다. Invoke를 1번 하는 binary와 2번 하는 binary의 명령어 수 차이가 Invoke 한 번의 명령어 수입니다.
 
 ```bash
-vela model.tflite --accelerator-config ethos-u55-256
-# → model_vela.tflite 생성 (NPU command + 일부 CPU fallback)
+qemu-system-arm -M mps2-an386 -nographic -semihosting-config enable=on,target=native \
+                -plugin ./libinsncount.dylib -kernel pd_cmsis_1.elf
 ```
 
-Vela 변환된 모델은 *NPU custom op*를 포함합니다. Op resolver에 추가:
+| kernel | 전체(Invoke 1회) | 전체(Invoke 2회) | Invoke 1회 | `.text` |
+|--------|-----------------:|-----------------:|-----------:|--------:|
+| reference | 529,755,814 | 1,053,819,691 | 524,063,877 | 398,420 byte |
+| CMSIS-NN | 28,783,829 | 51,841,564 | 23,057,735 | 430,412 byte |
 
-```c
-#include "tensorflow/lite/micro/kernels/ethosu.h"
+Invoke 한 번의 명령어 수는 CMSIS-NN이 22.7분의 1입니다. 대신 `.text`는 31,992 byte 늘었습니다(`.text`에는 300,568 byte의 모델이 포함됩니다). 실제 MCU의 시간은 명령어 수에 memory wait state, cache, pipeline 효과가 더해지므로 보드의 cycle counter로 다시 잽니다. TFLite Micro의 `cortex_m_generic/micro_time.cc`는 `GetCurrentTimeTicks()`에서 DWT `CYCCNT`(또는 `ARM_MODEL_USE_PMU_COUNTERS`일 때 PMU cycle counter)를 읽으므로, 보드에서는 `MicroProfiler`의 tick이 cycle 수입니다. 같은 파일의 `ticks_per_second()`는 0을 돌려주므로 시간으로 바꾸려면 core clock으로 직접 나눕니다.
 
-resolver.AddEthosU();
-```
+### MicroProfiler
 
-이제 NPU-targetable layer는 Ethos-U55가, fallback layer는 Cortex-M55 + CMSIS-NN이 처리.
-
-## 사례 — Person Detection on STM32
-
-STM32 Cube AI 또는 직접 빌드:
-
-```text
-Model: MobileNetV1 0.25 96×96 grayscale
-Input: 96 × 96 × 1 (int8)
-Flash: 350 KB (model + runtime + ops)
-RAM:   90 KB (arena) + 10 KB (other)
-```
-
-```c
-// 카메라 frame을 96×96 grayscale로 변환
-camera_capture(rgb_buffer);
-resize_grayscale(rgb_buffer, 320, 240, gray_buffer, 96, 96);
-
-// 입력 채우기
-TfLiteTensor *in = interp->input(0);
-for (int i = 0; i < 96*96; i++)
-    in->data.int8[i] = gray_buffer[i] - 128;   // -128~127 범위
-
-// Inference
-interp->Invoke();
-
-// 출력: [no_person_prob, person_prob]
-TfLiteTensor *out = interp->output(0);
-int8_t person = out->data.int8[1];
-if (person > THRESHOLD) led_on();
-```
-
-Cortex-M7/Ethos-U55 사례의 latency와 power는 model·clock·delegate 구성에서 측정합니다.
-
-## Memory Layout
-
-**Flash:**
-
-- Code:                ~ 200 KB (TFLite Micro + kernels)
-- Model:               ~ 100~500 KB (.tflite as C array)
-- Other code, libs:    ~ 100 KB
-
-**RAM:**
-
-- Tensor arena:        ~ 50~200 KB
-- System (stack, etc.): ~ 50 KB
-
-Cortex-M4 보드는 RAM 128 KB / Flash 512 KB가 흔합니다. 적당한 모델이 들어갑니다. M7 (1 MB RAM)에는 더 큰 모델.
-
-## Profiling
-
-```c
+```cpp
 #include "tensorflow/lite/micro/micro_profiler.h"
 
-static tflite::MicroProfiler profiler;
-static tflite::MicroInterpreter static_interp(
-    model, resolver, tensor_arena, kArenaSize, nullptr, &profiler);
-
+static tflite::MicroProfiler prof;
+static tflite::MicroInterpreter interp(model, r, arena, kArenaSize, nullptr, &prof);
 interp.Invoke();
-profiler.LogTicksPerTagCsv();
+prof.LogTicksPerTagCsv();
 ```
 
-각 op의 실행 시간이 출력. Bottleneck을 찾아 optimize.
-
-## 측정 비교
+host(aarch64) 빌드는 Makefile이 `-DTF_LITE_USE_CTIME`을 넣으므로 tick이 `clock()` 값입니다. 절대값은 MCU와 무관하지만 op 사이의 비중은 볼 수 있습니다.
 
 ```text
-Speech Commands (Tiny CNN) on Cortex-M4 (STM32F4 168 MHz):
-  Reference kernel (no SIMD):  120 ms
-  CMSIS-NN INT8:                25 ms
-  → 5×
-
-Person Detection (MobileNetV1 0.25) on Cortex-M7 (STM32H7 480 MHz):
-  Reference:                    300 ms
-  CMSIS-NN INT8:                 35 ms
-  → 9×
-
-MobileNetV1 0.25 on Cortex-M55 + Ethos-U55:
-  CMSIS-NN only:                 35 ms
-  Ethos-U55 delegate:             5 ms
-  → 7× over CMSIS-NN
+"Unique Tag","Total ticks across all events with that tag."
+DEPTHWISE_CONV_2D, 3456
+CONV_2D, 19078
+AVERAGE_POOL_2D, 5
+RESHAPE, 1
+SOFTMAX, 1
+"total number of ticks", 22541
 ```
+
+이 모델에서는 `CONV_2D`가 전체의 85%입니다.
+
+## Ethos-U
+
+[12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)에서 이 모델을 Vela 5.2.0에 넣었을 때 57개 operator가 모두 NPU로 갔습니다(`CPU operators = 0`). TFLite Micro의 `kernels/ethos_u/README.md`에 따르면 Vela가 NPU 부분을 Ethos-U custom op로 바꾸고, runtime은 그 op를 만나면 Ethos-U로 넘깁니다. 빌드는 `CO_PROCESSOR=ethos_u`와 `ETHOSU_ARCH`를 주고, resolver에는 `AddEthosU()`를 등록합니다.
+
+```bash
+make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESSOR=ethos_u \
+     ETHOSU_ARCH=u55 TARGET=cortex_m_generic TARGET_ARCH=cortex-m55 microlite
+```
+
+같은 README는 Ethos-U driver의 초기화 API를 TFLite Micro API보다 먼저 불러야 한다고 적고, Ethos-U가 있는 실행 환경으로 Arm Corstone-300 FVP를 듭니다. 이 글의 QEMU에는 Ethos-U model이 없어 이 단계는 실행하지 않았습니다.
 
 ## 자주 보는 함정
 
-> Float32 모델 그대로
+> ⚠️ Invoke 전에 입력을 다시 채우지 않음
 
-```text
-Float32 MobileNet on Cortex-M4:  > 2 seconds
-INT8 quantized:                  ~ 100 ms
-```
+같은 입력으로 Invoke를 두 번 부르는 binary를 돌리자 두 번째 결과가 `[-113, 113]`이 아니라 `[2, -2]`였습니다(reference, CMSIS-NN 모두). host 빌드에서 Invoke 뒤 입력 tensor를 원래 이미지와 비교하자 9,216 byte 중 9,178 byte가 바뀌어 있었습니다(입력은 arena+18432, 출력은 arena+0). arena 안의 입력 자리를 중간 tensor가 다시 쓴 것입니다. 매 Invoke 전에 입력을 다시 씁니다.
 
-MCU에서 float은 *느림*. 반드시 INT8 quantize.
+> ⚠️ arena를 재지 않고 정함
 
-> Arena 너무 작음
+`arena_used_bytes()`는 target·kernel마다 다릅니다(위 표 82,292~85,024). target 빌드에서 재고, 모자라면 `AllocateTensors()`의 `missing:` 값을 봅니다.
 
-```text
-AllocateTensors → kTfLiteError
-```
+> ⚠️ resolver에 op 누락
 
-Arena가 부족하면 silently fail 안 하고 error code 반환. 처음에 넉넉히 잡고 줄임.
+모델의 op 하나라도 빠지면 `AllocateTensors()`가 `Didn't find op for builtin opcode`로 실패합니다.
 
-> AllOpsResolver 사용
+> ⚠️ CMSIS-NN을 켜지 않음
 
-```text
-Flash usage: 600 KB (model 50 KB) — 대부분이 op resolver
-```
+`OPTIMIZED_KERNEL_DIR` 없이 빌드하면 reference kernel이 들어갑니다. 이 모델에서 reference kernel의 Invoke 명령어 수는 CMSIS-NN의 22.7배였습니다.
 
-MutableOpResolver로 필요한 op만.
+> ⚠️ 입력 양자화 부호
 
-> CMSIS-NN 활성화 안 함
-
-```bash
-# build flag
-OPTIMIZED_KERNEL_DIR=cmsis_nn
-```
-
-기본 빌드는 reference kernel. 5-10× 차이.
-
-> Unsupported op
-
-```text
-Unsupported op: SOFTMAX_V2
-```
-
-TFLite Micro는 모든 op를 지원 안 함. Vela report 또는 빌드 에러로 확인.
-
-> Input quantization 누락
-
-```c
-// Input은 float이라고 가정
-in->data.f[i] = pixel / 255.0f;
-// → INT8 모델에는 잘못된 형식
-```
-
-Quantized model은 *INT8 input*. `q = round(x / scale - zero_point)`로 변환.
+이 모델의 입력은 int8, scale 0.007843, zero_point -1입니다. 실수 입력 `x`는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)의 LiteRT 식 `real = (q - zero_point) × scale`을 뒤집은 `q = round(x / scale) + zero_point`로 바꿉니다. `- zero_point`로 쓰면 zero_point만큼 어긋납니다. 저장소 예제는 uint8 이미지를 넣을 때 128을 빼서 int8로 바꿉니다.
 
 ## 정리
 
-- TFLite Micro = MCU용 TFLite, no malloc, OS-free.
-- 모델은 .tflite → C array로 flash에 둠.
-- Tensor arena 한 덩어리에서 intermediate tensor reuse.
-- MutableOpResolver로 사용 op만 link.
-- CMSIS-NN kernel의 효과는 target model과 core에서 측정합니다.
-- Vela로 Ethos-U binary 변환 + Ethos-U delegate.
-- INT8 quantization 필수. Float32는 MCU에 너무 무거움.
-- Arena 크기는 `arena_used_bytes()`로 측정 후 조정.
+- TFLite Micro는 `.tflite`를 flash에 두고, tensor는 고정된 arena 안에서만 할당합니다.
+- `MicroMutableOpResolver`에 모델이 쓰는 op만 등록합니다. 하나라도 빠지면 `AllocateTensors()`가 실패합니다.
+- arena 크기는 `arena_used_bytes()`로 target 빌드에서 잽니다. person detection 모델은 Cortex-M4에서 82,292 byte였습니다.
+- Cortex-M4에서 CMSIS-NN kernel은 Invoke 명령어 수를 22.7분의 1로 줄였고 `.text`는 31,992 byte 늘었습니다.
+- 이 모델에서는 Invoke가 arena 안의 입력 자리를 덮어썼으므로 매 Invoke 전에 입력을 채웁니다.
 
 다음 편은 **ONNX Runtime**입니다.
 

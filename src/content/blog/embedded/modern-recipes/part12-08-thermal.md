@@ -11,233 +11,248 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Edge AI 보드의 진짜 spec은 burst가 아니라 sustained 성능입니다."** 보드 크기·전력·냉각·ambient에 따라 온도와 throttling이 달라지므로 long-run thermal 측정이 필요합니다.
+> **"Edge AI 보드에서 믿을 숫자는 짧은 burst가 아니라 온도가 안정된 뒤의 sustained 성능입니다."** Linux thermal framework의 trip point와 Jetson의 power mode·fan 설정이 그 숫자를 정하므로, 장치에서 직접 읽고 long-run으로 잽니다.
+
+## 이 글의 근거
+
+이 글을 쓴 환경에는 Jetson 보드가 없어 Jetson 명령은 실행하지 않았습니다. 대신 다음 1차 자료와 대조했습니다.
+
+- NVIDIA Jetson Linux Developer Guide r36.4의 "Platform Power and Performance"(Orin Nano·NX·AGX Orin)와 "Tegrastats Utility" 페이지
+- Linux 7.4-rc3 소스의 `Documentation/driver-api/thermal/sysfs-api.rst`, `bindings/thermal/thermal-zones.yaml`, `bindings/hwmon/pwm-fan.yaml`, `drivers/thermal/gov_step_wise.c`
+
+아래 C 코드는 Debian 13 arm64 guest(gcc 14.2.0)에서 빌드해 실행했습니다. 이 guest는 QEMU `virt` machine이라 thermal zone이 하나도 없으므로, Jetson 문서의 trip 값으로 만든 가짜 sysfs tree에도 돌렸습니다.
 
 ## 어떤 상황에서 쓰나
 
-자율주행 ECU, drone autopilot, factory inspection 박스, 카메라 NVR 모두 *수 시간 연속 동작*을 전제로 합니다. 데이터센터 GPU와 달리 큰 fan과 chiller를 못 쓰고, 자동차 장착 위치에 따라 ambient 요구 범위가 넓습니다.
+카메라 분석 박스나 로봇처럼 추론을 몇 시간씩 연속으로 돌리는 장치입니다. 짧게 재면 온도가 trip에 닿기 전의 숫자만 잡히므로, 실제 운영 조건에서 온도가 안정될 때까지 재야 합니다.
 
-문제는 spec sheet의 TOPS·fps 숫자가 거의 항상 *burst* 기준이라는 점입니다. 짧게 측정하면 throttle이 일어나기 전 수치가 잡히므로 실제 deploy 환경의 sustained 수치보다 높게 나올 수 있습니다. 차이는 보드·냉각·ambient·workload로 측정합니다. 처음부터 sustained 기준으로 측정하고 enclosure·heatsink를 함께 설계해야 합니다.
+NVIDIA 문서도 같은 점을 짚습니다. Orin의 MAXN mode는 "an unconstrained power mode"이지만, "this mode does not guarantee the best performance for all use cases because hardware throttling is engaged when the total module power exceeds the TDP budget. Therefore, it is not the maximum performance mode."라고 적습니다.
 
 ## 핵심 개념
 
-Thermal throttle은 SoC가 *junction temperature*(Tj) 한계에 도달하면 frequency를 강제로 낮추는 방식으로 동작합니다. 아래 trip 온도는 구조를 보여 주는 예시이고, 실제 값은 SoC datasheet와 BSP의 thermal zone 설정(device tree)으로 확인합니다.
+### Thermal zone과 trip point
 
-| 온도 (예시) | 동작 |
+Linux thermal framework의 단위는 thermal zone입니다. zone 하나는 온도 sensor, cooling device, trip point, governor로 이루어집니다. 온도와 trip 온도는 millidegree Celsius로 읽힙니다.
+
+trip point 종류는 Jetson 문서 기준으로 셋입니다.
+
+| trip type | 동작 |
+|-----------|------|
+| `passive` | clock throttling처럼 성능을 낮춰 발열을 줄이는 cooling device를 켬 |
+| `active` | fan처럼 열을 내보내는 cooling device를 켬 |
+| `critical` | thermal shutdown |
+
+`critical`을 넘으면 커널은 먼저 정상 power-off(또는 reboot)를 시도하고, 정해진 delay 뒤에는 강제 power-off로 넘어갑니다(`sysfs-api.rst` 5장).
+
+Jetson Orin 문서에 실린 `gpu-thermal` zone의 device tree입니다.
+
+```text
+gpu-sw-shutdown { temperature = <0x19834>; type = "critical"; hysteresis = <0x0>; }
+gpu-sw-slowdown { temperature = <0x182b8>; type = "passive";  hysteresis = <0x0>; }
+gpu-hot-surface { temperature = <0x11170>; type = "active";   hysteresis = <0x1f40>; }
+...
+thermal-zone-params { governor-name = "step_wise"; };
+```
+
+16진수를 풀면 critical 104,500(104.5 °C), passive 99,000(99.0 °C), active 70,000(70.0 °C)이고, active trip의 hysteresis는 8,000(8 °C)입니다. 같은 문서의 본문은 passive trip을 99.5 °C라고 적는데, 예시 DT 값은 99,000입니다. 실제 값은 장치에서 `trip_point_*_temp`로 읽습니다.
+
+### Throttling을 누가 하나
+
+Jetson Orin 문서는 thermal 동작을 이렇게 나눕니다.
+
+| 동작 | 담당 |
 |------|------|
-| 60°C | fan ramp 시작 (있다면) |
-| 85°C | soft throttle — frequency 단계 감소 |
-| 95°C | hard throttle — minimum freq |
-| 105°C | shutdown |
+| 온도 측정 | BPMP firmware(on-chip sensor), Linux `lm90.c`(on-board sensor) |
+| software clock throttling | Linux `cpufreq_cooling.c`, `devfreq_cooling.c` |
+| fan | Linux `pwm-fan.c` |
+| hardware clock throttling(slowdown) | BPMP firmware |
+| software shutdown | Linux `thermal_core.c` |
+| hardware shutdown | BPMP firmware, `lm90.c` |
 
-DVFS(Dynamic Voltage and Frequency Scaling)가 throttle의 실제 mechanism입니다. Linux kernel이 thermal zone trip을 감지하면 cpufreq governor가 frequency를 떨어뜨리고, GPU·DLA는 vendor driver가 별도 관리합니다.
-
-Cooling은 세 옵션이 있습니다.
-
-| Cooling | 특성 |
-|---------|------|
-| Passive heatsink | fanless, 먼지/진동 영향 적음, 자동차·산업 장비에서 선호 |
-| Fan | 효율 좋음, 소비자 device, 먼지·실패 위험 |
-| Liquid | 대형 edge box·data center, 비용·복잡도 높음 |
-
-자동차 ECU는 먼지·진동·수명 문제로 fanless 설계를 우선 검토하는 경우가 많고, 이때는 *처음부터 낮은 clock*으로 thermal headroom을 확보합니다.
-
-Production deploy의 핵심은 *margin*입니다. 정상 운영 온도를 throttle trip보다 충분히 낮게 두어야 ambient가 변해도 trip에 걸리지 않습니다. margin 크기는 최악 ambient·enclosure·workload 조건에서 측정해 정합니다.
+governor `step_wise`의 동작은 `gov_step_wise.c`에 있습니다(같은 Jetson 문서는 passive throttling에 BSP의 PID controller를 쓴다고도 적지만, 위 DT 예의 governor는 `step_wise`입니다). 온도가 trip보다 높고 상승 중이면 cooling state를 한 단계 올리고, 내려가는 중이면 한 단계 낮추되 trip 위에 있는 동안은 최소 state보다 한 단계 위에 둡니다. trip 아래로 내려가 계속 떨어지면 그 trip의 cooling 요청을 거둡니다.
 
 ## 코드 / 실제 사용 예
 
-### tegrastats — Jetson 실시간 모니터
+### thermal zone 읽기
 
 ```bash
-sudo tegrastats --interval 1000
-
-# RAM 12345/30536MB CPU [50%@2200,30%@2200,...]
-# GR3D_FREQ 80%@1300  CV0@45.5C CPU@52C GPU@67C SOC@70C
-# VDD_GPU_SOC 6800/6800  VDD_CPU_CV 800/800
-```
-
-CPU·GPU·thermal zone·power rail이 한 번에 보입니다. Long-running 추론을 돌리며 1시간 trend를 찍는 것이 sustained 측정의 기본입니다.
-
-### thermal zone 직접 읽기
-
-```bash
-# 사용 가능한 thermal zone
 ls /sys/class/thermal/
-# thermal_zone0  thermal_zone1  ...
-
-# 각 zone 정보
-cat /sys/class/thermal/thermal_zone0/type        # CPU-therm
-cat /sys/class/thermal/thermal_zone0/temp        # 65000 (65.0°C)
-cat /sys/class/thermal/thermal_zone0/policy      # step_wise
-
-# Trip points
-cat /sys/class/thermal/thermal_zone0/trip_point_0_temp   # 예: 60000 (active cooling)
-cat /sys/class/thermal/thermal_zone0/trip_point_1_temp   # 예: 85000 (passive/throttle)
-cat /sys/class/thermal/thermal_zone0/trip_point_2_temp   # 예: 95000 (critical)
+cat /sys/class/thermal/thermal_zone0/type
+cat /sys/class/thermal/thermal_zone0/temp                  # millidegree Celsius
+cat /sys/class/thermal/thermal_zone0/policy                # governor
+cat /sys/class/thermal/thermal_zone0/trip_point_0_type     # critical / passive / active / hot
+cat /sys/class/thermal/thermal_zone0/trip_point_0_temp
 ```
 
-`/sys/class/thermal`은 표준 Linux thermal framework입니다. Custom application의 telemetry에도 활용합니다.
+`type`, `temp`, `policy`, `available_policies`, `trip_point_[0-*]_temp`, `trip_point_[0-*]_type`, `trip_point_[0-*]_hyst`, `emul_temp`는 `sysfs-api.rst`가 thermal zone 아래에 정의하는 attribute입니다.
 
-### nvpmodel — Jetson power mode
+### Application에서 margin 읽기
 
-```bash
-# 현재 mode 확인
-sudo nvpmodel -q
-# NV Power Mode: MAXN
-# 0
-
-# Mode 전환 — mode ID와 전력 budget의 대응은 module마다 다름
-sudo nvpmodel -m 0   # 대개 MAXN
-sudo nvpmodel -m <id>   # /etc/nvpmodel.conf의 POWER_MODEL 정의 참조
-
-# Custom mode (편집)
-sudo vi /etc/nvpmodel.conf
-```
-
-각 mode는 *CPU/GPU/DLA frequency cap + power budget*의 조합입니다. MAXN이 항상 sustained 성능이 가장 좋은 것은 아니므로, 냉각 조건에서 mode별 long-run 성능을 측정해 production mode를 고릅니다.
-
-### Power telemetry를 application에서
+모든 zone의 온도와 각 trip까지 남은 margin을 출력하는 프로그램입니다. 인자로 sysfs root를 바꿀 수 있습니다.
 
 ```c
+/* Read every thermal zone's type, temp and trip points under a sysfs root.
+ * usage: thermal_mon [root]   (default /sys/class/thermal) */
+#include <dirent.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-int read_thermal(const char *path) {
+static int read_line(const char *path, char *buf, size_t n) {
     FILE *f = fopen(path, "r");
     if (!f) return -1;
-    int millideg;
-    fscanf(f, "%d", &millideg);
+    if (!fgets(buf, (int)n, f)) { fclose(f); return -1; }
     fclose(f);
-    return millideg / 1000;   /* °C */
+    buf[strcspn(buf, "\n")] = '\0';
+    return 0;
 }
 
-void thermal_monitor(void) {
-    int cpu = read_thermal("/sys/class/thermal/thermal_zone0/temp");
-    int gpu = read_thermal("/sys/class/thermal/thermal_zone1/temp");
+static int read_millic(const char *path, long *out) {   /* millidegree Celsius */
+    char b[32];
+    if (read_line(path, b, sizeof b) != 0) return -1;
+    return sscanf(b, "%ld", out) == 1 ? 0 : -1;
+}
 
-    if (cpu > 80 || gpu > 80) {
-        log_warn("High temp cpu=%d gpu=%d, reducing workload", cpu, gpu);
-        reduce_inference_rate();
+int main(int argc, char **argv) {
+    const char *root = argc > 1 ? argv[1] : "/sys/class/thermal";
+    DIR *d = opendir(root);
+    if (!d) { perror(root); return 1; }
+    struct dirent *e;
+    int zones = 0;
+    while ((e = readdir(d))) {
+        if (strncmp(e->d_name, "thermal_zone", 12) != 0) continue;
+        char p[512], type[64] = "?", ttype[32];
+        long t, trip;
+        snprintf(p, sizeof p, "%s/%s/type", root, e->d_name);  read_line(p, type, sizeof type);
+        snprintf(p, sizeof p, "%s/%s/temp", root, e->d_name);
+        if (read_millic(p, &t) != 0) { printf("%s %s: temp unreadable\n", e->d_name, type); continue; }
+        printf("%s %-12s %6.1f C", e->d_name, type, t / 1000.0);
+        for (int i = 0; ; i++) {
+            snprintf(p, sizeof p, "%s/%s/trip_point_%d_temp", root, e->d_name, i);
+            if (read_millic(p, &trip) != 0) break;
+            snprintf(p, sizeof p, "%s/%s/trip_point_%d_type", root, e->d_name, i);
+            if (read_line(p, ttype, sizeof ttype) != 0) strcpy(ttype, "?");
+            printf("  [%s %.1f C, margin %.1f]", ttype, trip / 1000.0, (trip - t) / 1000.0);
+        }
+        printf("\n");
+        zones++;
     }
-    if (cpu > 90 || gpu > 90) {
-        log_error("Critical temp, entering safe mode");
-        enter_safe_mode();
-    }
+    closedir(d);
+    printf("%d thermal zone(s) under %s\n", zones, root);
+    return 0;
 }
 ```
 
-Production application은 *thermal trend*를 1~5 sec 주기로 읽어 workload를 능동적으로 조절합니다.
+```bash
+gcc -std=c11 -Wall -Wextra -O2 thermal_mon.c -o thermal_mon
+./thermal_mon                       # real sysfs
+./thermal_mon /root/p1208/fakesys   # fake tree: gpu-thermal, temp 67500, trips from the Orin DT above
+```
 
-### Fan curve 설정
+```text
+0 thermal zone(s) under /sys/class/thermal
+thermal_zone1 gpu-thermal    67.5 C  [critical 104.5 C, margin 37.0]  [passive 99.0 C, margin 31.5]  [active 70.0 C, margin 2.5]
+1 thermal zone(s) under /root/p1208/fakesys
+```
+
+첫 줄은 QEMU `virt` guest의 결과입니다. 가상 machine에는 sensor가 없어 zone이 0개입니다. 개발 PC나 VM에서 thermal 코드를 시험하면 이렇게 아무것도 읽히지 않으므로, 실제 보드에서 다시 확인합니다. 가짜 tree는 Jetson 문서의 trip 값에 온도 67.5 °C를 넣은 것입니다. application은 이 margin이 줄어드는 추세를 보고 추론 rate를 낮추는 식으로 씁니다.
+
+### tegrastats
+
+Tegrastats Utility 문서의 사용법입니다.
 
 ```bash
-# PWM fan 직접 제어 (Jetson)
-cat /sys/devices/.../pwm-fan/hwmon0/pwm1
-echo 180 > /sys/devices/.../pwm-fan/hwmon0/pwm1   # 0~255
+tegrastats --interval 1000 --logfile thermal.log &
+tegrastats --stop
+```
 
-# Device tree로 cooling-levels 정의
-fan: pwm-fan {
-    compatible = "pwm-fan";
-    pwms = <&pwmc 0 45334>;
-    cooling-levels = <0 64 128 192 255>;
+`--interval`은 ms 단위이고 기본값은 1000 ms입니다. 문서가 보여 주는 출력 항목의 예는 `RAM 220/38955MB (lfb 847x4MB)`, 온도 `MCPU@45C`, 전력 `VDDRQ 312/234`입니다. 온도는 `/sys/devices/virtual/thermal/thermal_zone<x>/temp`에서 읽은 값입니다.
+
+### nvpmodel — power mode
+
+```bash
+sudo /usr/sbin/nvpmodel -q          # current mode
+sudo /usr/sbin/nvpmodel -m <x>      # switch mode; <x> is the mode ID
+```
+
+문서에 따르면 설정한 mode는 바꿀 때까지 유지되고 전원을 껐다 켜도 남습니다. GPU `tpc_pg_mask`가 달라지는 mode로 바꾸면 reboot가 필요하다는 경고가 나옵니다. custom mode는 `/etc/nvpmodel.conf`에 `< POWER_MODEL ID=2 NAME=MODE_15W >` 형식으로 추가하고, 그 안에서 CPU core on/off와 CPU(kHz)·GPU·EMC(Hz) 최대 주파수를 정합니다. 문서는 "The frequencies you select are subject to the MaxN limit defined in mode 0"이라고 적습니다.
+
+### jetson_clocks
+
+```bash
+sudo /usr/bin/jetson_clocks --show
+sudo /usr/bin/jetson_clocks --store        # default file: ${HOME}/.jetsonclocks_conf.txt
+sudo /usr/bin/jetson_clocks                # CPU, GPU, EMC to static max of the current nvpmodel mode
+sudo /usr/bin/jetson_clocks --restore
+```
+
+문서는 이 script가 CPU·GPU·EMC clock을 고정 최대 주파수로 맞춘다("setting the static maximum frequencies of the CPU, GPU and EMC clocks")고 적고, 그 최대값은 nvpmodel power mode가 정한다고 적습니다. 또 `jetson_clocks`를 돌린 뒤에는 nvpmodel mode를 바꿀 수 없고, 바꾸려면 reboot해야 합니다. 측정 전에 mode를 먼저 정해 둡니다.
+
+### Fan
+
+Orin에서 fan 속도는 userspace daemon `nvfancontrol`이 `/etc/nvfancontrol.conf`의 온도-PWM 표에 따라 정합니다. profile은 `quiet`와 `cool` 두 가지이고, 바꾸려면 service를 멈추고 `FAN_DEFAULT_PROFILE`을 고친 뒤 status 파일을 지우고 다시 시작합니다.
+
+```bash
+sudo nvfancontrol -q
+sudo systemctl stop nvfancontrol
+# set FAN_DEFAULT_PROFILE quiet|cool in /etc/nvfancontrol.conf
+sudo rm /var/lib/nvfancontrol/status
+sudo systemctl start nvfancontrol
+```
+
+fan을 daemon이 관리하므로, hwmon의 PWM 값을 직접 쓰기 전에 `nvfancontrol` service 상태부터 확인합니다. 이 글에서는 daemon이 도는 중에 직접 쓴 값이 어떻게 되는지 확인하지 않았습니다. 커널 쪽 fan은 `pwm-fan` binding으로 정의합니다. `cooling-levels`는 "PWM duty cycle values corresponding to thermal cooling states"이고 각 값은 최대 255입니다. binding의 예입니다.
+
+```text
+pwm-fan {
+  compatible = "pwm-fan";
+  cooling-levels = <0 102 170 230>;
+  pwms = <&pwm 0 10000 0>;
+  #cooling-cells = <2>;
 };
 ```
 
-`cooling-levels`는 thermal zone의 step level에 매핑됩니다. step_wise governor가 trip을 감지하면 한 단계씩 올립니다.
-
-### Sustained 성능 측정
-
-```bash
-# 짧은 burst 측정
-timeout 300 ./yolo_bench --fps_log fps.log
-
-# 1시간 sustained 측정
-timeout 3600 ./yolo_bench --fps_log fps_long.log
-
-# tegrastats 동시에
-sudo tegrastats --logfile thermal.log &
-```
-
-두 log의 fps 곡선과 thermal log를 겹쳐 보면 throttle 시점과 steady state가 드러납니다. 측정 시간은 온도가 steady state에 도달할 만큼 길게 잡습니다.
-
-### jetson_clocks — burst max
-
-```bash
-# 현재 설정 저장 후 모든 clock을 max로 lock — benchmarking·development
-sudo jetson_clocks --store /tmp/backup.conf
-sudo jetson_clocks
-
-# 원래대로 복원
-sudo jetson_clocks --restore /tmp/backup.conf
-```
-
-`jetson_clocks`은 DVFS를 우회해 clock을 최대로 고정하는 명령입니다. thermal 보호는 여전히 동작하지만 발열이 커지므로 burst 측정·development 용도로만 쓰고, production은 측정한 `nvpmodel` mode로 운영합니다.
-
 ## 측정 / 성능 비교
 
-Power mode와 cooling 비교는 같은 model·입력·ambient에서 mode나 cooling 하나만 바꿔 측정합니다. 기록할 항목입니다.
+이 글에서는 보드가 없어 측정값을 싣지 않습니다. power mode나 냉각을 비교할 때는 같은 모델·입력·주변 온도에서 하나만 바꾸고, 다음을 함께 기록합니다.
 
 | 항목 | 출처 | 보는 것 |
 |---|---|---|
-| Burst fps | 첫 수 분 bench log | datasheet·demo 수치와의 비교 기준 |
-| Sustained fps | steady state 이후 bench log | 실제 운영 성능 |
-| Peak·steady 온도 | `tegrastats`·thermal zone | trip까지 남은 margin |
-| GPU·CPU freq | `tegrastats` | throttle 발생 시점 |
-| Rail power | `tegrastats` VDD_* | mode별 power budget 준수 |
+| 처음 몇 분의 처리량 | 벤치마크 log | burst 기준값 |
+| 온도가 안정된 뒤의 처리량 | 벤치마크 log | sustained 성능 |
+| zone별 온도와 trip까지 margin | `tegrastats`, 위 `thermal_mon` | 여유 |
+| CPU·GPU 주파수 | `tegrastats` | throttling 시점 |
+| rail 전력 | `tegrastats`의 `VDD*` 항목 | mode별 전력 |
 
-Burst와 sustained가 거의 같은 mode는 냉각이 그 mode의 발열을 감당한다는 뜻입니다. 두 값이 벌어지면 mode를 낮추거나 heatsink·airflow를 키운 뒤 다시 측정해 비교합니다. Heatsink 크기·fan·ducting 같은 cooling 변경도 같은 표로 비교합니다.
+burst와 sustained가 거의 같으면 냉각이 그 mode의 발열을 감당한다는 뜻입니다. 차이가 크면 mode를 낮추거나 냉각을 키운 뒤 같은 표로 다시 비교합니다.
 
 ## 자주 보는 함정
 
-> Burst benchmark만 측정
+> ⚠️ 짧은 벤치마크만 돌림
 
-```bash
-./bench --duration 30
-# 짧은 측정 — throttle 이전 수치만 잡힘
-```
+온도가 trip에 닿기 전에 끝난 측정은 burst 숫자입니다. 온도 곡선이 평평해질 때까지 돌립니다.
 
-온도가 steady state에 도달할 만큼 long-run 측정을 합니다. Cold start와 warm steady state는 다릅니다.
+> ⚠️ MAXN이 가장 빠르다고 가정
 
-> jetson_clocks production 활성화
+NVIDIA 문서대로 MAXN에서도 모듈 전력이 TDP budget을 넘으면 hardware throttling이 걸립니다. mode마다 sustained 처리량을 재서 고릅니다.
 
-```bash
-# /etc/rc.local
-sudo jetson_clocks   # always max — 발열 증가, thermal trip 위험
-```
+> ⚠️ `jetson_clocks` 뒤 mode 변경
 
-Production은 `nvpmodel`로 *thermal-aware mode*를 선택합니다.
+`jetson_clocks`를 돌린 뒤에는 reboot 없이 nvpmodel mode를 바꿀 수 없습니다. 자동화 script에서 순서를 지킵니다.
 
-> Fan을 무조건 신뢰
+> ⚠️ VM·개발 PC에서 thermal 코드를 시험
 
-```c
-/* fan 전제 설계 */
-/* 먼지 누적·bearing 마모로 fan 성능 저하 → throttle */
-```
+위 실행처럼 VM에는 thermal zone이 없을 수 있습니다. 읽기 실패와 zone 0개를 오류로 처리하고, 실제 보드에서 다시 확인합니다.
 
-먼지·진동이 많은 환경(자동차)이라면 fanless·passive를 우선 검토합니다. Fan을 쓰더라도 monitoring + alert를 갖춥니다.
+> ⚠️ fan PWM을 직접 쓰고 daemon을 잊음
 
-> Margin 부족
-
-정상 운영 온도가 trip 직전에 머물면 ambient가 조금만 올라도 trip에 걸립니다. 최악 ambient 조건에서 측정한 margin을 기준으로 enclosure·workload를 설계합니다.
-
-> Enclosure ventilation 부족
-
-완전 밀폐된 IP67 box는 내부 공기 온도가 외부보다 올라가고, SoC는 그만큼 높아진 온도 위에서 동작합니다. 내부 공기로만 열을 버리는 heatsink는 효과가 제한됩니다. IP rating이 필요하면 *conduction*으로 외부 panel에 열을 전달하는 설계가 필요합니다. 밀폐형 자동차 ECU 등에서 쓰는 방식입니다.
-
-> Workload가 transient burst만 큼
-
-30 fps에 batch 1이면 매 frame마다 짧은 burst가 고르게 반복됩니다. 반대로 1 fps에 batch 30이면 총 연산량은 같지만 한 번의 burst가 훨씬 커져 순간 전력과 온도가 튈 수 있습니다. Batch 크기와 분배를 조절해 *순간 power spike*를 줄입니다.
+Orin의 fan 속도는 `nvfancontrol`이 온도 표에 따라 정합니다. 바꿀 때는 문서의 절차대로 profile을 바꾸거나 service를 멈춘 뒤 다룹니다.
 
 ## 정리
 
-- Edge AI 보드의 실제 spec은 burst가 아닌 sustained 성능입니다.
-- Throttle은 thermal zone trip에서 시작해 frequency를 단계적으로 낮춥니다. trip 온도는 SoC·BSP 설정으로 확인합니다.
-- `tegrastats`·`/sys/class/thermal`로 CPU·GPU·thermal zone을 실시간 모니터합니다.
-- `nvpmodel`로 power mode를 thermal-aware하게 설정합니다. `jetson_clocks`는 측정·개발 용도로만 씁니다.
-- 먼지·진동이 큰 자동차·산업 환경에서는 fanless·passive cooling을 우선 검토합니다.
-- Production application은 thermal trend를 읽어 workload를 능동 조절합니다.
-- 최악 ambient에서 측정한 margin을 기준으로 enclosure·heatsink를 설계합니다.
-- Steady state까지 가는 long-run 측정이 sustained 성능을 드러냅니다.
+- 연속 동작하는 edge 장치의 성능은 온도가 안정된 뒤의 sustained 값으로 봅니다.
+- thermal zone의 `passive` trip은 clock throttling, `active`는 fan, `critical`은 shutdown을 부릅니다. 값은 `trip_point_*_temp`에서 millidegree Celsius로 읽습니다.
+- Jetson Orin 문서의 `gpu-thermal` 예는 active 70 °C, passive 99 °C, critical 104.5 °C입니다.
+- `nvpmodel`이 mode의 최대 주파수를 정하고, `jetson_clocks`는 그 최대값으로 clock을 고정합니다. MAXN도 TDP를 넘으면 throttling됩니다.
+- Orin의 fan은 `nvfancontrol`이 관리하므로 profile과 service로 다룹니다.
 
 다음 편은 **Jetson 가족과 최적화 stack**입니다.
 

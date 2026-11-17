@@ -115,7 +115,7 @@ bit 9:8은 구성에 따라 뜻이 바뀝니다. 4 KB·16 KB page에서 52-bit V
 
 parent 쪽 write-protect는 valid 번역을 바꾸는 일이라 TLBI가 필요합니다. 그래서 `dup_mmap()`은 복사를 마친 뒤 `flush_tlb_mm(oldmm)`으로 parent ASID의 entry를 지웁니다. TLB entry를 지우지 않으면 processor가 옛 번역을 계속 쓸 수 있으므로(Arm 가이드 8장), 이 flush가 없으면 parent의 write가 TLB에 남은 writable 번역으로 fault 없이 child와 공유하는 page에 들어갈 수 있습니다.
 
-이렇게 fork 직후 두 process는 같은 물리 page를 각자의 page table에서 read-only로 가리킵니다. 어느 쪽이든 write하면 permission fault가 나고 `do_wp_page()`로 갑니다. 그 page를 이 process만 쓰고 있으면 그대로 쓰기 가능으로 바꾸고(`wp_page_reuse`), 아니면 `wp_page_copy()`가 새 page를 할당해 내용을 복사합니다. `wp_page_copy()`는 PTE를 `ptep_clear_flush()`로 지우고 TLB를 flush한 뒤 새 PTE를 씁니다. 코드 주석은 예전처럼 새 PTE를 먼저 쓰고 flush하면 TLB마다 옛 PTE와 새 PTE가 섞이는 구간이 생긴다고 설명합니다. 위 BBM 순서입니다.
+이렇게 fork 직후 두 process는 같은 물리 page를 각자의 page table에서 read-only로 가리킵니다. 어느 쪽이든 write하면 permission fault가 나고 `do_wp_page()`로 갑니다. 그 page를 이 process만 쓰고 있으면 그대로 쓰기 가능으로 바꾸고(`wp_page_reuse`), 아니면 `wp_page_copy()`가 새 page를 할당해 내용을 복사합니다. `wp_page_copy()`는 PTE를 `ptep_clear_flush()`로 지우고 TLB를 flush한 뒤 새 PTE를 씁니다. 코드 주석은 예전처럼 새 PTE를 먼저 쓰고 flush하면 TLB마다 옛 PTE와 새 PTE가 섞이는 구간이 생긴다고 설명합니다. 이것이 앞에서 본 BBM 순서입니다.
 
 ### Page fault 처리
 
@@ -207,6 +207,46 @@ int main(int argc, char **argv) {
 - **인자를 주고 실행.** `munmap()`으로 VMA가 없어졌으므로 `SEGV_MAPERR`입니다.
 
 실제 프로그램에서는 `si_addr`를 `/proc/<pid>/maps`의 줄과 대조합니다. 그 주소를 포함한 줄이 없으면 MAPERR 쪽이고(해제한 메모리, 잘못된 포인터), 줄이 있으면 권한 칸(`r--p`처럼 r·w·x와 private `p`/shared `s`, [`proc.rst`](https://github.com/torvalds/linux/blob/v6.12/Documentation/filesystems/proc.rst))이 그 접근을 허용하지 않는 ACCERR 쪽입니다. handler를 달지 않고 process가 죽게 두면 `show_unhandled_signals`가 켜진 kernel은 `unhandled exception` 줄에 하드웨어 fault 이름(`level N translation fault`, `level N permission fault` 등)을 남깁니다([`arch/arm64/kernel/traps.c`](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/kernel/traps.c)의 `arm64_show_signal`, fault.c의 `fault_info` 표).
+
+### Debian arm64 guest에서 돌려 보기
+
+위 두 프로그램을 Debian 13 arm64 guest(커널 `6.12.116+deb13-arm64`, QEMU 11.1.3 `virt`, HVF, 4 vCPU)에서 GCC 14.2.0 `-O2`로 빌드해 실행했습니다. `minflt_read_first`는 첫 프로그램의 `p[0] = 42;` 앞에 `volatile char c = p[0];`만 넣은 변형입니다.
+
+```text
+# ./minflt
+minor faults: 1
+# ./minflt_read_first
+minor faults: 2
+# ./segv
+SEGV_ACCERR
+# ./segv x
+SEGV_MAPERR
+```
+
+본문이 커널 코드에서 따라간 결과가 그대로 나옵니다. write만 하면 fault 1개, read를 먼저 하면 zero page mapping과 COW로 2개입니다.
+
+handler 없이 죽는 경우의 커널 로그도 봤습니다. arm64 `traps.c`의 `show_unhandled_signals`는 기본값 0이고, `kernel/signal.c`가 이를 sysctl `debug.exception-trace`로 노출합니다. 이 값을 1로 두고, read-only anonymous page에 바로 write하는 프로그램과 한 번 read로 page를 채운 뒤 write하는 프로그램을 돌렸습니다.
+
+```text
+# echo 1 > /proc/sys/debug/exception-trace
+nohandler[1983]: unhandled exception: DABT (lower EL), ESR 0x0000000092000047, level 3 translation fault in nohandler[6cc,aaaae6c00000+1000]
+nohandler[1984]: unhandled exception: DABT (lower EL), ESR 0x000000009200004f, level 3 permission fault in nohandler[6cc,aaaad3510000+1000]
+```
+
+첫 줄이 위 `segv`의 인자 없는 경우와 같은 상황입니다. 하드웨어는 PTE가 없어 *translation fault*를 냈지만, 사용자에게 간 `si_code`는 VMA 검사에서 정해진 `SEGV_ACCERR`였습니다. read로 PTE를 먼저 만든 둘째 줄에서야 하드웨어 fault가 *permission fault*로 바뀝니다.
+
+부팅 로그의 ASID 줄도 확인했습니다.
+
+```text
+# journalctl -k -b | grep "ASID allocator"
+kernel: ASID allocator initialised with 256 entries
+# cat /sys/devices/system/cpu/vulnerabilities/meltdown
+Not affected
+# journalctl -k -b | grep -i -E "E0PD|isolation|kpti"
+kernel: CPU features: detected: E0PD
+```
+
+부팅 로그에 KPTI(kernel page table isolation) 줄이 없고 `CPU features: detected: E0PD`가 있어 KPTI가 꺼져 있으므로, "TLB와 ASID"의 계산대로 256은 8-bit ASID입니다. KPTI가 켜졌다면 8-bit는 128, 16-bit는 32768이 나오므로 어느 쪽이든 256이 될 수는 없습니다. 이 guest의 CPU는 Apple Silicon host를 `-cpu host`로 넘긴 것이므로, 실제 Cortex-A 보드의 값은 그 보드에서 다시 봅니다.
 
 ## 자주 보는 함정
 

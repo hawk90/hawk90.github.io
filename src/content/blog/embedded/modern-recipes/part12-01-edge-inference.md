@@ -62,7 +62,7 @@ Cloud 경로는 이 합에 업로드, 서버까지의 왕복, 서버 대기열�
 | West US | 130 ms | 3.9배 |
 | East US | 185 ms | 5.6배 |
 
-이 값은 Azure backbone 위 region 사이의 왕복이고, device에서 첫 region까지 가는 접속망 구간은 들어 있지 않습니다. 표가 보여 주는 것은 region 사이 거리만으로 쓰는 시간이고, West US·East US 행은 그 시간만으로 30 fps 간격을 네 배·여섯 배 가까이 넘습니다. 첫 질문의 경계로 보면 이 두 region은 업로드와 서버 처리를 0으로 쳐도 30 fps 제어에 실패하고, Korea South·Japan East는 남은 시간(25.3 ms·3.3 ms) 안에 업로드와 서버 처리가 들어가야 통과합니다.
+이 값은 Azure backbone 위 region 사이의 왕복이고, device에서 첫 region까지 가는 접속망 구간은 들어 있지 않습니다. 표의 값은 region 사이 거리에만 드는 시간이고, West US·East US 행은 그 시간만으로 30 fps 간격을 네 배·여섯 배 가까이 넘습니다. 첫 질문의 경계로 보면 이 두 region은 업로드와 서버 처리를 0으로 쳐도 30 fps 제어에 실패하고, Korea South·Japan East는 남은 시간(25.3 ms·3.3 ms) 안에 업로드와 서버 처리가 들어가야 통과합니다.
 
 업로드 시간은 산술로 나옵니다. 아래 대역폭 표의 1080p NV12 frame 하나는 3,110,400 B = 24,883,200 bit라, uplink 속도별 전송 시간은 다음과 같습니다(속도는 계산용 가정값입니다).
 
@@ -121,11 +121,11 @@ result = cloud_api(image) if online else local_model(image)
 
 ## 하드웨어 등급 — 공개 사양으로 본 범위
 
-아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. 출처에 값이 없는 칸은 `TBD`입니다. Jetson 계열 전체 라인업과 세대 비교는 [12-09 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
+아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. Jetson 계열 전체 라인업과 세대 비교는 [12-09 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
 
 | 예시 (등급) | 메모리 | 전력 (공식 표기) |
 |---|---|---|
-| Alif Ensemble E7 (microNPU를 넣은 MCU) | MRAM 최대 5.5 MB, SRAM 최대 13.5 MB | NPU 값 TBD |
+| Alif Ensemble E7 (microNPU를 넣은 MCU) | MRAM 최대 5.5 MB, SRAM 최대 13.5 MB | NPU 전력은 페이지에 없음 |
 | Raspberry Pi 5 (SBC) | 1·2·4·8·16 GB LPDDR4X-4267 | 입력 5 V/5 A |
 | Raspberry Pi AI HAT+ (SBC + 가속기) | 외부 메모리 불필요 (Hailo 표기) | 칩 typical 2.5 W / 1.5 W |
 | Jetson Orin Nano 8GB, Super (edge GPU) | 8 GB 128-bit LPDDR5, 102 GB/s | 7 W - 15 W - 25 W |
@@ -133,7 +133,7 @@ result = cloud_api(image) if online else local_model(image)
 
 - Alif 페이지의 전력값은 STOP 모드 1.7 µA와 고효율 Cortex-M55 동적 전류 27 µA/MHz이고, NPU 값이 아닙니다.
 - Raspberry Pi 5의 값은 USB-C Power Delivery 전원 입력 규격입니다.
-- AI HAT+의 전력은 가속기 칩 값이고(Hailo-8 2.5 W, Hailo-8L 1.5 W), HAT 보드 전체 값은 TBD입니다.
+- AI HAT+의 전력은 가속기 칩 값이고(Hailo-8 2.5 W, Hailo-8L 1.5 W), HAT 보드 전체의 전력은 출처에 없습니다.
 - Ethos-U55는 칩이 아니라 IP라 메모리·전력 행을 두지 않았습니다. E7 행이 그 IP 두 개를 넣은 칩입니다.
 
 | 예시 | 공개된 연산 성능 |
@@ -165,7 +165,7 @@ Alif E7 페이지는 두 NPU의 GOPS를 공개하고, NPU clock은 적지 않습
 
 페이지의 core clock을 그대로 넣으면 2 × 256 × 400 MHz = 204.8 GOPS, 2 × 128 × 160 MHz = 40.96 GOPS입니다.
 
-256 MAC NPU의 공개값은 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞습니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 어느 core clock으로도 이 식에서 나오지 않고, 페이지만으로는 그 NPU의 clock이 얼마인지 알 수 없습니다. 확실한 것은 MAC 수 차이가 2배인데 공개 성능 차이는 204 ÷ 46 ≈ 4.4배라는 것입니다. 같은 IP를 MAC 수만 보고 비교하면 이 차이를 놓칩니다.
+256 MAC NPU의 공개값은 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞습니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 어느 core clock으로도 이 식에서 나오지 않고, 페이지만으로는 그 NPU의 clock이 얼마인지 알 수 없습니다. 확실한 점은 MAC 수 차이가 2배인데 공개 성능 차이는 204 ÷ 46 ≈ 4.4배라는 점입니다. 같은 IP를 MAC 수만 보고 비교하면 이 차이를 놓칩니다.
 
 같은 단위로 놓으면 204 GOPS = 0.204 TOPS입니다. Alif 페이지에는 sparse·dense 표기가 없습니다. 이 글은 204가 위 식으로 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞는다는 점에서 dense 값으로 *추정*하고 비교합니다. 그 추정으로 Orin Nano 8GB(Super)의 GPU dense INT8 33 TOPS와 견주면 33 ÷ 0.204 ≈ 162배입니다. MCU 등급은 "더 느린 Jetson"이 아니라, 모델 크기와 입력 크기를 그 범위에 맞춰 줄여야 하는 다른 등급입니다.
 
@@ -247,7 +247,21 @@ nm release.o
 nm debug.o
 ```
 
-출하 빌드(`release.o`)의 symbol 목록에 `frame_dump`나 `fopen`·`fwrite`가 있으면 frame dump 코드가 들어간 것입니다. 이 차이를 사람이 매번 보지 않도록, 출하 산출물에 대고 도는 검사를 하나 둡니다.
+Debian 13 arm64 guest의 clang 19.1.7로 위 코드를 `result.c`로 저장해 두 빌드를 만든 결과입니다.
+
+```text
+$ nm release.o
+0000000000000000 T on_frame
+$ nm debug.o
+                 U fclose
+                 U fopen
+0000000000000000 T frame_dump
+                 U fwrite
+0000000000000080 T on_frame
+                 U snprintf
+```
+
+출하 빌드(`release.o`)의 symbol 목록에 `frame_dump`나 `fopen`·`fwrite`가 있으면 frame dump 코드가 들어간 것입니다. 같은 guest에서 `offsetof`·`sizeof`로 앞 문단의 셈도 확인했습니다. `t_ns`의 offset은 8, 구조체 크기는 24이고, `uint16_t` 하나를 더해도 24, `uint8_t thumb[16]`을 더하면 40이었습니다. 이 차이를 사람이 매번 보지 않도록, 출하 산출물에 대고 도는 검사를 하나 둡니다.
 
 ```sh
 #!/bin/sh
@@ -258,7 +272,18 @@ fi
 echo "OK: no frame dump in $1"
 ```
 
-이 검사는 `frame_dump` symbol이나 `.nv12` 파일 이름 문자열이 있으면 exit 1로 실패하고, 없으면 exit 0으로 통과합니다. 출하 빌드의 CI 단계에 넣으면, frame dump 옵션이 켜진 채 출하되는 경우 빌드가 실패합니다. 표의 나머지 두 줄(수집 경로 승인, 원격 뷰어 제거)은 코드보다 운영 절차에 속하므로 여기서 다루지 않습니다.
+이 검사는 `frame_dump` symbol이나 `.nv12` 파일 이름 문자열이 있으면 exit 1로 실패하고, 없으면 exit 0으로 통과합니다. 위 두 object에 돌린 결과입니다.
+
+```text
+$ sh check.sh release.o; echo rc=$?
+OK: no frame dump in release.o
+rc=0
+$ sh check.sh debug.o; echo rc=$?
+FAIL: frame dump code in debug.o
+rc=1
+```
+
+출하 빌드의 CI 단계에 넣으면, frame dump 옵션이 켜진 채 출하되는 경우 빌드가 실패합니다. 표의 나머지 두 줄(수집 경로 승인, 원격 뷰어 제거)은 코드보다 운영 절차에 속하므로 여기서 다루지 않습니다.
 
 ### 끊긴 동안의 결과 — store-and-forward
 
@@ -333,7 +358,26 @@ int main(void) {
 }
 ```
 
-`main`의 마지막 줄은 만든 인원수(`produced`), 보낸 인원수(`sent`), 합친 횟수(`folded`)를 찍습니다. `folded`가 0보다 크면서 `produced`와 `sent`의 두 합계가 같으면, 버퍼가 넘쳐도 인원수를 잃지 않았다는 뜻입니다. 받는 쪽은 seq가 건너뛴 것을 보고, 건너뛴 뒤의 첫 항목이 그 구간의 합이라는 것을 압니다. 한계는 두 가지입니다.
+같은 guest에서 `clang -std=c11 -O2 -Wall -Wextra sf.c -o sf && ./sf`로 돌린 출력입니다.
+
+```text
+  send seq  1  in  2 out  1
+  send seq  2  in  3 out  1
+  offline, queued 1
+  offline, queued 2
+  offline, queued 3
+  offline, queued 4
+  offline, queued 4
+  offline, queued 4
+  send seq  6  in  7 out  4
+  send seq  7  in  2 out  1
+  send seq  8  in  3 out  1
+  send seq  9  in  1 out  1
+  send seq 10  in  2 out  1
+produced in 20 out 10 / sent in 20 out 10 / folded 3
+```
+
+`main`의 마지막 줄은 만든 인원수(`produced`), 보낸 인원수(`sent`), 합친 횟수(`folded`)를 찍습니다. 끊긴 동안(seq 3~8) 버퍼가 4칸에서 세 번 넘쳤고, seq 3·4·5의 값은 seq 6에 합쳐져 `in 7 out 4`로 나갔습니다. `folded`가 0보다 크면서 `produced`와 `sent`의 두 합계가 같으면, 버퍼가 넘쳐도 인원수를 잃지 않았다는 뜻입니다. 받는 쪽은 seq가 건너뛴 것을 보고, 건너뛴 뒤의 첫 항목이 그 구간의 합이라는 것을 압니다. 한계는 두 가지입니다.
 
 - 이 고리 버퍼는 RAM에 있어서, 끊긴 동안 전원이 꺼지면 쌓인 결과가 사라집니다. 전원 차단까지 견뎌야 하면 비휘발성 저장소에 둡니다.
 - 합친 값이 `uint16_t`를 넘으면 `add_sat`가 65,535에서 멈추므로, 그 뒤로는 합계도 정확하지 않습니다. 오래 끊길 수 있는 설치 환경이면 필드 폭과 버퍼 크기를 그 기간에 맞춰 정합니다.
@@ -351,7 +395,7 @@ AGX Orin의 275 TOPS는 sparse이고 GPU·DLA 합이며, dense GPU 칸은 85 TOP
 ## 정리
 
 - 추론을 어디서 할지는 *추론 하나 단위*로, frame 간격·데이터 크기·privacy·오프라인 네 질문으로 정합니다. 출입 카운터는 검출을 edge에, 집계를 cloud에 둡니다. 그다음 데이터량(비압축 카메라 1대 하루 약 16.1 TB 대 결과 약 2.07 MB), 전력, 모델 갱신 경로를 봅니다.
-- 첫 두 질문은 숫자로 가릅니다. 30 fps는 33.3 ms, 60 fps는 16.7 ms가 처리량 예산이고, Azure 공개값으로 Korea Central에서 West US region까지 P50 왕복만 130 ms라 이 거리 하나가 30 fps 간격 약 3.9개입니다. 1080p60 NV12 카메라 1대는 비압축으로 약 1.49 Gbit/s, 8대는 약 1.49 GB/s이고, 비압축 1080p frame 한 장은 1 Gbit/s uplink에서도 약 24.9 ms가 걸립니다.
+- 첫 두 질문은 숫자로 가릅니다. 30 fps는 33.3 ms, 60 fps는 16.7 ms가 처리량 예산이고, Azure 공개값으로 Korea Central에서 West US region까지 P50 왕복만 130 ms라 이 거리만으로 30 fps 간격의 약 3.9배입니다. 1080p60 NV12 카메라 1대는 비압축으로 약 1.49 Gbit/s, 8대는 약 1.49 GB/s이고, 비압축 1080p frame 한 장은 1 Gbit/s uplink에서도 약 24.9 ms가 걸립니다.
 - 끊긴 동안의 결과는 store-and-forward로 쌓고, 버퍼가 차면 버리지 말고 합쳐서 합계를 지킵니다.
 - GDPR 데이터 최소화(제5조 1항 (c))와 기본값에 의한 보호(제25조 2항)는 원본을 밖으로 내보내지 않는 edge 구조와 맞닿아 있습니다. 코드에서는 결과 구조체에 픽셀 필드를 두지 않고, frame dump를 `FRAME_DUMP` 빌드에만 넣고, 출하 산출물에 `frame_dump` symbol이 없는지를 검사합니다.
 - 공개 성능은 sparse·dense와 MAC × clock을 맞춰 읽습니다. Alif E7의 256 MAC Ethos-U55 204 GOPS는 400 MHz에서 모든 MAC이 일하는 값과 맞아서, 이 글은 dense 값으로 추정했습니다(Alif는 sparse·dense를 표기하지 않음). 그 추정으로 Orin Nano 8GB의 dense GPU 33 TOPS와 약 162배 차이입니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 core clock으로는 같은 식에서 나오지 않습니다.
@@ -359,7 +403,7 @@ AGX Orin의 275 TOPS는 sparse이고 GPU·DLA 합이며, dense GPU 칸은 85 TOP
 
 ### 수정 이력
 
-- 2026-10-11: 하드웨어 표·EP 목록·TensorRT sparsity 조건을 각 1차 자료와 다시 대조하고 확인 날짜를 붙였습니다. ONNX Runtime IoT/Edge/Mobile 열에 Qualcomm QNN이 있다고 적었던 것을 바로잡았습니다(QNN은 GPU 열에 있습니다). Pipeline buffer 수를 상태 나열로 다시 셌습니다(이전 판의 "6개 이상"을 5개로 정정). 128 MAC NPU를 약 180 MHz로 돈다고 적었던 역산을, 페이지의 core clock과 나란히 놓고 46 GOPS가 식과 맞지 않는다는 서술로 바꿨습니다. Alif 값을 dense로 본 것이 추정임을 밝히고, 배율을 162배로 고쳤습니다. 결과 구조체·`FRAME_DUMP`·출하 빌드 검사와 store-and-forward 예제를 더했습니다.
+- 2026-10-11: 하드웨어 표·EP 목록·TensorRT sparsity 조건을 각 1차 자료와 다시 대조하고 확인 날짜를 붙였습니다. ONNX Runtime IoT/Edge/Mobile 열에 Qualcomm QNN이 있다고 적었던 것을 바로잡았습니다(QNN은 GPU 열에 있습니다). Pipeline buffer 수를 상태 나열로 다시 셌습니다(5개). 128 MAC NPU를 약 180 MHz로 돈다고 적었던 역산을, 페이지의 core clock과 나란히 놓고 46 GOPS가 식과 맞지 않는다는 서술로 바꿨습니다. Alif 값을 dense로 본 것이 추정임을 밝히고, 배율을 162배로 고쳤습니다. 결과 구조체·`FRAME_DUMP`·출하 빌드 검사와 store-and-forward 예제를 더했습니다.
 - 2026-10-11 (2차): 개발용 노트북에서 실행한 출력과 그 환경 표를 모두 지우고, 처리량·지연은 코드의 설계값과 구조로 셈한 값으로 바꿨습니다. 같은 이유로 NEON 정규화 비교 절을 지웠습니다(SIMD는 [8-07 SIMD](/blog/embedded/modern-recipes/part8-07-simd)가 다룹니다). 다시 열어 보지 못한 Ethos-U55 TRM 기반 서술(AXI manager 구성, clock 입력)을 지웠습니다. 결과 구조체 크기를 AAPCS64 규칙으로 셈했습니다. Raspberry Pi·Hailo 출처를 product brief로 바꾸고(Raspberry Pi 두 문서는 발행 월을 표기합니다), Vela·TFLM 링크를 태그·커밋에 고정했습니다.
 - 2026-10-11 (3차): stage latency 측정, 3-stage pipeline 코드, 처리량·지연 셈, buffer 수 절을 다음 편 [12-02 Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)으로 옮겼습니다. 이 글은 추론을 어디서 할지를 정하는 내용만 남깁니다.
 

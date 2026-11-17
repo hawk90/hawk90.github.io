@@ -11,298 +11,131 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NPU는 MAC array·vector unit·memory hierarchy를 조합한 workload-specific accelerator입니다."** 전력당 throughput은 architecture·model·precision·memory traffic으로 비교해야 합니다.
+> **"NPU는 MAC array·vector unit·memory hierarchy를 조합한 workload-specific accelerator입니다."** 같은 모델이라도 MAC 수, SRAM 배치, 지원 operator에 따라 결과가 달라지므로, 비교는 vendor 컴파일러가 내는 보고서와 실측으로 합니다.
 
 ## 어떤 상황에서 쓰나
 
-스마트폰 (Apple Neural Engine, Qualcomm Hexagon, Samsung NPU), 스마트 카메라, 로봇, AR/VR headset, 차량 ADAS, edge AI 박스 등 *저전력 inference*가 필요한 모든 곳에서 NPU가 표준입니다.
+스마트폰, 스마트 카메라, 로봇, 차량, edge AI 박스처럼 저전력으로 신경망 추론을 해야 하는 곳입니다. CPU와 NPU의 latency·전력 차이는 model·runtime·clock·memory path에 따라 다르므로, 이 글은 수치를 외우는 대신 Arm Ethos-U의 공개 컴파일러(Vela)로 같은 모델을 여러 NPU 구성에 넣어 보는 방법을 보입니다.
 
-CPU와 NPU의 latency·전력 차이는 model·runtime·clock·memory path로 측정합니다. battery 환경의 always-on inference도 NPU 외 여러 구현을 비교할 수 있습니다.
+이 글의 실행은 Debian 13 arm64 guest의 Python venv에 설치한 `ethos-u-vela` 5.2.0으로 했고, 모델은 TensorFlow Lite Micro 저장소의 `person_detect.tflite`(96×96 사람 검출, INT8, sha256 `808cfdfc…`)입니다.
 
 ## 핵심 개념 — MAC Array
 
-Neural network은 *대부분이 MAC*입니다.
+신경망 연산의 대부분은 곱셈-누적(MAC)입니다. convolution은 weight와 입력 window를 곱해 채널·공간 방향으로 더하고, fully connected는 weight 벡터와 입력 벡터의 내적입니다. 아래 Vela 실행에서도 person detection 모델 한 번의 추론은 7,160,196 MAC으로 보고됐습니다.
 
-```text
-Convolution:    sum(w_ij × x_ij) over i, j, channels
-Fully connected: sum(w_i × x_i) over i
+NPU는 MAC unit을 격자로 배치해 cycle마다 여러 MAC을 동시에 굴립니다. 128 × 128 격자라면 cycle당 16,384 MAC입니다. 아래 Ethos-U 구성 이름의 숫자가 바로 이 cycle당 MAC 수입니다.
+
+## Arm Ethos-U — Cortex-M과 짝을 이루는 NPU
+
+Vela 5.2.0의 `architecture_features.py`는 지원하는 구성을 이름으로 정의합니다. 이름 끝의 숫자가 cycle당 MAC 수입니다.
+
+| 계열 | Vela가 받는 구성 |
+| --- | --- |
+| Ethos-U55 | `ethos-u55-32`, `-64`, `-128`, `-256` |
+| Ethos-U65 | `ethos-u65-256`, `-512` (512는 256 MAC 코어 2개로 정의) |
+| Ethos-U85 | `ethos-u85-128`, `-256`, `-512`, `-1024`, `-2048` |
+
+peak 연산량은 MAC 수 × 2(곱셈과 덧셈) × clock입니다. Vela의 기본 U55 system 구성(`Ethos_U55_High_End_Embedded`)은 core clock을 500 MHz로 두므로, `ethos-u55-256`이면 256 × 2 × 500 MHz = 256 GOPS입니다. 실제 칩의 clock과 구성은 칩 벤더가 정하므로, 제품의 TOPS는 그 칩의 데이터시트에서 봅니다([12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)의 Alif E7 예).
+
+아래 Vela 실행에서 U55의 기본 메모리 모드는 `Shared_Sram`이었고, SRAM 72.73 KiB와 off-chip flash 228 KiB를 함께 썼습니다. 실행 쪽은 TFLite Micro가 맡습니다. Vela가 NPU로 보낼 부분을 custom operator 하나로 바꾸고, TFLite Micro가 그 operator를 Ethos-U driver로 넘깁니다([12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)에서 인용한 TFLite Micro README).
+
+## Vela로 같은 모델을 여러 구성에 넣기
+
+Vela는 INT8 TFLite 모델을 받아 NPU가 실행할 부분을 custom operator로 바꾸고, 메모리 사용량과 성능 추정을 보고합니다.
+
+```bash
+python3 -m venv venv && . venv/bin/activate
+pip install ethos-u-vela            # 5.2.0
+for c in ethos-u55-64 ethos-u55-128 ethos-u55-256 ethos-u65-256; do
+    vela --accelerator-config $c --output-dir out-$c person_detect.tflite
+done
 ```
 
-NPU는 *수백~수천 개의 MAC unit*을 격자로 배치하고 cycle마다 한 번씩 굴립니다.
-
-TPU 계열의 systolic array는 weight를 격자에 미리 load해 둡니다. Input은 한쪽 끝에서 흘러 들어와 격자를 통과하고, 각 cell은 자기 자리에서 MAC 연산을 한 뒤 결과를 옆 cell로 넘깁니다.
+`ethos-u55-128`의 요약 출력 일부입니다.
 
 ```text
-  X X X X
-  X X X X     ← 16 MAC 격자
-  X X X X     매 cycle 16 × 1 = 16 MAC
-  X X X X     128 × 128 array면 16384 MAC/cycle
+Accelerator configuration               Ethos_U55_128
+System configuration             Ethos_U55_High_End_Embedded
+Memory mode                               Shared_Sram
+Total SRAM used                                 72.73 KiB
+Total Off-chip Flash used                      228.27 KiB
+CPU operators = 0 (0.0%)
+NPU operators = 57 (100.0%)
+Neural network macs                           7160196 MACs/batch
 ```
 
-## Arm Ethos — Cortex-M 짝꿍 NPU
+`out-*/*_summary_*.csv`에서 뽑은 구성별 추정치입니다.
 
-| NPU | MAC | 성능 | 결합 |
-|-----|-----|------|------|
-| Ethos-U55 | ~256 | 32-512 GOPS | Cortex-M |
-| Ethos-U65 | ~512 | 1 TOPS | Cortex-M |
-| Ethos-U85 | ~2048 | 4 TOPS | Cortex-M |
-| Ethos-N78 | 대형 | ~10 TOPS | Cortex-A |
+| 구성 | core clock | NPU cycle | 전체 cycle | 추정 추론 시간 |
+| --- | ---: | ---: | ---: | ---: |
+| `ethos-u55-64` | 500 MHz | 369,563 | 457,984 | 0.916 ms |
+| `ethos-u55-128` | 500 MHz | 204,284 | 353,931 | 0.708 ms |
+| `ethos-u55-256` | 500 MHz | 127,348 | 299,767 | 0.600 ms |
+| `ethos-u65-256` | 1 GHz | 121,810 | 125,147 | 0.125 ms |
 
-Ethos-U55가 Cortex-M55와 결합한 시스템:
+MAC 수를 64에서 256으로 네 배 늘리면 NPU cycle은 약 2.9분의 1로 줄지만, 전체 cycle은 1.5분의 1로만 줄었습니다. Vela의 전체 cycle은 NPU 연산 cycle에 메모리 접근 cycle 추정을 더한 값이므로, MAC을 늘려 줄어드는 것은 앞쪽뿐입니다. U65는 Vela가 고른 system 구성 `Ethos_U65_Client_Server`가 `Dedicated_Sram_384KB` 메모리 모드와 1 GHz clock이라 같은 모델에서 전체 cycle이 NPU cycle에 가깝습니다. 이 값들은 Vela의 모델 기반 추정이고, 실제 보드에서 잰 값이 아닙니다.
 
-| 블록 | 역할 | 연결 |
+모델의 operator 57개가 모두 NPU로 갔다는 줄(`CPU operators = 0`)도 중요합니다. 지원되지 않는 operator가 있으면 그 수가 여기에 나오고, 그 부분은 Cortex-M에서 돕니다.
+
+## 다른 NPU 계열
+
+공개 자료로 확인한 수치만 적습니다.
+
+| 플랫폼 | 공개 수치 | 출처 |
 | --- | --- | --- |
-| Cortex-M55 | kernel dispatch, control | Ethos-U55 (control), AXI |
-| Ethos-U55 | MAC array, NN inference | Cortex-M55 (control), AXI |
-| AXI bus | shared interconnect | DDR / SRAM |
-| DDR / SRAM | weight·activation 저장 | M55·U55 모두 접근 |
+| Apple M2 Neural Engine | "up to 15.8 trillion operations per second" | Apple Newsroom, 2022-06 M2 발표 |
+| NVIDIA Jetson AGX Orin 64GB | 275 TOPS(sparse), GPU 170 / DLA 105 TOPS(sparse) | NVIDIA Jetson Orin 비교표([12-01](/blog/embedded/modern-recipes/part12-01-edge-inference) 참고) |
 
-CPU가 kernel을 dispatch, NPU가 MAC을 처리. MCU급 power budget(수십 mW)에서 1 TOPS.
+Qualcomm Hexagon, Google Edge TPU 등의 TOPS·전력 수치는 이번에 연 공개 자료에서 확인하지 못해 싣지 않았습니다. Apple의 A17 Pro 발표 자료는 Neural Engine이 "up to 2x faster"라고만 적어 TOPS 값은 쓰지 않았습니다.
 
-## Qualcomm Hexagon DSP
+각 계열의 프로그래밍 진입점은 다음과 같습니다.
 
-```text
-Hexagon DSP (v66, v68):
-  HVX (Hexagon Vector eXtensions): 1024-bit SIMD
-  HMX (Hexagon Matrix eXtensions): MAC array
-  ~10 TOPS @ 1.5W (Snapdragon 8 Gen 2)
-```
-
-Hexagon은 *프로그래밍 가능한 DSP*. NPU instruction set이 정의되어 있어 SDK로 직접 짤 수 있습니다.
-
-```c
-// Hexagon SDK
-HVX_Vector va = *(HVX_Vector*)a;
-HVX_Vector vb = *(HVX_Vector*)b;
-HVX_Vector vc = Q6_Vw_vadd_VwVw(va, vb);   /* 32 × 32-bit add 한 cycle */
-```
-
-## Apple Neural Engine
-
-```text
-ANE (A17 Pro, M2):
-  ~15.8 TOPS (M2), 35 TOPS INT8 (A17 Pro)
-  16 cores (compute units)
-  Core ML로만 access
-```
-
-Apple은 ANE의 ISA를 공개하지 않습니다. Core ML framework가 *유일한 진입점*입니다.
-
-```swift
-let model = try MyModel(configuration: MLModelConfiguration())
-let input = MyModelInput(image: cgImage)
-let result = try model.prediction(input: input)
-```
-
-`MLModelConfiguration().computeUnits = .all`이면 CPU/GPU/ANE 중 자동 선택.
-
-## Google Edge TPU (Coral)
-
-```text
-Edge TPU:
-  4 TOPS @ 2W
-  INT8 only
-  TensorFlow Lite 전용
-  USB stick, M.2, dev board 등 form factor
-```
-
-```python
-from pycoral.utils import edgetpu
-from pycoral.adapters import common
-
-interpreter = edgetpu.make_interpreter('model_edgetpu.tflite')
-interpreter.allocate_tensors()
-common.set_input(interpreter, image)
-interpreter.invoke()
-```
-
-## NVIDIA Jetson — GPU + DLA
-
-Jetson은 *NPU가 아닌 GPU + DLA(Deep Learning Accelerator)* 조합:
-
-```text
-Orin AGX:
-  CUDA cores: 2048
-  Tensor cores: 64
-  DLA: 2 cores, 정수 가속
-```
-
-GPU는 flexible (CUDA, training 가능), DLA는 INT8 inference 전용 (저전력).
+| 플랫폼 | 진입점 |
+|--------|-----------|
+| Arm Ethos-U | Vela로 변환한 모델 → TFLite Micro + Ethos-U custom operator |
+| Apple Neural Engine | Core ML |
+| NVIDIA DLA | TensorRT ([12-05](/blog/embedded/modern-recipes/part12-05-tensorrt)) |
 
 ## Memory Hierarchy
 
-```text
-NPU memory:
-  L1 / activation buffer:   몇 KB~수십 KB, register file
-  L2 / weight buffer:       100 KB~수 MB, SRAM
-  L3 / scratchpad:          수 MB
-  DDR:                      ~ GB, external
-
-이상적: weight·activation이 L1/L2에 들어가서 DDR access 최소화
-현실:   큰 model은 layer마다 DDR access 필요
-```
-
-NPU 효율은 *MAC array 활용률 × memory bandwidth 충족*. DDR이 못 따라가면 MAC이 idle.
-
-```text
-Roofline:
-  arithmetic intensity (MAC/byte) vs throughput
-
-  Memory-bound:  small layer, DDR bandwidth 한계
-  Compute-bound: large layer, MAC 한계
-```
-
-INT8 conv가 보통 compute-bound, FC layer가 memory-bound.
+NPU의 MAC array는 데이터가 제때 오지 않으면 쉽니다. 위 Vela 결과에서 MAC을 네 배로 늘려도 전체 cycle이 1.5분의 1로만 준 것이 그 예이고, 같은 모델을 전용 SRAM 모드로 돌린 U65 구성은 전체 cycle이 NPU cycle에 거의 붙었습니다.
 
 ## Quantization — INT8
 
-NPU는 *대부분 INT8*. FP32 → INT8로 4× memory 감소, 2~4× throughput 증가.
+TFLite(LiteRT) quantization 명세는 INT8 값과 실수의 관계를 다음 식으로 정의합니다.
 
 ```text
-quantize:   q = round((x - zero_point) / scale)
-dequantize: x = (q + zero_point) × scale
-
-per-tensor: scale 한 개
-per-channel: scale이 채널마다
+real_value = (int8_value - zero_point) × scale
 ```
 
-```python
-import tensorflow as tf
-
-converter = tf.lite.TFLiteConverter.from_saved_model('model')
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
-converter.representative_dataset = rep_data
-converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-converter.inference_input_type = tf.int8
-converter.inference_output_type = tf.int8
-tflite_model = converter.convert()
-```
-
-Calibration data는 model·data distribution에 맞춰 정하고 accuracy 영향은 representative set에서 측정합니다.
-
-## Power vs Performance
-
-| 플랫폼 | TOPS | 전력 | TOPS/W |
-|--------|------|------|--------|
-| Cortex-M (CMSIS-NN) | 0.001 | 0.001 | 1 |
-| Ethos-U55 | 0.5 | 0.05 | 10 |
-| Hexagon HMX | 10 | 1.5 | 6.7 |
-| Edge TPU | 4 | 2 | 2 |
-| Apple ANE M2 | 15.8 | ~3 | ~5 |
-| Jetson Orin GPU | 275 | 50 | 5.5 |
-| Jetson Orin DLA | 105 | ~20 | 5.3 |
-| A100 GPU | 624 | 400 | 1.6 |
-
-작은 NPU일수록 TOPS/W 효율이 좋습니다. Cloud GPU는 절대 throughput 크지만 효율은 낮습니다.
-
-## NPU Programming 인터페이스
-
-| 플랫폼 | 인터페이스 |
-|--------|-----------|
-| Arm Ethos | Vela compiler → TFLite Micro + Ethos delegate |
-| Qualcomm Hexagon | SNPE SDK, QNN SDK |
-| Apple ANE | Core ML (모델 변환 후) |
-| Google Edge TPU | `edgetpu_compiler` → TFLite |
-| NVIDIA DLA | TensorRT (with kDLA flag) |
-
-대부분 *모델 → 컴파일러 → device-specific binary* 흐름. CPU instruction이 직접 노출되지 않습니다.
-
-## Ethos-U55 + Cortex-M55 예
-
-```python
-# Vela로 TFLite 모델을 Ethos-U binary로 변환
-vela model.tflite --config vela.ini --system-config Ethos_U55_High_End_Embedded
-# → model_vela.tflite 생성
-
-# 또는 명령줄
-vela --output-dir out model.tflite --accelerator-config ethos-u55-256
-```
-
-```c
-// Cortex-M55 측 코드 (TFLite Micro + Ethos delegate)
-#include "tensorflow/lite/micro/all_ops_resolver.h"
-
-static const tflite::Model *model = tflite::GetModel(model_vela_tflite);
-tflite::MicroAllOpsResolver resolver;
-tflite::MicroInterpreter interp(model, resolver, tensor_arena, ARENA_SIZE);
-
-interp.AllocateTensors();
-copy_input_to(interp.input(0));
-interp.Invoke();
-read_output(interp.output(0));
-```
-
-CPU는 dispatch만, NPU가 conv를 처리.
-
-## 사례 — Person Detection on STM32H747 + Ethos-U55
-
-```text
-Model: MobileNet v1 0.25 96×96
-Input: 96×96×3 grayscale
-Operations: ~7 MOPS
-
-CPU only (Cortex-M7):  ~50 ms inference, 200 mW
-With Ethos-U55:        ~6 ms inference, 80 mW
-```
-
-8배 빠르고 전력 1/3. Always-on person detection이 가능해집니다.
+같은 명세는 weight를 per-axis(Conv의 per-channel) 또는 per-tensor로, zero-point를 0으로 두고, activation은 per-tensor·asymmetric으로 둡니다. 정의를 뒤집으면 `q = round(x / scale) + zero_point`입니다. 양자화의 자세한 절차와 실행 예는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)에서 다룹니다.
 
 ## 자주 보는 함정
 
-> 모든 layer가 NPU에서 돌아간다는 가정
+> ⚠️ 모든 layer가 NPU에서 돈다는 가정
 
-Custom activation처럼 지원되지 않는 op가 하나라도 끼면 그 layer는 CPU로 fallback합니다. 이렇게 되면 NPU와 CPU 사이를 오가는 데이터 이동 비용 때문에 가속 자체가 무의미해집니다. Vela report로 *어느 layer가 fallback*인지 확인하고, 모델을 NPU-friendly하게 재설계합니다.
+지원되지 않는 operator가 있으면 그 부분은 host CPU로 갑니다. Vela 요약의 `CPU operators` 줄로 확인합니다. 위 모델은 0개였습니다.
 
-> Memory size 부족
+> ⚠️ MAC 수로 성능을 추정
 
-```text
-Ethos-U55 SRAM: 200 KB
-Model activation: 1 MB → DDR access 빈번 → 효율 50%
-```
+위 표처럼 MAC을 네 배로 늘려도 전체 cycle은 1.5분의 1로만 줄었습니다. 메모리 구성(SRAM 크기, flash 사용 여부)까지 같은 조건에서 비교합니다.
 
-작은 모델 (MobileNet, EfficientNet-Lite) 선택. 또는 NPU의 SRAM 옵션이 큰 chip.
+> ⚠️ 추정치를 측정치로 사용
 
-> INT8 accuracy 손실 무시
+Vela의 cycle·추론 시간은 성능 모델의 추정입니다. 실제 칩의 clock, 메모리 wait state, host CPU 부분이 더해지므로 보드에서 [12-02](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)의 방법으로 다시 잽니다.
 
-```text
-FP32 model:  ImageNet top-1 73%
-INT8 model:  top-1 70%   ← 3% 손실
-```
+> ⚠️ 양자화 공식을 틀리게 구현
 
-Quantization-aware training (QAT)로 줄일 수 있음. Post-training quantization (PTQ)는 빠르지만 손실 큼.
-
-> NPU TOPS가 곧 application throughput
-
-```text
-NPU peak: 10 TOPS
-Model:    1 GOPS (1 frame)
-Theoretical: 10000 fps
-
-Real:     200 fps (5%)
-```
-
-Memory bandwidth, kernel launch overhead, pre/post processing이 제약. Peak는 marketing.
-
-> Per-tensor vs per-channel quantization
-
-Per-tensor는 더 단순하지만 accuracy 손실 크고, per-channel은 정확하지만 hardware support 필요. NPU가 지원하는지 확인.
-
-> Batch size 1 가정
-
-Edge는 보통 batch=1. NPU 효율이 batch=1에서 떨어집니다. Multi-frame batching이 가능하면 8 frame batch로 throughput 2~3배 늘림.
+위 정의(`(q - zero_point) × scale`)와 부호가 다른 식으로 전처리를 짜면 입력이 한쪽으로 치우칩니다. 모델의 input tensor가 가진 scale·zero_point를 그대로 씁니다.
 
 ## 정리
 
-- NPU = MAC array + memory hierarchy + INT8 가속.
-- Systolic array가 핵심 패턴. 매 cycle 수백~수천 MAC.
-- Arm Ethos (Cortex-M 짝), Qualcomm Hexagon (DSP+HMX), Apple ANE, Google Edge TPU, NVIDIA DLA가 대표.
-- TOPS/W 효율은 작은 NPU가 cloud GPU보다 좋습니다.
-- INT8 quantization이 표준. PTQ는 빠르지만 손실, QAT는 정확하지만 학습 필요.
-- Memory bandwidth와 MAC 활용률 둘 다 챙겨야 효율.
-- Unsupported op는 CPU fallback. 모델을 NPU-friendly하게.
-- Vendor SDK (Vela, SNPE, Core ML, edgetpu_compiler) 거쳐 binary 생성.
+- NPU의 핵심은 MAC array와 그것을 먹여 살리는 memory hierarchy입니다.
+- Ethos-U55는 Vela 기준 32~256 MAC/cycle 구성이고, peak는 MAC × 2 × clock입니다.
+- 같은 person detection 모델에서 U55의 MAC을 64→256으로 늘리면 NPU cycle은 2.9분의 1, 전체 cycle은 1.5분의 1로 줄었습니다(Vela 추정).
+- INT8의 실수 값은 `(q - zero_point) × scale`입니다.
 
-다음 편은 **TFLite Micro**입니다.
+다음 편은 **Quantization**입니다.
 
 ## 관련 항목
 

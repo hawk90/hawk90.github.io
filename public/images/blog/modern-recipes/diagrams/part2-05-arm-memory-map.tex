@@ -18,15 +18,15 @@
 ]
 
 % Memory regions (top to bottom = high to low addresses)
-\node[ppb] (r6) at (0, 6.5) {Private Peripheral Bus (PPB)\\[1pt]\scriptsize SCB, NVIC, DWT, ITM};
-\node[dev] (r5) at (0, 5.0) {External device (1 GB)\\[1pt]\scriptsize strongly-ordered};
-\node[ram] (r4) at (0, 3.5) {External RAM (1 GB)\\[1pt]\scriptsize normal, non-shareable};
-\node[per] (r3) at (0, 2.0) {Peripheral (0.5 GB)\\[1pt]\scriptsize device};
-\node[sram] (r2) at (0, 0.5) {SRAM (0.5 GB)\\[1pt]\scriptsize normal, shareable (bitband 0x22xxxxxx)};
-\node[code] (r1) at (0, -1.0) {Code (0.5 GB)\\[1pt]\scriptsize normal, executable (bitband 0x22xxxxxx 가능)};
+\node[ppb] (r6) at (0, 6.5) {Private Peripheral Bus (PPB)\\[1pt]\scriptsize strongly-ordered, XN: SCB, NVIC, DWT, ITM};
+\node[dev] (r5) at (0, 5.0) {External device (1 GB)\\[1pt]\scriptsize device, XN};
+\node[ram] (r4) at (0, 3.5) {External RAM (1 GB)\\[1pt]\scriptsize normal, WBWA / WT};
+\node[per] (r3) at (0, 2.0) {Peripheral (0.5 GB)\\[1pt]\scriptsize device, XN (bitband 0x42xxxxxx)};
+\node[sram] (r2) at (0, 0.5) {SRAM (0.5 GB)\\[1pt]\scriptsize normal, WBWA (bitband 0x22xxxxxx)};
+\node[code] (r1) at (0, -1.0) {Code (0.5 GB)\\[1pt]\scriptsize normal, WT};
 
 % Address labels (right side)
-\node[addr, anchor=west] at ([xshift=4pt]r6.north east) {0xE0100000};
+\node[addr, anchor=west] at ([xshift=4pt]r6.north east) {0xE00FFFFF};
 \node[addr, anchor=west] at ([xshift=4pt]r6.south east) {0xE0000000};
 \node[addr, anchor=west] at ([xshift=4pt]r5.north east) {0xDFFFFFFF};
 \node[addr, anchor=west] at ([xshift=4pt]r5.south east) {0xA0000000};

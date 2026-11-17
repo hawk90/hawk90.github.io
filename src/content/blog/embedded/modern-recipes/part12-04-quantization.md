@@ -11,48 +11,116 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Quantization은 float 표현을 낮은 bit-width로 바꿔 메모리·연산량을 줄이는 기법입니다."** FP32→INT8의 저장량과 성능·accuracy 변화는 model·kernel·hardware·calibration으로 측정합니다.
+> **"Quantization은 float 표현을 낮은 bit-width 정수로 바꿔 메모리·연산량을 줄이는 기법입니다."** 같은 INT8이라도 scale을 tensor 하나에 줄지 channel마다 줄지에 따라 작은 channel의 오차가 150배 넘게 달라집니다.
 
 ## 어떤 상황에서 쓰나
 
-NPU·DLA·Edge TPU 같은 전용 가속기는 *INT8만* 지원하는 경우가 흔합니다. FP32 모델을 그대로 들고 가면 가속기가 일을 안 하고 CPU로 떨어집니다. Smartphone·자동차·IoT처럼 전력·메모리 예산이 빠듯한 환경에서는 quantization이 사실상 의무입니다.
+INT8 모델을 받는 가속기([12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)에서는 INT8 TFLite 모델을 Ethos-U용 Vela에 넣었습니다)에 모델을 올리거나, flash·RAM이 부족해 weight를 줄여야 할 때입니다. LLM은 크기 때문에 더 절실합니다. 8B parameter 모델은 16-bit로 두면 weight만 16 GB 남짓이고, llama.cpp의 Llama 3.1 8B 표에서 F16 파일은 14.96 GiB, Q4_K_M은 4.58 GiB입니다.
 
-LLM은 또 다른 이유입니다. Llama 3 8B를 FP16으로 들고 가면 16 GB가 필요해 mobile·SBC에 안 들어갑니다. INT4로 quantize하면 4 GB까지 줄어 Raspberry Pi 5·iPhone에서 돌릴 수 있게 됩니다. 2024년 이후 mobile LLM이 폭발한 것이 이 변화 덕분입니다.
+이 글의 계산과 ONNX Runtime 실행은 Debian 13 arm64 guest의 Python 3.13.5, numpy, `onnx` 1.23.2, `onnxruntime` 1.32.0에서 돌렸습니다.
 
 ## 핵심 개념
 
-Quantization은 float 값을 정수로 *선형 매핑*하는 단순한 수식입니다.
+LiteRT(TFLite) quantization 명세는 INT8 값과 실수를 다음처럼 잇습니다.
 
 ```text
-scale (s)     = (max - min) / 255
-zero point(z) = round(-min / s)
-
-quantize    q = round(x / s) + z
-dequantize  x = (q - z) * s
+real_value = (int8_value - zero_point) × scale
 ```
 
-Symmetric은 `z = 0`으로 두고 `[-128, 127]` 범위를 씁니다. 곱셈에 zero point가 없어 계산이 빠릅니다. Asymmetric은 `z ≠ 0`으로 `[0, 255]`를 써서 ReLU 후처럼 한쪽으로 치우친 분포를 더 정확하게 표현합니다. 보통 *weight = symmetric, activation = asymmetric*을 씁니다.
+정의를 뒤집으면 `q = round(x / scale) + zero_point`이고, 표현 범위를 넘는 값은 clip합니다. 같은 명세는 weight를 zero-point 0인 symmetric으로, activation을 zero-point가 범위 안 어디든 올 수 있는 asymmetric으로 둡니다. 명세의 activation은 int8이고 zero-point는 [-128, 127] 안에 옵니다. 0~6 범위의 ReLU6 출력이라면 scale = 6 / 255, zero-point = -128로 두고 아래처럼 왕복합니다.
+
+```text
+asym int8: scale 0.023529 zp -128 q [-128, -86, -43, 0, 42, 84, 127] back [0.0, 0.9882, 2.0, 3.0118, 4.0, 4.9882, 6.0]
+```
+
+명세는 예전 도구가 per-tensor asymmetric uint8을 썼다고 적습니다. 같은 범위를 uint8로 두면 zero-point만 0이 되고 scale은 같습니다.
 
 적용 시점은 두 가지입니다.
 
-| 방식 | 동작 | 장점 | 단점 |
-|------|------|------|------|
-| PTQ (Post-Training Quantization) | 학습이 끝난 모델에 calibration data 100~1000장을 흘려 scale을 결정합니다 | 빠르고 재학습이 필요 없습니다 | accuracy 손실이 1~5% |
-| QAT (Quantization-Aware Training) | 학습 중 fake-quant node를 삽입해 gradient는 float로, forward는 quantized로 돌립니다 | accuracy가 FP32에 근접합니다 | 재학습이 필요합니다 (epoch 5 내외) |
+| 방식 | 동작 |
+|------|------|
+| PTQ (Post-Training Quantization) | 학습이 끝난 모델에 calibration 입력을 흘려 activation 범위를 재고 scale을 정함 |
+| QAT (Quantization-Aware Training) | 학습 중에 quantize·dequantize를 흉내 내는 node를 넣어, 양자화 오차를 본 채로 weight를 학습 |
 
-세 번째 축은 *granularity*입니다.
+### Granularity — per-tensor와 per-channel
 
-| Granularity | 설명 |
-|-------------|------|
-| Per-tensor | tensor 전체에 scale 하나 — 빠름, 정확도 ↓ |
-| Per-channel | conv filter마다 scale — Modern 표준, 정확도 ↑↑ |
-| Per-group | LLM weight를 N개씩 묶어 scale — INT4 표준 |
+symmetric·asymmetric과 적용 시점에 이어, scale을 몇 개 둘지(granularity)가 세 번째 축입니다. 명세는 weight에 per-axis(Conv의 per-channel)와 per-tensor를 둘 다 허용합니다.
 
-LLM INT4는 group size 64~128로 per-group quantization이 거의 강제됩니다. Outlier 한 개가 scale을 망가뜨리는 것을 막기 위함입니다.
+차이를 숫자로 보려고, output channel마다 크기가 0.01배~2배로 다른 conv weight `[8, 3, 3, 3]`을 만들어 symmetric INT8로 양자화했습니다. scale을 tensor 전체에 하나 줄 때와 channel마다 줄 때, 각 channel의 최대 절대 오차를 그 channel의 최대값으로 나눈 상대 오차입니다.
+
+```text
+ch  max|w|   rel.err per-tensor  rel.err per-channel
+0   0.0233     0.5877              0.0038
+1   0.0392     0.4578              0.0037
+2   0.1102     0.1638              0.0039
+3   0.1689     0.1052              0.0036
+4   0.4500     0.0384              0.0037
+5   1.1991     0.0151              0.0035
+6   1.9350     0.0093              0.0039
+7   4.6207     0.0039              0.0039
+non-zero int8 values per channel with the per-tensor scale: [1, 11, 22, 25, 24, 26, 27, 27] of 27
+```
+
+per-tensor scale은 가장 큰 channel(최대 4.62)에 맞춰지므로, 가장 작은 channel 0은 27개 weight 중 26개가 0으로 반올림되어 상대 오차가 59%입니다. per-channel은 모든 channel이 0.4% 이하입니다. 자로 비유하면, 1 m 눈금 하나로 1 mm 부품과 1 m 부품을 같이 재는 것이 per-tensor, 부품마다 맞는 자를 쓰는 것이 per-channel입니다.
+
+```python
+# per-tensor vs per-channel INT8 weight quantization on a conv weight whose
+# output channels have very different ranges
+import numpy as np
+rng = np.random.default_rng(0)
+w = rng.normal(size=(8, 3, 3, 3)).astype(np.float32)           # [out_ch, in_ch, kh, kw]
+w *= np.array([0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0], np.float32)[:, None, None, None]
+
+def q_sym(x, scale):                       # symmetric: zero_point = 0, range [-127, 127]
+    q = np.clip(np.round(x / scale), -127, 127)
+    return q * scale                       # real = (q - 0) * scale
+
+s_t = np.abs(w).max() / 127                                   # one scale
+s_c = np.abs(w).reshape(8, -1).max(axis=1) / 127              # one scale per out channel
+```
+
 
 ## 코드 / 실제 사용 예
 
+### ONNX Runtime static quantization
+
+64 → 256 → 10의 작은 MLP를 `onnx.helper`로 만들고, 200개 calibration 입력으로 `quantize_static`을 돌렸습니다. `QuantFormat`·`QuantType`도 `onnxruntime.quantization`에서 import해야 합니다.
+
+```python
+from onnxruntime.quantization import quantize_static, CalibrationDataReader, QuantFormat, QuantType
+
+class Reader(CalibrationDataReader):
+    def __init__(self, data):
+        self.it = iter(data)
+    def get_next(self):
+        try:
+            return {"input": next(self.it)}
+        except StopIteration:
+            return None
+
+quantize_static(
+    model_input="model.onnx",
+    model_output="model_int8.onnx",
+    calibration_data_reader=Reader(calib),
+    quant_format=QuantFormat.QDQ,
+    per_channel=True,
+    activation_type=QuantType.QInt8,
+    weight_type=QuantType.QInt8,
+)
+```
+
+```text
+onnxruntime 1.32.0
+size fp32 77003 int8 QDQ 22629
+ops in quantized graph {'DequantizeLinear': 7, 'QuantizeLinear': 4, 'MatMul': 2, 'Add': 1}
+max relative output error: mean 0.0222, worst 0.0739; argmax agreement 98/100
+```
+
+파일은 77,003 byte에서 22,629 byte로 줄었습니다. QDQ format은 원래 연산(`MatMul`, `Add`) 앞뒤에 `QuantizeLinear`·`DequantizeLinear`를 끼워 넣은 그래프이고, 이 실행에서는 원래 그래프의 `Relu`가 양자화 뒤 그래프에서 사라졌습니다. 100개 test 입력에서 FP32 출력 대비 최대 상대 오차의 평균은 2.2%, 최악 7.4%였고, 최댓값 index(분류 결과)는 100개 중 98개가 같았습니다. 실제 모델에서는 이 비교를 정확도 지표로 다시 합니다.
+
 ### TFLite PTQ INT8
+
+LiteRT 문서의 "Post-training integer quantization" 페이지가 쓰는 API입니다. 문서 예제는 입출력 type을 `tf.uint8`로 두고 calibration 입력을 `tf.data.Dataset.from_tensor_slices(...).batch(1).take(100)`으로 만듭니다. 아래의 `tf.int8` 입출력과 500개 loop는 이 글의 선택입니다. 이 글의 환경에는 TensorFlow가 없어 실행하지 않았습니다.
 
 ```python
 import tensorflow as tf
@@ -73,204 +141,76 @@ tflite_int8 = converter.convert()
 open("model_int8.tflite", "wb").write(tflite_int8)
 ```
 
-`representative_dataset`이 핵심입니다. 100~1000장 정도가 보통이고 *실제 deploy 분포*에서 sampling합니다.
+`representative_dataset`이 activation 범위를 정하는 calibration 입력입니다. 실제 deploy 분포에서 뽑아야 범위가 맞습니다.
 
-### QAT 흐름
+### llama.cpp quantize — LLM 4-bit
 
-```python
-import tensorflow_model_optimization as tfmot
-
-q_aware = tfmot.quantization.keras.quantize_model(model)
-q_aware.compile(optimizer='adam', loss='categorical_crossentropy')
-q_aware.fit(train_x, train_y, epochs=5, validation_split=0.1)
-
-converter = tf.lite.TFLiteConverter.from_keras_model(q_aware)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
-tflite_qat = converter.convert()
-```
-
-PTQ로 1~2% accuracy가 떨어졌다면 QAT로 거의 회복됩니다. Production critical model은 QAT가 표준입니다.
-
-### ONNX Runtime quantize
-
-```python
-from onnxruntime.quantization import quantize_static, CalibrationDataReader
-
-class Reader(CalibrationDataReader):
-    def __init__(self, paths):
-        self.it = iter(paths)
-    def get_next(self):
-        try:
-            img = load(next(self.it))
-            return {'input': img}
-        except StopIteration:
-            return None
-
-quantize_static(
-    model_input='model.onnx',
-    model_output='model_int8.onnx',
-    calibration_data_reader=Reader(calib_paths),
-    quant_format=QuantFormat.QDQ,
-    per_channel=True,
-    activation_type=QuantType.QInt8,
-    weight_type=QuantType.QInt8,
-)
-```
-
-`QDQ` (Quantize-Dequantize) format은 inference engine이 fold 후 INT8 kernel을 선택합니다. TensorRT·OpenVINO 모두 이 포맷을 받습니다.
-
-### llama.cpp quantize — LLM INT4
+llama.cpp의 `tools/quantize/README.md`는 GGUF로 변환한 모델을 `llama-quantize`로 양자화하는 예를 보입니다.
 
 ```bash
-# HuggingFace → GGUF FP16
-python convert_hf_to_gguf.py models/llama-3-8b \
-       --outfile llama-3-8b-f16.gguf
-
-# Quantize
-./llama-quantize llama-3-8b-f16.gguf llama-3-8b-Q4_K_M.gguf Q4_K_M
+./build/bin/llama-quantize gemma-4-E2B-it-bf16.gguf gemma-4-E2B-it-Q4_K_M.gguf Q4_K_M
 ```
 
-`Q4_K_M`은 mixed bit-width입니다. Attention K·V는 6-bit, FFN은 4-bit, embedding은 6-bit처럼 layer 종류에 따라 다른 bit를 씁니다. 같은 4-bit family 중 *accuracy/size trade-off*가 가장 좋다고 평가됩니다.
+같은 README의 Llama 3.1 8B 표(일부)입니다. 이 표는 README에 실린 값이고 이 글에서 재지 않았습니다.
 
-| Variant | Size | PPL Δ vs FP16 | 비고 |
-|---------|------|---------------|------|
-| Q2_K | 3.5 GB | +0.6 | accuracy 큰 손실 |
-| Q3_K_M | 3.7 GB | +0.10 | |
-| Q4_K_M | 4.6 GB | +0.03 | 권장 |
-| Q5_K_M | 5.5 GB | +0.01 | |
-| Q6_K | 6.3 GB | +0.005 | |
-| Q8_0 | 8.5 GB | +0.001 | FP16 거의 동등 |
+| Variant | bits/weight | size (GiB) | text generation t/s @ 128 |
+|---------|------------:|-----------:|--------------------------:|
+| Q2_K | 3.1593 | 2.95 | 79.85 ±0.20 |
+| Q3_K_M | 3.9960 | 3.74 | 71.68 ±0.22 |
+| Q4_K_M | 4.8944 | 4.58 | 71.93 ±1.52 |
+| Q5_K_M | 5.7036 | 5.33 | 67.23 ±1.08 |
+| Q6_K | 6.5633 | 6.14 | 58.67 ±3.13 |
+| Q8_0 | 8.5008 | 7.95 | 50.93 ±0.08 |
+| F16 | 16.0005 | 14.96 | 29.17 ±0.04 |
 
-### GPTQ — 4-bit weight, Hessian 기반
+`Q4_K_M`의 bits/weight는 이름의 4가 아니라 4.8944이고, 같은 README의 메모리 표에서 Llama 3.1 8B Q4_K_M 파일은 4.9 GB입니다. README는 정확도 손실을 perplexity나 KL divergence로 잰다고 설명하지만, 이 표에는 그 값이 없어 이 글도 싣지 않았습니다.
 
-```python
-from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+### GPTQ와 SmoothQuant
 
-cfg = BaseQuantizeConfig(bits=4, group_size=128, desc_act=False)
-model = AutoGPTQForCausalLM.from_pretrained(
-    "meta-llama/Llama-3-8B-Instruct", quantize_config=cfg)
-model.quantize(calib_examples)
-model.save_quantized("llama-3-8b-gptq-4bit")
-```
+두 방법 모두 LLM용 PTQ입니다. 이 글에서는 실행하지 않았고, 설명은 각 논문의 초록에서 옮겼습니다.
 
-GPTQ는 layer별 Hessian inverse를 추정해 *rounding error를 다음 weight로 흘려 보내는* 방식입니다. Vanilla round 대비 4-bit에서 perplexity 차이가 크게 줄어듭니다.
-
-### SmoothQuant — activation outlier 처리
-
-```python
-import smoothquant
-# Activation outlier를 weight로 transfer → INT8 안정화
-model = smoothquant.smooth_lm(model, scales, alpha=0.5)
-# 이후 일반 INT8 PTQ
-```
-
-LLM activation은 *극소수 channel에 outlier*가 있습니다. 그대로 INT8 quantize하면 dynamic range가 outlier에 끌려가 accuracy가 무너집니다. SmoothQuant는 activation outlier를 mathematically 동등한 weight scale로 옮겨 둘 다 안정화합니다.
-
-### Per-channel vs per-tensor 비교
-
-```python
-# Per-tensor (빠름)
-scale = (w.max() - w.min()) / 255
-
-# Per-channel (정확)
-scale_per_ch = (w.max(dim=(1,2,3)) - w.min(dim=(1,2,3))) / 255
-# Conv weight: [out_ch, in_ch, kh, kw]
-```
-
-Modern framework는 *per-channel weight + per-tensor activation*이 기본 조합입니다. 정확도는 거의 FP32 수준이면서 활성 quantize는 한 번에 끝나 빠릅니다.
-
-### Calibration method 선택
-
-| 방법 | 특성 |
-|------|------|
-| Min-Max | 단순, outlier에 약함 |
-| Percentile 99.9 | outlier 무시, robust |
-| KL Divergence | histogram + KL minimize, TensorRT 표준 |
-| Entropy | KL과 유사 |
-| MSE | squared error 최소 |
-
-TensorRT는 KL이 기본입니다. ResNet·YOLO 계열에서 잘 동작합니다. LLM activation은 outlier가 많아 percentile 99.9 또는 SmoothQuant가 안전합니다.
+- **GPTQ**(arXiv 2210.17323)는 "a new one-shot weight quantization method based on approximate second-order information"으로, weight를 "3 or 4 bits per weight"까지 줄이면서 정확도 저하를 무시할 수준으로 둔다고 보고합니다.
+- **SmoothQuant**(arXiv 2211.10438)는 W8A8을 위한 training-free PTQ입니다. "weights are easy to quantize while activations are not"이라는 관찰에서 출발해, 수학적으로 동등한 변환으로 activation의 outlier 부담을 weight로 옮깁니다.
 
 ## 측정 / 성능 비교
 
-ResNet-50 ImageNet top-1 accuracy 변화입니다.
+이 글에서 잰 것과 인용한 것을 나눠 적습니다.
 
-| Precision | Top-1 acc | Size | Latency (Cortex-A78) |
-|-----------|-----------|------|-----------------------|
-| FP32 | 76.1 % | 98 MB | 300 ms |
-| FP16 | 76.1 % | 49 MB | 150 ms |
-| INT8 PTQ per-tensor | 75.2 % | 25 MB | 80 ms |
-| INT8 PTQ per-channel | 75.8 % | 25 MB | 80 ms |
-| INT8 QAT | 76.0 % | 25 MB | 80 ms |
-| INT4 PTQ | 73.5 % | 13 MB | 55 ms |
-| INT4 GPTQ | 75.0 % | 13 MB | 55 ms |
+| 항목 | 값 | 출처 |
+| --- | --- | --- |
+| per-tensor vs per-channel 상대 오차, 가장 작은 channel | 0.5877 vs 0.0038 | 위 numpy 실행 |
+| 작은 MLP, ORT QDQ INT8 파일 크기 | 77,003 → 22,629 byte | 위 ORT 실행 |
+| 같은 MLP, argmax 일치 | 98/100 | 위 ORT 실행 |
+| Llama 3.1 8B, Q4_K_M vs F16 크기 | 4.58 vs 14.96 GiB | llama.cpp quantize README |
 
-PTQ 결과의 허용 accuracy drop은 application requirement로 정합니다. 필요하면 per-channel·QAT·calibration data를 비교합니다.
-
-LLM 비교입니다. Llama 3 8B, perplexity (낮을수록 좋음)입니다.
-
-| Variant | Size | PPL | Token/sec (Jetson Orin) | 체감 |
-|---------|------|-----|--------------------------|-------|
-| FP16 | 16 GB | 6.21 | OOM | — |
-| Q8_0 | 8.5 GB | 6.22 | 12 | FP16과 동등 |
-| Q5_K_M | 5.5 GB | 6.25 | 28 | 체감 동등 |
-| Q4_K_M | 4.6 GB | 6.31 | 40 | 잘 모를 수준 |
-| Q3_K_M | 3.7 GB | 6.45 | 55 | 일부 약화 |
-| Q2_K | 3.5 GB | 7.10 | 70 | 가끔 이상 |
-
-Q4_K_M이 size·quality·speed의 sweet spot입니다.
+ResNet-50 등 큰 모델의 정확도·latency는 이번에 실행하지 않았고 확인한 공개 자료도 없어 싣지 않았습니다.
 
 ## 자주 보는 함정
 
-> Calibration data 너무 적음
+> ⚠️ calibration 입력이 적거나 deploy와 다름
 
-```python
-representative_dataset = [single_image]   # 1장
-```
+activation 범위는 calibration 입력에서 정해집니다. 실제 deploy 분포와 다른 입력으로 정하면 scale이 맞지 않습니다. 몇 장을 쓸지는 정확도 비교로 정하고, 낮과 밤처럼 조건이 다른 입력을 골고루 넣습니다.
 
-100장 이상, 가능하면 deploy 분포의 1000장 정도를 씁니다.
+> ⚠️ per-tensor weight scale
 
-> Calibration data가 deploy와 다름
+위 실행처럼 channel 간 크기 차이가 큰 weight에 scale 하나를 주면 작은 channel이 거의 0이 됩니다. 가속기가 per-channel을 지원하는지 먼저 봅니다.
 
-실내에서 모은 데이터로 calibration한 모델을 야외에 deploy하면 accuracy가 5% 가까이 떨어집니다. Day/night, indoor/outdoor, multiple devices에서 골고루 sampling합니다.
+> ⚠️ 양자화 식의 부호
 
-> First/last layer까지 INT8
+`(q - zero_point) × scale`의 부호를 바꿔 쓰면 전처리가 틀립니다. 모델 input tensor의 scale·zero_point를 읽어 그대로 씁니다([12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)).
 
-입력 normalize layer나 출력 logit layer까지 INT8로 바꾸면 accuracy가 크게 손해를 봅니다. Mixed precision으로 입출력 layer를 FP16에 두면 회복됩니다.
+> ⚠️ INT8 가속기에 float 입력
 
-> Batch norm fusion 누락
-
-`Conv → BN → ReLU`가 분리된 채로 quantize되면 BN folding이 일어나지 않아 scale 추정이 부정확해집니다. Quantize 전에 *BN folding*을 먼저 수행합니다. 대부분 toolchain이 자동으로 처리하지만 custom path에서는 직접 확인이 필요합니다.
-
-> LLM activation outlier 무시
-
-```python
-quantize_static(llm.onnx, ...)   # KL calibration
-# Layer 마다 perplexity 폭증
-```
-
-SmoothQuant·AWQ로 outlier를 처리한 뒤 quantize합니다.
-
-> NPU에 FP32 input
-
-```c
-npu_run(fp32_buffer);   /* NPU is INT8-only → fallback to CPU */
-```
-
-Preprocess에서 INT8로 변환해 NPU buffer에 직접 넣습니다.
+INT8 모델의 입력이 int8이면, 전처리에서 위 식으로 변환해 넣어야 합니다. float를 그대로 넣으면 모델이 기대하는 범위를 벗어난 값이 들어갑니다.
 
 ## 정리
 
-- Quantization은 float을 정수로 선형 매핑하는 압축으로 메모리 4배·연산 2~4배를 얻습니다.
-- PTQ와 QAT의 accuracy·비용 trade-off는 model과 data에서 측정합니다.
-- Weight는 per-channel symmetric, activation은 per-tensor asymmetric이 표준 조합입니다.
-- LLM은 per-group INT4·GPTQ·AWQ·SmoothQuant 등을 model/runtime 지원에 맞춰 선택합니다.
-- llama.cpp Q4_K_M은 size·quality·speed의 sweet spot입니다.
-- Calibration data는 100~1000장, *deploy 분포*에서 sampling합니다.
-- First/last layer는 FP16에 두는 mixed precision이 accuracy 회복에 효과적입니다.
-- NPU·DLA·Edge TPU는 거의 INT8 전용이므로 quantization이 deploy 전제 조건입니다.
+- INT8 값과 실수는 `real = (q - zero_point) × scale`로 이어지고, weight는 symmetric, activation은 asymmetric이 명세의 기본입니다.
+- 크기가 다른 channel에 scale 하나를 주면 작은 channel의 오차가 150배 넘게 커집니다(위 실행 58.8% vs 0.38%).
+- ONNX Runtime `quantize_static`은 작은 MLP를 3.4분의 1 크기의 QDQ 모델로 바꿨고 분류 결과는 98% 일치했습니다.
+- LLM 4-bit 양자화의 실제 크기는 README 표의 bits/weight로 봅니다(Q4_K_M 4.89).
 
-다음 편은 **Thermal management**입니다.
+다음 편은 **TensorRT**입니다.
 
 ## 관련 항목
 
