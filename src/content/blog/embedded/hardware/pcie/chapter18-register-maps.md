@@ -12,376 +12,361 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"본 reference는 *PCIe 진단·tuning에 자주 쓰이는 register*의 비트 layout을 모은 *cheat sheet*입니다."** — 이 글의 구현 기준은 [Linux v6.12 pci_regs.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)이며, 장치별 register의 실제 구현·접근 속성은 해당 규격 판과 device 자료로 확인합니다. 본 reference는 *setpci·driver 코드 작성 시 빠른 lookup*용. *Linux `include/uapi/linux/pci_regs.h`*가 *symbolic 이름 출처*.
+> **"이 장은 이 시리즈에서 읽은 레지스터의 offset과 비트를 Linux v6.12 `include/uapi/linux/pci_regs.h`의 이름 그대로 한곳에 모은 reference입니다."** 모든 행은 그 헤더의 `#define`과 주석에서 옮겼고, 헤더에 없는 비트는 pciutils 3.13.0 `lib/header.h`나 mainline 헤더에서 가져왔다고 표시했습니다. 비트마다 시리즈 VM에서 실제로 읽은 값이 있는 곳은 해당 장을 걸었습니다.
 
-[Ch 1~17](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 *각 register의 의미·동작*을 봤습니다. 이 장은 *비트 layout을 한 곳에 모은 reference*입니다.
+[Ch 1~17](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 각 레지스터의 동작을 봤습니다. 이 장은 `setpci`나 드라이버 코드를 쓸 때 찾아보는 용도입니다. 레지스터 이름 열의 `PCI_` 접두사가 붙은 상수는 [Linux v6.12 `pci_regs.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)에 있습니다.
 
 ## Type 0 Header (Endpoint)
 
-| Offset | 크기 | 필드 | 설명 |
-|--------|------|------|------|
-| 0x00 | 2 | Vendor ID | PCI-SIG 부여 |
-| 0x02 | 2 | Device ID | Vendor 부여 |
-| 0x04 | 2 | Command | enable·bus master·memory 등 |
-| 0x06 | 2 | Status | error·capability·int 등 |
-| 0x08 | 1 | Revision ID | |
-| 0x09 | 3 | Class Code | base·sub·programming interface |
-| 0x0C | 1 | Cache Line Size | |
-| 0x0D | 1 | Latency Timer | (legacy PCI) |
-| 0x0E | 1 | Header Type | bit 7: multi-func, bit 0~6: 0=Type 0 |
-| 0x0F | 1 | BIST | built-in self test |
-| 0x10 | 4 | BAR 0 | |
-| 0x14 | 4 | BAR 1 | |
-| 0x18 | 4 | BAR 2 | |
-| 0x1C | 4 | BAR 3 | |
-| 0x20 | 4 | BAR 4 | |
-| 0x24 | 4 | BAR 5 | |
-| 0x28 | 4 | Cardbus CIS Pointer | |
-| 0x2C | 2 | Subsystem Vendor ID | |
-| 0x2E | 2 | Subsystem Device ID | |
-| 0x30 | 4 | Expansion ROM Base Address | |
-| 0x34 | 1 | Capabilities Pointer | first cap offset |
-| 0x3C | 1 | Interrupt Line | |
-| 0x3D | 1 | Interrupt Pin | INTA/B/C/D |
-| 0x3E | 1 | Min_Gnt | (legacy) |
-| 0x3F | 1 | Max_Lat | (legacy) |
+| Offset | 크기 | `pci_regs.h` | 헤더 주석 / 비고 |
+|------|------|------|------|
+| 0x00 | 2 | `PCI_VENDOR_ID` | 16 bits |
+| 0x02 | 2 | `PCI_DEVICE_ID` | 16 bits |
+| 0x04 | 2 | `PCI_COMMAND` | 아래 비트 표 |
+| 0x06 | 2 | `PCI_STATUS` | 아래 비트 표 |
+| 0x08 | 1 | `PCI_REVISION_ID` | `PCI_CLASS_REVISION`(0x08)은 "High 24 bits are class, low 8 revision" |
+| 0x09 | 1 | `PCI_CLASS_PROG` | Reg. Level Programming Interface |
+| 0x0A | 2 | `PCI_CLASS_DEVICE` | Device class |
+| 0x0C | 1 | `PCI_CACHE_LINE_SIZE` | |
+| 0x0D | 1 | `PCI_LATENCY_TIMER` | |
+| 0x0E | 1 | `PCI_HEADER_TYPE` | 하위 7비트 형식, 0x80 Multi-Function ([Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)) |
+| 0x0F | 1 | `PCI_BIST` | |
+| 0x10~0x24 | 4×6 | `PCI_BASE_ADDRESS_0`~`_5` | [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio) |
+| 0x28 | 4 | `PCI_CARDBUS_CIS` | |
+| 0x2C | 2 | `PCI_SUBSYSTEM_VENDOR_ID` | |
+| 0x2E | 2 | `PCI_SUBSYSTEM_ID` | |
+| 0x30 | 4 | `PCI_ROM_ADDRESS` | "Bits 31..11 are address, 10..1 reserved" |
+| 0x34 | 1 | `PCI_CAPABILITY_LIST` | 첫 capability offset |
+| 0x3C | 1 | `PCI_INTERRUPT_LINE` | |
+| 0x3D | 1 | `PCI_INTERRUPT_PIN` | |
+| 0x3E | 1 | `PCI_MIN_GNT` | |
+| 0x3F | 1 | `PCI_MAX_LAT` | |
 
 ## Command Register (0x04)
 
-| Bit | 의미 |
-|-----|------|
-| 0 | I/O Space Enable |
-| 1 | Memory Space Enable |
-| 2 | Bus Master Enable |
-| 3 | Special Cycle Enable (legacy) |
-| 4 | Memory Write and Invalidate (legacy) |
-| 5 | VGA Palette Snoop (legacy) |
-| 6 | Parity Error Response |
-| 8 | SERR# Enable |
-| 9 | Fast Back-to-Back (legacy) |
-| 10 | Interrupt Disable |
+| 비트 | `pci_regs.h:40-51` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_COMMAND_IO` | Enable response in I/O space |
+| 1 | `PCI_COMMAND_MEMORY` | Enable response in Memory space |
+| 2 | `PCI_COMMAND_MASTER` | Enable bus mastering |
+| 3 | `PCI_COMMAND_SPECIAL` | Enable response to special cycles |
+| 4 | `PCI_COMMAND_INVALIDATE` | Use memory write and invalidate |
+| 5 | `PCI_COMMAND_VGA_PALETTE` | Enable palette snooping |
+| 6 | `PCI_COMMAND_PARITY` | Enable parity checking |
+| 7 | `PCI_COMMAND_WAIT` | Enable address/data stepping |
+| 8 | `PCI_COMMAND_SERR` | Enable SERR |
+| 9 | `PCI_COMMAND_FAST_BACK` | Enable back-to-back writes |
+| 10 | `PCI_COMMAND_INTX_DISABLE` | INTx Emulation Disable |
+
+시리즈 VM의 e1000e Command는 0x0406이었습니다([Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)). bit 1·2(Memory, Bus Master)와 bit 10(INTx Disable, MSI-X 사용 중)이 켜진 값입니다. [Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling)에서는 igb에 `COMMAND=0100:0100`으로 bit 8만 켰습니다.
 
 ## Status Register (0x06)
 
-| Bit | 의미 |
-|-----|------|
-| 3 | Interrupt Status |
-| 4 | Capabilities List (이 device가 capability 가짐) |
-| 5 | 66 MHz Capable (legacy) |
-| 7 | Fast Back-to-Back Capable (legacy) |
-| 8 | Master Data Parity Error |
-| 11 | Signaled Target Abort |
-| 12 | Received Target Abort |
-| 13 | Received Master Abort |
-| 14 | Signaled System Error |
-| 15 | Detected Parity Error |
+| 비트 | `pci_regs.h:53-69` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_STATUS_IMM_READY` | Immediate Readiness |
+| 3 | `PCI_STATUS_INTERRUPT` | Interrupt status |
+| 4 | `PCI_STATUS_CAP_LIST` | Support Capability List |
+| 5 | `PCI_STATUS_66MHZ` | Support 66 MHz PCI 2.1 bus |
+| 6 | `PCI_STATUS_UDF` | User Definable Features [obsolete] |
+| 7 | `PCI_STATUS_FAST_BACK` | Accept fast-back to back |
+| 8 | `PCI_STATUS_PARITY` | Detected parity error |
+| 10:9 | `PCI_STATUS_DEVSEL_MASK` | DEVSEL timing |
+| 11 | `PCI_STATUS_SIG_TARGET_ABORT` | Set on target abort |
+| 12 | `PCI_STATUS_REC_TARGET_ABORT` | Master ack of target abort |
+| 13 | `PCI_STATUS_REC_MASTER_ABORT` | Set on master abort |
+| 14 | `PCI_STATUS_SIG_SYSTEM_ERROR` | Set when we drive SERR |
+| 15 | `PCI_STATUS_DETECTED_PARITY` | Set on parity error |
+
+QEMU는 오류 메시지가 SERR# 또는 DevCtl enable 검사를 통과할 때 bit 14를 세웁니다(`hw/pci/pcie_aer.c:200-209`, `222-223`).
 
 ## Type 1 Header (Bridge) — 차이점
 
-| Offset | 필드 |
-|--------|------|
-| 0x18 | Primary Bus Number |
-| 0x19 | Secondary Bus Number |
-| 0x1A | Subordinate Bus Number |
-| 0x1B | Secondary Latency Timer |
-| 0x1C | I/O Base |
-| 0x1D | I/O Limit |
-| 0x1E | Secondary Status |
-| 0x20 | Memory Base |
-| 0x22 | Memory Limit |
-| 0x24 | Prefetchable Memory Base |
-| 0x26 | Prefetchable Memory Limit |
-| 0x28 | Prefetchable Base Upper 32 |
-| 0x2C | Prefetchable Limit Upper 32 |
-| 0x30 | I/O Base Upper 16 |
-| 0x32 | I/O Limit Upper 16 |
-| 0x3E | Bridge Control |
+| Offset | `pci_regs.h:131-161` | 비고 |
+|------|------|------|
+| 0x18 | `PCI_PRIMARY_BUS` | |
+| 0x19 | `PCI_SECONDARY_BUS` | |
+| 0x1A | `PCI_SUBORDINATE_BUS` | "Highest bus number behind the bridge" |
+| 0x1B | `PCI_SEC_LATENCY_TIMER` | |
+| 0x1C / 0x1D | `PCI_IO_BASE` / `PCI_IO_LIMIT` | |
+| 0x1E | `PCI_SEC_STATUS` | |
+| 0x20 / 0x22 | `PCI_MEMORY_BASE` / `PCI_MEMORY_LIMIT` | 1 MiB 단위 window |
+| 0x24 / 0x26 | `PCI_PREF_MEMORY_BASE` / `PCI_PREF_MEMORY_LIMIT` | 하위 4비트 1이면 64-bit (`PCI_PREF_RANGE_TYPE_64`) |
+| 0x28 / 0x2C | `PCI_PREF_BASE_UPPER32` / `PCI_PREF_LIMIT_UPPER32` | |
+| 0x30 / 0x32 | `PCI_IO_BASE_UPPER16` / `PCI_IO_LIMIT_UPPER16` | |
+| 0x38 | `PCI_ROM_ADDRESS1` | Type 0의 0x30과 같은 형식 |
+| 0x3E | `PCI_BRIDGE_CONTROL` | bit 6 `PCI_BRIDGE_CTL_BUS_RESET` = Secondary bus reset |
+
+root port 00:03.0의 실제 값과 해석은 [Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)에 있습니다.
 
 ## PCIe Capability (ID 0x10) — Sub-register
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | PCIe Cap List (ID + Next). Version은 +0x02 |
-| +0x02 | PCIe Capabilities (Device/Port Type) |
-| +0x04 | Device Capabilities |
-| +0x08 | Device Control |
-| +0x0A | Device Status |
-| +0x0C | Link Capabilities |
-| +0x10 | Link Control |
-| +0x12 | Link Status |
-| +0x14 | Slot Capabilities |
-| +0x18 | Slot Control |
-| +0x1A | Slot Status |
-| +0x1C | Root Control |
-| +0x20 | Root Status |
-| +0x24 | Device Capabilities 2 |
-| +0x28 | Device Control 2 |
-| +0x2A | Device Status 2 |
-| +0x2C | Link Capabilities 2 |
-| +0x30 | Link Control 2 |
-| +0x32 | Link Status 2 |
+| Offset | `pci_regs.h:474-705` | 헤더 주석 |
+|------|------|------|
+| +0x02 | `PCI_EXP_FLAGS` | Capabilities register (버전 bit 3:0, type bit 7:4) |
+| +0x04 | `PCI_EXP_DEVCAP` | Device capabilities |
+| +0x08 | `PCI_EXP_DEVCTL` | Device Control |
+| +0x0A | `PCI_EXP_DEVSTA` | Device Status |
+| +0x0C | `PCI_EXP_LNKCAP` | Link Capabilities |
+| +0x10 | `PCI_EXP_LNKCTL` | Link Control |
+| +0x12 | `PCI_EXP_LNKSTA` | Link Status |
+| +0x14 | `PCI_EXP_SLTCAP` | Slot Capabilities |
+| +0x18 | `PCI_EXP_SLTCTL` | Slot Control |
+| +0x1A | `PCI_EXP_SLTSTA` | Slot Status |
+| +0x1C | `PCI_EXP_RTCTL` | Root Control |
+| +0x1E | `PCI_EXP_RTCAP` | Root Capabilities |
+| +0x20 | `PCI_EXP_RTSTA` | Root Status |
+| +0x24 | `PCI_EXP_DEVCAP2` | Device Capabilities 2 |
+| +0x28 | `PCI_EXP_DEVCTL2` | Device Control 2 |
+| +0x2A | `PCI_EXP_DEVSTA2` | Device Status 2 |
+| +0x2C | `PCI_EXP_LNKCAP2` | Link Capabilities 2 |
+| +0x30 | `PCI_EXP_LNKCTL2` | Link Control 2 |
+| +0x32 | `PCI_EXP_LNKSTA2` | Link Status 2 |
+| +0x34 / +0x38 / +0x3A | `PCI_EXP_SLTCAP2` / `SLTCTL2` / `SLTSTA2` | Slot Capabilities·Control·Status 2 |
+
+`setpci`에서는 `CAP_EXP+10.w`처럼 capability 시작 기준 offset으로 씁니다([Ch 9](/blog/embedded/hardware/pcie/chapter09-physical-layer)).
 
 ## Device Control (+0x08)
 
-| Bit | 의미 |
-|-----|------|
-| 0 | Correctable Error Reporting Enable |
-| 1 | Non-Fatal Error Reporting Enable |
-| 2 | Fatal Error Reporting Enable |
-| 3 | Unsupported Request Reporting Enable |
-| 4 | Relaxed Ordering Enable |
-| 5~7 | MaxPayload (000=128, 001=256, ..., 101=4096) |
-| 8 | Extended Tag Field Enable |
-| 9 | Phantom Functions Enable |
-| 10 | Auxiliary Power PM Enable |
-| 11 | No Snoop Enable |
-| 12~14 | MaxReadRequest (000=128, ..., 101=4096) |
-| 15 | 해당 function type에서 FLR 개시 또는 Bridge Configuration Retry. 장치 유형·지원 확인 |
+| 비트 | `pci_regs.h:502-525` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_EXP_DEVCTL_CERE` | Correctable Error Reporting En. |
+| 1 | `PCI_EXP_DEVCTL_NFERE` | Non-Fatal Error Reporting Enable |
+| 2 | `PCI_EXP_DEVCTL_FERE` | Fatal Error Reporting Enable |
+| 3 | `PCI_EXP_DEVCTL_URRE` | Unsupported Request Reporting En. |
+| 4 | `PCI_EXP_DEVCTL_RELAX_EN` | Enable relaxed ordering |
+| 7:5 | `PCI_EXP_DEVCTL_PAYLOAD` | Max_Payload_Size, 0~5 = 128~4096 바이트 |
+| 8 | `PCI_EXP_DEVCTL_EXT_TAG` | Extended Tag Field Enable |
+| 9 | `PCI_EXP_DEVCTL_PHANTOM` | Phantom Functions Enable |
+| 10 | `PCI_EXP_DEVCTL_AUX_PME` | Auxiliary Power PM Enable |
+| 11 | `PCI_EXP_DEVCTL_NOSNOOP_EN` | Enable No Snoop |
+| 14:12 | `PCI_EXP_DEVCTL_READRQ` | Max_Read_Request_Size, 0~5 = 128~4096 바이트 |
+| 15 | `PCI_EXP_DEVCTL_BCR_FLR` | Bridge Configuration Retry / FLR |
 
-예를 들어 합성 Device Control `0x2810`에서 `(value & 0x00e0) >> 5`는 0이므로 MPS 128 B, `(value & 0x7000) >> 12`는 2이므로 MRRS 512 B입니다. 이 해석은 [Ch 15](/blog/embedded/hardware/pcie/chapter15-tools#실제-도구로-합성-필드-해석하기)의 실제 pciutils dump decoder로 확인했습니다. 값을 실제 장치에 쓰는 tuning 예가 아닙니다.
+예를 들어 `0x2810`은 `(v & 0x00e0) >> 5 = 0`이라 MPS 128바이트, `(v & 0x7000) >> 12 = 2`라 MRRS 512바이트, bit 4·11이 켜져 RO·No Snoop입니다. [Ch 15](/blog/embedded/hardware/pcie/chapter15-tools)에서 이 값을 넣은 dump를 `lspci -F`로 해석해 같은 결과를 얻었습니다. bit 0~3이 쓰기 가능해야 장치가 오류 메시지를 보낸다는 점은 [Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling)에서 봤습니다.
 
 ## Link Status (+0x12)
 
-| Bit | 의미 |
-|-----|------|
-| 0~3 | Current Link Speed (0001=2.5GT, 0010=5GT, ..., 0110=64GT) |
-| 4~9 | Negotiated Link Width |
-| 10 | Undefined |
-| 11 | Link Training |
-| 12 | Slot Clock Configuration |
-| 13 | Data Link Layer Link Active |
-| 14 | Link BW Management Status |
-| 15 | Link Autonomous BW Status |
+| 비트 | `pci_regs.h:567-584` | 헤더 주석 |
+|------|------|------|
+| 3:0 | `PCI_EXP_LNKSTA_CLS` | Current Link Speed (1=2.5, 2=5, 3=8, 4=16, 5=32, 6=64 GT/s) |
+| 9:4 | `PCI_EXP_LNKSTA_NLW` | Negotiated Link Width |
+| 11 | `PCI_EXP_LNKSTA_LT` | Link Training |
+| 12 | `PCI_EXP_LNKSTA_SLC` | Slot Clock Configuration |
+| 13 | `PCI_EXP_LNKSTA_DLLLA` | Data Link Layer Link Active |
+| 14 | `PCI_EXP_LNKSTA_LBMS` | Link Bandwidth Management Status |
+| 15 | `PCI_EXP_LNKSTA_LABS` | Link Autonomous Bandwidth Status |
+
+시리즈 VM root port의 Link Status 0x2011은 DLLLA·x1·2.5 GT/s입니다([Ch 9](/blog/embedded/hardware/pcie/chapter09-physical-layer)). Link Status 2의 equalization 비트는 Linux v6.12에 정의가 없고 pciutils 3.13.0 `lib/header.h:933-937`에 있습니다.
 
 ## AER Capability (Extended ID 0x0001)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Capability ID·Version·Next |
-| +0x04 | Uncorrectable Error Status |
-| +0x08 | Uncorrectable Error Mask |
-| +0x0C | Uncorrectable Error Severity |
-| +0x10 | Correctable Error Status |
-| +0x14 | Correctable Error Mask |
-| +0x18 | AER Capabilities·Control |
-| +0x1C | Header Log (4 DW = 16 byte) |
-| +0x2C | Root Error Command (Root Port only) |
-| +0x30 | Root Error Status |
+| Offset | `pci_regs.h:753-807` | 헤더 주석 |
+|------|------|------|
+| +0x04 | `PCI_ERR_UNCOR_STATUS` | Uncorrectable Error Status |
+| +0x08 | `PCI_ERR_UNCOR_MASK` | Uncorrectable Error Mask |
+| +0x0C | `PCI_ERR_UNCOR_SEVER` | Uncorrectable Error Severity |
+| +0x10 | `PCI_ERR_COR_STATUS` | Correctable Error Status |
+| +0x14 | `PCI_ERR_COR_MASK` | Correctable Error Mask |
+| +0x18 | `PCI_ERR_CAP` | Advanced Error Capabilities & Ctrl |
+| +0x1C | `PCI_ERR_HEADER_LOG` | Header Log Register (16 bytes) |
+| +0x2C | `PCI_ERR_ROOT_COMMAND` | Root Error Command |
+| +0x30 | `PCI_ERR_ROOT_STATUS` | |
+| +0x34 | `PCI_ERR_ROOT_ERR_SRC` | Error Source Identification |
 
 ### Uncorrectable Error Status·Mask·Severity (+0x04/+0x08/+0x0C)
 
-| Bit | 의미 |
-|-----|------|
-| 4 | Data Link Protocol Error |
-| 5 | Surprise Down Error |
-| 12 | Poisoned TLP |
-| 13 | Flow Control Protocol Error |
-| 14 | Completion Timeout |
-| 15 | Completer Abort |
-| 16 | Unexpected Completion |
-| 17 | Receiver Overflow |
-| 18 | Malformed TLP |
-| 19 | ECRC Error |
-| 20 | Unsupported Request |
-| 21 | ACS Violation |
-| 22 | Uncorrectable Internal Error |
-| 23 | MC Blocked TLP |
-| 24 | AtomicOp Egress Blocked |
-| 25 | TLP Prefix Blocked Error |
+| 비트 | `pci_regs.h:755-771` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_ERR_UNC_UND` | Undefined |
+| 4 | `PCI_ERR_UNC_DLP` | Data Link Protocol |
+| 5 | `PCI_ERR_UNC_SURPDN` | Surprise Down |
+| 12 | `PCI_ERR_UNC_POISON_TLP` | Poisoned TLP |
+| 13 | `PCI_ERR_UNC_FCP` | Flow Control Protocol |
+| 14 | `PCI_ERR_UNC_COMP_TIME` | Completion Timeout |
+| 15 | `PCI_ERR_UNC_COMP_ABORT` | Completer Abort |
+| 16 | `PCI_ERR_UNC_UNX_COMP` | Unexpected Completion |
+| 17 | `PCI_ERR_UNC_RX_OVER` | Receiver Overflow |
+| 18 | `PCI_ERR_UNC_MALF_TLP` | Malformed TLP |
+| 19 | `PCI_ERR_UNC_ECRC` | ECRC Error Status |
+| 20 | `PCI_ERR_UNC_UNSUP` | Unsupported Request |
+| 21 | `PCI_ERR_UNC_ACSV` | ACS Violation |
+| 22 | `PCI_ERR_UNC_INTN` | internal error |
+| 23 | `PCI_ERR_UNC_MCBTLP` | MC blocked TLP |
+| 24 | `PCI_ERR_UNC_ATOMEG` | Atomic egress blocked |
+| 25 | `PCI_ERR_UNC_TLPPRE` | TLP prefix blocked |
+| 28 | (mainline 7.4-rc3) `PCI_ERR_UNC_IDE_CHECK` | IDE Check Failed |
+| 29 | (mainline 7.4-rc3) `PCI_ERR_UNC_MISR_IDE` | Misrouted IDE TLP |
+
+마지막 두 행은 Linux v6.12에 없고 2026-11-16에 받은 mainline `pci_regs.h:792-793`에 있습니다([Ch 13](/blog/embedded/hardware/pcie/chapter13-virtualization-2)). [Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling)의 `error status/mask=00100000/02400000`은 bit 20(UR)이 status, bit 22·25가 mask인 값입니다.
 
 ### Correctable Error Status·Mask (+0x10/+0x14)
 
-| Bit | 의미 |
-|-----|------|
-| 0 | Receiver Error |
-| 6 | Bad TLP |
-| 7 | Bad DLLP |
-| 8 | Replay Number Rollover |
-| 12 | Replay Timer Timeout |
-| 13 | Advisory Non-Fatal Error |
-| 14 | Corrected Internal Error |
-| 15 | Header Log Overflow |
+| 비트 | `pci_regs.h:777-784` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_ERR_COR_RCVR` | Receiver Error Status |
+| 6 | `PCI_ERR_COR_BAD_TLP` | Bad TLP Status |
+| 7 | `PCI_ERR_COR_BAD_DLLP` | Bad DLLP Status |
+| 8 | `PCI_ERR_COR_REP_ROLL` | REPLAY_NUM Rollover |
+| 12 | `PCI_ERR_COR_REP_TIMER` | Replay Timer Timeout |
+| 13 | `PCI_ERR_COR_ADV_NFAT` | Advisory Non-Fatal |
+| 14 | `PCI_ERR_COR_INTERNAL` | Corrected Internal |
+| 15 | `PCI_ERR_COR_LOG_OVER` | Header Log Overflow |
 
 ## MSI Capability (ID 0x05)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Cap ID·Next |
-| +0x02 | Message Control |
-| +0x04 | Message Address (32-bit) |
-| +0x08 | Message Address Upper (64-bit MSI만) |
-| +0x08 또는 +0x0C | Message Data |
-| +0x0C 또는 +0x10 | Mask Bits. 각각 32-bit·64-bit MSI이며 masking 지원 시 |
-| +0x10 또는 +0x14 | Pending Bits. 각각 32-bit·64-bit MSI이며 masking 지원 시 |
+| Offset | `pci_regs.h:307-321` | 헤더 주석 |
+|------|------|------|
+| +0x02 | `PCI_MSI_FLAGS` | Message Control |
+| +0x04 | `PCI_MSI_ADDRESS_LO` | Lower 32 bits |
+| +0x08 | `PCI_MSI_ADDRESS_HI` | Upper 32 bits (if `PCI_MSI_FLAGS_64BIT` set) |
+| +0x08 / +0x0C | `PCI_MSI_DATA_32` / `PCI_MSI_DATA_64` | data, 32-bit / 64-bit 장치 |
+| +0x0C / +0x10 | `PCI_MSI_MASK_32` / `PCI_MSI_MASK_64` | Mask bits |
+| +0x10 / +0x14 | `PCI_MSI_PENDING_32` / `PCI_MSI_PENDING_64` | Pending |
 
 ### Message Control
 
-| Bit | 의미 |
-|-----|------|
-| 0 | MSI Enable |
-| 1~3 | Multiple Message Capable (000=1, 001=2, ..., 101=32) |
-| 4~6 | Multiple Message Enable |
-| 7 | 64-bit Address Capable |
-| 8 | Per-vector Masking Capable |
+| 비트 | `pci_regs.h` | 헤더 주석 |
+|------|------|------|
+| 0 | `PCI_MSI_FLAGS_ENABLE` | MSI feature enabled |
+| 3:1 | `PCI_MSI_FLAGS_QMASK` | Maximum queue size available |
+| 6:4 | `PCI_MSI_FLAGS_QSIZE` | Message queue size configured |
+| 7 | `PCI_MSI_FLAGS_64BIT` | 64-bit addresses allowed |
+| 8 | `PCI_MSI_FLAGS_MASKBIT` | Per-vector masking capable |
+
+MSI가 최대 32개라는 제한은 [Linux v6.12 MSI HOWTO](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/msi-howto.rst)(120-127행)에 있습니다([Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts)).
 
 ## MSI-X Capability (ID 0x11)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Cap ID·Next |
-| +0x02 | Message Control |
-| +0x04 | Table BIR (BAR index) + Table Offset |
-| +0x08 | PBA BIR + PBA Offset |
+| Offset | `pci_regs.h:324-335` | 헤더 주석 |
+|------|------|------|
+| +0x02 | `PCI_MSIX_FLAGS` | Message Control |
+| +0x04 | `PCI_MSIX_TABLE` | `_BIR` 0x7 = BAR index, `_OFFSET` 0xfffffff8 = Offset into specified BAR |
+| +0x08 | `PCI_MSIX_PBA` | 같은 형식 |
 
 ### Message Control
 
-| Bit | 의미 |
-|-----|------|
-| 10:0 | Table Size – 1 (max 2048) |
-| 14 | Function Mask |
-| 15 | MSI-X Enable |
+| 비트 | `pci_regs.h` | 헤더 주석 |
+|------|------|------|
+| 10:0 | `PCI_MSIX_FLAGS_QSIZE` | Table size (N-1 인코딩, 최대 2048) |
+| 14 | `PCI_MSIX_FLAGS_MASKALL` | Mask all vectors for this function |
+| 15 | `PCI_MSIX_FLAGS_ENABLE` | MSI-X enable |
 
 ### Table Entry (16 byte)
 
-| Offset | 필드 |
-|--------|------|
-| 0 | Message Address Low |
-| 4 | Message Address Upper |
-| 8 | Message Data |
-| 12 | Vector Control (bit 0: mask) |
+| Offset | `pci_regs.h:338-343` |
+|------|------|
+| 0x0 | `PCI_MSIX_ENTRY_LOWER_ADDR` |
+| 0x4 | `PCI_MSIX_ENTRY_UPPER_ADDR` |
+| 0x8 | `PCI_MSIX_ENTRY_DATA` |
+| 0xC | `PCI_MSIX_ENTRY_VECTOR_CTRL`, bit 0 `PCI_MSIX_ENTRY_CTRL_MASKBIT` |
+
+시리즈 VM NVMe의 실제 table 내용은 [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts)에 있습니다.
 
 ## SR-IOV Capability (Extended ID 0x0010)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Cap ID·Version·Next |
-| +0x04 | SR-IOV Capabilities |
-| +0x08 | SR-IOV Control |
-| +0x0A | SR-IOV Status |
-| +0x0C | InitialVFs |
-| +0x0E | TotalVFs |
-| +0x10 | NumVFs |
-| +0x12 | Function Dependency Link |
-| +0x14 | First VF Offset |
-| +0x16 | VF Stride |
-| +0x1A | VF Device ID |
-| +0x1C | Supported Page Sizes |
-| +0x20 | System Page Size |
-| +0x24~0x38 | VF BAR 0~5 |
-| +0x3C | VF Migration State Array Offset |
+| Offset | `pci_regs.h:948-970` | 헤더 주석 | igb(03:00.0)에서 본 값 |
+|------|------|------|------|
+| +0x04 | `PCI_SRIOV_CAP` | SR-IOV Capabilities | |
+| +0x08 | `PCI_SRIOV_CTRL` | SR-IOV Control | `ARIHierarchy+` |
+| +0x0A | `PCI_SRIOV_STATUS` | SR-IOV Status | |
+| +0x0C | `PCI_SRIOV_INITIAL_VF` | Initial VFs | 8 |
+| +0x0E | `PCI_SRIOV_TOTAL_VF` | Total VFs | 8 |
+| +0x10 | `PCI_SRIOV_NUM_VF` | Number of VFs | 0 → 2 |
+| +0x12 | `PCI_SRIOV_FUNC_LINK` | Function Dependency Link | 0 |
+| +0x14 | `PCI_SRIOV_VF_OFFSET` | First VF Offset | 128 |
+| +0x16 | `PCI_SRIOV_VF_STRIDE` | Following VF Stride | 2 |
+| +0x1A | `PCI_SRIOV_VF_DID` | VF Device ID | 0x10ca |
+| +0x1C | `PCI_SRIOV_SUP_PGSIZE` | Supported Page Sizes | 0x553 |
+| +0x20 | `PCI_SRIOV_SYS_PGSIZE` | System Page Size | 0x1 |
+| +0x24~ | `PCI_SRIOV_BAR` | VF BAR0 부터 | VF BAR0·BAR3 각 16 KiB |
+| +0x3C | `PCI_SRIOV_VFM` | VF Migration State Array Offset | 0 |
+
+오른쪽 열은 [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio)의 `lspci -vv` SR-IOV 출력에서 옮겼습니다.
 
 ## ACS Capability (Extended ID 0x000D)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Cap ID·Version·Next |
-| +0x04 | ACS Capability |
-| +0x06 | ACS Control |
-| +0x08 | Egress Control Vector |
+| Offset | `pci_regs.h:989-999` |
+|------|------|
+| +0x04 | `PCI_ACS_CAP` |
+| +0x06 | `PCI_ACS_CTRL` |
+| +0x08 | `PCI_ACS_EGRESS_CTL_V` |
 
-### ACS Capability (bit 표시)
+### ACS Capability·Control 비트
 
-| Bit | 의미 |
-|-----|------|
-| 0 | Source Validation |
-| 1 | Translation Blocking |
-| 2 | P2P Request Redirect |
-| 3 | P2P Completion Redirect |
-| 4 | Upstream Forwarding |
-| 5 | P2P Egress Control |
-| 6 | Direct Translated P2P |
+| 비트 | `pci_regs.h` | 헤더 주석 | QEMU root port Cap / Ctl |
+|------|------|------|------|
+| 0 | `PCI_ACS_SV` | Source Validation | + / + |
+| 1 | `PCI_ACS_TB` | Translation Blocking | + / - |
+| 2 | `PCI_ACS_RR` | P2P Request Redirect | + / + |
+| 3 | `PCI_ACS_CR` | P2P Completion Redirect | + / + |
+| 4 | `PCI_ACS_UF` | Upstream Forwarding | + / + |
+| 5 | `PCI_ACS_EC` | P2P Egress Control | - / - |
+| 6 | `PCI_ACS_DT` | Direct Translated P2P | + / - |
+
+오른쪽 열은 시리즈 VM root port의 `ACSCap`·`ACSCtl` 줄입니다([Ch 1](/blog/embedded/hardware/pcie/chapter01-fundamentals)의 `lspci -vv`). ACS 유무가 IOMMU group에 미친 영향은 [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)에 있습니다.
 
 ## LTR Capability (Extended ID 0x0018)
 
-| Offset | 필드 |
-|--------|------|
-| +0x00 | Cap ID·Version·Next |
-| +0x04 | Max Snoop Latency |
-| +0x06 | Max No-Snoop Latency |
+| Offset | `pci_regs.h:979-985` |
+|------|------|
+| +0x04 | `PCI_LTR_MAX_SNOOP_LAT` |
+| +0x06 | `PCI_LTR_MAX_NOSNOOP_LAT` |
 
 ### Latency Format
 
-| Bit | 의미 |
-|-----|------|
-| 0~9 | Value |
-| 10~12 | Scale (0=1ns·1=32ns·2=1024ns·3=32768ns·4=1048576ns·5=33554432ns) |
-| 13~15 | Max Latency config register의 reserved. LTR message의 Requirement bit와 혼동하지 않음 |
+| 비트 | `pci_regs.h` | 뜻 |
+|------|------|------|
+| 9:0 | `PCI_LTR_VALUE_MASK` 0x3ff | Value |
+| 12:10 | `PCI_LTR_SCALE_MASK` 0x1c00 | Scale |
 
-LTR config의 reserved 범위는 [Intel DSA architecture specification의 Max Snoop Latency](https://cdrdv2-public.intel.com/857060/341204-006-intel-data-streaming-accelerator-spec.pdf)와도 대조했습니다. 실제 latency message 형식과 config register 형식을 섞지 않습니다.
+Scale 값의 단위는 pciutils 3.13.0 `cap_ltr_scale()`(`ls-ecaps.c:53-56`)이 `PCI_LTR_*` 필드를 해석할 때 쓰는 `1 << (scale * 5)` ns이고, Linux v6.12 `encode_l12_threshold()`(`drivers/pci/pcie/aspm.c:514-545`)도 L1.2 threshold에 같은 단위를 씁니다. 0=1 ns, 1=32 ns, 2=1024 ns, 3=32768 ns, 4=1048576 ns, 5=33554432 ns입니다. 시리즈 VM에는 LTR 장치가 없습니다.
 
 ## ECAM 주소 계산
 
-```text
-ECAM_address = ECAM_BASE
-             + (Bus << 20)
-             + (Device << 15)
-             + (Function << 12)
-             + (Register_offset)
+Linux v6.12 `include/linux/pci-ecam.h:23-34`의 정의입니다.
+
+```c
+#define PCIE_ECAM_BUS_SHIFT	20 /* Bus number */
+#define PCIE_ECAM_DEVFN_SHIFT	12 /* Device and Function number */
+#define PCIE_ECAM_REG_MASK	0xfff /* Limit offset to a maximum of 4K */
 ```
 
 | 단위 | 크기 |
 |------|------|
-| 1 function | 4 KB |
-| 1 device (8 functions) | 32 KB |
-| 1 bus (32 devices) | 1 MB |
-| 1 segment (256 buses) | 256 MB |
+| function 하나 | 4 KiB (offset 12비트) |
+| bus 하나 (devfn 256) | 1 MiB |
+| bus 256개 | 256 MiB |
 
-ECAM_BASE는 사용하는 segment·bus 범위의 기준을 명시해야 합니다. 위 식은 bus 0 기준 base의 기본 식이며, Linux의 window mapping 구현은 시작 bus를 뺀 상대 bus를 사용하는 경우도 있습니다. 주소를 계산했다고 실제 config 접근이 허용되거나 장치가 존재한다는 뜻은 아닙니다.
+시리즈 VM의 ECAM base는 0x4010000000이었고, e1000e(bus 2)의 config는 0x4010200000에서 읽혔습니다([Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)).
 
-## Linux `include/uapi/linux/pci_regs.h`
+## 이 시리즈의 장 목록
 
-이 고정판 헤더에서 사용하는 주요 symbolic 이름입니다. 최신 규격의 모든 field를 포함한다는 뜻은 아닙니다.
-
-| 상수 | 값 |
+| 장 | 이 장의 표와 연결되는 실험 |
 |------|------|
-| `PCI_COMMAND_MEMORY` | 0x02 |
-| `PCI_COMMAND_MASTER` | 0x04 |
-| `PCI_EXP_DEVCTL` | 8 |
-| `PCI_EXP_DEVCTL_PAYLOAD` | 0x00e0 |
-| `PCI_EXP_LNKSTA_CLS` | 0x000f |
-| `PCI_ERR_UNCOR_STATUS` | 0x04 (AER offset) |
-| `PCI_MSIX_TABLE_BIR` | 0x07 |
-| `PCI_EXT_CAP_ID_ERR` | 0x01 |
-| `PCI_EXT_CAP_ID_SRIOV` | 0x10 |
+| [Ch 1](/blog/embedded/hardware/pcie/chapter01-fundamentals) | Express Capability type, LnkCap·LnkSta |
+| [Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp) | DevCtl Extended Tag, AER Header Log |
+| [Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space) | Type 0·Type 1 header dump, ECAM |
+| [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio) | BAR sizing, SR-IOV |
+| [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts) | MSI·MSI-X |
+| [Ch 6](/blog/embedded/hardware/pcie/chapter06-power-management) | PMCSR, ASPM Control |
+| [Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling) | AER 주입 |
+| [Ch 8](/blog/embedded/hardware/pcie/chapter08-dllp) | DLLLA, Data Link 오류 비트 |
+| [Ch 9](/blog/embedded/hardware/pcie/chapter09-physical-layer) | Link Control·Link Status 2 |
+| [Ch 10](/blog/embedded/hardware/pcie/chapter10-linux-basics) ~ [Ch 17](/blog/embedded/hardware/pcie/chapter17-performance) | Linux 드라이버·운영·도구·성능 |
 
-driver 코드는 *symbolic 이름 사용 권장* — *magic number 회피*.
-
-## 지금까지 다룬 내용과 다음 장
-
-전체 19편 중 이 장은 register lookup을 담당합니다. 다음 [Ch 19 고급 기능](/blog/embedded/hardware/pcie/chapter19-advanced-features)에서 Lane Margining·10-bit Tag·TPH·ACS·L0p를 이어갑니다.
-
-- Ch 1: Fundamentals — Gen·encoding·stack·topology
-- Ch 2: TLP — 5 가족·split transaction·routing·ordering
-- Ch 3: Configuration Space — 4 KB ECAM·Capability chain
-- Ch 4: BAR & MMIO — size probe·ReBAR·VF BAR
-- Ch 5: Interrupts — INTx·MSI·MSI-X·Interrupt Remapping
-- Ch 6: Power Management — D/L states·ASPM·L1 substates·PME
-- Ch 7: Error Handling — AER 3-tier·DPC·Poisoned TLP
-- Ch 8: DLLP — ACK/NAK·Flow Control·FLIT mode
-- Ch 9: Physical Layer — LTSSM·Equalization·SerDes
-- Ch 10: Linux Basics — struct pci_dev·driver model·sysfs
-- Ch 11: DMA·IOMMU — coherent·streaming·ATS·PASID·IOMMUFD
-- Ch 12: Virtualization I — SR-IOV·VFIO·DPDK·SPDK·ACS
-- Ch 13: Virtualization II — vIOMMU·S-IOV·VirtIO·IDE·TDISP
-- Ch 14: Linux Operations — pciehp·AER recovery·DPC·ARI
-- Ch 15: Tools — lspci·setpci·pcimem·debugfs·analyzer
-- Ch 16: Troubleshooting — 10 시나리오북
-- Ch 17: Performance — BW·MPS·NUMA·DDIO·P2P
-- Ch 18: Register Maps — 본 reference
-
-Lookup에 쓰는 register offset은 일반적인 config 시작점, capability 시작점, extended capability 시작점 중 어느 기준인지 먼저 확인합니다. 실제 장치에 읽기·쓰기나 reset을 실행하지 않았으며, 이 표를 완전한 모든 세대 register 목록으로 해석하면 안 됩니다.
+다음 [Ch 19 고급 기능](/blog/embedded/hardware/pcie/chapter19-advanced-features)에서 Lane Margining·10-bit Tag·TPH·ACS·L0p를 이어 갑니다.
 
 ## 관련 항목
 
-- [Ch 1: PCIe Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals) — 시리즈 시작
-- [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — 같은 헤더를 *처음 배울 때* 보는 쪽. 이 장은 비트 단위로 찾아볼 때
+- [Ch 1: PCIe Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals) — 시리즈 VM 구성
+- [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — 같은 헤더를 처음 배울 때 보는 쪽. 이 장은 비트 단위로 찾아볼 때
 - [CXL Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position) — PCIe 위 alternate protocol
 - [HBM·GDDR 심화 Ch 9: CXL.mem](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
 - [Embedded Performance Engineering Ch 29: CXL Interconnect](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)
 
 ## 시리즈 자료 출처 안내
 
-본 글의 1차 자료는 *PCIe Base Specification·Linux `include/uapi/linux/pci_regs.h`·Linux `drivers/pci/`·CPU 벤더 매뉴얼*입니다. PCIe Specification은 *§ navigation aid*로만 인용 — *spec 본문 재생산 없음*. 자세한 정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.
+이 글의 표는 Linux v6.12 `include/uapi/linux/pci_regs.h`의 정의와 주석을 옮긴 것이고, 헤더에 없는 비트는 출처를 따로 적었습니다. 관찰값은 Ch 1의 시리즈 VM에서 읽었습니다. 자료 정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내)에 있습니다.
 
 > PCI Express® and PCIe® are registered trademarks of PCI-SIG.
-> Spec 인용은 PCI-SIG의 저작권을 따릅니다.
