@@ -21,7 +21,7 @@ topics: ["embedded"]
 - TensorRT 11.0.0 release notes(docs.nvidia.com)
 - 같은 저장소의 `samples/trtexec/README.md`
 
-이전 판의 성능 표(ResNet-50·YOLOv8m latency·fps, GPU 사용률)는 출처가 없어 뺐고, 이전 판 코드 가운데 TensorRT 11에서 사라진 API는 아래에서 바로잡았습니다.
+출처가 있는 성능 수치는 찾지 못해 성능 표는 싣지 않았고, 코드는 TensorRT 11에 있는 API로만 썼습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -33,7 +33,7 @@ Jetson 보드나 데이터센터 GPU에서 ONNX 모델을 미리 최적화한 en
 
 TensorRT 11.0 release notes에서 이 글과 직접 관련된 변화는 셋입니다.
 
-- **Strongly typed가 기본.** "createNetworkV2() produces a strongly typed network by default in TensorRT 11.0.0. Weak typing is no longer supported." 11.4.0 header에서 `NetworkDefinitionCreationFlag::kSTRONGLY_TYPED`는 "Strongly typed mode is always enabled" 주석과 함께 deprecated이고, 이전 판이 쓰던 `kEXPLICIT_BATCH`는 header에 없습니다.
+- **Strongly typed가 기본.** "createNetworkV2() produces a strongly typed network by default in TensorRT 11.0.0. Weak typing is no longer supported." 11.4.0 header에서 `NetworkDefinitionCreationFlag::kSTRONGLY_TYPED`는 "Strongly typed mode is always enabled" 주석과 함께 deprecated이고, `kEXPLICIT_BATCH`는 header에 없습니다.
 - **precision flag 제거.** per-precision `BuilderFlag` 값(`kFP16`, `kBF16`, `kFP8`, `kINT8`, `kINT4`, `kFP4` 등)이 제거됐습니다. 11.4.0 header의 `BuilderFlag`에도 `kGPU_FALLBACK`, `kTF32`, `kSPARSE_WEIGHTS` 등은 있지만 `kFP16`·`kINT8`은 없습니다. FP16으로 돌리려면 network의 tensor type이 FP16이어야 합니다.
 - **implicit quantization 제거.** "The IInt8Calibrator class and all subclasses (… IInt8EntropyCalibrator2 …), setInt8Calibrator() … have been removed. Use explicit quantization with Q/DQ nodes instead." INT8 모델은 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)에서 ONNX Runtime으로 만든 것 같은 Q/DQ 그래프로 넘깁니다.
 
@@ -152,11 +152,11 @@ config->setDLACore(0);
 config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
 ```
 
-`setDefaultDeviceType`, `setDLACore`, `BuilderFlag::kGPU_FALLBACK`은 11.4.0 header에 있습니다. 이전 판의 `setFlag(kINT8)` 줄은 TensorRT 11에서 그 flag가 없으므로 뺐습니다. DLA 개수는 장치마다 다르고, [12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)에서 인용한 NVIDIA Jetson Orin 비교표대로 Orin Nano 8GB에는 DLA가 없습니다.
+`setDefaultDeviceType`, `setDLACore`, `BuilderFlag::kGPU_FALLBACK`은 11.4.0 header에 있습니다. TensorRT 11에는 `BuilderFlag::kINT8`이 없으므로 `setFlag(kINT8)`은 쓰지 않습니다. DLA 개수는 장치마다 다르고, [12-01](/blog/embedded/modern-recipes/part12-01-edge-inference)에서 인용한 NVIDIA Jetson Orin 비교표대로 Orin Nano 8GB에는 DLA가 없습니다.
 
 ### Custom plugin
 
-release notes는 "The entire IPluginV2 family is deprecated, but not removed"라고 적고, 11.4.0의 `NvInferPluginBase.h`에는 `IPluginV3`가 있습니다. 새 plugin은 V3 interface로 씁니다. 이전 판의 `IPluginV2DynamicExt` 예는 deprecated interface라 뺐습니다.
+release notes는 "The entire IPluginV2 family is deprecated, but not removed"라고 적고, 11.4.0의 `NvInferPluginBase.h`에는 `IPluginV3`가 있습니다. 새 plugin은 V3 interface로 씁니다. `IPluginV2DynamicExt`는 deprecated interface입니다.
 
 ## 자주 보는 함정
 
