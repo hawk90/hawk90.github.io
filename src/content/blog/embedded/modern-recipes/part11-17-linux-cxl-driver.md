@@ -146,7 +146,7 @@ $ echo region0    > /sys/bus/cxl/drivers/cxl_region/bind
 | `commit` 1 → 0 → 1 | `commit`이 1, 0, 1로 바뀜 |
 | `cxl_region` bind | `dax0.0`이 생기고 node 1(256 MB)이 나타남 |
 
-`size`와 `dpa_size`는 `kstrtou64`·`kstrtoull`로 읽으므로(`drivers/cxl/core/region.c`, `port.c`) `256M` 같은 접미사를 받지 않습니다. 이전 판의 `echo 256M > size`는 이 때문에 실패합니다. `targetN`에는 memdev 이름이 아니라 *endpoint decoder* 이름을 쓰고, 그 decoder에는 위처럼 DPA를 먼저 잡아야 합니다. commit만 해서는 메모리가 생기지 않고, region을 `cxl_region` driver에 bind해야 dax device가 만들어집니다. `cxl create-region`은 이 모든 단계를 대신 합니다.
+`size`와 `dpa_size`는 `kstrtou64`·`kstrtoull`로 읽으므로(`drivers/cxl/core/region.c`, `port.c`) `256M` 같은 접미사를 받지 않아 `echo 256M > size`는 실패합니다. `targetN`에는 memdev 이름이 아니라 *endpoint decoder* 이름을 쓰고, 그 decoder에는 위처럼 DPA를 먼저 잡아야 합니다. commit만 해서는 메모리가 생기지 않고, region을 `cxl_region` driver에 bind해야 dax device가 만들어집니다. `cxl create-region`은 이 모든 단계를 대신 합니다.
 
 **commit은 되돌릴 수 있습니다.** `commit`에 0을 쓰면 decoder reset이 예약되고 region이 내려갑니다. 플랫폼이 잠근(locked) region만 `-EPERM`으로 거부합니다(`drivers/cxl/core/region.c`의 `commit_store`).
 
