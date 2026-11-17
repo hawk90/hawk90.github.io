@@ -249,7 +249,7 @@ spinlock을 보유한 채 기다리면 다른 참여자의 진행을 막습니�
 - lock 없는 4 thread 증가는 800만 중 314만만 남았고, 세 lock은 모두 800만을 맞췄습니다.
 - LDREX/STREX는 ARMv7-A와 Cortex-M3에서 assemble되고 Cortex-M0에서는 거절됩니다. LSE 명령은 `-march=armv8.1-a`에서만 assemble됩니다.
 - Debian gcc 14.2.0 기본 빌드는 atomic을 outline helper 호출로, `-march=armv8.1-a`는 LSE 명령으로, `-mno-outline-atomics`는 LL/SC loop로 만듭니다.
-- 1초 경쟁에서 TTAS는 thread 간 획득 횟수가 1.4~5.4배 차이 났고, ticket은 1.03 이하, MCS는 한 번을 빼고 1.01 이하였습니다.
+- HVF 게스트(4 vCPU)의 1초 경쟁에서 TTAS는 thread 간 획득 횟수가 1.4~5.4배 차이 났고, ticket은 1.03 이하, MCS는 한 번을 빼고 1.01 이하였습니다.
 - release store는 ARMv7-A에서 `dmb ish` + store, AArch64에서 `stlr`이 됐습니다.
 
 ## 근거 자료

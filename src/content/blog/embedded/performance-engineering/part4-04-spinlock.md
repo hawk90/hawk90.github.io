@@ -327,6 +327,8 @@ FIFO lock은 다음 차례가 실행 중이어야만 진행합니다. 8 vCPU에 
 
 ## 정리
 
+아래 수치는 모두 이 글의 측정 환경(Apple M2 Pro 위 HVF Debian 13 arm64 게스트)에서 잰 값이며, 다른 CPU나 보드의 값이 아닙니다.
+
 - 같은 CPU에서 futex로 넘기는 context switch는 650 ns였고, spinlock은 이 비용 대신 CPU를 씁니다.
 - 어느 hold time에서도 항상 이기는 lock은 없었습니다. 0.1 µs에서는 mutex가, 1 µs에서는 TTAS가, 100 µs에서는 TTAS가 가장 빨랐습니다.
 - TTAS는 짧은 hold에서 TAS보다 빨랐고, 공정한 ticket lock은 p99 대기를 크게 줄였습니다.

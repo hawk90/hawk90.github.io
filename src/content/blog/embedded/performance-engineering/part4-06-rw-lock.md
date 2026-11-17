@@ -229,6 +229,8 @@ rcu_read_unlock();
 
 ## 정리
 
+아래 수치는 모두 이 글의 측정 환경(Apple M2 Pro 위 HVF Debian 13 arm64 게스트)에서 잰 값이며, 다른 CPU나 보드의 값이 아닙니다.
+
 - glibc `pthread_rwlock_t`의 read는 공유 `__readers` word를 RMW하므로, 짧은 read 구간에서는 read 100%에서도 mutex보다 느렸습니다(4 thread, 9.70 대 34.50 Mops/s).
 - Read 구간이 약 2 µs가 되자 같은 4 thread에서 rwlock이 mutex의 2~6배가 됐습니다.
 - glibc 기본값은 reader preference이고, 겹치는 reader 3개 앞에서 writer 대기가 중앙값 9 ms, 최악 98 ms였습니다. `PREFER_WRITER_NONRECURSIVE_NP`로 39 µs까지 줄었습니다.

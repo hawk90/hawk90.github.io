@@ -214,7 +214,7 @@ refill 횟수는 3C를 구분하지 않습니다. 크기·간격·순서를 하�
 - Cachegrind(32 KiB, 4-way, 64 B)에서 64 KiB 반복 순회는 매 pass 1,024 line이 capacity miss였고, 블록 단위로 바꾸자 104,013 → 2,637로 줄었습니다.
 - 8 KiB 간격의 배열 다섯 개는 80.9% miss(conflict)였고, line 하나씩 padding하자 5.2%가 됐습니다. 남은 것은 capacity miss입니다.
 - M2 Pro에서 stride 4,096 byte 열 순회는 4,100 byte보다 중앙값 기준 2.9배 느렸습니다. 64×64 tiling은 행렬곱을 1.6배 빠르게 했습니다.
-- 무작위 gather에서 software prefetch의 이득은 최대 7%였습니다. out-of-order 코어는 독립 miss를 이미 겹칩니다.
+- M2 Pro에서 무작위 gather의 software prefetch 이득은 최대 7%였습니다. out-of-order 코어는 독립 miss를 이미 겹칩니다.
 - PMU의 refill 카운터는 miss 수만 셉니다. 3C 구분은 실험으로 합니다.
 
 다음 편은 **Cache Line 최적화**입니다.

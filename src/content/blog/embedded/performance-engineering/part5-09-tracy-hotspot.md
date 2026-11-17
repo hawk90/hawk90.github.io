@@ -236,6 +236,8 @@ Hotspot README가 권하는 것은 `--call-graph dwarf`입니다. 이 guest에�
 
 ## 정리
 
+아래 수치는 모두 이 글의 측정 환경(Apple M2 Pro 위 HVF Debian 13 arm64 게스트)에서 잰 값이며, 다른 CPU나 보드의 값이 아닙니다.
+
 - Tracy zone 비용은 timer 경로가 정합니다. Mac(CNTVCT)에서 약 7.6 ns, Linux arm64 VM(`clock_gettime`)에서 약 47 ns였습니다. 매뉴얼의 2.25 ns는 12개 스레드의 wall-clock 차이를 zone 수로 나눈 값이라 스레드당 비용과 직접 비교할 수 없습니다.
 - Hotspot은 `--call-graph dwarf`로 기록한 `perf.data`를 보여 주며, 배포 AppImage는 x86_64용뿐입니다.
 - uftrace는 `-pg` 또는 동적 패치로 사용자 함수의 진입·반환을 기록합니다. 이 예제에서는 기록 고정 비용이 약 100 ms였고, 20,000회 반복에서 늘어난 몫은 반복당 약 0.9 µs였습니다.

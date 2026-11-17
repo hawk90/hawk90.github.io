@@ -286,6 +286,8 @@ mutex_take(&mtx);   /* 다른 lock이라 서로를 배제하지 못함 */
 
 ## 정리
 
+아래 수치는 모두 이 글의 측정 환경(Apple M2 Pro 위 HVF Debian 13 arm64 게스트)에서 잰 값이며, 다른 CPU나 보드의 값이 아닙니다.
+
 - 경쟁 없는 mutex 대기는 22 ns였지만, 8 thread가 하나를 다투자 평균 31.8 µs, p99 410 µs가 됐습니다.
 - `perf lock`은 커널 lock tracepoint를 읽습니다. pthread mutex 경합은 `do_futex`의 커널 spinlock 경합으로만 보였습니다.
 - 배포 커널(lockdep 없음)에서 쓸 수 있는 lock tracepoint는 `contention_begin`/`contention_end`뿐입니다.

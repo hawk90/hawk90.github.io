@@ -258,7 +258,7 @@ Linux가 `CNTVCT_EL0`를 읽기 전에 `isb`를 두는 이유는, 그렇지 않�
 
 - Wall-clock, CPU 시간, 명령어 수는 서로 다른 질문에 답합니다. CPU를 나눠 쓰면 앞의 둘이 두 배 차이 납니다.
 - DWT `CYCCNT`는 ARMv7-M에서 선택 사항이고 `NOCYCCNT`로 확인합니다. Cortex-M0+에는 없고, QEMU에서는 0만 읽힙니다.
-- Linux에서는 `CLOCK_MONOTONIC_RAW`(vDSO, 약 17 ns)와 perf를 씁니다. arm64에서 직접 읽을 때는 `isb; mrs cntvct_el0`입니다.
+- Linux에서는 `CLOCK_MONOTONIC_RAW`(vDSO)와 perf를 씁니다. 이 글의 HVF 게스트에서 호출 하나는 약 17 ns였습니다. arm64에서 직접 읽을 때는 `isb; mrs cntvct_el0`입니다.
 - GPIO와 로직 분석기는 카운터가 없는 보드에서도 쓸 수 있는 외부 측정입니다.
 - 측정값은 trace buffer에 쌓아 두고, 출력은 측정이 끝난 뒤에 합니다.
 
