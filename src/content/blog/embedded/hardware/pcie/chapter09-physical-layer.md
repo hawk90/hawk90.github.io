@@ -138,7 +138,7 @@ FTS의 용도·개수·형식도 이번에 연 자료에 없어 다루지 않습
 
 ## LTSSM 디버깅
 
-표준 config space로는 현재 LTSSM 상태를 읽을 수 없고, 컨트롤러별 레지스터가 필요합니다. Linux 트리에서 그런 레지스터를 읽는 예가 MediaTek Gen3(`ltssm_str[]`), Baikal-T1(`BT1_CCU_PCIE_LTSSM_*`), DesignWare 계열(`DW_PCIE_LTSSM_*`)입니다. 이들 드라이버는 링크가 올라오지 않으면 그 값을 로그에 남기므로, 보드 bring-up 로그에서 LTSSM 숫자를 봤다면 먼저 해당 드라이버 소스의 표를 찾습니다. 링크 bring-up 절차 전체는 [Embedded Debugging Ch 18](/blog/tools/debugging/embedded/chapter18-highspeed-link-bringup)에 있습니다.
+표준 config space로는 현재 LTSSM 상태를 읽을 수 없고, 컨트롤러별 레지스터가 필요합니다. Linux 트리에서 그런 레지스터를 읽는 예가 MediaTek Gen3(`ltssm_str[]`), Baikal-T1(`BT1_CCU_PCIE_LTSSM_*`), DesignWare 계열(`DW_PCIE_LTSSM_*`)입니다. 이들 드라이버는 링크가 올라오지 않으면 그 값을 로그에 남기므로, 보드 bring-up 로그에서 LTSSM 숫자를 봤다면 먼저 해당 드라이버 소스의 표를 찾습니다.
 
 ## 자주 하는 실수
 
@@ -176,7 +176,6 @@ Link Status 2의 Equalization Complete·Phase 1~3 Successful 비트가 결과를
 - [Ch 1: PCIe Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals) — 속도별 encoding
 - [Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — L0s·L1
 - [Ch 8: DLLP](/blog/embedded/hardware/pcie/chapter08-dllp) — DL_Active
-- [Embedded Debugging Ch 18: 고속 링크 bring-up](/blog/tools/debugging/embedded/chapter18-highspeed-link-bringup)
 
 ## 시리즈 자료 출처 안내
 

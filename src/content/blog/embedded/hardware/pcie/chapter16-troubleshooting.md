@@ -171,7 +171,6 @@ IOMMU group, isolated MSI, reset 범위 세 조건을 모두 봐야 했습니다
 - [Ch 14: Linux Operations](/blog/embedded/hardware/pcie/chapter14-linux-operations) — pciehp·recovery
 - [Ch 15: Tools](/blog/embedded/hardware/pcie/chapter15-tools)
 - [Ch 17: Performance](/blog/embedded/hardware/pcie/chapter17-performance)
-- [Embedded Debugging Ch 18: 고속 링크 bring-up](/blog/tools/debugging/embedded/chapter18-highspeed-link-bringup) — 실제 보드의 링크 문제
 
 ## 시리즈 자료 출처 안내
 
