@@ -191,7 +191,7 @@ relaxed 버전도 한 번도 틀리지 않았습니다. 그렇다고 relaxed가 
 
 ## Lock-Free Queue
 
-단일 producer·단일 consumer ring을 C11 atomic으로 쓴 버전입니다. 이전 판의 `__DMB()` 버전은 `pop`에서 `buf[t]`를 읽은 뒤 `tail`을 쓰기 전에 barrier가 없어, producer가 아직 읽지 않은 칸을 덮어쓸 수 있었습니다. 아래 코드는 `tail`도 release로 써서 그 순서를 막습니다.
+단일 producer·단일 consumer ring을 C11 atomic으로 쓴 버전입니다. `pop`에서 `buf[t]`를 읽은 뒤 `tail`을 쓰기 전에 barrier가 없으면 producer가 아직 읽지 않은 칸을 덮어쓸 수 있습니다. 아래 코드는 `tail`도 release로 써서 그 순서를 막습니다.
 
 ```c
 #define SIZE 256u
@@ -229,7 +229,7 @@ Debian guest에서 producer thread와 consumer thread로 1억 byte를 흘려 순
 100000000 items, 0 out-of-order or corrupted
 ```
 
-같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어갑니다. 뒤쪽은 이전 판의 `__DMB()`(buf write → head write) 자리이고, 앞쪽은 tail을 acquire로 읽었기 때문에 붙었습니다.
+같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어갑니다. 뒤쪽은 buf write → head write 순서를 지키는 자리이고, 앞쪽은 tail을 acquire로 읽었기 때문에 붙었습니다.
 
 ```text
 push:
@@ -296,7 +296,7 @@ __DSB();   /* AN321 4.11: required architecturally if an exception follows immed
 /* 이제 IRQ가 새 vector 사용 */
 ```
 
-AN321 4.11절의 아키텍처 요구는 DSB이고, Cortex-M3·M4·M0+에서는 구현상 그것도 필요 없다고 적습니다. 이전 판의 "DSB+ISB가 없으면 다음 IRQ가 옛 vector를 써서 crash"는 AN321과 맞지 않아 고쳤습니다. vector table의 *entry*를 바꾼 경우는 AN321 4.12절에 따로 있습니다.
+AN321 4.11절의 아키텍처 요구는 DSB이고, Cortex-M3·M4·M0+에서는 구현상 그것도 필요 없다고 적습니다. vector table의 *entry*를 바꾼 경우는 AN321 4.12절에 따로 있습니다.
 
 ## Multi-Core Wakeup
 
