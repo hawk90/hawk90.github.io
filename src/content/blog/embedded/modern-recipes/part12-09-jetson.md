@@ -137,7 +137,7 @@ vpiStreamSync(stream);
 
 ### DeepStream
 
-Gst-nvinfer 문서는 "The plugin accepts batched NV12/RGBA buffers from upstream. The NvDsBatchMeta structure must already be attached to the Gst Buffers."라고 적습니다. 이 batch를 만드는 것이 Gst-nvstreammux이고, 문서는 "forms a batch of frames from multiple input sources"라고 설명합니다. 그래서 카메라나 decoder와 `nvinfer` 사이에는 `nvstreammux`가 들어가야 합니다. 이전 판의 `nvarguscamerasrc ! nvvidconv ! nvinfer` pipeline은 `nvstreammux`가 없어 이 조건을 만족하지 않습니다.
+Gst-nvinfer 문서는 "The plugin accepts batched NV12/RGBA buffers from upstream. The NvDsBatchMeta structure must already be attached to the Gst Buffers."라고 적습니다. 이 batch를 만드는 것이 Gst-nvstreammux이고, 문서는 "forms a batch of frames from multiple input sources"라고 설명합니다. 그래서 카메라나 decoder와 `nvinfer` 사이에는 `nvstreammux`가 들어가야 합니다. `nvarguscamerasrc ! nvvidconv ! nvinfer`처럼 `nvstreammux`를 빼면 이 조건을 만족하지 않습니다.
 
 nvstreammux는 source마다 `sink_%u` pad를 요청해 연결하고, `batch-size`만큼 frame이 모이거나 `batched-push-timeout`이 지나면 batch를 내보냅니다. 출력은 하나의 해상도(`width`, `height`)이고, 입력 해상도가 다르면 muxer가 scale합니다.
 
