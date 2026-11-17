@@ -122,11 +122,11 @@ cmake -B build -DGGML_VULKAN=ON                    # Vulkan GPUs
 | `-lm, --load-mode MODE` | `auto`, `none`, `mmap`, `mlock`, `mmap+mlock` | `auto`(mmap) |
 | `--chat-template` | custom jinja chat template | model metadata의 template |
 
-이전 판의 `--no-mmap`은 이 build의 help에 없고 `--load-mode`가 그 자리를 맡습니다.
+`--no-mmap`은 이 build의 help에 없고 `--load-mode`가 그 자리를 맡습니다.
 
 ### C API
 
-`include/llama.h`는 이 commit에서 바뀌었습니다. `llama_decode()`와 `llama_batch_get_one()`이 deprecated가 되었고, 대신 `llama_batch_ext`와 `llama_process(ctx, LLAMA_PROCESS_TYPE_DECODE, batch)`를 씁니다(`examples/simple/simple.cpp`가 새 방식입니다). 이전 판의 `llama_batch_get_one` loop는 컴파일되지만 deprecated 경고가 납니다. 아래는 새 API로 쓴 loop이고, 실행해 문장을 생성했습니다.
+`include/llama.h`는 이 commit에서 바뀌었습니다. `llama_decode()`와 `llama_batch_get_one()`이 deprecated가 되었고, 대신 `llama_batch_ext`와 `llama_process(ctx, LLAMA_PROCESS_TYPE_DECODE, batch)`를 씁니다(`examples/simple/simple.cpp`가 새 방식입니다). `llama_batch_get_one`으로 쓴 loop는 컴파일되지만 deprecated 경고가 납니다. 아래는 새 API로 쓴 loop이고, 실행해 문장을 생성했습니다.
 
 ```c
 #include <stdio.h>
@@ -269,7 +269,7 @@ Generation: 49 tokens, 237.249 tokens-per-sec
 Peak memory: 0.369 GB
 ```
 
-이전 판처럼 문자열을 그대로 `prompt`로 넘기면 chat template이 빠지므로, `apply_chat_template`으로 감쌌습니다.
+문자열을 그대로 `prompt`로 넘기면 chat template이 빠지므로, `apply_chat_template`으로 감쌌습니다.
 
 ## 측정 / 성능 비교
 
