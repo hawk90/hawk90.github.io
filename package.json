@@ -158,7 +158,7 @@
     "astro-expressive-code": "^0.44.3",
     "cheerio": "^1.2.0",
     "htmlparser2": "^10.1.0",
-    "marked": "^18.2.0",
+    "marked": "^18.2.1",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-katex": "^7.0.1",
     "rehype-slug": "^6.0.0",
@@ -184,7 +184,7 @@
       "fflate": "0.8.3"
     },
     "postcss-nested": {
-      "postcss-selector-parser": "7.1.8"
+      "postcss-selector-parser": "7.2.1"
     },
     "katex": "0.19.1"
   }
