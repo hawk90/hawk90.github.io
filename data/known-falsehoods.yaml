@@ -278,3 +278,9 @@
   correction: 'FPRD/FPWR/FPRW use the Configured Station Address (node addressing), not a "fixed position"'
   source: 'Beckhoff EtherCAT Slave Controller Section I v2.3, Table 4/Table 6 (Configured Address Read/Write)'
   fixed_in: industrial-ethernet ch04
+
+- id: soem-simple-test-op-wait-40
+  pattern: '40회\s*×\s*50,000'
+  correction: 'SOEM v1.4.0 simple_test waits with chk = 200 (up to 201 iterations of ec_statecheck(..., 50000))'
+  source: 'SOEM v1.4.0 test/linux/simple_test/simple_test.c:73-81'
+  fixed_in: industrial-ethernet ch05

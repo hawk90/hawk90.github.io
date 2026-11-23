@@ -2,7 +2,7 @@
 title: "EtherCAT Master 구현 — SOEM API와 구성·검증의 경계"
 slug: "embedded/protocols/industrial-ethernet/chapter05-ethercat-master"
 date: 2026-05-13T09:05:00
-description: "SOEM v1.4.0의 NIC 조회·WKC 계산을 실행하고, OP 전환·주기 실행·ESI/SII 구성에서 별도로 검증할 조건을 살펴봅니다."
+description: "SOEM v1.4.0을 macOS와 Debian 12 VM에서 빌드하고 adapter 조회·권한·기대 WKC를 실제로 확인한 뒤, IgH 1.6.9의 커널 모듈 구조와 라이선스, 슬레이브의 SII를 소스로 정리합니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 5
 tags: [ethercat, soem, igh, twincat]
@@ -12,47 +12,63 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"EtherCAT 마스터는 전용 하드웨어가 아니라 *일반 NIC + 결정적 소프트웨어*로 만든다."** SOEM(작고 portable), IgH(커널 모듈, 고성능), TwinCAT(상용 Windows) 셋 중 목적에 맞춰 고릅니다.
+> **"EtherCAT 마스터는 전용 하드웨어가 아니라 *일반 NIC + 결정적 소프트웨어*로 만든다."** SOEM은 userspace 라이브러리, IgH는 커널 모듈, TwinCAT은 Beckhoff의 상용 환경입니다.
 
-EtherCAT의 *경제성*을 떠받치는 핵심은 *마스터의 단순함*입니다. 슬레이브는 ASIC이 필요하지만, 마스터는 *일반 1 Gbps NIC + Linux PC*면 충분합니다. 이 비대칭이 EtherCAT을 빠르게 퍼뜨렸습니다.
+EtherCAT의 비대칭은 슬레이브와 마스터 사이에 있습니다. 슬레이브는 ESC라는 전용 칩이 필요하지만, 마스터는 [Ch 4](/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame)에서 본 대로 raw socket으로 프레임을 만들어 보내면 됩니다. 식당에 비유하면 슬레이브는 각자 주방 설비를 갖춘 가게이고, 마스터는 주문서 한 장을 들고 가게를 차례로 도는 배달원입니다.
 
-이 장은 마스터 측 구현 세 가지를 비교하고, SOEM C API로 NIC 목록과 기대 WKC를 확인합니다. 실제 OP 주기 통신은 별도 검증 범위로 구분합니다. 마지막에 슬레이브 측의 ESC 칩 선택과 ENI/ESI XML 파일 구조를 정리합니다.
+이 장은 마스터 구현 셋을 비교하고, SOEM v1.4.0을 macOS와 Debian 12 VM에서 직접 빌드·실행하면서 만난 일을 기록합니다. 그다음 IgH EtherCAT Master 1.6.9의 소스 구조를 보고, 마지막에 슬레이브 쪽의 SII·ESI를 정리합니다.
 
 ## 세 가지 마스터 — 한눈 비교
 
-| 항목 | SOEM | IgH (EtherCAT Master) | TwinCAT |
+| 항목 | SOEM v1.4.0 | IgH EtherCAT Master 1.6.9 | TwinCAT |
 |------|------|----------------------|---------|
-| 라이선스 | v1.4.0 LICENSE의 GPLv2 + 예외·추가 기술 조건 확인 | 선택 버전의 license 확인 | 제품·기능별 상용 조건 |
-| 형태 | 순수 C 라이브러리 | 커널 모듈 + userspace lib | Windows 통합 IDE |
-| OS | Linux/Windows/RTOS | Linux (커널 패치) | Windows + RT extension |
+| 라이선스 | GPLv2 + 링크 예외, Beckhoff EtherCAT Master License 조건 (`LICENSE`) | master·드라이버 GPLv2, userspace `lib/`와 `ecrt.h`는 LGPL 2.1 | Beckhoff 상용 |
+| 형태 | C 라이브러리, userspace | 커널 모듈 + userspace 라이브러리 | 개발은 Windows의 Visual Studio 기반 XAE, runtime은 Windows 또는 TwinCAT/BSD |
+| NIC 경로 | `PF_PACKET` raw socket | 전용 패치 드라이버 또는 generic 드라이버 | 호환 포트에 설치하는 TwinCAT 실시간 이더넷 드라이버 |
 
-세 가지 모두 *정상 동작*하지만 *지향점*이 다릅니다.
-
-- **SOEM**: 가볍게 시작하고 싶을 때. 임베디드 RTOS(FreeRTOS, NuttX)에도 포팅 가능.
-- **IgH**: production 수준의 결정성. CNC, 로봇 컨트롤러 등에 적합.
-- **TwinCAT**: PLC 프로그래머가 익숙한 환경. *Beckhoff IO 모듈*과 매칭이 자연스러움.
-
-이 글은 [SOEM v1.4.0 LICENSE](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/LICENSE)·[EtherLab 1.6 API](https://docs.etherlab.org/ethercat/1.6/doxygen/group__ApplicationInterface.html)를 기준으로 구현 경계를 구분합니다. Cycle·jitter·지역별 채택률·라이선스 비용을 같은 조건으로 측정하거나 조사한 비교는 아닙니다.
+SOEM v1.4.0의 `LICENSE`는 GPLv2에 링크 예외를 붙이고, 끝에서 두 번째 문단에서 SOEM으로 EtherCAT 마스터를 만들어 쓰거나 배포하려면 Beckhoff Automation에서 EtherCAT Master License를 받아야 한다고 적습니다. 오픈소스라는 사실과 상용 배포 조건은 따로 읽어야 합니다. IgH 1.6.9의 `README.md`는 GPLv2를, `lib/master.c`와 `include/ecrt.h`의 헤더는 LGPL을 명시하고, 저장소에 `COPYING`과 `COPYING.LESSER`(2.1)가 함께 있습니다.
 
 ## SOEM — Simple Open EtherCAT Master
 
-SOEM은 *학습용 + 임베디드용* 마스터의 표준입니다. 이 글은 tag v1.4.0의 API에 한정합니다. 이후 버전의 구조·라이선스·예제는 별도로 확인해야 합니다.
+SOEM은 C 라이브러리 하나로 프레임 생성, 슬레이브 탐색, SII 읽기, mailbox, DC 설정까지 담고 있습니다. 이 글은 tag v1.4.0만 다룹니다.
 
-### 빌드
+### 빌드 — 두 환경에서 만난 두 가지 문제
 
-아래는 소스 버전을 고정해 임시 build directory에 라이브러리만 만드는 예입니다. 시스템 install이나 slave 상태 변경을 포함하지 않습니다.
+v1.4.0의 `CMakeLists.txt` 첫 줄은 `cmake_minimum_required(VERSION 2.8.4)`입니다. macOS(arm64, CMake 4.5.1, Apple clang 21.0.0)에서 그대로 configure하면 실패합니다.
+
+```text
+CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 has been removed from CMake.
+```
+
+`-DCMAKE_POLICY_VERSION_MINIMUM=3.5`를 주면 configure가 통과하고 `libsoem.a`가 만들어집니다.
 
 ```bash
 git clone --branch v1.4.0 --depth 1 https://github.com/OpenEtherCATsociety/SOEM.git
 cmake -S SOEM -B soem-build -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-cmake --build soem-build --target soem --parallel 2
+cmake --build soem-build --target soem --parallel 4
 ```
 
-`CMAKE_POLICY_VERSION_MINIMUM`은 구형 CMakeLists를 새 CMake에서 configure할 때의 호환 설정입니다. 생성된 static library의 경로·OS library·include 경로는 실제 build 결과로 확인합니다. 이 작업의 검증은 macOS port의 library build이며 Linux RT 실행과 다릅니다.
+Debian 12 VM(arm64, CMake 3.25.1, GCC 12.2.0)에서는 configure는 되지만 컴파일이 멈춥니다. `CMakeLists.txt`가 Linux·macOS 모두에 `-Wall -Wextra -Werror`를 붙이는데, GCC 12가 `oshw/linux/oshw.c`의 `strncpy`에 경고를 내기 때문입니다.
+
+```text
+/root/SOEM/oshw/linux/oshw.c:83:11: error: ‘strncpy’ specified bound depends on the length of the source argument [-Werror=stringop-truncation]
+cc1: all warnings being treated as errors
+```
+
+해당 코드는 바로 앞에서 길이를 `EC_MAXLEN_ADAPTERNAME - 1`로 자르고 끝에 `'\0'`을 넣으므로 실제 overflow는 아닙니다. 그래서 이 경고만 오류에서 빼고 빌드했습니다.
+
+```bash
+cmake -S SOEM -B soem-build -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_FLAGS="-Wno-error=stringop-truncation"
+cmake --build soem-build --parallel 4
+```
+
+이렇게 하면 `libsoem.a`와 `simple_test`, `slaveinfo`, `eepromtool`이 모두 만들어집니다.
 
 ### NIC 목록 조회 예제
 
-다음 완결된 C 프로그램은 adapter 목록을 조회하고 해제합니다. `ec_init()`·`ec_config_init()`·PDO 송신·OP 요청을 호출하지 않습니다. NIC를 찾았다는 사실은 slave 연결이나 주기 통신 성공을 뜻하지 않습니다.
+다음 프로그램은 SOEM이 찾은 adapter 목록을 출력하고 해제합니다. `ec_init()`이나 슬레이브 설정은 호출하지 않습니다.
 
 ```c title="soem-adapter-list.c"
 #include <stdio.h>
@@ -71,33 +87,46 @@ int main(void) {
 }
 ```
 
-Linux에서는 port에 맞는 pthread·rt 등의 link library가, macOS에서는 pthread·pcap과 실제 SOEM include 경로가 필요합니다. 출력은 실제 환경에서 확인하며 고정 slave 목록을 실행 결과로 제시하지 않습니다.
+VM에서 SOEM include 경로 네 개를 주고 `libsoem.a`, `-lpthread -lrt`와 링크해 실행한 결과입니다. veth 한 쌍을 미리 만들어 두었습니다.
 
-### OP 초기화는 별도의 시험 범위입니다
+```text
+# gcc -Wall -O2 -I SOEM/soem -I SOEM/osal -I SOEM/osal/linux -I SOEM/oshw/linux \
+    soem-adapter-list.c soem-build/libsoem.a -lpthread -lrt -o soem-adapter-list
+# ./soem-adapter-list
+lo	lo
+enp0s1	enp0s1
+veth1	veth1
+veth0	veth0
+```
 
-[공식 simple_test](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/test/linux/simple_test/simple_test.c)는 discovery·mapping·SAFE_OP·process data·OP 흐름을 보여 줍니다. 다만 `ec_config_map()`은 호출자 buffer의 용량을 인자로 받지 않습니다. 고정4096 B IOmap을 임의의 실기에 넘기고 반환값을 나중에 검사해도 이미 발생한 overflow를 막을 수는 없습니다. 선택한 slave/PDO의 필요 용량과 mapping 구현을 확인한 시험 구성이 필요합니다.
+Linux port의 `ec_find_adapters()`는 인터페이스 이름을 `name`과 `desc`에 똑같이 넣습니다(`oshw/linux/oshw.c` 83·85행의 두 `strncpy`). 목록에 나온다는 것은 커널이 그 인터페이스를 안다는 뜻일 뿐, 슬레이브가 연결되어 있다는 뜻은 아닙니다.
 
-실행할 master는 statecheck 반환값·초기 output·timeout·WKC 부족과 상태 이상 시 처리·종료와 복귀를 개별적으로 설계해야 합니다. 40회×50,000 μs의 상태 대기만 약2초이고 송수신·재시도도 더해지므로 이를200 ms 상한이라고 부를 수는 없습니다. 여기서는 실제 OP 전환이나 output 제어를 실행하지 않습니다.
+### OP 초기화 흐름 — 공식 simple_test
+
+[공식 simple_test](https://github.com/OpenEtherCATsociety/SOEM/blob/v1.4.0/test/linux/simple_test/simple_test.c)는 다음 순서로 진행합니다.
+
+1. `ec_init(ifname)`로 소켓을 엽니다.
+2. `ec_config_init(FALSE)`가 슬레이브를 찾고 Pre-Op까지 올립니다([Ch 3](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)의 ESM 절).
+3. `ec_config_map(&IOmap)`가 process data를 `char IOmap[4096]`에 매핑하고 Safe-Op를 요청합니다.
+4. `ec_configdc()`로 DC를 설정합니다.
+5. 기대 WKC를 계산하고, process data를 한 번 주고받은 뒤 `ec_writestate(0)`로 Op를 요청합니다.
+6. `chk = 200`과 `while (chk-- && ...)`로 최대 201번 `ec_send_processdata()`·`ec_receive_processdata()`·`ec_statecheck(0, EC_STATE_OPERATIONAL, 50000)`를 반복하며 Op 도달을 기다립니다.
+
+두 가지를 짚어 둡니다. 먼저 `ec_config_map(void *pIOmap)`(`ethercatconfig.c` 1643행)은 buffer 크기를 받지 않습니다. 매핑할 process data가 4096 byte를 넘어도 함수는 막지 못하므로, 호출 전에 슬레이브 구성의 총 입출력 크기를 알고 buffer를 잡아야 합니다. 다음으로 6단계의 대기는 `ec_statecheck`의 timeout 50,000 μs를 최대 201번 반복하므로 송수신 시간을 빼고도 약 10초입니다.
 
 ### 기대 WKC 계산
 
-v1.4.0의 `ec_groupt`에 `expectedWKC` field는 없습니다. [공식 예제](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/test/linux/simple_test/simple_test.c)는 `outputsWKC*2 + inputsWKC`을 계산합니다. 다음 순수 함수는 실제 타입을 사용합니다.
+v1.4.0의 `ec_groupt`(`ethercatmain.h` 239행부터)에는 `expectedWKC` 필드가 없고 `outputsWKC`와 `inputsWKC`(266·268행)가 있습니다. simple_test 65행은 이 둘로 기대값을 계산합니다.
 
-```c title="soem-expected-wkc.c"
-#include <stdbool.h>
-#include "ethercat.h"
-bool expected_wkc(const ec_groupt *group, int *result) {
-    if (!group || !result) return false;
-    *result = 2 * (int)group->outputsWKC + (int)group->inputsWKC;
-    return true;
-}
+```c title="test/linux/simple_test/simple_test.c:65"
+expectedWKC = (ec_group[0].outputsWKC * 2) + ec_group[0].inputsWKC;
 ```
 
-예를 들어 input/output이 각1회이면 기대값은3이며 input만 성공한 값1은 그1/3입니다. WKC 부족량만으로 고장 slave 수나 특정 SM 번호를 유일하게 추정할 수는 없습니다.
+출력 쪽에 2를 곱하는 이유는 [Ch 4](/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame)의 WKC 규칙에 있습니다. LRW에서 write 성공은 +2, read 성공은 +1입니다. 예를 들어 출력과 입력을 하나씩 가진 슬레이브 한 대의 기대값은 3이고, input만 성공하면 1, output만 성공하면 2가 돌아옵니다. 여러 대가 물려 있으면 같은 부족분이 여러 조합에서 나올 수 있어, 몇 대가 실패했는지는 WKC만으로 알 수 없습니다.
 
 ### RT cycle thread
 
-상대 sleep의 누적 drift를 줄이는 한 방법으로 `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, ...)`로 *절대 시각 wakeup*을 씁니다.
+주기 루프는 상대 sleep 대신 *절대 시각*으로 깨어나야 오차가 쌓이지 않습니다. `nanosleep(1 ms)`를 반복하면 처리 시간만큼 매 주기 밀리지만, `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, ...)`은 다음 목표 시각을 고정해 두고 그때까지 잡니다. 다음은 그 골격입니다.
 
 ```c
 struct timespec next_cycle;
@@ -112,115 +141,132 @@ while (running) {
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_cycle, NULL);
 
     ec_send_processdata();
-    ec_receive_processdata(EC_TIMEOUT);
+    wkc = ec_receive_processdata(EC_TIMEOUTRET);
 
     /* control logic here */
 }
 ```
 
-위 block은 실행 가능한 전체 프로그램이 아닌 Linux의 주기 대기 흐름 발췌입니다. 반환값·EINTR·overrun·late cycle 처리와 종료 조건이 필요합니다. 절대 시각 대기는 누적 drift를 줄이는 수단이며 특정 jitter·deadline을 보장하지 않습니다.
+`clock_nanosleep()`이 `EINTR`로 돌아오면 같은 목표로 다시 자야 하고, 처리가 늦어 목표가 이미 지났다면 다음 목표를 어떻게 잡을지 정해야 합니다. 그 계산은 [Ch 11](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)에서 코드로 다룹니다.
 
 ## IgH EtherCAT Master
 
-IgH(EtherCAT Master, Ingenieurgemeinschaft IgH가 개발)는 *커널 모듈 + userspace 라이브러리* 구조입니다.
+IgH EtherCAT Master(Ingenieurgemeinschaft IgH)는 *커널 모듈 + userspace 라이브러리* 구조입니다. 마스터 모듈이 커널 안에서 프레임을 주고받고, 애플리케이션은 `ecrt.h` API로 그 모듈에 요청을 보냅니다.
 
-![IgH 구조 — userspace API → ioctl → userspace lib → /dev/EtherCAT0 → 커널 모듈 → NIC](/images/blog/industrial-ethernet/diagrams/ch05-igh-stack.svg)
+![IgH 구조 — 애플리케이션이 ecrt_*() 함수로 userspace lib를 부르고, lib가 /dev/EtherCAT0에 ioctl을 보내 커널 모듈이 패치 드라이버 또는 generic 드라이버로 NIC를 쓰는 흐름](/images/blog/industrial-ethernet/diagrams/ch05-igh-stack.svg)
 
-IgH는 선택한 kernel·장치에 맞는 native driver 또는 generic driver 경로를 확인해야 합니다. 두 경로의 대역폭·jitter 우열은 구성과 측정 없이 고정하지 않습니다.
+1.6.9 소스의 `master/master.c` 369행은 마스터마다 `EtherCAT%u` 이름의 character device를 만듭니다. 그림의 `/dev/EtherCAT0`이 그것입니다.
 
-### 구성과 API의 경계
+NIC 경로는 둘입니다. `devices/` 디렉터리에는 커널 버전별로 패치한 네이티브 드라이버가 `*-<버전>-ethercat.c`와 원본 `*-<버전>-orig.c` 쌍으로 들어 있습니다. 이 드라이버를 쓰면 NIC가 일반 네트워크 스택에서 떨어지고, 마스터가 NIC를 직접 polling합니다. 1.6.9에 Linux 6.12용 파일이 있는 드라이버는 다음과 같습니다.
 
-[EtherLab 공식 문서](https://etherlab.org/en_GB/ethercat)는 stable-1.6 문서를 제공합니다. Kernel·driver 조합과 설치 방식은 그 버전에 맞춰 정하며 여기서는 모듈 설치나 서비스 시작을 실행하지 않습니다.
+| 드라이버 | 6.12 파일 | 가장 이른 버전 |
+|---|---|---|
+| e1000, e1000e, e100, 8139too | 있음 | 3.x |
+| igb | 있음 | 3.18 |
+| igc | 있음 | 5.14 |
+| r8169 | 있음 | 5.10 (3.x용은 `devices/` 최상위) |
+| genet | 있음 | 5.10 |
+| stmmac | 있음 | 6.1 |
 
-[1.6 application API](https://docs.etherlab.org/ethercat/1.6/doxygen/group__ApplicationInterface.html)에서 request master→create domain→slave config/PDO entry 등록→activate→domain data 접근을 구분합니다. 주기에는 receive→domain process→application 처리→domain queue→send가 필요합니다. NULL·오류 반환·PDO offset·working counter·release·실행 주기를 생략한 busy loop를 완성 master로 제시하면 안 됩니다. API 이름이 비슷하다는 사실만으로 SOEM과 lifecycle·threading 계약이 같지는 않습니다.
+다른 하나는 `devices/generic.c`의 generic 드라이버입니다. 커널 안에서 `PF_PACKET`, `SOCK_RAW` 소켓을 열어(219·222행) 아무 NIC나 일반 드라이버 그대로 씁니다. 지원 드라이버가 없는 NIC에서도 동작하지만, 프레임이 일반 네트워크 스택을 거칩니다.
+
+### 애플리케이션 API의 순서
+
+`include/ecrt.h`(1.6.9)의 함수로 애플리케이션 흐름을 나누면 다음과 같습니다.
+
+| 단계 | API (`ecrt.h` 행) |
+|---|---|
+| 마스터 요청 | `ecrt_request_master()` (655) |
+| domain 생성 | `ecrt_master_create_domain()` (762) |
+| 슬레이브 설정 | `ecrt_master_slave_config()` (798) |
+| PDO entry 등록 | `ecrt_domain_reg_pdo_entry_list()` (2163) |
+| 활성화 | `ecrt_master_activate()` (1061) |
+| process data 포인터 | `ecrt_domain_data()` (2219) |
+| 주기: 수신 | `ecrt_master_receive()` (1131), `ecrt_domain_process()` (2234) |
+| 주기: 송신 | `ecrt_domain_queue()` (2247), `ecrt_master_send()` (1113) |
+| 해제 | `ecrt_release_master()` (692) |
+
+`ecrt.h` 1053행 주석대로 활성화 뒤에는 애플리케이션이 `ecrt_master_send()`와 `ecrt_master_receive()`를 주기적으로 불러 통신을 유지해야 합니다. SOEM은 같은 일을 `ec_send_processdata()`·`ec_receive_processdata()` 두 함수에 묶어 두었고, IgH는 domain 단위의 처리(`ecrt_domain_process()`·`ecrt_domain_queue()`)를 따로 부르게 합니다. 예제는 저장소의 `examples/user`, `examples/dc_user`에 있습니다.
 
 ## TwinCAT (Beckhoff)
 
-TwinCAT은 *Windows + RT extension* 위에서 동작합니다. *PLC 프로그래머의 도구*입니다. ladder logic, structured text, motion control NC가 *동일 IDE*에 통합되어 있습니다.
+TwinCAT은 Beckhoff의 상용 자동화 환경으로, PLC 프로그래밍과 모션 제어, EtherCAT 마스터를 한 제품에 묶습니다. [TwinCAT/BSD 소개](https://www.beckhoff.com/en-en/products/ipc/software-and-tools/twincat-bsd/)는 프로그래밍을 Windows의 Visual Studio 기반 TwinCAT 3 XAE에서 하고, runtime은 FreeBSD 기반 TwinCAT/BSD에서도 돌릴 수 있다고 설명합니다. NIC는 [호환 포트에 TwinCAT 실시간 드라이버를 설치](https://infosys.beckhoff.com/content/1033/el37x2/1036996875.html)해 씁니다. SOEM과 IgH는 EtherCAT 통신만 다루므로 PLC 로직과 HMI는 사용자가 따로 만들어야 합니다. 이 차이가 선택의 첫 번째 기준입니다. TwinCAT의 가격은 이 글에서 다루지 않습니다.
 
-```text
-TwinCAT 구조
-  Visual Studio + TwinCAT IDE (개발)
-       ↓
-  TwinCAT XAE / XAR (Runtime)
-       ↓
-  Windows + RT extension (kernel-level scheduler)
-       ↓
-  Intel NIC (TwinCAT real-time driver)
-       ↓
-  EtherCAT 망
-```
+## 슬레이브 쪽 — ESC와 MCU
 
-TwinCAT의 강점은 *모션·CNC·visualization 통합*입니다. SOEM/IgH는 *EtherCAT만* 다룹니다. PLC 로직과 HMI는 별도로 구현해야 합니다. TwinCAT은 *한 IDE*에서 모두를 합칩니다.
-
-가격은 선택한 runtime·기능·target 조건의 공식 견적을 기준으로 확인해야 합니다. 이 글은 비용이나 ROI를 산정하지 않습니다.
-
-## 슬레이브 ESC 칩 — 선택 가이드
-
-슬레이브 측 ESC 칩 선택은 시스템 비용과 성능의 핵심입니다.
-
-선정할 ESC의 자원 차이는 [Ch 3의 ET1100/LAN9252 비교](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)를 참조합니다. 가격·바이너리 호환성·미확인 자원 수를 일괄 표로 추정하지 않습니다.
-
-대부분의 슬레이브 보드는 *MCU 한 개 + ESC 칩 한 개* 구조입니다.
+MCU를 쓰는 슬레이브 보드는 *MCU 한 개 + ESC 한 개* 구조입니다. ESC는 Digital I/O PDI로 MCU 없이 I/O를 직접 낼 수도 있습니다(ESC Section I Table 1). MCU가 있으면 ESC가 EtherCAT 처리를 하드웨어로 하고, MCU는 PDI(SPI 등)로 ESC 메모리를 읽고 써서 애플리케이션을 돌립니다. ESC별 자원 차이는 [Ch 3의 표](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)에 있습니다.
 
 ![EtherCAT 슬레이브 보드 — RJ45 IN/OUT, LAN9252 ESC, SPI로 STM32F4 연결](/images/blog/industrial-ethernet/diagrams/ch05-slave-hw.svg)
 
-STM32 측 application은 *EtherCAT Slave Stack*을 돌립니다. Beckhoff가 *Slave Stack Code (SSC)* tool로 자동 생성 코드를 제공합니다. ETG 가입사라면 무료로 받을 수 있습니다.
+### SII·ESI·ENI — 슬레이브와 망을 설명하는 자료
 
-### ESI (EtherCAT Slave Information) XML
+슬레이브는 자기 자신을 SII와 ESI 두 곳에서 설명하고, 구성 도구는 이를 모아 망 전체 구성인 ENI를 만듭니다.
 
-각 슬레이브 모델은 *ESI XML*을 가집니다. 슬레이브 제조사가 *모델별로 발행*합니다. 마스터는 이 XML을 읽어 *어떤 PDO를 매핑할지, 어떤 mailbox 프로토콜이 지원되는지* 알아냅니다.
+| 이름 | 위치 | 누가 읽나 |
+|---|---|---|
+| SII (Slave Information Interface) | 슬레이브의 EEPROM | 마스터가 런타임에 ESC를 통해 읽음 |
+| ESI (EtherCAT Slave Information) | 제조사가 배포하는 XML 파일 | 구성 도구가 오프라인으로 읽음 |
+| ENI (EtherCAT Network Information) | 구성 도구가 만든 XML 파일 | 마스터가 망 전체 구성을 불러옴 |
 
-ESI/ENI 파일은 장치 제조사와 engineering tool이 발행한 원본을 schema·firmware revision과 함께 확인해야 합니다. 아래에서 다루는 개념은 실제 EL1004나 TwinCAT의 유효한 XML 파일을 재현한 것이 아닙니다.
+SOEM v1.4.0은 ESI·ENI XML을 읽지 않고 SII로 자동 구성합니다. 저장소에 ENI 파서가 없으며, `ec_config_init()`이 SII에서 mailbox SM 설정을 읽고(Ch 3), `ec_config_map()`이 SII나 CoE로 PDO 크기를 구합니다.
 
-`ProductCode`와 `RevisionNo`는 *슬레이브 칩의 EEPROM*에 저장되어 있어, 마스터가 *읽어서* 어떤 ESI XML과 매칭할지 결정합니다.
+### SII의 identity 주소
 
-### ENI (EtherCAT Network Information) XML
+SOEM v1.4.0의 `ethercattype.h` 301~303행은 identity 항목을 다음처럼 정의합니다.
 
-ENI는 *마스터가 사용하는 망 전체 구성 파일*입니다. 어떤 슬레이브가 *어떤 순서*로 있는지, 어떤 PDO를 매핑할지, DC 설정은 어떻게 할지 등을 모두 담습니다. TwinCAT은 ESI들을 모아 ENI를 *자동 생성*합니다.
+```c title="soem/ethercattype.h:301-303"
+ECT_SII_MANUF       = 0x0008,
+ECT_SII_ID          = 0x000a,
+ECT_SII_REV         = 0x000c,
+```
 
-ESI/ENI 파일은 장치 제조사와 engineering tool이 발행한 원본을 schema·firmware revision과 함께 확인해야 합니다. 아래에서 다루는 개념은 실제 EL1004나 TwinCAT의 유효한 XML 파일을 재현한 것이 아닙니다.
-
-ESI는 XML, SII는 ESC의 구성·식별 EEPROM 데이터입니다. SOEM v1.4.0의 자동 구성은 SII/CoE 등의 경로를 사용하며 일반 ENI importer를 제공한다고 가정하지 않습니다. TwinCAT·IgH의 실제 구성 방식과 파일 import 지원은 각 tool/version에서 확인해야 합니다.
-
-## EEPROM — 슬레이브 측 ID 저장
-
-EEPROM/SII 저장 방식·용량은 ESC별 사양입니다. SOEM v1.4.0의 `ECT_SII_MANUF=0x0008`, `ECT_SII_ID=0x000A`, `ECT_SII_REV=0x000C`는 **16-bit word 주소**입니다. 따라서 vendor ID의 byte offset은0x10, product code는0x14, revision은0x18입니다. 이를 byte 주소0x08·0x0C·0x10으로 적으면 다른 데이터를 읽게 됩니다. SII와 실제 장치 revision·PDO·SM 구성을 함께 확인해야 합니다.
+이 값은 **16-bit word 주소**입니다. byte 주소로 바꾸면 vendor ID는 0x10, product code는 0x14, revision은 0x18입니다. word 0x0000~0x0007은 ESC Configuration Area로, ESC 데이터시트 Section I Table 40은 word 0x0을 PDI Control, 0x4를 Configured Station Alias, 0x7을 checksum으로 정의합니다. 마스터는 이 identity를 읽어 슬레이브가 기대한 모델·revision인지 확인합니다.
 
 ## 자주 하는 실수
 
 ### "raw socket 권한이 없어서 안 된다"
 
-`sudo` 또는 *CAP_NET_RAW* capability가 필요합니다. systemd unit에서 `AmbientCapabilities=CAP_NET_RAW`를 주는 것이 일반적입니다. 컨테이너면 `--cap-add=NET_RAW`.
+맞습니다. VM에서 `nobody` 사용자로 `slaveinfo veth0`을 실행하면 소켓을 열지 못합니다.
+
+```text
+$ su nobody -s /bin/sh -c "/root/soem-build/test/linux/slaveinfo/slaveinfo veth0"
+SOEM (Simple Open EtherCAT Master)
+Slaveinfo
+Starting slaveinfo
+No socket connection on veth0
+Excecute as root
+End program
+```
+
+root가 아니어도 실행 파일에 `CAP_NET_RAW`만 주면(`setcap cap_net_raw+ep`) `ec_init on veth0 succeeded.`까지 갑니다. 다만 하나가 달라집니다. SOEM의 `nicdrv.c`는 소켓을 연 뒤 `SIOCSIFFLAGS`로 인터페이스에 `IFF_PROMISC`를 켜는데(163~164행), 이 ioctl에는 `CAP_NET_ADMIN`이 필요하고 SOEM은 반환값을 무시합니다. 실제로 VM에서 PROMISC를 끈 뒤 `CAP_NET_RAW`만으로 실행하면 PROMISC가 켜지지 않았고, root로 실행하면 켜졌습니다. SOEM 프레임의 목적지는 broadcast(ff:ff:ff:ff:ff:ff)라 promiscuous가 아니어도 돌아온 프레임을 받습니다.
 
 ### "ec_init 성공인데 슬레이브가 0개 발견된다"
 
-NIC가 *promiscuous mode*가 아니거나, 케이블이 *상류/하류*가 바뀌어 꽂혔거나, 슬레이브의 *EEPROM이 비어* 있는 경우입니다. `ethtool eth0`로 link, `ethtool -i eth0`로 driver를 구별해 확인합니다. 케이블·전원·link mode·상태·SII를 관측하지 않고 한 원인으로 단정하지 않습니다.
+위 veth 실험이 정확히 그 상황입니다. `ec_init()`은 소켓을 열었다는 뜻이고, `No slaves found!`는 [Ch 4](/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame)에서 본 BRD의 WKC가 0이었다는 뜻입니다. 실제 망에서 이렇게 나오면 링크 상태(`ethtool ethX`의 `Link detected`)와 슬레이브 전원을 먼저 보고, 케이블이 첫 슬레이브의 입력 포트(port 0)에 꽂혔는지 확인합니다. ESC는 MAC 주소를 보지 않으므로 MAC 설정은 원인이 아닙니다.
 
 ### "WKC가 expected의 절반이다"
 
-Input/output 성공 가중치를 따로 봐야 합니다. 각1회 기대값3에서 output만 빠지면 관측1, 즉1/3입니다. 누락량만으로 output 문제나 고정 SM 번호를 단정할 수는 없습니다.
+출력·입력 가중치가 다르므로 "절반"이라는 비율 자체가 단서가 되지 않습니다. 기대 3에서 output만 빠지면 1, input만 빠지면 2입니다. 슬레이브가 여러 대면 어느 슬레이브가 Op에 있지 않은지를 슬레이브별 AL Status(0x0130)로 확인합니다. SOEM의 `ec_readstate()`는 BRD로 전체를 본 뒤 FPRD로 하나씩 읽습니다.
 
-### "DC 동기 후 1초마다 drift가 보인다"
+### "DC 동기 후 시간이 지나면 drift가 보인다"
 
-주기 보정 누락을 포함한 여러 원인을 확인해야 합니다. 슬레이브 clock의 *drift*를 보정하려면 선택한 master의 reference clock·offset/delay·주기 DC datagram을 확인해야 합니다. SOEM v1.4.0의 DC 설정 후 주기 코드가 FRMW를 추가하지만, *수동 LRW 만 보낸다*면 별도 DC datagram을 chain해야 합니다.
+DC의 drift 보정은 주기 프레임의 FRMW가 reference 시각을 계속 배포해야 유지됩니다(Ch 2). SOEM v1.4.0은 `ec_configdc()` 뒤 `ec_send_processdata()`가 만드는 프레임에 FRMW를 자동으로 붙입니다. process data를 SOEM 함수 없이 직접 LRW로 보낸다면 FRMW도 직접 넣어야 합니다.
 
-### "TwinCAT으로 만든 ENI를 SOEM에 그대로 못 쓴다"
+### "TwinCAT으로 만든 ENI를 SOEM에 그대로 쓴다"
 
-SOEM v1.4.0은 일반 ENI importer를 제공하는 API로 문서화되어 있지 않습니다. ESI XML·SII·수동 설정·특정 importer의 지원 범위를 구분하고 존재가 확인되지 않은 `ec_ENI`를 안내하지 않습니다.
+SOEM v1.4.0 소스에는 ENI를 읽는 코드가 없습니다. SOEM에서 같은 구성을 쓰려면 SII 기반 자동 구성을 쓰거나, PDO 매핑을 코드에서 CoE로 직접 설정합니다.
 
 ## 정리
 
-- EtherCAT 마스터는 *전용 하드웨어 없이 일반 NIC + 소프트웨어*로 구현됩니다.
-- 세 가지 주류는 SOEM(가벼움), IgH(고성능, 커널 모듈), TwinCAT(상용 통합 환경)입니다.
-- SOEM의 핵심 API는 `ec_init`, `ec_config_init`, `ec_config_map`, `ec_send_processdata`, `ec_receive_processdata`입니다.
-- Master 구현만으로 jitter가 정해지지 않으며 host·NIC·망·slave의 측정 조건이 필요합니다.
-- 슬레이브 ESC 칩은 LAN9252·ET1100·AX58100이 대표. MCU + ESC 한 쌍이 표준 구성입니다.
-- ESI XML은 *슬레이브 모델별 명세*, ENI XML은 *마스터의 망 구성*입니다.
-- 슬레이브 EEPROM에는 Vendor ID, Product Code, 기본 설정이 저장되어 마스터가 *런타임에 자동 매핑*합니다.
-- NIC 조회·source build·실제 OP 통신과 성능 검증은 서로 다른 범위입니다.
+- EtherCAT 마스터는 *전용 하드웨어 없이 일반 NIC + 소프트웨어*로 구현합니다. SOEM은 raw socket, IgH는 패치 드라이버나 generic 드라이버를 씁니다.
+- SOEM v1.4.0은 CMake 4에서 `CMAKE_POLICY_VERSION_MINIMUM`이, GCC 12에서 `-Wno-error=stringop-truncation`이 필요했습니다.
+- SOEM 배포에는 GPLv2 조건과 별도로 Beckhoff EtherCAT Master License 조건이 붙습니다. IgH는 GPLv2(커널 쪽)와 LGPL 2.1(lib)입니다.
+- simple_test의 기대 WKC는 `outputsWKC * 2 + inputsWKC`이고, Op 대기는 최대 201 × 50 ms입니다.
+- `ec_config_map()`은 IOmap 크기를 모르므로 buffer는 호출자가 충분히 잡습니다.
+- 소켓에는 `CAP_NET_RAW`가 필요하고, `CAP_NET_ADMIN`이 없으면 promiscuous 설정은 조용히 실패합니다.
+- SII identity 주소는 word 단위(0x0008·0x000A·0x000C)입니다.
 
-다음 편은 **Ch 6: PROFINET 개요 — RT·IRT 클래스**입니다. Siemens 진영의 PROFINET이 어떻게 RT와 IRT 두 등급으로 결정성을 만드는지, GSDML XML이 무엇인지 풀어봅니다.
+다음 편은 **Ch 6: PROFINET 개요 — RT·IRT 클래스**입니다. PROFINET이 Conformance Class와 RT·IRT로 결정성을 어떻게 나누는지 PI 자료로 봅니다.
 
 ## 관련 항목
 
@@ -229,5 +275,7 @@ SOEM v1.4.0은 일반 ENI importer를 제공하는 API로 문서화되어 있지
 - [Ch 6: PROFINET 개요 — RT·IRT 클래스](/blog/embedded/protocols/industrial-ethernet/chapter06-profinet)
 - [Practical RTOS Internals Part 1.4: Preemption](/blog/embedded/rtos/practical-internals/part1-04-preemption) — 마스터 cycle thread 설계
 - [Modern Embedded Recipes: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)
+- [SOEM v1.4.0 소스](https://github.com/OpenEtherCATsociety/SOEM/tree/v1.4.0)
+- [IgH EtherCAT Master 1.6.9 소스](https://gitlab.com/etherlab.org/ethercat/-/tree/1.6.9)
 - [원문 — SOEM GitHub](https://github.com/OpenEtherCATsociety/SOEM)
 - [원문 — EtherLab IgH Master](https://etherlab.org/en/ethercat/)

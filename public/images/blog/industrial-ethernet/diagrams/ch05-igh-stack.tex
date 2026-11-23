@@ -14,13 +14,13 @@
   {User application};
 \node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, 0) {ecrt\_master\_*() API};
 
-\draw[uses] (app.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {ioctl} ++(0, -1);
+\draw[uses] (app.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {ecrt\_*() 함수 호출} ++(0, -1);
 
 \node[blk, fill=absfill, draw=absbord] (ulib) at (0, -2) {IgH userspace lib};
-\draw[uses] (ulib.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {/dev/EtherCAT0} ++(0, -1);
+\draw[uses] (ulib.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {ioctl · /dev/EtherCAT0} ++(0, -1);
 
 \node[blk, fill=prpfill, draw=prpbord] (kern) at (0, -4) {IgH kernel module};
-\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, -4) {자체 NIC driver patch};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, -4) {패치 드라이버 또는 generic 드라이버};
 
 \draw[uses] (kern.south) -- ++(0, -1);
 
