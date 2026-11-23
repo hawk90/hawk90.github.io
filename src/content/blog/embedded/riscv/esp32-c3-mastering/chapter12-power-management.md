@@ -2,7 +2,7 @@
 title: "ESP32-C3 전력 관리 — Modem·Light·Deep Sleep와 Wake 소스"
 slug: "embedded/riscv/esp32-c3-mastering/chapter12-power-management"
 date: 2026-05-20T09:12:00
-description: "ESP-IDF v5.4.2의 Modem·Light·Deep-sleep 조건과 C3 GPIO wake·RTC 보존을 확인하고 입력이 명시된 전력 예산을 계산합니다."
+description: "ESP32-C3 데이터시트의 모드별 전류 표와 ESP-IDF v5.4.2의 wake source 조건으로 Modem·Light·Deep-sleep을 정리하고, GPIO wake 핀 제약과 RTC 메모리, 입력을 밝힌 배터리 예산 계산을 다룹니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 12
 tags: [power, sleep, low-power, rtc, esp32-c3]
@@ -12,42 +12,59 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **배터리 수명은 Active·sleep·wake 비용과 외부 회로를 합친 예산입니다.** 가장 깊은 sleep의 칩 전류만으로 제품의 평균 전류를 계산할 수 없습니다.
+> **배터리 수명은 깨어 있는 시간의 전류가 거의 다 정합니다.** C3의 Deep-sleep 전류는 데이터시트 기준 5 µA지만, 30분에 한 번 3초 깨어나는 장치에서도 평균 전류의 대부분은 그 3초에서 나옵니다.
 
-기준은 ESP-IDF v5.4.2 commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`입니다. 고정 소스의 wake/API 조건과 순수 산술을 대조했으며 실제 board 전류·wake latency·RTC retention·배터리 수명을 측정한 결과가 아닙니다.
+잠든 동안의 전류를 줄이는 것보다 깨어 있는 시간을 줄이는 쪽이 효과가 큽니다. 전기 요금이 대기 전력보다 에어컨을 켠 시간에 좌우되는 것과 같습니다. 이 장은 [ESP32-C3 Datasheet v2.5](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)의 4.1.3.5절(PMU)과 5.6절(Current Consumption), [ESP-IDF v5.4.2 Sleep Modes](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/system/sleep_modes.html) 문서를 기준으로 합니다.
 
-## 전력 모드와 상태
+전류는 직접 측정하지 않았습니다. 아래 전류 값은 모두 데이터시트의 칩 단독 값(Table 5-7은 peak, Table 5-8·5-9는 typical)이고, 코드는 v5.4.2로 esp32c3 빌드를 통과시켰습니다. Ch 3에서 본 것처럼 Espressif QEMU는 Deep-sleep에서 깨어나지 않아 wake 동작도 실행하지 못했습니다.
 
-| 모드 | CPU/application 상태 | 확인할 조건 |
-|---|---|---|
-| Active | 일반 실행 | clock·radio·peripheral·workload |
-| Modem-sleep | CPU는 실행 가능, radio 활동을 절약 | connection·DTIM/listen interval·coexistence |
-| Light-sleep | 실행을 멈췄다 복귀 | wake source·PM lock·driver·RAM retention 설정 |
-| Deep-sleep | wake 뒤 startup 경로 재진입 | RTC domain·reset/wake 원인·유효 wake pin·보드 회로 |
+## 전력 모드와 데이터시트 전류
 
-고정80mA/15mA/130µA/5µA를 모든 모드의 실측값처럼 사용하지 않습니다. [데이터시트](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)의 supply·clock·RF·유지 domain 조건과 제품의 측정 지점을 맞춥니다. Wake 시간200ms와 고정16000배 같은 보장도 사용하지 않습니다.
+데이터시트 4.1.3.5절은 PMU가 미리 정의한 네 모드를 이렇게 설명합니다.
 
-## Modem Sleep — WiFi 끄기
+| 모드 | 4.1.3.5절 설명 |
+|---|---|
+| Active | CPU, RF 회로, 모든 주변장치가 켜짐 |
+| Modem-sleep | CPU는 켜져 있고 clock을 낮출 수 있음. RF는 필요할 때만 주기적으로 켜서 연결 유지 |
+| Light-sleep | CPU가 멈춤. MAC, RTC timer, 외부 인터럽트로 깨어나고 무선 연결 유지 가능 |
+| Deep-sleep | RTC만 켜짐. 무선 연결 정보는 RTC 메모리에 저장 |
 
-연결된 station의 power-save는 AP와의 beacon/DTIM·listen interval 관계를 포함합니다. 항상 RF를 완전히 끄는 mode나 특정15mA 평균값으로 설명하지 않습니다. `esp_wifi_set_ps()`의 반환과 실제 packet/latency·연결 유지·전류를 함께 확인합니다. Wi-Fi가 없는 workload의 Modem-sleep 조건과도 구분합니다.
+각 모드의 전류는 5.6절의 세 표에 있습니다. Table 5-7의 측정 조건은 3.3 V 공급, 25 °C, RF 포트 기준이고, Table 5-8·5-9에는 측정 조건이 따로 적혀 있지 않습니다.
 
-## Light Sleep — 클럭 정지, 상태 보존
+| 상태 | 조건 | Typ / Peak |
+|------|------|------|
+| Wi-Fi TX (Table 5-7) | 802.11b 1 Mbps @21 dBm | 335 mA (peak) |
+| Wi-Fi TX | 802.11n HT20 MCS7 @18.5 dBm | 276 mA (peak) |
+| Wi-Fi RX | 802.11b/g/n HT20 | 84 mA (peak) |
+| Modem-sleep (Table 5-8) | 160 MHz, CPU running, 주변장치 clock 꺼짐/켜짐 | 23 / 28 mA |
+| Modem-sleep | 80 MHz, CPU idle, 주변장치 clock 꺼짐/켜짐 | 13 / 18 mA |
+| Light-sleep (Table 5-9) | VDD_SPI와 Wi-Fi 전원 차단, 모든 GPIO high-impedance | 130 µA |
+| Deep-sleep | RTC timer + RTC memory | 5 µA |
+| Power off | CHIP_EN low | 1 µA |
 
-명시적 `esp_light_sleep_start()`는 복귀 가능한 sleep API이며 반환 오류·활성 wake source를 확인합니다. 자동 Light-sleep은 PM/tickless·lock·driver 조건과 연결되어 있고 단순히 같은 함수의 반복 호출과 동등하지 않습니다.
+Table 5-8 각주에 따르면 Modem-sleep에서는 Wi-Fi가 clock gating되고, flash에 접근할 때는 소비가 더 높을 수 있으며 80 Mbit/s flash를 SPI 2-line mode로 쓸 때 그 소비는 10 mA입니다. 개발 보드의 USB-UART, LDO, 전원 LED는 이 표에 없으므로, 보드 단자에서 재면 이보다 큰 값이 나옵니다.
 
-Light-sleep GPIO wake는 `gpio_wakeup_enable()`로 각 pin의 level을 설정하고 `esp_sleep_enable_gpio_wakeup()`을 사용합니다. 이를 RTC GPIO0~5만 가능하다고 제한하지 않습니다. 반대로 이 API를 그대로 Deep-sleep에 사용하지 않습니다. UART/Wi-Fi wake는 driver·전력 도메인·config의 조건을 해당 API 문서에서 확인합니다.
+## Modem-sleep — Wi-Fi 연결을 유지한 채 절약
 
-`esp_pm_configure()`를 사용한다면 `CONFIG_PM_ENABLE`, tickless 설정, 사용 가능한 CPU clock과 모든 lock의 수명을 맞춥니다. 성공 반환만으로 현재 sleep 중이거나 원하는 전류에 도달했다고 판단하지 않습니다.
+Wi-Fi station이 AP에 연결된 동안 쓰는 절전입니다. Ch 7에서 본 대로 기본값은 `WIFI_PS_MIN_MODEM`이고, AP의 DTIM마다 깨어나 beacon을 받습니다. `WIFI_PS_MAX_MODEM`은 `listen_interval`마다 깨어나 더 아끼는 대신 broadcast를 놓칠 수 있습니다. Wi-Fi 가이드는 Modem-sleep이 station-only mode에서 AP에 연결된 뒤에만 동작한다고 적습니다.
 
-## Deep Sleep — 거의 모든 것이 꺼짐
+## Light-sleep — 멈췄다가 그 자리에서 이어서
 
-Deep-sleep wake는 함수 호출 다음 줄로 복귀하는 경로가 아닙니다. 유지한 RTC domain과 startup 초기화·reset/wake 원인을 확인합니다. eFuse와 flash의 비휘발성 보존을 RTC RAM retention과 같은 종류로 세지 않습니다.
+Light-sleep은 CPU를 멈추고 RAM 내용을 유지한 채 잠드는 모드입니다. 책을 덮지 않고 엎어 둔 채 잠깐 자는 것처럼, 깨어나면 `esp_light_sleep_start()` 다음 줄에서 이어서 실행합니다. 반환값이 `ESP_OK`가 아니면 잠들지 못한 것이므로, 반환값을 꼭 확인합니다.
 
-### C3의 GPIO wake 범위
+C3의 Light-sleep GPIO wake는 핀 제약이 없습니다. v5.4.2 Sleep Modes 문서의 C3 해당 절(RTC IO wake가 없는 칩용)은 "Any IO can be used as the external input to wake up the chip from Light-sleep"이라고 적습니다. 핀마다 `gpio_wakeup_enable(pin, GPIO_INTR_LOW_LEVEL)`처럼 level을 정하고 `esp_sleep_enable_gpio_wakeup()`을 부릅니다. C3 `soc_caps.h`는 `SOC_PM_SUPPORT_WIFI_WAKEUP`과 `SOC_PM_SUPPORT_BT_WAKEUP`도 선언하므로, `esp_sleep_enable_wifi_wakeup()`·`esp_sleep_enable_bt_wakeup()`도 wake source로 쓸 수 있고, `SOC_UART_SUPPORT_WAKEUP_INT`에 따라 `esp_sleep_enable_uart_wakeup()`도 있습니다.
 
-기준 `soc_caps.h`의 `SOC_GPIO_DEEP_SLEEP_WAKE_VALID_GPIO_MASK`는 GPIO0~5를 표시합니다. `esp_deep_sleep_enable_gpio_wakeup()`은 LOW/HIGH level 조건을 받습니다. GPIO9을 Deep-sleep wake pin으로 쓰거나 edge wake와 같다고 설명하지 않습니다.
+매번 직접 부르지 않고 idle 때 자동으로 Light-sleep에 들어가게 할 수도 있습니다. Ch 10에서 본 것처럼 `CONFIG_PM_ENABLE`과 `CONFIG_FREERTOS_USE_TICKLESS_IDLE`을 켜고 `esp_pm_configure()`에 `light_sleep_enable = true`를 주는 방식입니다. 이때 driver나 application이 잡은 PM lock이 하나라도 남아 있으면 잠들지 않습니다.
 
-다음은 C3의 timer와 GPIO source를 **준비만 하는** helper입니다. Sleep에 들어가기 전에 owner가 반환값을 확인하고 이미 활성화한 다른 wake source도 관리합니다. 예에서는 timer를 최대24시간으로 제한합니다.
+## Deep-sleep — RTC만 남기고 끔
+
+Deep-sleep은 RTC 도메인만 남기고 모두 끕니다. 깨어나면 함수 다음 줄이 아니라 reset처럼 ROM부터 다시 부팅하고, `app_main()`이 처음부터 실행됩니다. RAM 내용은 사라지고 RTC 메모리(8 KB)만 남습니다.
+
+### C3의 GPIO wake는 GPIO0~5만
+
+같은 Sleep Modes 문서는 "IOs that are powered by the VDD3P3_RTC power domain can be used to wake up the chip from Deep-sleep"이라고 적고, `esp_deep_sleep_enable_gpio_wakeup()`으로 핀과 level을 정하게 합니다. 데이터시트 Table 2-1에서 VDD3P3_RTC로 전원을 받는 GPIO는 GPIO0~5이고, v5.4.2 `soc_caps.h`도 `SOC_GPIO_DEEP_SLEEP_WAKE_VALID_GPIO_MASK`를 `BIT0`~`BIT5`로 정의합니다. boot mode strapping pin인 GPIO9(Table 2-1에서 VDD3P3_CPU 도메인)로는 Deep-sleep에서 깨울 수 없습니다.
+
+trigger는 edge가 아니라 level입니다. `ESP_GPIO_WAKEUP_GPIO_LOW`와 `ESP_GPIO_WAKEUP_GPIO_HIGH` 중 하나를 고릅니다. 아래 helper는 timer와 GPIO 두 wake source를 준비만 하고 잠들지는 않습니다. timer는 최대 24시간으로 제한했습니다.
 
 ```c title="c3-sleep.c"
 #include <stdint.h>
@@ -66,15 +83,13 @@ esp_err_t c3_prepare_deep_wake(unsigned pin, uint64_t microseconds) {
 }
 ```
 
-이 준비는 atomic transaction이 아닙니다. GPIO 설정이 실패했다면 timer source는 이미 설정됐을 수 있으므로 오류를 무시하고 sleep에 들어가지 않습니다. GPIO4/5 등 실제 pin의 외부 level·pull·다른 peripheral 점유를 확인하고, wake level이 계속 active여서 곧바로 재기동하지 않는지도 시험합니다.
+두 설정은 한꺼번에 적용되지 않습니다. timer 설정이 성공한 뒤 GPIO 설정이 실패하면 timer source만 켜진 채로 돌아오므로, 호출자는 실패하면 잠들지 말고 오류를 처리해야 합니다.
 
-준비가 성공한 owner가 `esp_deep_sleep_start()`를 호출합니다. Wake 뒤 `esp_sleep_get_wakeup_cause()`로 cause를 읽고 GPIO cause라면 status도 대조합니다. `ESP_SLEEP_WAKEUP_UNDEFINED` 하나만으로 모든 reset을 power-on이라고 분류하지 않습니다.
+준비가 끝나면 `esp_deep_sleep_start()`를 부르고, 깨어난 뒤에는 `esp_sleep_get_wakeup_cause()`로 원인을 읽습니다. GPIO로 깨어났다면 `esp_sleep_get_gpio_wakeup_status()`로 어느 핀인지 확인합니다. 원인이 `ESP_SLEEP_WAKEUP_UNDEFINED`이면 sleep에서 깨어난 것이 아니라 전원 투입이나 다른 reset으로 시작한 것이므로, 구체적인 원인은 `esp_reset_reason()`으로 따로 봅니다.
 
-## RTC SRAM — Deep sleep을 건너뛰는 변수
+## RTC 메모리 — Deep-sleep을 건너는 변수
 
-RTC 데이터를 두는 선언과 실제 유지 조건은 구분합니다. Power domain·linker 배치·reset 원인·cold boot 초기화를 확인합니다. Heap handle·task pointer 등 다시 초기화해야 할 runtime 객체를 RTC에 저장해 그대로 재사용하지 않습니다.
-
-다음은 센서 read가 없는 counter 예입니다. 다른 app_main 예와 합쳐서 중복 정의하지 않습니다.
+Ch 3에서 본 것처럼 `RTC_DATA_ATTR` 변수는 RTC 메모리에 놓이고 Deep-sleep을 지나도 값이 남습니다. 아래는 깨어난 횟수를 세고 60초 뒤 다시 잠드는 예입니다.
 
 ```c title="c3-rtc-counter.c"
 #include <stdio.h>
@@ -93,28 +108,24 @@ void app_main(void) {
 }
 ```
 
-RTC 메모리는 별도 작은 영역이며 linker가 다른 RTC 자료와 함께 사용합니다. 영구 power loss 뒤 유지할 데이터는 별도의 비휘발성 정책·write 빈도·복구를 설계합니다. RTC attribute 하나로 모든 reset에서 보존을 보장하지 않습니다.
+RTC 메모리는 8 KB이고, Ch 1의 `idf.py size`에서 본 것처럼 ESP-IDF가 이미 일부(hello 예제에서 52 byte)를 씁니다. 전원이 완전히 끊기면 값이 사라지므로, 배터리 교체 뒤에도 남아야 하는 값은 NVS(Ch 3)에 씁니다. heap pointer나 task handle처럼 부팅마다 다시 만들어지는 값은 RTC 메모리에 저장해도 다음 부팅에서 의미가 없습니다.
 
-## ULP 부재 — C3의 가장 큰 약점
+## ULP 부재 — 잠든 동안 센서를 읽을 수 없다
 
-C3에는 application이 Deep-sleep 중 센서 코드를 실행하는 ULP coprocessor가 없습니다. Timer로 main CPU를 깨워 읽거나 외부 sensor/logic의 조건 출력을 wake pin에 연결하는 설계를 검토합니다. 외부 회로를 전부 끄면 wake 신호를 만드는 회로도 꺼질 수 있으므로 domain을 함께 설계합니다.
+ESP32 일부 칩에는 main CPU가 잠든 동안 센서를 읽는 ULP coprocessor가 있습니다. v5.4.2 C3 `soc_caps.h`에는 ULP 관련 정의가 하나도 없습니다. 그래서 C3에서 주기적으로 센서를 읽으려면 timer로 main CPU를 깨우거나, 외부 센서의 인터럽트 출력을 GPIO0~5에 연결해 조건이 맞을 때만 깨우는 방식을 씁니다. 외부 센서가 wake 신호를 내려면 그 센서는 C3가 자는 동안에도 전원이 켜져 있어야 하므로, 센서 대기 전류를 예산에 넣습니다.
 
-ULP가 필요한 경우 다른 target의 실제 coprocessor·ADC·GPIO·clock·SDK 지원을 확인합니다. 원래의 "ESP32-H2에 ULP가 있으므로 대체"라는 주장은 이 장의 대안에서 제외했습니다. 다른 칩에 대한 고정 전류·기능 우위를 추정하지 않습니다.
+## 입력을 밝힌 배터리 예산
 
-## 입력을 명시한 배터리 예산
+평균 전류는 한 주기 동안 쓴 전하량을 주기로 나눈 값입니다. 아래 예는 데이터시트 값이 아니라 계산을 보이기 위한 가정값입니다. 깨어 있는 3초 동안 80 mA는 Table 5-7의 Wi-Fi RX 84 mA와 Table 5-8의 Modem-sleep 23~28 mA 사이에 놓이는 값이고, sleep 0.005 mA는 Table 5-9의 Deep-sleep 5 µA입니다. 두 값 모두 배터리 단자 기준이라고 가정하므로 regulator 손실은 빠져 있습니다.
 
-아래는 **계산 예제의 가정값**입니다. 실제 battery terminal에서 측정한 전류와 사용 가능한 capacity가 같은 전압 기준으로 표현돼 있다고 가정합니다. Chip supply 전류와 battery 쪽 전류를 regulator 변환 없이 섞지 않습니다.
-
-| 입력 |30분 주기 예 |5분 주기 예 |
+| 입력 | 30분 주기 예 | 5분 주기 예 |
 |---|---|---|
-| 사용 가능 capacity |2000mAh |2000mAh |
-| 주기 |1800s |300s |
-| Active |3s ×80mA |3s ×80mA |
-| 나머지 sleep 전류 |0.005mA |0.005mA |
+| 사용 가능 용량 | 2000 mAh | 2000 mAh |
+| 주기 | 1800 s | 300 s |
+| Active | 3 s × 80 mA | 3 s × 80 mA |
+| 나머지 sleep 전류 | 0.005 mA | 0.005 mA |
 
-30분 예는 charge248.985mAs/주기, 평균0.138325mA이고 이상 수명은약14458.7시간, **602.4일**입니다. 기존301일/10개월 계산은 단위를 중복 변환한 오류였습니다.5분 예는 평균0.80495mA, 약103.5일이며 수명 비율은약5.82입니다. 특정제품의8개월/1년 수명을 측정하거나 보장한 값이 아닙니다.
-
-다음 계산기는 유한·범위 입력과 overflow를 검사하며 charge·평균 전류·시간·일을 분리합니다.
+아래 계산기는 입력 범위를 검사하고, 주기당 전하량·평균 전류·수명(시간·일수)을 따로 돌려줍니다.
 
 ```js title="c3-power-budget.mjs"
 export function powerBudget({capacityMah, periodSeconds, activeSeconds,
@@ -134,32 +145,44 @@ export function powerBudget({capacityMah, periodSeconds, activeSeconds,
 }
 ```
 
-실제 예산에는 cold boot·연결 재시도·RF burst·센서·LED·pull resistor·regulator quiescent/효율·battery self-discharge·온도와 사용 가능한 capacity를 넣습니다. Burst current에 따른 전압 강하와 계측 bandwidth도 확인합니다.
+Node.js로 두 예와 잘못된 입력을 넣어 실행한 결과입니다.
+
+```text
+30min {"chargeMas":248.985,"averageMilliamp":0.138325,"hours":14458.70233146575,"days":602.4459304777396}
+5min {"chargeMas":241.485,"averageMilliamp":0.80495,"hours":2484.626374308963,"days":103.52609892954013}
+invalid -> RangeError invalid power budget
+```
+
+30분 주기에서 주기당 전하 248.985 mA·s 중 240 mA·s(96%)가 3초의 active 구간에서 나옵니다. 그래서 평균 전류는 0.138 mA, 이상적인 수명은 약 602일입니다. 같은 장치를 5분마다 깨우면 평균이 0.805 mA로 늘고 수명은 약 104일로 5.8배가량 짧아집니다. Deep-sleep 전류를 반으로 줄이는 것보다 깨어 있는 3초를 1초로 줄이는 쪽이 효과가 훨씬 큽니다.
+
+실제 제품의 예산에는 Wi-Fi 재접속에 걸리는 시간, TX burst, 센서와 pull-up 저항, regulator의 대기 전류와 효율, 배터리 자가 방전처럼 이 계산에 없는 항목을 더합니다. TX peak 335 mA(Table 5-7) 같은 순간 전류는 배터리 내부 저항에서 전압 강하를 만듭니다. 이런 burst를 재려면 측정 장비의 대역폭도 충분해야 합니다.
 
 ## 진단과 관찰
 
-Deep-sleep 전류가 높으면 chip domain뿐 아니라 외부 부품과 측정 경로를 분리합니다. Brownout detector를 끄는 것을 일반적인 절전 해결책으로 쓰지 않습니다. 전원 무결성과 reset 원인을 확인합니다.
+Deep-sleep 전류가 데이터시트보다 높게 나오면 칩보다 보드를 먼저 의심합니다. 개발 보드의 USB-UART 칩, 전원 LED, LDO 대기 전류는 데이터시트 Table 5-9에 들어 있지 않습니다. GPIO가 외부 pull 저항으로 전류를 흘리는지도 확인합니다.
 
-Timer 오차는 실제 RTC slow clock source·보정·온도·측정 기준으로 분석합니다. 원인을 단일RC8MHz로 정하거나 외부 crystal을 추가하면 항상 해결된다고 설명하지 않습니다. Sleep 함수의 반환·wake cause·PM lock·peripheral 재초기화와 실제 전류 파형을 함께 기록합니다.
+Deep-sleep timer가 예상보다 빠르거나 느리면 RTC slow clock을 봅니다. 데이터시트는 내부 slow RC oscillator를 "typically about 136 kHz, and adjustable"이라고 적고, v5.4.2의 RTC clock source choice(`RTC_CLK_SRC`)는 기본값이 `CONFIG_RTC_CLK_SRC_INT_RC`("Internal 136 kHz RC oscillator")입니다. 정확도가 필요하면 `CONFIG_RTC_CLK_SRC_EXT_CRYS`("External 32 kHz crystal")를 고르고 GPIO0·1에 32 kHz 크리스털을 답니다(Ch 4). GPIO0·1은 데이터시트 Table 2-6에서 XTAL_32K_P/N과 ADC1_CH0/CH1을 함께 맡는 핀이므로, 크리스털을 쓰려면 이 두 핀을 ADC 입력 배정에서 빼고 계획합니다.
 
 ## 시리즈를 마치며
 
-이 시리즈는 core·memory·주변장치·무선·build·FreeRTOS·보안·전력 관리의 계약을 나누어 봤습니다. C3의 제약과 SDK source를 확인하는 방법은 이어지는 target 검증의 출발점입니다. 각 장의 native/helper 검사를 실제 silicon·RF·전력·security 시험으로 확대해 제품 증거를 남깁니다.
+이 시리즈는 ESP32-C3를 코어, 메모리, 주변장치, 무선, 빌드, FreeRTOS, 보안, 전력 순서로 따라왔습니다. 각 장의 수치는 데이터시트·TRM·ESP-IDF v5.4.2 소스에서 가져오거나 직접 빌드·QEMU로 돌려 얻었고, 실제 보드에서만 볼 수 있는 전류·RF·wake 동작은 측정하지 않았다고 밝혀 두었습니다. 제품을 만든다면 그 항목들이 다음에 측정할 목록입니다.
 
 ### 다음 시리즈 추천
 
-이 시리즈에서 닿지 못한 깊이를 채우는 다음 시리즈입니다.
+이 시리즈에서 깊이 다루지 못한 주제를 이어서 볼 수 있는 시리즈입니다.
 
-- **[Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model)** — Secure Boot V2를 *공격 모델 수준*에서 더 깊이. fault injection, side-channel, glitching에 대한 방어를 다룹니다. 위협 모델과 검증 범위를 넓힐 때 참고합니다.
-- **[Practical RTOS Internals 시리즈](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS의 *내부 자료구조와 스케줄링 정책*. C3의 *단일 코어 시분할*이 vanilla FreeRTOS와 *어디서 다른지* 명확해집니다.
-- **[Modern Embedded Recipes 시리즈](/blog/embedded/modern-recipes/00-preface)** — *CMake·동기화 패턴·IRQ 설계*의 모범 사례. ESP-IDF 코드를 *더 깔끔하게* 쓰는 데 직접 도움이 됩니다.
-- **FreeRTOS Mastering 시리즈** — vanilla FreeRTOS를 *처음부터* 손에 익히는 코스. Espressif fork와의 차이점을 이해하는 데 좋습니다.
-
-ESP32-S3(2 코어·ULP·USB OTG)나 *ESP32-H2(Thread·Zigbee)*로 확장하려면 *지금까지 손에 익은 ESP-IDF 지식*이 그대로 통합니다. 이 시리즈가 *그 출발점*이 되었기를 바랍니다.
+- **[Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model)** — Secure Boot를 공격 모델 수준에서 더 깊이 다룹니다. fault injection, side-channel, glitching 방어까지 이어집니다.
+- **[Practical RTOS Internals 시리즈](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS의 내부 자료구조와 스케줄링 정책을 다룹니다. C3의 단일 코어 시분할이 vanilla FreeRTOS와 어디서 다른지 비교해 볼 수 있습니다.
+- **[Modern Embedded Recipes 시리즈](/blog/embedded/modern-recipes/00-preface)** — CMake, 동기화 패턴, IRQ 설계의 사례 모음입니다.
 
 ## 정리
 
-Wake API의 지원 source·pin·level과 runtime/RTC 수명을 구분합니다. 전류·charge·평균·수명은 같은 기준의 입력으로 계산하고 결과를 actual 측정과 분리합니다. 자동 Light-sleep 설정과 Deep-sleep 준비 성공은 실제 전력·복구·데이터 보존 시험을 대신하지 않습니다.
+- C3의 칩 단독 전류는 Wi-Fi TX peak 276~335 mA, Modem-sleep 13~28 mA, Light-sleep 130 µA, Deep-sleep 5 µA입니다(Datasheet v2.5 Table 5-7~5-9).
+- Light-sleep은 어떤 GPIO로도 깨울 수 있지만, Deep-sleep GPIO wake는 VDD3P3_RTC 도메인의 GPIO0~5만, level trigger로 됩니다.
+- Deep-sleep에서 깨어나면 처음부터 다시 부팅하고, `RTC_DATA_ATTR` 변수만 남습니다.
+- C3에는 ULP coprocessor가 없어, 잠든 동안의 센서 읽기는 timer wake나 외부 인터럽트로 대신합니다.
+- 30분마다 3초 깨는 가정에서 평균 전류의 96%가 active 구간에서 나오고, 주기를 5분으로 줄이면 수명이 약 5.8배 짧아집니다.
+- Deep-sleep timer 정확도는 RTC slow clock이 정하고, 기본은 내부 136 kHz RC입니다.
 
 ## 관련 항목
 

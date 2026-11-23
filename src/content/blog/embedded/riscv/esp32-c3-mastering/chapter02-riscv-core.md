@@ -2,7 +2,7 @@
 title: "ESP32-C3 RISC-V 코어 분석 — RV32IMC·PMP·인터럽트 컨트롤러"
 slug: "embedded/riscv/esp32-c3-mastering/chapter02-riscv-core"
 date: 2026-05-20T09:02:00
-description: "ESP32-C3의 RV32IMC·M/U-mode·PMP와 인터럽트 매트릭스를 ESP-IDF v5.4.2 소스로 대조합니다."
+description: "ESP32-C3 TRM v1.4의 CSR 목록·PMP·인터럽트 컨트롤러를 ESP-IDF v5.4.2 소스와 대조하고, QEMU에서 PMP store fault와 CSR 값을 직접 읽어 봅니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 2
 tags: [risc-v, isa, pmp, interrupt, esp32-c3]
@@ -12,92 +12,89 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **C3의 하드웨어 특권 지원과 ESP-IDF application이 실제 실행하는 모드를 구분합니다.** CPU는 M/U-mode를 지원하지만 보통의 ESP-IDF application을 task별 U-mode sandbox로 자동 분리한다는 뜻은 아닙니다.
+> **C3 코어는 표준 RISC-V를 따르되 CSR 목록, PMP 우선순위, 인터럽트 컨트롤러가 Espressif 고유 방식입니다.** 다른 RISC-V 칩에서 쓰던 `mcycle`·`mie`·PLIC 코드를 그대로 가져오면 C3에서는 맞지 않습니다.
 
-이 장은 ESP-IDF v5.4.2 commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`와 [ESP32-C3 TRM v1.4](https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf)의 CPU·PMP·Interrupt Matrix를 기준으로 합니다. 아래 cross-compile·산술 검사는 실제 칩에서의 fault·interrupt 측정과 구분합니다.
+ESP-IDF로 `app_main()`을 쓰는 동안 코어는 그냥 32-bit MCU처럼 보입니다. RISC-V 특권 모델이 드러나는 곳은 panic 로그, 인라인 어셈블리, 부트로더가 걸어 두는 PMP, 인터럽트 진입 경로입니다. 이 장은 그 네 곳을 읽을 수 있을 만큼만 다룹니다.
 
-ESP-IDF가 가려 두는 부분이 *정확히 이 장의 주제*입니다. C에서 보이는 코어는 *그냥 32-bit MCU*지만, 부트로더·인터럽트 진입·PMP 설정·secure boot에서는 *RISC-V 특권 모델을 직접 만져야* 합니다. 이 장에서는 *꼭 알아야 하는 만큼*의 RISC-V를 정리합니다.
+기준 자료는 [ESP32-C3 TRM v1.4](https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf)의 1장 ESP-RISC-V CPU와 8장 Interrupt Matrix, 그리고 [ESP-IDF v5.4.2](https://github.com/espressif/esp-idf/tree/v5.4.2) 소스입니다. 실행 결과는 Espressif QEMU(`esp_develop_9.0.0_20240606`, `-M esp32c3`)에서 얻었습니다. 아래에서 보듯 QEMU는 일부 CSR 값을 실제 칩과 다르게 보고하므로, QEMU 값과 TRM 값을 나란히 적습니다.
 
-깊이는 *ESP-IDF 사용자가 부트 시퀀스를 읽고 인라인 어셈블리를 짤 수 있는 수준*까지입니다. RISC-V 사양 전체를 다루지는 않습니다. 그건 별도 시리즈로 떼어 둡니다.
+## RV32IMC — 무엇이 있고 무엇이 없나
 
-## RV32IMC — 무엇이 들어 있나
+TRM 1.1절은 코어를 "base integer (I), multiplication/division (M) and compressed (C) standard extensions"로 설명하고, 4단 in-order scalar 파이프라인이라고 적습니다. `misa` 리셋 값도 I·M·C·U만 1입니다(Ch 1 표 참조).
 
-C3 코어가 지원하는 명령어 집합은 *RV32IMC* 한 줄로 끝납니다. 무엇이 들어 있는지 풀어 봅니다.
+| 확장 | C3 | 코드에 미치는 영향 |
+|------|----|------|
+| I | 있음 | load/store·분기·정수 연산 |
+| M | 있음 | `mul`·`div`·`rem`을 한 명령으로 실행 |
+| C | 있음 | 자주 쓰는 명령을 16-bit로 인코딩 |
+| A | 없음 | `lr`/`sc`·AMO 명령 없음 |
+| F/D | 없음 | 부동소수점은 soft-float 라이브러리 호출 |
 
-| 확장 | 의미 | 코드에서 확인할 점 |
-|------|------|------|
-| I | 32-bit integer base | load/store·분기·정수 연산 |
-| M | 정수 곱셈·나눗셈 | MUL·DIV·REM 계열 |
-| C | 16-bit compressed encoding | 명령별 register·immediate 제약 |
+A 확장이 없으니 C11 `atomic_fetch_add()` 같은 연산은 어디선가 흉내 내야 합니다. ESP-IDF v5.4.2의 `components/newlib/priv_include/esp_stdatomic.h`는 `__riscv_atomic`이 정의되지 않으면 `HAS_ATOMICS_32`를 0으로 두고, 코어가 하나(`SOC_CPU_CORES_NUM == 1`)이면 `portSET_INTERRUPT_MASK_FROM_ISR()`로 인터럽트를 막은 채 값을 읽고 쓰는 방식으로 `__atomic_*` 함수를 구현합니다. C3에서 atomic 연산 하나는 인터럽트 마스크 설정과 해제를 동반한다는 뜻입니다.
 
-C3에는 A·F/D·V 확장이 없습니다. 원자 연산은 toolchain·runtime이 제공하는 대상별 경로를 확인하고, FPU가 없는 부동소수점 연산은 soft-float 비용을 고려합니다. 모든 부동소수점 표현이 무조건 library call로 남는 것은 아니며 상수 접기 같은 최적화 결과를 disassembly로 확인합니다. ISA의 A 유무만으로 모든 SMP 구현 가능성을 일반화하지 않습니다.
+### Compressed 명령 — 같은 연산, 절반 크기
 
-### Compressed 명령어가 만드는 것
-
-C 확장은 *자주 쓰는 명령어의 16-bit 버전*입니다. 코드가 작아지고 *I-cache 미스가 줄어듭니다*.
+C 확장은 자주 쓰는 명령을 2 byte로 줄인 별칭입니다. 같은 문장을 약어로 쓰는 것과 비슷해서, 뜻은 같고 길이만 짧습니다. 아래 파일은 같은 두 연산을 32-bit와 16-bit로 각각 인코딩합니다.
 
 ```asm title="c3-encoding.S"
 .option push
 .option norvc
-# 일반 32-bit 명령
-addi a0, a0, 1            # 0x00150513 (4 bytes)
-sw   a0, 0(sp)            # 0x00a12023 (4 bytes)
-
-# Compressed 16-bit 명령
+addi a0, a0, 1
+sw   a0, 0(sp)
 .option rvc
-c.addi a0, 1              # 0x0505 (2 bytes)
-c.swsp a0, 0(sp)          # 0xc02a (2 bytes)
+c.addi a0, 1
+c.swsp a0, 0(sp)
 .option pop
 ```
 
-GCC는 `-march=rv32imc`로 기본 사용합니다. disassembler가 alias를 쓰면 `c.` prefix 없이도16-bit 명령일 수 있으므로 instruction byte 길이를 확인합니다.
+`riscv32-esp-elf-as -march=rv32imc_zicsr_zifencei`로 어셈블하고 `objdump -d`로 풀면 다음과 같습니다.
 
-## 특권 모델 — 하드웨어 M/U와 SDK 실행 경로
-
-TRM의 `misa.U`는1이고 `mstatus.MPP`는 U/M 복귀 모드를 표현합니다. S-mode는 구현하지 않습니다. 기존의 "M-mode만 구현하므로 U-mode 격리가 불가능"이라는 설명은 잘못됐습니다.
-
-이 사실과 ESP-IDF의 task 실행 정책은 별개입니다. 일반 FreeRTOS task를 생성했다고 각 task가 자동으로 U-mode와 독립 PMP 영역을 받지는 않습니다. 특권 전환·trap·메모리 권한의 초기화와 runtime 관리를 포함해 격리 구성을 검증해야 합니다. ARM의 thread/handler 실행 상태와 privileged/unprivileged 구분도 같은 축으로 섞지 않습니다.
-
-## CSR — Control and Status Registers
-
-CSR은 코어의 *제어판*입니다. 인터럽트 enable, trap 핸들러 주소, PMP, cycle counter 등이 모두 CSR로 노출됩니다. CSR 접근은 *전용 명령어*로 합니다.
-
-```asm
-# CSR 읽기/쓰기 원자 명령
-csrrw rd, csr, rs1     # rd ← csr, csr ← rs1
-csrrs rd, csr, rs1     # rd ← csr, csr ← csr | rs1   (Set bits)
-csrrc rd, csr, rs1     # rd ← csr, csr ← csr & ~rs1  (Clear bits)
+```text
+   0:	00150513          	addi	a0,a0,1
+   4:	00a12023          	sw	a0,0(sp)
+   8:	0505                	addi	a0,a0,1
+   a:	c02a                	sw	a0,0(sp)
 ```
 
-C3에 있는 주요 CSR입니다.
+16-bit 명령도 disassembly에는 `c.` 접두사 없이 `addi`·`sw`로 찍힙니다. 명령 길이는 니모닉이 아니라 왼쪽의 인코딩 폭(4 byte `00150513`과 2 byte `0505`)으로 구분해야 합니다.
 
-| CSR | 주소 | 의미 |
-|-----|------|------|
-| `mstatus` | 0x300 | global 인터럽트 enable, privilege |
-| `misa` | 0x301 | 구현된 ISA 비트맵 (RV32IMC) |
-| `mie` | 0x304 | 인터럽트별 enable mask |
-| `mtvec` | 0x305 | trap vector 베이스 주소 |
-| `mscratch` | 0x340 | trap handler temp 저장소 |
-| `mepc` | 0x341 | trap 발생 시 PC |
-| `mcause` | 0x342 | trap 원인 |
-| `mtval` | 0x343 | trap 부가 정보 (잘못된 주소 등) |
-| `mip` | 0x344 | 인터럽트 pending 비트 |
-| `pmpcfg0~3` | 0x3A0~0x3A3 | PMP 설정 (4 entries per CSR) |
-| `pmpaddr0~15` | 0x3B0~0x3BF | PMP base address |
-| `mcycle` | 0xB00 | cycle counter (low 32) |
-| `mcycleh` | 0xB80 | cycle counter (high 32) |
-| `minstret` | 0xB02 | 실행된 instruction 수 |
+## 특권 모델 — M-mode와 U-mode
 
-### 인라인 어셈블리로 CSR 읽기
+TRM Register 1.6의 `misa`는 U=1, S=0입니다. C3는 Machine mode와 User mode를 구현하고 Supervisor mode는 없습니다. Register 1.5 `mstatus`의 MPP 필드도 0x0(User)과 0x3(Machine) 두 값만 정의하고, "Only lower bit is writable"이라고 적습니다.
 
-ESP-IDF에서 cycle counter를 읽는 *가장 짧은 방법*입니다.
+U-mode가 하드웨어에 있다는 것과 ESP-IDF가 U-mode를 쓴다는 것은 다른 이야기입니다. 이 장의 QEMU 실행에서 `app_main()` 안의 `mstatus`는 0x00000088(MIE와 MPIE가 1)이었고, `app_main()`이 `mstatus`·`pmpcfg` 같은 M-mode 전용 CSR을 읽어도 trap이 나지 않았습니다. 일반 FreeRTOS task가 M-mode에서 돈다는 뜻입니다.
+
+## CSR — TRM이 나열한 것만 있다
+
+CSR은 코어의 제어판입니다. 인터럽트 enable, trap 진입 주소, PMP 설정이 모두 여기에 있습니다. 다른 RISC-V 칩의 제어판에 익숙한 채로 C3를 보면, 있어야 할 스위치 몇 개가 빠져 있습니다. TRM 1.4.1절 Register Summary는 C3에 구현된 CSR을 다음과 같이 나열합니다.
+
+| 분류 | CSR (주소) |
+|------|------|
+| Machine Information | `mvendorid`(0xF11), `marchid`(0xF12), `mimpid`(0xF13), `mhartid`(0xF14) |
+| Trap Setup | `mstatus`(0x300), `misa`(0x301), `mtvec`(0x305) |
+| Trap Handling | `mscratch`(0x340), `mepc`(0x341), `mcause`(0x342), `mtval`(0x343) |
+| PMP | `pmpcfg0~3`(0x3A0~0x3A3), `pmpaddr0~15`(0x3B0~0x3BF) |
+| Trigger | `tselect`(0x7A0), `tdata1`(0x7A1), `tdata2`(0x7A2), `tcontrol`(0x7A5) |
+| Debug | `dcsr`(0x7B0), `dpc`(0x7B1), `dscratch0`(0x7B2), `dscratch1`(0x7B3) |
+| 성능 카운터 (custom) | `mpcer`(0x7E0), `mpcmr`(0x7E1), `mpccr`(0x7E2) |
+| GPIO 접근 (custom) | `cpu_gpio_oen`(0x803), `cpu_gpio_in`(0x804), `cpu_gpio_out`(0x805) |
+
+표준 `mie`(0x304), `mip`(0x344), `mcycle`(0xB00), `minstret`(0xB02)는 이 목록에 없습니다. 인터럽트별 enable과 pending은 CSR이 아니라 인터럽트 컨트롤러의 메모리 맵 레지스터(`INTERRUPT_CORE0_CPU_INT_ENABLE_REG`, `INTERRUPT_CORE0_CPU_INT_EIP_STATUS_REG`)가 맡습니다. 같은 절에 따르면 RO CSR에 쓰려 하면 illegal instruction 예외가 납니다.
+
+`mtvec`에도 C3만의 제약이 있습니다. Register 1.7은 MODE 필드를 "Only vectored mode 0x1 is available"로, BASE를 256 byte 정렬로 정의합니다. QEMU에서 읽은 `mtvec`은 0x40380001로, 256 byte 정렬된 0x40380000에 MODE=1이 붙은 값이었습니다. 0x40380000은 Ch 1 부팅 로그에서 app의 IRAM segment(`segment 2: ... vaddr=40380000`)가 올라간 첫 주소입니다.
+
+### cycle count는 `mcycle`이 아니라 `mpccr`
+
+cycle counter는 TRM이 custom CSR로 정의한 `mpccr`(0x7E2)입니다. ESP-IDF v5.4.2의 `components/riscv/include/riscv/rv_utils.h`는 `rv_utils_get_cycle_count()`에서 `SOC_CPU_HAS_CSR_PC`가 1이면 `CSR_PCCR_MACHINE`(0x7e2)을, 아니면 `mcycle`을 읽고, C3의 `soc_caps.h`는 `SOC_CPU_HAS_CSR_PC 1`을 선언합니다. TRM Register 1.12는 `mpcer`의 CYCLE 이벤트에 "Cycle count does not increment during WFI mode"라는 단서도 달아 두었습니다.
+
+아래는 cycle count를 읽는 함수와, `mstatus.MIE`를 저장했다가 되돌리는 인터럽트 마스크 함수입니다. MIE는 Register 1.5에서 bit 3이므로 immediate 8을 씁니다.
 
 ```c title="c3-csr.c"
 #include <stdint.h>
 
-uint32_t read_mcycle_low(void) {
+uint32_t read_cycle_count(void) {
     uint32_t cycles;
-    __asm__ volatile ("csrr %0, mcycle" : "=r"(cycles));
+    __asm__ volatile ("csrr %0, 0x7e2" : "=r"(cycles));  /* mpccr */
     return cycles;
 }
 
@@ -115,49 +112,83 @@ void irq_restore(uint32_t previous) {
 }
 ```
 
-기존 상태를 저장하지 않고 마지막에 항상 enable하면 중첩된 호출의 mask를 풀 수 있습니다. 위 코드는 MIE bit만 다루는 저수준 설명이며 ESP-IDF/FreeRTOS의 critical-section API를 대체하지 않습니다. low32 cycle 값은 wrap하며 clock/sleep 조건을 포함한 장시간 절대 시각이 아닙니다.
+`csrrci`는 이전 값을 돌려주면서 비트를 지우므로, 복원할 때 이전 상태를 보고 다시 켤지 정합니다. 무조건 다시 켜면 바깥 호출자가 이미 막아 둔 인터럽트까지 풀어 버립니다. 실제 코드에서는 `esp_cpu_get_cycle_count()`와 `portENTER_CRITICAL()`을 쓰면 되고, 위 함수는 그 아래에서 무슨 일이 일어나는지 보여 주는 용도입니다.
 
-`csrr`은 `csrrs rd, csr, x0`의 축약입니다. `csrci`/`csrsi`는 *5-bit immediate*로 설정/해제를 한 번에 합니다.
+같은 방식의 함수를 `app_main()`에 넣고 빌드하면 `esp_cpu_get_cycle_count()`가 `csrr s0,0x7e2`로 컴파일됩니다. QEMU에서 실행한 결과입니다.
 
-### `mcause` 디코딩
+```text
+mstatus.MIE before=1 inside=0 after=1
+esp_cpu_get_cycle_count delta over vTaskDelay(10ms) = 1541000
+```
 
-trap이 발생하면 `mcause`에 *원인*이 담깁니다.
+MIE가 1에서 0이 됐다가 1로 돌아왔습니다. cycle 차이는 QEMU의 가상 시계 기준이라 실제 칩의 160 MHz 동작과 비교할 값은 아닙니다.
 
-| 필드·값 | 의미 |
-|---|---|
-| `mcause[31]` | interrupt와 exception 구분 |
-| `mcause[30:0]` | cause 번호; 대상의 vector 정의로 해석 |
-| exception2 | illegal instruction |
-| exception5 | load access fault |
+### `-march`에 `_zicsr`가 필요한 이유
 
-C3의 peripheral source 번호, 매핑된 CPU interrupt 번호, exception cause를 같은 번호 공간으로 취급하지 않습니다. 표준 machine-timer cause를 모든 C3 tick 경로로 가정하지도 않습니다.
+`csrr` 같은 CSR 명령은 Zicsr 확장에 속합니다. 같은 한 줄짜리 파일을 GCC 14.2.0(`esp-14.2.0_20241119`)으로 두 번 컴파일하면 차이가 보입니다.
 
-ESP-IDF의 `panic_handler.c`가 이 값을 읽어 *crash 메시지*를 출력합니다.
+```text
+$ riscv32-esp-elf-gcc -march=rv32imc -mabi=ilp32 -c z.c
+z.c: Assembler messages:
+z.c:1: Error: unrecognized opcode `csrr a5,mstatus', extension `zicsr' required
+$ riscv32-esp-elf-gcc -march=rv32imc_zicsr -mabi=ilp32 -c z.c
+$
+```
 
-## PMP — Physical Memory Protection
+ESP-IDF 빌드는 `-march=rv32imc_zicsr_zifencei`를 넘기므로(Ch 1), 컴포넌트 안에서 쓴 인라인 어셈블리는 이 문제를 만나지 않습니다. 직접 만든 Makefile이나 다른 툴체인으로 C3 코드를 빌드할 때 만나는 오류입니다.
 
-PMP는 *코드/데이터 영역마다 R/W/X 권한*을 정합니다. MPU와 목적이 겹치지만 특권·matching·lock 동작은 구현별로 확인합니다.
+### QEMU가 보고하는 CSR은 실제 칩과 다르다
+
+TRM과 QEMU의 값이 갈리는 대표 사례가 `misa`와 ID CSR입니다.
+
+| CSR | TRM v1.4 리셋 값 | QEMU 실행에서 읽은 값 |
+|-----|------|------|
+| `misa` | MXL=1, I·M·C·U만 1 (= 0x40101104) | 0x401411ad |
+| `mvendorid` | 0x00000612 | 0x00000000 |
+| `marchid` | 0x80000001 | 0x00000000 |
+
+QEMU의 `misa`는 A·D·F·H·S 비트까지 켜져 있습니다. QEMU는 ESP-IDF 바이너리를 실행하는 데 필요한 동작을 흉내 낼 뿐, 실제 칩과 비트 단위로 같지는 않습니다. 이 시리즈에서 QEMU 값을 근거로 쓸 때는 항상 TRM 값과 함께 적습니다.
+
+## `mcause` — trap 원인 읽기
+
+trap이 나면 `mcause`가 원인을 담습니다. 진료 기록의 "주 증상" 칸과 같아서, panic 로그를 읽을 때 가장 먼저 봅니다. TRM Register 1.10은 bit 31을 Interrupt Flag로, 하위 5 bit를 Exception Code로 정의하고, C3가 내는 exception ID를 다음과 같이 나열합니다.
+
+| ID | 원인 | `mtval` 내용 (Register 1.11) |
+|----|------|------|
+| 0x1 | PMP Instruction access fault | 실패한 명령 주소 |
+| 0x2 | Illegal Instruction | 실패한 명령의 opcode |
+| 0x3 | Hardware Breakpoint/Watchpoint 또는 EBREAK | — |
+| 0x5 | PMP Load access fault | load 대상 주소 |
+| 0x7 | PMP Store access fault | store 대상 주소 |
+| 0x8 | ECALL from U mode | — |
+| 0xb | ECALL from M mode | — |
+
+같은 레지스터 설명은 instruction address misaligned(ID 0x0)가 없다고 밝힙니다. 명령을 가져올 때 주소의 최하위 비트를 항상 마스크하기 때문입니다. 인터럽트일 때는 bit 31이 1이 되고 하위 비트에 CPU interrupt 번호 1~31이 들어갑니다. TRM에 따르면 C3는 RISC-V 표준이 코어 내부 인터럽트용으로 남겨 둔 0~15번까지 외부 인터럽트에 씁니다. 그래서 표준의 machine timer interrupt(cause 7)를 기대하는 코드는 C3에서 맞지 않습니다.
+
+ESP-IDF는 `components/esp_system/port/arch/riscv/panic_arch.c`에서 이 값을 문자열로 바꿉니다. 다음 절의 QEMU 실행이 그 결과를 보여 줍니다.
+
+## PMP — 부트로더가 잠가 두는 보호막
+
+PMP는 코어가 주소 구간마다 읽기·쓰기·실행 권한을 검사하는 장치입니다. C3에서는 부트로더가 이 설정을 미리 잠가 두기 때문에, application에서 보는 PMP는 바꿀 수 없는 결과물입니다. 그 결과물을 읽으려면 entry 구조부터 알아야 합니다.
 
 ### Entry 구조
 
-PMP entry (총 16개) — `pmpcfgN` 8 bit + `pmpaddrN` 32 bit:
+PMP entry는 16개이고, 각 entry는 `pmpcfgN`의 8 bit와 `pmpaddrN` 32 bit로 이뤄집니다. `pmpcfg0` 한 CSR이 entry 0~3의 cfg 4개를 담고, `pmpcfg1`이 4~7, `pmpcfg2`가 8~11, `pmpcfg3`이 12~15를 담습니다. TRM 1.8.5절에 따르면 이 CSR들은 RISC-V Privileged Architecture v1.10의 정의를 그대로 따릅니다.
 
 ![PMP Entry — pmpcfg + pmpaddr](/images/blog/esp32-c3/diagrams/ch02-pmp-entry.svg)
 
-A field (address matching mode):
-
-| 값 | 모드 | 의미 |
+| A 값 | 모드 | 범위 |
 |----|------|------|
-| `00` | OFF | 엔트리 사용 안 함 |
-| `01` | TOR | Top-Of-Range — 이전 entry의 addr ~ 현재 addr |
-| `10` | NA4 | Naturally Aligned 4-byte |
-| `11` | NAPOT | Naturally Aligned Power-Of-Two |
+| `00` | OFF | 사용 안 함 |
+| `01` | TOR | 이전 entry의 주소부터 현재 주소 직전까지 |
+| `10` | NA4 | 4 byte |
+| `11` | NAPOT | 2의 거듭제곱 크기, 크기에 맞춰 정렬 |
 
-`pmpcfg0` 한 CSR이 *entry 0~3의 cfg 4개*를 담고, `pmpcfg1`이 4~7, ... `pmpcfg3`이 12~15를 담습니다.
+C3는 표준과 두 가지가 다릅니다(TRM 1.8.2). 겹치는 영역의 정적 우선순위가 없어 하나라도 허용하면 접근이 성공하고, NAPOT 범위는 최대 1 GB입니다.
 
-### NAPOT은 먼저 산술만 검증
+### NAPOT 인코딩을 먼저 계산해 보기
 
-64 KiB 영역 `0x40000000`의 인코딩은 `(base >> 2) | ((size - 1) >> 3)`이므로 `0x10001fff`입니다. 다음 함수는 alignment·크기·32-bit 주소 범위를 검사하며 **CSR을 쓰지 않습니다**.
+NAPOT은 주소와 크기를 `pmpaddr` 하나에 함께 담습니다. 0x40000000에서 시작하는 64 KiB 영역이라면 `(base >> 2) | ((size - 1) >> 3)` = 0x10000000 | 0x1FFF = 0x10001FFF입니다. 아래 함수는 이 계산과 함께 정렬, 크기, TRM의 1 GB 상한을 검사합니다. CSR에는 쓰지 않습니다.
 
 ```c title="c3-napot.c"
 #include <stdint.h>
@@ -173,69 +204,138 @@ bool c3_napot_encode(uint32_t base, uint32_t size, uint32_t *encoded) {
 }
 ```
 
-`A=NAPOT,R=1`의 cfg byte `0x19`는 **L=0**입니다. M-mode 접근을 read-only로 제한했다는 의미가 아니며, M-mode에도 검사하려면 L의 의미를 포함해야 합니다. Lock 후에는 reset 전 변경할 수 없으므로 application에서 임의로 entry0을 재설정하는 예를 제공하지 않습니다.
+호스트에서 세 경우를 돌린 결과입니다.
 
-### 실제 ESP-IDF 보호 초기화
+```text
+64KiB@0x40000000 ok=1 enc=0x10001fff
+misaligned ok=0
+2GiB ok=0
+cfg A=NAPOT|R = 0x19
+```
 
-기준 [cpu_region_protect.c](https://github.com/espressif/esp-idf/blob/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0/components/esp_hw_support/port/esp32c3/cpu_region_protect.c)의 `esp_cpu_configure_region_protection()`은 비중첩 TOR 영역과 lock을 사용합니다. 일부 빈 주소 범위까지 묶는 제약을 주석·static assert로 기록합니다. C3는 overlapping PMP region의 표준 우선순위를 구현하지 않으므로 영역을 겹치지 않게 해야 합니다.
+정렬이 어긋난 0x40008000과 1 GB를 넘는 2 GiB는 거부됩니다. 마지막 줄의 cfg byte 0x19는 A=NAPOT(0x18)과 R(0x01)만 켠 값이라 L=0입니다. TRM 1.8.3절에 따르면 L이 0인 entry는 M-mode 접근을 검사하지 않으므로, 이 값으로는 M-mode 코드를 read-only로 묶지 못합니다.
 
-이 기본 주소 보호를 secure boot signature 검증, task별 sandbox 또는 flash 쓰기 금지와 동일시하지 않습니다. Flash 수정은 mapped 주소로의 CPU store와 flash driver가 수행하는 erase/program을 구분합니다. 실제 permission fault 검증에는 실행 모드·전체 entry 상태·alias·접근 종류와 reset 이후 복구까지 필요합니다.
+### 실제 ESP-IDF 보호 — 2nd-stage bootloader가 건다
+
+PMP는 2nd-stage bootloader가 먼저 겁니다. v5.4.2의 C3 bootloader(`bootloader_esp32c3.c`)가 `bootloader_init_mem()`을 부르고, 이 함수(`components/bootloader_support/src/bootloader_mem.c`)는 `CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE`(기본값 y)이 켜져 있으면 `esp_cpu_configure_region_protection()`을 호출합니다. app의 `call_start_cpu0()`(`components/esp_system/port/cpu_start.c`)도 `Unicore app` 로그를 찍은 직후 같은 `bootloader_init_mem()`을 한 번 더 부르지만, 이때는 entry가 이미 잠겨 있어 bootloader가 쓴 값이 그대로 남습니다.
+
+[`cpu_region_protect.c`](https://github.com/espressif/esp-idf/blob/v5.4.2/components/esp_hw_support/port/esp32c3/cpu_region_protect.c)는 entry 0~14를 TOR로, 마지막 entry 15를 주소 공간 끝 4 byte를 덮는 NA4로 쓰고, 16개 모두에 `PMP_L`을 붙입니다(Ch 1의 entry 표). Lock은 CPU reset으로만 풀리므로, application이 시작될 때는 이미 바꿀 수 없는 상태입니다. QEMU에서 `app_main()`이 읽은 값이 그 결과입니다.
+
+```text
+pmpcfg0=0x89888f88
+pmpcfg1=0x888d898b
+pmpcfg2=0x8f888d8f
+pmpcfg3=0x90888b88
+```
+
+byte 단위로 풀면 `pmpcfg0`의 entry 0~3은 0x88, 0x8f, 0x88, 0x89입니다. 0x88은 L(0x80)+TOR(0x08)로 권한 없음, 0x8f는 RWX, 0x89는 R입니다. 소스의 entry 0(NONE), 1(RWX), 2(NONE), 3(R)과 정확히 맞습니다. `pmpcfg3`의 마지막 byte 0x90은 entry 15의 L+NA4입니다.
+
+### QEMU에서 일부러 PMP fault 내기
+
+entry 3은 flash의 read-only 데이터(DROM) 구간을 R로 묶습니다. 그렇다면 `const` 문자열에 값을 쓰는 순간 store access fault가 나야 합니다. 아래는 그 실험의 핵심 두 줄입니다.
+
+```c title="c3-pmp-fault.c"
+static const char kRodata[] = "flash rodata";
+/* ... */
+*(volatile char *)kRodata = 'F';
+```
+
+QEMU에서의 출력입니다.
+
+```text
+kRodata at 0x3c027850, writing...
+Guru Meditation Error: Core  0 panic'ed (Store access fault). Exception was unhandled.
+
+Core  0 register dump:
+MEPC    : 0x42009906  RA      : 0x42009902  SP      : 0x3fc8f610  GP      : 0x3fc8c200  
+...
+MSTATUS : 0x00001880  MTVEC   : 0x40380001  MCAUSE  : 0x00000007  MTVAL   : 0x3c027850  
+```
+
+`MCAUSE` 7은 위 표의 PMP Store access fault이고, `MTVAL`은 쓰려던 주소 0x3c027850 그대로입니다. `MEPC`의 0x4200xxxx는 flash에서 실행 중이던 `app_main()` 안의 store 명령 위치입니다. `MSTATUS` 0x1880에서 MPP(bit 12:11)가 0b11이므로 trap 직전 모드가 Machine mode였다는 것도 함께 읽힙니다. M-mode 코드인데도 막힌 이유가 바로 L 비트입니다.
+
+이 결과는 QEMU의 PMP 구현에서 나왔습니다. 실제 칩에서 같은 결과가 나는지는 이 장에서 확인하지 않았고, 근거는 TRM 1.8.3절의 설명과 소스의 entry 설정입니다.
 
 ## 인터럽트 컨트롤러 — Interrupt Matrix와 CPU interrupt
 
-C3는 주변장치 source를 CPU interrupt로 매핑하는 자체 controller를 사용합니다. 이를 PLIC이나 CLIC의 호환 구현이라고 부르지 않습니다. 하드웨어 register와 ESP-IDF allocator의 지원 범위를 구분합니다.
-
-### 구조
+C3의 인터럽트는 두 단계를 거칩니다. 주변장치 인터럽트 source가 Interrupt Matrix를 거쳐 CPU interrupt 번호 하나에 연결되고, 코어 안의 인터럽트 컨트롤러(INTC)가 우선순위를 따져 trap을 일으킵니다. 전화 교환대가 외부 회선 62개를 내선 31개 중 하나로 이어 주는 구조와 비슷합니다.
 
 ![ESP32-C3 interrupt flow — 주변장치 source가 Interrupt Matrix를 거쳐 CPU INT 1~31로 매핑되고 RV32 trap vector로 진입](/images/blog/riscv/esp32-c3-mastering/diagrams/ch02-interrupt-matrix.svg)
 
-특이한 점은 *어떤 페리퍼럴 인터럽트가 어떤 CPU INT 번호가 될지*를 *런타임에 설정*한다는 것입니다. ESP-IDF의 `esp_intr_alloc()`이 이를 자동 처리합니다.
+TRM 8.1·8.3.2·8.3.3절이 숫자와 연결 방법을 정합니다.
 
-### `esp_intr_alloc` 예시
+- 주변장치 인터럽트 source는 62개(0~61)이고, CPU interrupt는 31개(1~31)입니다.
+- source X를 CPU interrupt P에 연결하려면 `INTERRUPT_CORE0_SOURCE_X_MAP_REG`에 P를 씁니다. 여러 source를 같은 P에 연결할 수 있고, 0을 쓰면 연결이 끊깁니다.
+- 8.3.2절은 C3가 RISC-V Privileged ISA 대신 자체 인터럽트 컨트롤러로 인터럽트를 구현한다고 명시합니다.
 
-기준 API는 `esp_err_t esp_intr_alloc(int source, int flags, intr_handler_t handler, void *arg, intr_handle_t *ret_handle)`입니다. Timer 같은 주변장치는 해당 driver의 callback API를 우선 사용해 interrupt status의 확인·clear·enable·수명을 함께 관리합니다. source만 할당한 빈 ISR은 동작하는 timer 예제가 아닙니다.
+TRM 1.5.2절은 CPU interrupt마다 다섯 가지 속성을 둡니다.
 
-`ESP_INTR_FLAG_IRAM`은 code를 IRAM으로 옮기는 linker 지시자가 아닙니다. ISR과 호출하는 모든 code, 접근 data가 cache-disabled 상태에서도 유효해야 합니다. `IRAM_ATTR` 하나로 전체 경로가 안전해지는 것은 아니며 allocator 오류도 확인해야 합니다. [v5.4.2 interrupt allocation](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/system/intr_alloc.html)은 shared interrupt를 level-triggered로 제한합니다.
+| 속성 | 레지스터 | 내용 |
+|------|------|------|
+| Enable | `INTERRUPT_CORE0_CPU_INT_ENABLE_REG` | 인터럽트별 on/off |
+| Type | `INTERRUPT_CORE0_CPU_INT_TYPE_REG` | 0 = level, 1 = edge |
+| Priority | `INTERRUPT_CORE0_CPU_INT_PRI_n_REG` | 1(최저)~15(최고), 0이면 마스크 |
+| Pending | `INTERRUPT_CORE0_CPU_INT_EIP_STATUS_REG` | 읽기 전용 pending 상태 |
+| Clear | `INTERRUPT_CORE0_CPU_INT_CLEAR_REG` | edge 인터럽트의 pending 해제 |
 
-### 하드웨어 우선순위와 API flag
+우선순위가 `INTERRUPT_CORE0_CPU_INT_THRESH_REG`의 threshold보다 낮으면 마스크되고, 같은 우선순위끼리는 ID가 낮은 쪽이 먼저입니다. 인터럽트 ID i의 진입 주소는 `mtvec + 4i`이고, ID 0 자리(`mtvec + 0x00`)는 예외용으로 남겨 둡니다. 1.5.3.1절은 정상 상태에서 인터럽트가 들어온 뒤 CPU가 처리를 시작하기까지 정확히 4 cycle이 걸리고, 그 사이 최대 5개 명령이 더 실행될 수 있다고 적습니다.
 
-TRM은 CPU interrupt1~31과 하드웨어 priority1~15를 설명합니다. 원래의 "1~7,6 reserved,7 NMI" 표는 C3 설명에서 제거했습니다. 하드웨어 숫자를 `ESP_INTR_FLAG_LEVELn`에 그대로 옮기지 말고 `intr_alloc.c`, `esp_cpu_intr.c`, RISC-V vector/FreeRTOS port의 지원 조건을 확인합니다. ISR에서 호출 가능한 API는 해당 SDK port와 API의 FromISR 계약을 따릅니다.
+### ESP-IDF의 `esp_intr_alloc()`이 하는 일
 
-## 부트 시퀀스 — 어디서 어디로 가는가
+API는 `components/esp_hw_support/include/esp_intr_alloc.h`의 `esp_err_t esp_intr_alloc(int source, int flags, intr_handler_t handler, void *arg, intr_handle_t *ret_handle)`입니다. `intr_alloc.c`를 따라가면 비어 있는 CPU interrupt를 고른 뒤 `esp_rom_route_intr_matrix(cpu, source, intr)`로 matrix를 설정하고, C3처럼 `SOC_CPU_HAS_FLEXIBLE_INTC`가 1인 target에서는 `esp_cpu_intr_set_priority()`와 `esp_cpu_intr_set_type()`으로 우선순위와 level/edge를 씁니다.
 
-ROM과2nd-stage bootloader가 application을 준비한 뒤 application startup에서 runtime·scheduler를 초기화합니다. 기준 `components/freertos/app_startup.c`는 main task를 생성하고 그 task가 `app_main()`을 호출합니다. `app_main()` 뒤에 scheduler를 시작한다는 기존 순서는 반대였습니다.
+C3에서 동작을 가르는 세부는 다음과 같습니다.
 
-PMP 주소 보호의 정확한 호출 위치는 해당 startup 소스를 따라 확인합니다. 부트로더가 flash에 있던 영역을 application에서 덮어쓰면 무조건 PMP fault가 난다고 설명할 수 없습니다. Secure boot의 image 검증과 flash encryption은 Ch11의 별도 경로입니다.
+- **예약 번호**: `components/esp_hw_support/port/esp32c3/esp_cpu_intr.c`는 CPU interrupt 1을 Wi-Fi용, 6을 "permanently disabled interrupt"(`INT_MUX_DISABLED_INTNO`)로 예약합니다. 이 두 번호는 할당되지 않습니다.
+- **우선순위 flag**: 헤더는 `ESP_INTR_FLAG_LEVEL1`~`LEVEL6`과 `ESP_INTR_FLAG_NMI`(Level 7)를 정의하고, `esp_intr_flags_to_level()`이 flag를 정수 level로 바꿉니다. 하드웨어는 1~15를 지원하지만 이 API로 지정할 수 있는 값은 1~7입니다.
+- **공유 인터럽트**: [v5.4.2 Interrupt allocation 문서](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/system/intr_alloc.html)는 "Shared interrupts can only be level interrupts"라고 적고, edge로 공유하면 두 번째 주변장치의 인터럽트를 놓치는 시나리오를 설명합니다. `ESP_INTR_FLAG_SHARED`만 주면 priority level 1만 할당하고, `ESP_INTR_FLAG_LOWMED`를 더하면 2와 3까지 허용합니다.
+- **`ESP_INTR_FLAG_IRAM`**: 같은 문서는 "Never register an interrupt handler with `ESP_INTR_FLAG_IRAM` flag if you are not 100% sure that all the code and data that the interrupt ever accesses are in IRAM (code) or DRAM (data)"라고 경고합니다. 이 flag는 코드를 옮겨 주지 않습니다. handler에 `IRAM_ATTR`를 붙이고, handler가 부르는 함수와 읽는 데이터까지 내부 메모리에 있어야 합니다.
+
+## 부트 시퀀스 — ROM에서 `app_main()`까지
+
+Ch 1의 QEMU 로그를 이 장의 내용으로 다시 읽으면 순서가 이렇습니다.
+
+1. ROM(`ESP-ROM:esp32c3-api1-20210207`)이 flash에서 2nd-stage bootloader를 IRAM/DRAM에 올립니다.
+2. bootloader가 `bootloader_init_mem()`에서 PMP 16개 entry를 잠그고(app의 `call_start_cpu0()`이 같은 함수를 한 번 더 호출), partition table을 읽어 app image의 segment를 올립니다.
+3. app의 startup 코드가 `cpu_start` 로그를 찍고, `esp_startup_start_app()`(`components/freertos/app_startup.c`)이 `xTaskCreatePinnedToCore()`로 `main` task를 만든 뒤 `vTaskStartScheduler()`를 부릅니다.
+4. scheduler가 `main_task`를 실행하고, 이 task가 `Calling app_main()` 로그를 찍은 뒤 `app_main()`을 호출합니다. `app_main()`이 return하면 `main_task`는 스스로 삭제됩니다.
+
+scheduler가 먼저 시작되고, `app_main()`은 그 위에서 도는 task 하나일 뿐입니다. 그래서 `app_main()` 안에서 `vTaskDelay()`를 바로 쓸 수 있습니다. Secure boot의 서명 검증과 flash encryption은 이 순서의 1~2단계에 끼어드는 별도 기능이고, Ch 11에서 다룹니다.
 
 ## 자주 하는 실수
 
-### "인라인 어셈블리에서 `csrr`이 컴파일 에러"
+### "다른 RISC-V 칩의 `mcycle` 코드가 C3에서 이상하다"
 
-`-march=rv32imc`만으로는 *Zicsr*가 활성화되지 않는 GCC 버전이 있습니다. `-march=rv32imc_zicsr`로 명시하거나 ESP-IDF 기본 옵션을 그대로 둡니다.
+C3 TRM의 CSR 목록에는 `mcycle`·`minstret`이 없습니다. cycle count는 `mpccr`(0x7E2)이고, `esp_cpu_get_cycle_count()`가 이를 읽습니다. 32-bit 값이라 160 MHz에서는 2^32 / 160,000,000 ≈ 26.8초마다 한 바퀴 돕니다.
 
-### "PMP 설정 뒤 예상과 다른 결과"
+### "`mie`로 인터럽트를 켰는데 반응이 없다"
 
-CSR 값만 비교하지 말고 현재 M/U-mode, L bit, TOR 경계와 전체 영역의 중첩 여부를 확인합니다. Lock된 기존 entry를 application에서 다시 쓸 수 있다고 가정하지 않습니다. 실험은 복구 가능한 대상에서 전체 보호 구성을 고정해 진행합니다.
+C3에는 `mie` CSR이 없습니다. 인터럽트별 enable은 `INTERRUPT_CORE0_CPU_INT_ENABLE_REG`이고, 전역 enable은 `mstatus.MIE`입니다. 레지스터를 직접 만지기보다 `esp_intr_alloc()`·`esp_intr_enable()`을 쓰면 예약 번호 충돌까지 피할 수 있습니다.
 
-### "cycle count가 시간과 다름"
+### "PMP entry를 application에서 다시 쓰려 했다"
 
-low32 wrap과 CPU clock 변화, sleep을 포함한 측정 구간을 구분합니다. 절대 microsecond 시각은 `esp_timer_get_time()`의 contract를 확인하며, cycle 값이 어떤 경로에서 reset되는지는 선택한 SDK·대상에서 관찰합니다. 근거 없이 light-sleep 후 항상 reset된다고 단정하지 않습니다.
+bootloader가 16개 entry를 모두 lock했으므로 application에서 `pmpcfg`·`pmpaddr`에 써도 바뀌지 않습니다. 보호 구성을 바꾸려면 bootloader의 `CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE` 설정부터 손봐야 합니다.
 
-### "ISR에서 출력이 멈춤"
+### "ISR에서 `printf`를 불렀더니 abort가 났다"
 
-일반 `printf`·blocking lock·task API를 ISR에서 호출하지 않습니다. ISR-safe 통지로 task에 넘기고, cache-disabled 경로라면 code와 data 배치를 함께 확인합니다. Xtensa의 level 구분을 C3에 그대로 적용하지 않습니다.
+`printf`는 newlib의 stdio를 거치며 lock을 잡습니다. ESP-IDF v5.4.2의 `components/newlib/locks.c`는 ISR 안에서 recursive mutex를 잡으려 하면 `abort()`하고, 일반 mutex를 얻지 못해도 "rewrite your program to avoid libc interactions in ISRs!"라는 주석과 함께 `abort()`합니다. ISR에서는 `xQueueSendFromISR()`·`vTaskNotifyGiveFromISR()`처럼 `FromISR` 접미사가 붙은 API로 task에 일을 넘기고, 출력은 task에서 합니다. 디버그 출력이 꼭 필요하면 ROM 함수 `esp_rom_printf()`를 씁니다.
 
 ### "C++ exception이 안 잡힌다"
 
-ESP-IDF는 *기본적으로 -fno-exceptions*입니다. `menuconfig`에서 활성화 가능하지만 *코드 크기가 크게 증가*합니다. 보통 비활성 유지하고 `expected<T, E>` 또는 `esp_err_t` 기반 에러 전달을 씁니다.
+ESP-IDF v5.4.2의 `CONFIG_COMPILER_CXX_EXCEPTIONS`는 기본값이 n입니다. Kconfig 도움말은 이 상태에서 "any libstdc++ code which throws an exception will abort instead"라고 적고, 켜면 사용자 코드가 처음 exception을 던질 때 약 500 byte의 heap overhead가 더 든다고 밝힙니다. 끈 채로 쓴다면 `esp_err_t` 반환값으로 오류를 전달합니다.
 
 ## 정리
 
-C3의 ISA·특권·PMP·interrupt 번호는 각각 다른 계약입니다. U-mode의 하드웨어 지원과 SDK의 task 격리, PMP L bit와 M-mode 검사, peripheral source와 CPU interrupt, IRAM 표시와 전체 cache-safe 경로를 구분합니다. 인코딩·cross-compile 성공은 실제 보호·지연 측정의 대체물이 아닙니다.
+- C3 코어는 RV32IMC에 M/U-mode를 갖고, A·F·D·S가 없습니다. atomic 연산은 ESP-IDF가 인터럽트 마스크로 흉내 냅니다.
+- 구현된 CSR은 TRM 1.4.1절 목록이 전부입니다. `mie`·`mip`·`mcycle`은 없고, cycle count는 custom `mpccr`(0x7E2)입니다.
+- `mtvec`은 vectored mode만 지원하고 interrupt ID i의 진입점은 `mtvec + 4i`입니다.
+- PMP 16개 entry는 2nd-stage bootloader가 모두 L로 잠급니다(0~14는 TOR, 15는 NA4). QEMU에서 flash rodata에 쓰면 `MCAUSE` 7, `MTVAL` = 대상 주소로 panic이 납니다.
+- 62개 주변장치 source가 Interrupt Matrix를 거쳐 31개 CPU interrupt로 가고, 우선순위는 하드웨어 1~15, ESP-IDF flag로는 1~7입니다.
+- QEMU의 `misa`·`mvendorid`는 TRM 값과 다르므로 QEMU 값만으로 하드웨어를 판단하지 않습니다.
 
 ## 다음 장 예고
 
-다음 편은 **Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS**입니다. *400 KB SRAM과 4 MB flash*가 *어떻게 영역으로 나뉘는지*, 파티션 테이블과 OTA 동작을 다룹니다.
+다음 편은 **Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS**입니다. 이 장에서 PMP 표로 본 DROM·DRAM·IRAM 경계를 `soc.h` 주소로 풀고, partition table과 OTA가 flash를 어떻게 나누는지 다룹니다.
 
 
 ## 관련 항목
