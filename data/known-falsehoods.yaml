@@ -284,3 +284,9 @@
   correction: 'SOEM v1.4.0 simple_test waits with chk = 200 (up to 201 iterations of ec_statecheck(..., 50000))'
   source: 'SOEM v1.4.0 test/linux/simple_test/simple_test.c:73-81'
   fixed_in: industrial-ethernet ch05
+
+- id: openpowerlink-readpdo-writepdo
+  pattern: 'oplk_(readPdo|writePdo)\('
+  correction: 'openPOWERLINK V2.7.2 has no oplk_readPdo/oplk_writePdo; the API is oplk_allocProcessImage / oplk_linkProcessImageObject / oplk_exchangeProcessImageIn/Out'
+  source: 'openPOWERLINK V2.7.2 stack/include/oplk/oplk.h:633-645'
+  fixed_in: industrial-ethernet ch10
