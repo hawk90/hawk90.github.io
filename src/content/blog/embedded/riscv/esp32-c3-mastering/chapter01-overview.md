@@ -273,7 +273,7 @@ rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
 
 ### "기존 ESP32 코드가 그대로 도나"
 
-target을 바꾸는 명령은 `idf.py set-target esp32c3` 하나지만, 그 뒤 빌드에서 걸리는 곳은 몇 가지로 모입니다. Xtensa 인라인 어셈블리, `xTaskCreatePinnedToCore()`의 core 1 지정, touch·DAC·MCPWM처럼 C3에 없는 주변장치, ESP32 레지스터 주소를 직접 쓰는 코드가 그렇습니다. 빌드가 통과한 뒤에도 GPIO 번호와 strapping 핀은 C3 기준으로 다시 맞춰야 합니다(Ch 4).
+target을 바꾸는 명령은 `idf.py set-target esp32c3` 하나지만, 그 뒤 손볼 곳은 몇 가지로 모입니다. Xtensa 인라인 어셈블리, touch·DAC·MCPWM처럼 C3에 없는 주변장치, ESP32 레지스터 주소를 직접 쓰는 코드가 그렇습니다. 빌드가 통과해도 `xTaskCreatePinnedToCore()`의 core 1 지정은 실행 중 assert로 멈추고(Ch 10), GPIO 번호와 strapping 핀은 C3 기준으로 다시 맞춰야 합니다(Ch 4).
 
 ### "Arduino IDE에서도 되나"
 
