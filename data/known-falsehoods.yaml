@@ -272,3 +272,15 @@
   correction: 'QEMU pxb-cxl 단일 dport에서 port1의 decoder1.0은 cxl_switch_port_probe의 passthrough decoder ("Fallback to passthrough decoder")'
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
   fixed_in: f3b70730
+
+- id: esp32c3-i2s-pdm-microphone
+  pattern: 'ESP32-C3[^\n]{0,120}PDM (마이크|microphone) (연결|입력)'
+  correction: 'ESP32-C3 soc_caps는 SOC_I2S_SUPPORTS_PDM_TX만 정의하고 PDM_RX가 없어 ESP-IDF로 PDM 마이크 입력을 받을 수 없다'
+  source: 'ESP-IDF v5.4.2 components/soc/esp32c3/include/soc/soc_caps.h:218-220, esp_driver_i2s/include/driver/i2s_pdm.h'
+  fixed_in: 93c05b8f
+
+- id: esp32c3-mesh-max-layer-6
+  pattern: 'ESP-MESH[^\n]{0,40}최대 6-layer'
+  correction: 'esp_mesh_set_max_layer: tree 최대 25, chain 최대 1000. 6은 예제 CONFIG_MESH_MAX_LAYER 기본값'
+  source: 'ESP-IDF v5.4.2 components/esp_wifi/include/esp_mesh.h:890-895, examples/mesh/internal_communication/main/Kconfig.projbuild:94-98'
+  fixed_in: 0ef84672
