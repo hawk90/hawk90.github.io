@@ -14,7 +14,7 @@ topics: ["embedded", "embedded/protocols"]
 
 > **Linux의 타이머 wakeup 지연, 애플리케이션 실행 시간과 통신 완료 시간은 서로 다른 값입니다. PREEMPT_RT와 cyclictest만으로 전체 제어 deadline을 증명하지는 못합니다.**
 
-[Ch 5](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)의 마스터 루프와 [Ch 10](/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink)의 MN 주기는 모두 Linux가 제때 깨워 줘야 돌아갑니다. Ch 10의 VM에서도 50 ms 주기의 SoC 간격이 40~60 ms로 흔들렸습니다. 이 장에서는 Linux 쪽 지연을 재는 방법을 보고, 그 측정이 무엇을 말해 주고 무엇은 말해 주지 못하는지 가립니다.
+[Ch 5](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)의 마스터 루프와 [Ch 10](/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink)의 MN 주기는 모두 Linux가 제때 깨워 줘야 돌아갑니다. Ch 10의 VM에서도 50 ms 주기의 SoC 간격이 32.9~65.6 ms로 흔들렸습니다. 이 장에서는 Linux 쪽 지연을 재는 방법을 보고, 그 측정이 무엇을 말해 주고 무엇은 말해 주지 못하는지 가립니다.
 
 기준은 Linux v6.12 소스·문서와 rt-tests v2.6 소스이고, 실행은 Apple Silicon Mac의 QEMU/HVF 위 Debian 12 VM(vCPU 4)에서 했습니다. VM 숫자는 산업용 하드웨어의 지연이 아닙니다. 이 장의 실험은 그 차이를 보여 주려는 목적도 있습니다.
 
