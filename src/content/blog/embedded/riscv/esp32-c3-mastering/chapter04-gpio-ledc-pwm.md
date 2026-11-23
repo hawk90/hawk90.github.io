@@ -45,7 +45,7 @@ LEDC 설정값을 받아들일지는 driver가 소프트웨어로 분주비를 �
 | SPI boot (flash에서 부팅) | 1 | 상관없음 | 1 |
 | Joint download boot (UART0·USB로 기록) | 1 | 1 | 0 |
 
-Table 3-3 각주는 GPIO2가 두 모드를 실제로 가르지는 않지만 glitch 때문에 pull-up을 권한다고 적습니다. Table 3-2는 CHIP_EN이 high가 된 뒤 최소 3 ms(tH) 동안 strapping 값이 유지돼야 한다고 정합니다. 그래서 이 핀에 버튼이나 외부 장치를 달 때는 reset 직후 3 ms 동안 어떤 레벨이 걸리는지가 문제가 됩니다. GPIO9에 "누르면 GND" 버튼을 달면 reset 중에 누르는 순간 download mode로 들어갑니다. 개발 보드의 BOOT 버튼이 바로 이 동작을 이용합니다.
+Table 3-3 각주는 GPIO2가 두 모드를 실제로 가르지는 않지만 glitch 때문에 pull-up을 권한다고 적습니다. Table 3-2는 CHIP_EN이 high가 된 뒤 최소 3 ms(tH) 동안 strapping 값이 유지돼야 한다고 정합니다. 그래서 이 핀에 버튼이나 외부 장치를 달 때는 reset 직후 3 ms 동안 어떤 레벨이 걸리는지가 문제가 됩니다. GPIO9에 "누르면 GND" 버튼을 달면, reset 중에 누르고 있을 때 Table 3-3의 GPIO9 = 0 조건이 되어 download mode로 부팅합니다.
 
 ESP-IDF의 QEMU 실행 스크립트(`tools/idf_py_actions/qemu_ext.py`)도 esp32c3에 `-global driver=esp32c3.gpio,property=strap_mode,value=0x02` 같은 strap 값을 넘겨 부팅 모드를 흉내 냅니다.
 
