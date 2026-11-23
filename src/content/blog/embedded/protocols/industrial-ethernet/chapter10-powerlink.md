@@ -36,41 +36,46 @@ POWERLINK는 MN(Managing Node)이 주기와 전송 기회를 관리하는 산업
 
 ## 실제 프레임 — MN demo를 veth에 띄우기
 
-openPOWERLINK는 Linux userspace에서 pcap으로 프레임을 주고받는 구성을 기본으로 빌드합니다. VM에서 스택(`stack/`)을 빌드한 뒤 `apps/demo_mn_console`을 빌드했습니다. 기본 구성은 `CFG_BUILD_KERNEL_STACK = "Link to Application"`이고(`apps/common/cmake/configure-linux.cmake` 32행, 생성된 CMakeCache에도 같은 값), 링크에는 `libpcap-dev`와 `libsystemd-dev`가 필요했습니다(`libsystemd-dev`가 없으면 `cannot find -lsystemd`로 실패).
+openPOWERLINK는 Linux userspace에서 pcap으로 프레임을 주고받는 구성을 기본으로 빌드합니다. VM에서 스택(`stack/`)을 빌드한 뒤 `apps/demo_mn_console`을 빌드했습니다. 기본 구성은 `CFG_BUILD_KERNEL_STACK = "Link to Application"`이고(`apps/common/cmake/configure-linux.cmake` 32행, 생성된 CMakeCache에도 같은 값), 링크에는 `libpcap-dev`와 `libsystemd-dev`가 필요했습니다. `libsystemd-dev` 없이 빌드하면 마지막 링크에서 멈춥니다.
 
-demo의 구성 파일은 저장소에 들어 있는 `apps/common/openCONFIGURATOR_projects/Demo_3CN/output/mnobd.cdc`입니다. 이 프로젝트는 CN 1·32·110 세 대를 정의하고, MN의 `NMT_CycleLen_U32`(0x1006)를 `0x0000C350`, 즉 50,000 μs로 둡니다(`deviceConfiguration/00000000_POWERLINK_CiA302-4_MN.xdc` 149행). CN 없이 MN만 veth0에 띄우고(`demo_mn_console -c mnobd.cdc -d veth0`), 다른 network namespace로 옮긴 veth1에서 tcpdump로 잡았습니다. MN은 `timeout 12`로 약 12초 돌았고, 캡처된 첫 프레임과 마지막 프레임 사이는 10.55초입니다.
+```text
+[100%] Linking C executable demo_mn_console
+/usr/bin/ld: cannot find -lsystemd: No such file or directory
+collect2: error: ld returned 1 exit status
+```
+
+demo의 구성 파일은 저장소에 들어 있는 `apps/common/openCONFIGURATOR_projects/Demo_3CN/output/mnobd.cdc`입니다. 이 프로젝트는 CN 1·32·110 세 대를 정의하고, MN의 `NMT_CycleLen_U32`(0x1006)를 `0x0000C350`, 즉 50,000 μs로 둡니다(`deviceConfiguration/00000000_POWERLINK_CiA302-4_MN.xdc` 149행). CN 없이 MN만 veth0에 띄우고(`timeout 12 ./demo_mn_console -c mnobd.cdc -d veth0`), 다른 network namespace로 옮긴 veth1에서 tcpdump로 잡았습니다.
 
 MN 로그는 NMT 상태를 차례로 지나 Operational까지 갑니다.
 
 ```text
 NmtGsResetConfiguration->NmtMsNotActive Originating event:NmtEventEnterMsNotActive
-...
 NmtMsNotActive->NmtMsPreOperational1 Originating event:NmtEventTimerMsPreOp1
 NmtMsPreOperational1->NmtMsPreOperational2 Originating event:NmtEventTimerMsPreOp2
 NmtMsPreOperational2->NmtMsReadyToOperate Originating event:NmtEventEnterReadyToOperate
 NmtMsReadyToOperate->NmtMsOperational Originating event:NmtEventEnterMsOperational
 ```
 
-캡처된 1011개 프레임의 메시지 종류는 SoC 201개, SoA 809개, ASnd 1개였습니다. CN이 응답하지 않으니 PReq는 나가지 않았습니다. 처음 0.55초는 SoA만 약 0.8 ms 간격으로 나갔고(Pre-Operational 1), 그 사이에 ASnd 하나가 broadcast로 NMT ResetNode 명령을 보냈습니다.
+캡처 파일을 Python 표준 라이브러리만 쓰는 스크립트(`epl-pcap-stats.py`)로 세었습니다. EtherType 0x88AB 프레임 778개 중 SoC 198개, SoA 579개, ASnd 1개였고, 첫 프레임부터 마지막 프레임까지 10.41초였습니다. CN이 응답하지 않으니 PReq는 나가지 않았습니다. 첫 SoC 전 0.575초 동안은 SoA만 381개가 중앙값 0.719 ms 간격으로 나갔고(Pre-Operational 1), 그 사이에 ASnd 하나가 broadcast로 NMT ResetNode 명령을 보냈습니다.
 
 ```text
-    1   0.000000 86:17:ba:b5:1d:26 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NO_SERVICE)->  0  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
-    2   0.000816 86:17:ba:b5:1d:26 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NO_SERVICE)->  0  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
+   16   3.449343 b6:34:d2:3c:85:75 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NO_SERVICE)->  0  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
+   17   3.450125 b6:34:d2:3c:85:75 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NO_SERVICE)->  0  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
 ...
-   11   0.007887 86:17:ba:b5:1d:26 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NMT_REQUEST_INV)->240  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
-   12   0.007891 86:17:ba:b5:1d:26 → EPLv2_ASnd   POWERLINK 60 240->255  ASnd (NMT_COMMAND) NMTResetNode
+   26   3.456345 b6:34:d2:3c:85:75 → EPLv2_SoA    POWERLINK 54 240->255  SoA  (NMT_REQUEST_INV)->240  F:EA=0,ER=0    NMT_MS_PRE_OPERATIONAL_1
+   27   3.456351 b6:34:d2:3c:85:75 → EPLv2_ASnd   POWERLINK 60 240->255  ASnd (NMT_COMMAND) NMTResetNode
 ...
-  610   0.549827 86:17:ba:b5:1d:26 → EPLv2_SoC    POWERLINK 36 240->255 SoC
-  612   0.605889 86:17:ba:b5:1d:26 → EPLv2_SoC    POWERLINK 36 240->255 SoC
+  398   4.024071 b6:34:d2:3c:85:75 → EPLv2_SoC    POWERLINK 36 240->255 SoC
+  400   4.058538 b6:34:d2:3c:85:75 → EPLv2_SoC    POWERLINK 36 240->255 SoC
 ...
 ```
 
-SoC가 나오기 시작한 뒤 연속 SoC 사이 간격은 중앙값 50.217 ms, 최소 40.165 ms, 최대 59.627 ms였습니다. 설정한 50 ms 주기를 중심으로 ±10 ms쯤 흔들린 셈입니다. 이 값은 pcap으로 보내는 userspace MN을 VM 안에서 돌린 결과라 장비의 POWERLINK 주기 정밀도와 비교할 수 없습니다. 다만 [Ch 11](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)에서 다룰 host scheduling 지연이 주기에 그대로 실린다는 것은 보여 줍니다.
+목록의 시각은 tcpdump를 켠 순간부터 센 값이라, 앞 15개 프레임은 veth가 올라오며 커널이 보낸 IPv6 프레임입니다. SoC가 나오기 시작한 뒤 연속 SoC 197개 간격의 중앙값은 50.009 ms, 최소 32.944 ms, 최대 65.576 ms였습니다. 설정한 50 ms 주기를 중심으로 ±17 ms쯤 흔들린 셈입니다. 이 값은 pcap으로 보내는 userspace MN을 VM 안에서 돌린 결과라 장비의 POWERLINK 주기 정밀도와 비교할 수 없습니다.
 
 SoC 프레임 하나를 tshark로 풀면 다음과 같습니다.
 
 ```text
-Ethernet II, Src: 86:17:ba:b5:1d:26 (86:17:ba:b5:1d:26), Dst: EPLv2_SoC (01:11:1e:00:00:01)
+Ethernet II, Src: b6:34:d2:3c:85:75 (b6:34:d2:3c:85:75), Dst: EPLv2_SoC (01:11:1e:00:00:01)
     Type: ETHERNET Powerlink v2 (0x88ab)
 Ethernet POWERLINK
     .000 0001 = MessageType: Start of Cycle (SoC) (1)
@@ -78,11 +83,11 @@ Ethernet POWERLINK
     Source: 240 (0xf0) (Managing Node)
     Flags: 0x00
 ...
-    NetTime: Nov 23, 2026 03:32:27.513885199 UTC
+    NetTime: Nov 23, 2026 04:07:51.665558215 UTC
     RelativeTime: 0
 
-0000  01 11 1e 00 00 01 86 17 ba b5 1d 26 88 ab 01 ff   ...........&....
-0010  f0 00 00 00 cb b3 03 6b 0f 44 a1 1e 00 00 00 00   .......k.D......
+0000  01 11 1e 00 00 01 b6 34 d2 3c 85 75 88 ab 01 ff   .......4.<.u....
+0010  f0 00 00 00 17 bc 03 6b c7 9c ab 27 00 00 00 00   .......k...'....
 0020  00 00 00 00                                       ....
 ```
 
@@ -201,7 +206,7 @@ Black channel은 아래 통신 계층을 안전 기능의 일부로 믿지 않�
 
 - POWERLINK 메시지는 SoC·PReq·PRes·SoA·ASnd 등이고, openPOWERLINK `frame.h`가 값 0x01·0x03·0x04·0x05·0x06을 정의합니다.
 - MN 기본 주소는 `0xF0`, broadcast는 `0xFF`, EtherType은 `0x88AB`입니다.
-- VM에서 MN demo는 Pre-Operational 1에 SoA만, 그 뒤로 설정값 50 ms 주기의 SoC를 보냈고, VM 안에서 SoC 간격은 40~60 ms로 흔들렸습니다.
+- VM에서 MN demo는 Pre-Operational 1에 SoA만, 그 뒤로 설정값 50 ms 주기의 SoC를 보냈고, VM 안에서 SoC 간격은 32.9~65.6 ms로 흔들렸습니다.
 - 최소 프레임 선로 시간은 CN 32대에 443.52 μs이고, 이것은 주기의 하한일 뿐입니다.
 - 공개 API는 process image의 할당·연결·교환으로 동작합니다.
 - openSAFETY는 안전 장치에 구현하는 안전 통신 계층이고, 시스템의 안전 검증을 대신하지 않습니다.
