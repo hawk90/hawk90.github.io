@@ -2,7 +2,7 @@
 title: "ESP32-C3 위 FreeRTOS — 단일 코어 RTOS 활용 전략"
 slug: "embedded/riscv/esp32-c3-mastering/chapter10-freertos"
 date: 2026-05-20T09:10:00
-description: "ESP-IDF v5.4.2 단일 코어의 task·queue 수명, byte 단위 stack·우선순위와 tickless·timer·watchdog 조건을 확인합니다."
+description: "ESP32-C3의 ESP-IDF v5.4.2 FreeRTOS를 QEMU에서 직접 돌려 우선순위·tick·byte 단위 stack·queue·stack overflow 검출을 확인하고, watchdog과 tickless idle의 기본 설정을 Kconfig로 정리합니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 10
 tags: [freertos, rtos, task, queue, esp32-c3]
@@ -12,13 +12,13 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **단일 코어에서도 task preemption·interrupt·DMA에 의한 동시성 문제는 남습니다.** Core affinity와 lock·buffer lifetime은 서로 다른 계약입니다.
+> **C3의 FreeRTOS는 코어 하나에서 돌지만, preemption과 ISR 때문에 동시성 문제는 그대로 남습니다.** ESP-IDF 판 FreeRTOS는 stack을 byte로 세고, 기본 tick은 100 Hz라 10 ms보다 짧은 `vTaskDelay()`는 0 tick이 됩니다.
 
-기준은 ESP-IDF v5.4.2 commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`의 FreeRTOS fork와 C3 RISC-V port입니다. Vanilla FreeRTOS와 stack 단위·port macro·config가 다를 수 있으므로 대상 소스를 확인합니다. 아래 source/API 대조는 실제 C3 scheduler·ISR·watchdog·전류 측정과 구분합니다.
+ESP-IDF는 FreeRTOS를 Espressif 방식으로 고친 fork를 씁니다. 공식 FreeRTOS 문서를 그대로 읽으면 stack 단위와 tick 같은 기본값에서 어긋나는 곳이 있습니다. 이 장은 [ESP-IDF v5.4.2](https://github.com/espressif/esp-idf/tree/v5.4.2)의 `components/freertos`와 C3 RISC-V port를 기준으로 하고, Espressif QEMU(`esp_develop_9.0.0_20240606`)에서 실제로 돌린 결과를 함께 싣습니다. QEMU의 시간은 실제 칩과 같지 않으므로 타이밍 수치는 다루지 않습니다.
 
 ## 단일 코어 FreeRTOS
 
-C3에서는 *모든 태스크가 같은 코어*에서 시분할로 돌아갑니다. Affinity API를 쓸 때는0 또는 `tskNO_AFFINITY`처럼 유효한 값을 사용하며 다른 core 번호를 의미 없다는 이유로 허용하지 않습니다.
+한 사람이 여러 일을 번갈아 하는 것처럼, C3에서는 모든 task가 한 코어를 시분할로 나눠 씁니다. 그래도 높은 우선순위 task가 언제든 끼어들 수 있으므로 공유 데이터는 보호해야 합니다.
 
 ```c
 #include <stdio.h>
@@ -46,34 +46,55 @@ void app_main(void)
 }
 ```
 
-| 항목 | 값 | 비고 |
+QEMU에서 `app_main()`이 기본 설정 값을 직접 출력하게 했습니다.
+
+```text
+configMAX_PRIORITIES=25 configTICK_RATE_HZ=100 sizeof(StackType_t)=1 configNUMBER_OF_CORES=1
+pdMS_TO_TICKS(100)=10 pdMS_TO_TICKS(5)=0
+```
+
+| 항목 | 값 | 근거 |
 |------|-----|------|
-| 코어 수 | 1 | C3는 단일 |
-| 우선순위 | 0~24 (configMAX_PRIORITIES=25) | 0이 idle, 24가 최고 |
-| Tick rate | 100 Hz (기본) 또는 1000 Hz | menuconfig CONFIG_FREERTOS_HZ |
-| Stack API 단위 | byte | C3 port의 StackType_t는 uint8_t |
-| Idle task | 자동 생성, priority 0 | tickless idle hook 진입점 |
+| 코어 수 | 1 | `configNUMBER_OF_CORES` |
+| 우선순위 | 0~24 | `FreeRTOSConfig.h`의 `configMAX_PRIORITIES ( 25 )` |
+| Tick rate | 100 Hz (기본), 1~1000 | `CONFIG_FREERTOS_HZ` |
+| Stack 단위 | byte | RISC-V `portmacro.h`의 `portSTACK_TYPE uint8_t` |
+| Idle task | priority 0 | 아래 task 목록 |
 
-Priority0은 idle task도 쓰지만 사용자 task가 절대 사용할 수 없는 전용값은 아닙니다. 기준 `FreeRTOSConfig.h`는 `configMAX_PRIORITIES=25`이며 system task의 priority·affinity는 subsystem Kconfig·SDK 설정을 확인합니다. C3에 존재하지 않을 수 있는 IPC task를 포함한 고정 우선순위 표는 제거했습니다.
+두 번째 줄이 중요합니다. tick이 10 ms이므로 `pdMS_TO_TICKS(5)`는 0이 되고, `vTaskDelay(0)`은 기다리지 않고 yield만 합니다. 5 ms 주기가 필요하면 `CONFIG_FREERTOS_HZ`를 1000으로 올리거나 `esp_timer`를 씁니다.
 
-Application priority5~10이 무조건 안전하다는 보장은 없습니다. Task의 실행·block 시간, deadline·IRQ·무선/네트워크 부하와 idle의 실행 필요를 함께 분석합니다.
+stack 단위도 vanilla FreeRTOS와 다릅니다. v5.4.2 FreeRTOS(IDF) 문서는 "Task stack sizes in Vanilla FreeRTOS are specified in a number of words, whereas in IDF FreeRTOS, the task stack sizes are specified in bytes"라고 적고, C3 port의 `StackType_t`도 1 byte입니다. `xTaskCreate()`의 4096은 4096 byte입니다.
+
+C3에서 `xTaskCreatePinnedToCore()`에 줄 수 있는 core ID는 0과 `tskNO_AFFINITY`입니다. FreeRTOS의 `taskVALID_CORE_ID()`는 `0 <= xCoreID < configNUMBER_OF_CORES`를 검사하고, `xTaskCreatePinnedToCore()`(`esp_additions/freertos_tasks_c_additions.h`)는 이를 `configASSERT`로 확인합니다. 그래서 ESP32 코드의 core 1 지정을 C3에서 그대로 쓰면 assert 실패로 abort합니다.
+
+### 시작 시점의 task 목록
+
+`CONFIG_FREERTOS_USE_TRACE_FACILITY`와 `CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS`를 켜고 `app_main()` 첫 줄에서 `vTaskList()`를 부른 결과입니다.
+
+```text
+Name          State Prio Stack Num
+main           	X	1	2272	1
+IDLE           	R	0	1360	2
+```
+
+이 시점에는 `main`(priority 1, 지금 실행 중이라 X)과 `IDLE`(priority 0) 두 task만 있습니다. Stack 열은 그 task가 지금까지 남긴 최소 여유 stack(high-water mark)이고 단위는 byte입니다. `esp_timer` task는 v5.4.2 `esp_timer.c`의 주석대로 다른 코드가 esp_timer API를 쓸 때만 초기화되므로 이 앱에는 없습니다. 무선 stack처럼 component를 더하면 목록이 달라지므로, application task의 우선순위는 자기 빌드에서 이 목록을 찍어 보고 정합니다.
 
 ## 동기화 객체와 수명
 
-아래는 주요 데이터 전달·동기화 수단입니다.
+FreeRTOS가 제공하는 데이터 전달·동기화 수단은 다음과 같습니다.
 
 | 객체 | 용도 | API |
 |------|------|-----|
-| Queue | 데이터 큐 (FIFO) | `xQueueCreate`, `xQueueSend`, `xQueueReceive` |
-| Semaphore (binary/counting) | 시그널·자원 카운터 | `xSemaphoreCreateBinary`, `xSemaphoreTake/Give` |
-| Mutex | 상호 배제 (priority inheritance) | `xSemaphoreCreateMutex` |
-| Event Group | 비트 단위 멀티 시그널 | `xEventGroupCreate`, `xEventGroupWaitBits` |
-| Stream Buffer | byte 스트림 (1:1) | `xStreamBufferCreate`, `xStreamBufferSend/Receive` |
-| Message Buffer | 가변 길이 메시지 (1:1) | `xMessageBufferCreate`, `xMessageBufferSend/Receive` |
+| Queue | 고정 크기 item FIFO | `xQueueCreate`, `xQueueSend`, `xQueueReceive` |
+| Semaphore (binary/counting) | 신호, 자원 개수 | `xSemaphoreCreateBinary`, `xSemaphoreTake/Give` |
+| Mutex | 상호 배제, priority inheritance | `xSemaphoreCreateMutex` |
+| Event Group | 비트 단위 여러 신호 | `xEventGroupCreate`, `xEventGroupWaitBits` |
+| Stream Buffer | byte stream (writer 1, reader 1) | `xStreamBufferCreate`, `xStreamBufferSend/Receive` |
+| Message Buffer | 가변 길이 메시지 (writer 1, reader 1) | `xMessageBufferCreate`, `xMessageBufferSend/Receive` |
 
 ### Queue — producer/consumer
 
-다음은 ADC driver가 없는 독립 counter producer/consumer 예입니다. Task 실행 중 queue를 삭제하지 않으며 이 예에서는 application 수명 동안 유지합니다. 동적 task 생성 실패를 확인한 뒤 이미 만든 task·queue를 정리합니다.
+queue는 식당 주방의 주문 꽂이와 같습니다. 홀 직원(producer)은 주문서를 꽂고 바로 다음 손님에게 가고, 주방(consumer)은 자기 속도로 하나씩 뺍니다. 아래 예는 100 ms마다 숫자를 넣는 producer와 이를 출력하는 consumer입니다. task 생성이 실패하면 이미 만든 task와 queue를 정리합니다.
 
 ```c title="c3-queue-demo.c"
 #include <stdio.h>
@@ -119,27 +140,31 @@ void app_main(void) {
 }
 ```
 
-위 우선순위·주기는 설명용 설정입니다. Production에서는 counter wrap, queue full·producer 종료·consumer 지연·watchdog와 전체 system 부하를 정책으로 정합니다.
+QEMU 실행 결과의 처음 다섯 줄입니다(`app_main`은 테스트 harness 안에서 `queue_demo_main`으로 이름만 바꿔 호출했습니다).
 
-큐 길이는 *최악 burst*를 흡수할 만큼 잡습니다. 짧으면 *drop*, 길면 *RAM 낭비*입니다. C3는 SRAM 400 KB라 큐를 너무 키우면 다른 영역이 부족합니다.
+```text
+sample=0
+sample=1
+sample=2
+sample=3
+sample=4
+```
+
+consumer가 producer보다 우선순위가 높아(6 > 5) 값이 들어오는 즉시 깨어나므로 queue는 거의 비어 있습니다. 반대로 consumer가 느리면 32칸이 차고, `xQueueSend(..., 0)`가 `pdFALSE`를 돌려 그 sample은 버려집니다. 이 예에서는 실패하면 `sample`을 올리지 않으므로 같은 값을 다음에 다시 시도합니다.
 
 ### Mutex와 priority inheritance
 
-Mutex는 file-scope initializer에서 생성하지 않습니다. Owner의 초기화 함수에서 `xSemaphoreCreateMutex()` 결과를 검사한 뒤 task에 공유합니다. Take 성공 후 모든 작업의 성공·실패 경로에서 Give하며, ISR에서는 mutex를 사용하지 않습니다.
+mutex는 화장실 열쇠처럼 한 번에 한 task만 자원을 쓰게 합니다. FreeRTOS mutex에는 priority inheritance가 있어, 낮은 우선순위 task가 열쇠를 쥐고 있는 동안 높은 우선순위 task가 기다리면, 쥔 쪽의 우선순위를 잠시 올려 빨리 반납하게 합니다. binary semaphore에는 이 기능이 없습니다. 그래서 자원 보호에는 mutex를, 사건 신호에는 binary semaphore를 씁니다. mutex는 ISR에서 쓸 수 없습니다.
 
-Mutex는 *priority inheritance*가 켜져 있습니다. 낮은 우선순위가 mutex를 잡고 있을 때 *높은 우선순위가 대기*하면, *낮은 쪽 우선순위를 일시적으로 끌어올려* 빠르게 끝내게 합니다. Binary semaphore에는 이 기능이 *없습니다*. *자원 보호에는 mutex*, *시그널링에는 binary semaphore*를 쓰는 것이 규칙입니다.
+mutex는 초기화 함수에서 `xSemaphoreCreateMutex()`로 만들고 반환값을 확인합니다. take에 성공했다면 오류 경로를 포함한 모든 경로에서 give합니다.
 
-### Event Group — 비트 시그널
+### Event Group — 비트 신호
 
-여러 사건을 *하나의 객체*로 묶을 때 유용합니다.
+"Wi-Fi 연결됨", "시간 동기화됨", "MQTT 연결됨" 같은 여러 조건을 한 객체의 비트로 묶을 때 씁니다. `xEventGroupWaitBits()`의 인자로 모든 비트를 기다릴지(`xWaitForAllBits`), 깨어날 때 비트를 지울지(`xClearOnExit`)를 정하고, 반환된 비트 값으로 timeout인지 조건 충족인지를 구분합니다. 비트는 한번 세운 뒤 상태가 바뀌어도 저절로 내려가지 않으므로, disconnect event에서 해당 비트를 직접 지워야 합니다.
 
-먼저 `xEventGroupCreate()` 성공을 확인하고 setter와 waiter의 lifetime을 정합니다. `xEventGroupWaitBits()`의 wait-for-all·clear-on-exit·timeout을 구분하고 반환한 bit mask가 요구 조건을 만족하는지 확인합니다. 모든 bit를 한 번 관찰했다고 Wi-Fi/NTP/MQTT 상태가 이후에도 계속 유지되는 것은 아닙니다. 재연결·disconnect 때 bit를 갱신하는 owner가 필요합니다.
+### Stream Buffer — byte stream
 
-### Stream Buffer — byte 스트림
-
-UART 수신 같이 *바이트 단위로 들어오는* 데이터에 적합합니다.
-
-다음 publication helper는 먼저 만든 stream buffer를 받습니다. 한 ISR writer·한 task reader라는 조건을 유지하고 반환0을 overflow/drop 정책에 반영합니다. 여러 writer/reader를 쓰려면 외부 직렬화를 포함한 별도 계약이 필요합니다.
+byte가 하나씩 들어오는 데이터에는 stream buffer가 맞습니다. FreeRTOS stream buffer는 writer 하나, reader 하나를 전제로 하므로, ISR 하나가 쓰고 task 하나가 읽는 구성에서 lock 없이 씁니다.
 
 ```c title="c3-stream-isr.c"
 #include <stdint.h>
@@ -155,77 +180,95 @@ size_t c3_stream_byte_from_isr(StreamBufferHandle_t buffer, uint8_t byte) {
 }
 ```
 
-이는 UART interrupt status의 확인·clear·driver ownership을 구현한 UART ISR이 아닙니다. 일반 UART driver가 설치한 ISR과 임의 register 직접 읽기를 섞지 않습니다. IRAM-safe 경로 여부도 별도로 증명해야 합니다.
+반환값 0은 buffer가 가득 차 byte를 넣지 못했다는 뜻이고, 호출자가 overflow 카운터를 올리는 식으로 처리합니다. 이 함수는 UART interrupt 상태를 읽고 지우는 완성된 UART ISR이 아니라, ISR 안에서 쓰는 전달 부분만 보여 줍니다. ESP-IDF UART driver를 설치했다면 driver의 ring buffer와 event queue를 쓰고(Ch 5), 직접 ISR을 섞지 않습니다.
 
-## Tickless Idle — 절전의 핵심
+## Tickless Idle
 
-Tick 주기는 `CONFIG_FREERTOS_HZ`에 따라 달라집니다. Tickless idle은 idle 시간을 이용해 tick 처리를 줄이는 port 경로이며 Deep-sleep을 자동으로 사용하는 기능이 아닙니다. `CONFIG_PM_ENABLE`·tickless 설정과 `esp_pm_configure()`의 자동 Light-sleep, clock source·PM lock·driver 조건을 함께 확인합니다.
-
-PM lock은 create/acquire/release/delete의 반환값과 소유 수명을 관리합니다. 특정 UART 전송이 항상 같은 lock을 잡는다고 일반화하지 않습니다. 초기화 성공만으로 정해진 전류에 도달하는 것이 아니며 실제 wake·sleep·peripheral 동작과 전류 측정은 [Ch12](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management)에서 다룹니다.
+tickless idle은 할 일이 없을 때 주기적인 tick interrupt를 멈춰 CPU가 더 오래 쉬게 하는 기능입니다. v5.4.2의 `CONFIG_FREERTOS_USE_TICKLESS_IDLE`은 `PM_ENABLE`에 의존하고(`depends on PM_ENABLE`) 기본값은 n이며, 켜면 `CONFIG_FREERTOS_IDLE_TIME_BEFORE_SLEEP`로 최소 idle 시간을 정합니다. power management(`CONFIG_PM_ENABLE`)를 켜고 `esp_pm_configure()`로 `light_sleep_enable`을 설정해야 idle 때 자동 Light-sleep에 들어갑니다. 이 기능은 Deep-sleep을 자동으로 쓰지 않습니다. 설정과 전류는 [Ch 12](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management)에서 다룹니다.
 
 ## Software Timer
 
-vTaskDelay로 *주기 작업*을 만들 수 있지만, *짧은 콜백*에는 software timer가 적합합니다. timer 콜백은 *별도 timer service task*에서 실행됩니다.
+짧은 주기 작업은 task 대신 software timer callback으로 처리할 수 있습니다. callback은 timer service task 안에서 차례로 실행됩니다. v5.4.2 Kconfig에서 이 task의 우선순위 `CONFIG_FREERTOS_TIMER_TASK_PRIORITY`는 기본 1, 명령 queue 길이 `CONFIG_FREERTOS_TIMER_QUEUE_LENGTH`는 기본 10입니다.
 
-`xTimerCreate()`는 초기화 함수 안에서 호출하고 NULL을 검사합니다. `xTimerStart()`도 command queue에 요청을 보낼 수 있는지 확인합니다. 요청 성공과 callback 실행 완료는 다르며 timer service task의 priority·queue·tick resolution에 영향을 받습니다. Period는0tick이 되면 안 됩니다.
-
-Timer 콜백 안에서는 *vTaskDelay 등 차단 호출 금지*입니다. timer service task를 막아 *다른 timer가 못 돕니다*. 무거운 작업은 *queue로 별도 task에 넘겨야* 합니다.
+우선순위가 1이라 그보다 높은 application task가 바쁘면 callback이 늦어집니다. callback 안에서 `vTaskDelay()`처럼 막히는 호출을 하면 같은 service task의 다른 timer가 모두 밀립니다. 무거운 일은 queue로 별도 task에 넘깁니다. `xTimerCreate()`는 실패하면 NULL을 돌려주고, `xTimerStart()`는 명령 queue에 넣지 못하면 `pdFAIL`을 돌려줍니다. 주기는 0 tick이 될 수 없으므로, 앞의 `pdMS_TO_TICKS(5)` = 0 문제는 timer에도 그대로 적용됩니다.
 
 ## Watchdog — 두 가드
 
-여기서는 Task WDT와 Interrupt WDT를 구분합니다. Chip의 모든 watchdog 종류를 이 두 개로 제한하는 설명은 아닙니다.
+ESP-IDF는 두 종류의 watchdog를 씁니다. 공사장에 비유하면 Task WDT는 작업자(task)가 일하는지 돌아보는 감독관이고, Interrupt WDT는 전기 배선(interrupt)이 끊기지 않았는지 살피는 감독관입니다. 이 장의 QEMU 빌드에서 생성된 기본값은 다음과 같습니다.
 
-| WDT | 확인할 계약 |
-|---|---|
-| Task WDT | 구독한 task/user가 reset/feed를 수행하는지; idle 구독 포함 여부 |
-| Interrupt WDT | tick/interrupt 진행이 장시간 차단되는지; critical section·높은 ISR 포함 |
+```text
+CONFIG_ESP_INT_WDT=y
+CONFIG_ESP_INT_WDT_TIMEOUT_MS=300
+CONFIG_ESP_TASK_WDT_EN=y
+CONFIG_ESP_TASK_WDT_INIT=y
+# CONFIG_ESP_TASK_WDT_PANIC is not set
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=5
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
+```
 
-기준 config에서 TWDT가 startup에 초기화됐을 수 있으므로 `esp_task_wdt_init()`를 중복 호출하지 않습니다. Global owner가 init/reconfigure/deinit을 담당하고 task는 `esp_task_wdt_add(NULL)`, `reset()`, `delete(NULL)`의 결과와 등록 수명을 관리합니다. 일부 함수에 성공했다고 모든 watchdog을 feed한 것은 아닙니다.
+Task WDT는 부팅 중 초기화되고(`CONFIG_ESP_TASK_WDT_INIT=y`), IDLE task를 감시하며, 5초 안에 reset이 없으면 경고를 냅니다. 기본으로 panic은 하지 않습니다. 이미 초기화된 상태에서 `esp_task_wdt_init()`을 다시 부르면 v5.4.2 `task_wdt.c`가 `"TWDT already initialized"`와 함께 `ESP_ERR_INVALID_STATE`를 돌려주므로, 설정을 바꿀 때는 `esp_task_wdt_reconfigure()`를 씁니다. 자기 task도 감시하게 하려면 `esp_task_wdt_add(NULL)`로 등록하고 주기적으로 `esp_task_wdt_reset()`을 부릅니다.
 
-높은 priority의 busy loop가 자기 TWDT만 reset해도 감시 중인 idle task가 굶으면 timeout할 수 있습니다. 무조건 feed하거나 delay를 하나 넣는 방식으로 deadline 문제를 덮지 않고 실제로 timeout한 subscriber·panic config·scheduler 부하를 확인합니다.
+IDLE이 감시 대상이라는 점이 실무에서 중요합니다. priority가 높은 task가 막히지 않고 계속 돌면 IDLE이 실행되지 못해 Task WDT가 터집니다. 그 task가 자기 TWDT를 reset해도 IDLE 감시는 풀리지 않으므로, 그러니 그 task가 주기적으로 block하도록 고쳐야 합니다.
 
-Interrupt WDT의 timeout은 config 값이며 정상 ISR에 허용되는 latency budget은 제품 요구에서 정합니다. 고정300ms 또는 모든 ISR 수십µs라는 수치를 보편 합격선으로 사용하지 않습니다. `IRAM_ATTR`은 배치 요청이고 참조 code/data·API의 ISR 계약까지 확인해야 cache-disabled 경로를 평가할 수 있습니다.
+QEMU에서 priority 10 busy loop를 띄우고 QEMU를 timeout으로 끝낼 때까지 Task WDT 경고는 나오지 않았습니다. `idf.py qemu`가 `-global driver=timer.esp32c3.timg,property=wdt_disable,value=true`로 timer group watchdog를 끄고 실행하고(`qemu_ext.py`), v5.4.2의 Task WDT는 `CONFIG_ESP_TASK_WDT_USE_ESP_TIMER`가 꺼져 있으면 `task_wdt_impl_timergroup.c`, 즉 timer group 구현을 쓰기 때문입니다. watchdog 동작은 실제 보드에서 확인해야 합니다.
 
 ## 스택 오버플로 검출
 
-Stack 검사 옵션은 choice를 따르므로 PTRVAL과 CANARY를 동시에 y로 제시하지 않습니다. Canary 검사는 모든 overflow·임의 memory corruption의 완전한 검출기가 아닙니다. 예를 들어 다음은 한 가지 선택입니다.
+stack 검사 방식은 Kconfig choice라 하나만 고릅니다. v5.4.2의 기본값은 `CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY`이고, task 전환 때 stack 끝에 써 둔 값이 바뀌었는지 봅니다.
 
 ```text
 CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY=y
 ```
 
-기준 C3 port는 `StackType_t`를 `uint8_t`로 정의하며 stack API의 단위는 byte입니다. Vanilla FreeRTOS의32-bit stack word 설명을 그대로 가져오지 않습니다.
+1024 byte stack을 준 task에서 64 byte 지역 배열을 가진 함수를 100단계 재귀 호출하게 하고 QEMU에서 실행한 결과입니다.
+
+```text
+starting small_task with 1024-byte stack
+
+***ERROR*** A stack overflow in task small has been detected.
+Core  0 register dump:
+MEPC    : 0x40380880  RA      : 0x40383d3c  SP      : 0x3fc8dbc0  GP      : 0x3fc8c800  
+...
+```
+
+Kconfig 도움말("on each context switch")대로 canary는 context switch 때마다 검사하므로, 넘친 stack이 다른 메모리를 덮은 뒤에 발견됩니다. 그래서 검출 메시지가 나왔다는 것은 이미 다른 데이터가 망가졌을 수 있다는 뜻입니다. 평소에는 high-water mark로 여유를 재 두는 편이 낫습니다.
 
 ```c
 UBaseType_t high_water = uxTaskGetStackHighWaterMark(NULL);
 printf("minimum unused stack: %lu bytes\n", (unsigned long)high_water);
 ```
 
-High-water mark는 관찰한 실행 경로의 최소 미사용량입니다. 전체 worst-case proof가 아니며 실행되지 않은 error path·재귀·library call을 포함해 margin과 측정 범위를 정합니다. 모든 task를4096byte로 시작하거나500byte 이하만 보면 충분하다는 고정 기준은 제외했습니다.
+같은 QEMU 실행에서 4096 byte stack을 받은 probe task가 `printf` 한 번을 부른 뒤 출력한 값은 `probe high-water (4096-byte stack): 3920 bytes`였습니다. high-water mark는 지금까지 실행한 경로의 최솟값이라, 아직 안 지나간 오류 처리 경로나 깊은 library 호출은 반영하지 않습니다. 시험에서 모든 경로를 지나가게 한 뒤 값을 읽어야 의미가 있습니다.
 
-## 자주 하는 실수와 troubleshooting
+## 자주 하는 실수와 진단
 
-| 증상 | 먼저 확인할 근거 |
-|---|---|
-| Task WDT timeout | 실제 subscriber·등록/해제·feed 결과·idle 실행·panic 설정 |
-| Queue send 실패 | valid handle·full 상태·item lifetime·대기 시간·동시 작업 |
-| Timer 지연 | tick resolution·command queue·service task·긴 callback |
-| Stack 관련 panic | map/stack 범위·오류 경로·canary·관찰한 high-water 범위 |
-| Light-sleep 미진입 | effective config·PM lock·wake/driver 조건과 실제 trace |
+| 증상 | 이 장에서 본 원인 | 먼저 볼 곳 |
+|---|---|---|
+| 짧은 `vTaskDelay()`가 기다리지 않음 | 100 Hz에서 `pdMS_TO_TICKS(5)` = 0 | `CONFIG_FREERTOS_HZ` |
+| stack이 예상보다 4배 작게 계산됨 | vanilla FreeRTOS의 word 단위로 계산 | C3는 byte 단위 |
+| `xTaskCreatePinnedToCore(..., 1)`에서 assert abort | C3는 core 0만 있음 | `tskNO_AFFINITY` 또는 0 |
+| Task WDT 경고 (IDLE) | 높은 우선순위 task가 block하지 않음 | 경고에 찍힌 task 이름, busy loop |
+| `***ERROR*** A stack overflow` | stack 부족 | 그 task의 stack 크기와 high-water mark |
+| timer callback 지연 | service task priority 1 | `CONFIG_FREERTOS_TIMER_TASK_PRIORITY` |
 
 ## 정리
 
-C3의 단일 코어에서도 preemption과 ISR·DMA의 lifetime을 관리해야 합니다. 동적 객체와 task 생성 실패를 처리하고 queue·timer·event 결과를 해당 contract로 해석합니다. Tickless·watchdog·stack 검사 성공은 제품의 timing·전력·memory safety를 자동 보장하지 않습니다.
+- C3 FreeRTOS는 core 1개, 우선순위 0~24, 기본 tick 100 Hz입니다.
+- stack 인자는 byte 단위이고(`StackType_t` = `uint8_t`), QEMU에서 4096 byte task의 high-water mark는 3920 byte였습니다.
+- 100 Hz에서는 10 ms 미만 delay가 0 tick이 됩니다.
+- Task WDT는 기본 5초, IDLE 감시, panic 없음이고, Interrupt WDT는 300 ms입니다. QEMU는 timer group watchdog를 꺼서 이를 재현하지 못합니다.
+- 기본 canary 검사는 1024 byte task의 과도한 재귀를 `***ERROR*** A stack overflow`로 잡았습니다.
+- tickless idle은 `CONFIG_PM_ENABLE`이 필요하고 기본값은 꺼짐입니다.
 
 ## 다음 편
 
-[Ch 11: 보안 — Secure Boot, Flash Encryption, eFuse](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security)에서는 *펌웨어가 안전하게 부팅되는* 두 메커니즘과, 그 키를 보관하는 *eFuse*를 다룹니다. Security 설정·키·chip revision·복구 경로를 함께 확인하는 절차를 다룹니다.
+[Ch 11: 보안 — Secure Boot, Flash Encryption, eFuse](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security)에서는 펌웨어가 안전하게 부팅되는 두 메커니즘과 그 키를 보관하는 eFuse를 다룹니다.
 
 ## 관련 항목
 
 - [Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build)
 - [Ch 11: 보안 — Secure Boot, Flash Encryption](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security)
-- [Ch 12: 전력 관리 — Modem/Light/Deep Sleep](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management) — tickless idle 이어집니다
+- [Ch 12: 전력 관리 — Modem/Light/Deep Sleep](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management) — tickless idle 설정과 전류로 이어집니다
 - [Practical RTOS Internals — Part 2 FreeRTOS](/blog/embedded/rtos/practical-internals/00-preface) — vanilla FreeRTOS 내부
 - [Modern Embedded Recipes — 동기화 패턴](/blog/embedded/modern-recipes/00-preface)
 - [원문 — ESP-IDF FreeRTOS Reference](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/system/freertos.html)
