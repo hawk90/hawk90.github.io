@@ -273,6 +273,25 @@
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
   fixed_in: f3b70730
 
+- id: ethercat-fp-fixed-position
+  pattern: 'FP \(Fixed Position\)'
+  correction: 'FPRD/FPWR/FPRW use the Configured Station Address (node addressing), not a "fixed position"'
+  source: 'Beckhoff EtherCAT Slave Controller Section I v2.3, Table 4/Table 6 (Configured Address Read/Write)'
+  fixed_in: industrial-ethernet ch04
+
+- id: soem-simple-test-op-wait-40
+  pattern: '40회\s*×\s*50,000'
+  correction: 'SOEM v1.4.0 simple_test waits with chk = 200 (up to 201 iterations of ec_statecheck(..., 50000))'
+  source: 'SOEM v1.4.0 test/linux/simple_test/simple_test.c:73-81'
+  fixed_in: industrial-ethernet ch05
+
+- id: openpowerlink-readpdo-writepdo
+  pattern: 'oplk_(readPdo|writePdo)\('
+  correction: 'openPOWERLINK V2.7.2 has no oplk_readPdo/oplk_writePdo; the API is oplk_allocProcessImage / oplk_linkProcessImageObject / oplk_exchangeProcessImageIn/Out'
+  source: 'openPOWERLINK V2.7.2 stack/include/oplk/oplk.h:633-645'
+  fixed_in: industrial-ethernet ch10
+
+
 - id: heaptrack-record-only-option
   pattern: 'heaptrack --record-only'
   correction: 'heaptrack 1.4.0에는 --record-only가 없다. 원시 기록만 남기는 옵션은 -r/--raw'

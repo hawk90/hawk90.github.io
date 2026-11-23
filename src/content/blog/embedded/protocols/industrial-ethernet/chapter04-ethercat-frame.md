@@ -2,7 +2,7 @@
 title: "EtherCAT 프레임 구조 분석 — Datagram·WKC·Address 모드"
 slug: "embedded/protocols/industrial-ethernet/chapter04-ethercat-frame"
 date: 2026-05-13T09:04:00
-description: "EtherCAT frame이 standard Ethernet 위에 어떻게 얹히는가."
+description: "EtherCAT 프레임 헤더·datagram·명령 코드·WKC·mailbox 헤더를 Beckhoff ESC 데이터시트로 정리하고, SOEM이 veth로 보낸 실제 프레임과 합성 LRW·CoE 프레임을 tshark와 Node parser로 풉니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 4
 tags: [ethercat, frame, datagram, wkc]
@@ -12,95 +12,149 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"EtherCAT 프레임은 표준 Ethernet 프레임 안에 *여러 개의 datagram*을 *체인*으로 담는다. 각 datagram에는 *명령·주소·데이터·WKC*가 있다."** WKC(Working Counter)가 *몇 개의 슬레이브가 정상 처리했는지*를 마스터에 알리는 일종의 응답 채널입니다.
+> **"EtherCAT 프레임은 표준 Ethernet 프레임 안에 *여러 개의 datagram*을 *체인*으로 담는다. 각 datagram에는 *명령·주소·데이터·WKC*가 있다."** WKC(Working Counter)는 슬레이브들이 그 datagram을 몇 번 성공적으로 처리했는지 마스터에 알려 주는 카운터입니다.
 
-EtherCAT은 표준 Ethernet 위에 *자기 EtherType*을 얹는 방식입니다. 위층의 TCP/IP를 거치지 않으므로 *L2 직접 통신*입니다. 그 안에 *datagram chain*이 들어 있고, 각 datagram이 하나의 명령을 표현합니다.
+EtherCAT은 표준 Ethernet 위에 *자기 EtherType*을 얹습니다. TCP/IP를 거치지 않는 L2 통신입니다. 그 안에 *datagram chain*이 들어 있고, 각 datagram이 명령 하나를 나타냅니다. 기차에 비유하면 Ethernet 프레임은 기관차와 차량 전체, datagram은 칸 하나하나, WKC는 각 칸 끝에 달린 "몇 역에서 짐을 내리고 실었는지" 세는 계수기입니다.
 
-이 장은 EtherCAT 프레임의 *바이트 단위 구조*, 명령 코드의 의미, WKC의 사용법, 그리고 mailbox 프로토콜 다섯 종(CoE·SoE·FoE·EoE·AoE)을 정리합니다. 합성 frame과 parser를 옆에 두고 *직접 비트를 읽을 수 있는 수준*까지 다룹니다.
+이 장은 Beckhoff ESC 데이터시트 Section I v2.3의 2장을 바탕으로 프레임의 *바이트 단위 구조*를 정리합니다. 그다음 Debian VM에서 SOEM v1.4.0이 실제로 보낸 프레임과 손으로 만든 LRW·CoE 프레임을 veth로 보내고, tshark 4.0.17의 EtherCAT dissector와 Node.js parser로 같은 바이트를 읽어 봅니다.
 
 ## Ethernet 프레임 안에 EtherCAT
 
 ![EtherCAT 프레임 — Ethernet II에서 시작하여 Payload가 EtherCAT Header + Datagram chain으로 확장되고, 각 datagram은 Cmd/Idx/Address/Len/IRQ/Data/WKC 구조](/images/blog/industrial-ethernet/diagrams/ch04-ethercat-frame.svg)
 
-EtherType `0x88A4`가 EtherCAT의 시그니처입니다. Wireshark는 이 EtherType을 보고 *EtherCAT dissector*를 활성화합니다.
+EtherType `0x88A4`가 EtherCAT의 시그니처입니다. SOEM v1.4.0도 `ethercattype.h` 459행에 `ETH_P_ECAT 0x88A4`를 정의하고, Linux에서 이 값으로 raw socket을 엽니다.
 
-이 글은 untagged Ethernet II·MTU 1500 B·EtherCAT command type1을 다룹니다. [SOEM v1.4.0 타입 정의](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercattype.h)와 [datagram 생성 코드](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercatbase.c)를 기준으로 합니다. EtherCAT header는 2 byte입니다.
+EtherCAT header는 2 byte입니다(데이터시트 Figure 2, Table 2). little-endian으로 읽은 16 bit 값의 비트 배치는 다음과 같습니다.
 
 ```text
 EtherCAT Header (2 byte, little-endian)
-  bit 15-12: Type (0x1 = EtherCAT command, 일반)
-  bit 11   : Reserved
-  bit 10-0 : Length (datagram chain 전체 byte 수)
+  bit 15-12: Type     (0x1 = EtherCAT command)
+  bit 11   : Reserved (0)
+  bit 10-0 : Length   (뒤따르는 datagram chain의 byte 수, FCS 제외)
 ```
 
-Type=0x1이 대부분입니다. Type=0x4는 *Network Variables*, Type=0x5는 *Mailbox*용 별도 표시입니다.
+데이터시트는 ESC가 Type 0x1만 지원한다고 적고, header의 Length는 ESC가 무시하고 datagram 안의 길이 필드만 따른다고 주석을 답니다. SOEM은 이 값을 `EC_ECATTYPE 0x1000`(60행)으로 둡니다. 같은 Figure 2는 EtherCAT을 UDP/IP 안에 넣는 방식(UDP 목적지 포트 0x88A4)도 정의합니다. 이 글은 VLAN 태그 없는 Ethernet II 형식만 다룹니다.
 
 ## Datagram 구조
 
-Datagram 필드 의미:
+datagram은 10 byte header, 0~1486 byte data, 2 byte WKC로 이루어집니다(데이터시트 Figure 3, Table 3).
 
-- **Cmd** (1B): 명령 코드 (다음 표)
-- **Idx** (1B): 마스터가 응답 매칭에 쓰는 ID
-- **Address** (4B): 명령에 따라 의미가 다름
-- **Len** (11b): data 길이 (최대 1486 byte)
-- **Len/Flags**의 bit15: M(more datagrams). 마지막 datagram은 0입니다.
-- **IRQ** (16b): interrupt 정보. M bit와 다른 필드입니다.
-- **WKC** (2B): 성공한 접근의 명령별 가중 증가량을 누적하는 카운터
+| 필드 | 크기 | 의미 |
+|---|---|---|
+| Cmd | 1 B | 명령 코드 (다음 표) |
+| Idx | 1 B | 마스터가 중복·손실 datagram을 식별하는 번호. 슬레이브는 바꾸지 않습니다. |
+| Address | 4 B | 명령에 따라 position+offset, station address+offset, 또는 32 bit logical address |
+| Len | 11 bit | 뒤따르는 data 길이 |
+| R | 3 bit | Reserved, 0 |
+| C | 1 bit | Circulating frame. 프레임이 한 바퀴 돌았으면 1 |
+| M | 1 bit | More. 뒤에 datagram이 더 있으면 1, 마지막이면 0 |
+| IRQ | 2 B | 모든 슬레이브의 EtherCAT Event Request를 logical OR한 값 |
+| Data | n B | 읽기/쓰기 데이터 |
+| WKC | 2 B | Working Counter |
+
+data의 최대 길이 1486 byte는 SOEM의 `EC_MAXLRWDATA`(54행) 정의로도 맞춰 볼 수 있습니다. `EC_MAXECATFRAME - 14 - 2 - 10 - 2 - 4`, 즉 1518에서 Ethernet header 14, EtherCAT header 2, datagram header 10, WKC 2, FCS 4를 뺀 값입니다.
 
 ## 명령 코드 — 핵심 표
 
-EtherCAT 명령 코드는 *주소 모드*와 *동작*의 조합입니다.
+명령 코드는 *주소 모드*와 *동작*의 조합입니다. 데이터시트 Table 6의 값입니다.
 
 | Cmd | 이름 | 주소 모드 | 동작 |
 |---|---|---|---|
-| 0x00 | NOP | - | 아무것도 안 함 |
+| 0x00 | NOP | - | 슬레이브가 무시 |
 | 0x01 | APRD | Auto Increment | Read |
 | 0x02 | APWR | Auto Increment | Write |
 | 0x03 | APRW | Auto Increment | Read+Write |
-| 0x04 | FPRD | Configured address | Read |
-| 0x05 | FPWR | Configured address | Write |
-| 0x06 | FPRW | Configured address | Read+Write |
-| 0x07 | BRD | Broadcast | Read |
+| 0x04 | FPRD | Configured Station Address | Read |
+| 0x05 | FPWR | Configured Station Address | Write |
+| 0x06 | FPRW | Configured Station Address | Read+Write |
+| 0x07 | BRD | Broadcast | Read (메모리 값과 datagram 값의 OR) |
 | 0x08 | BWR | Broadcast | Write |
 | 0x09 | BRW | Broadcast | Read+Write |
 | 0x0A | LRD | Logical | Read |
 | 0x0B | LWR | Logical | Write |
 | 0x0C | LRW | Logical | Read+Write |
-| 0x0D | ARMW | Auto Increment | Read Multiple Write |
-| 0x0E | FRMW | Configured address | Read Multiple Write |
+| 0x0D | ARMW | Auto Increment | 주소가 0인 슬레이브는 Read, 나머지는 Write |
+| 0x0E | FRMW | Configured Station Address | 주소가 일치하면 Read, 나머지는 Write |
 
-핵심 패턴은 네 가지입니다.
+주소 모드는 네 가지입니다(데이터시트 2.3절).
 
-- **AP (Auto-increment Position)**: 슬레이브가 자기 *position counter*(상류로부터 몇 번째)로 식별. 초기화·재구성에 사용.
-- **FP (Fixed Position)**: ESC의 *configured station address*로 식별. 정상 동작 중 개별 슬레이브 접근.
-- **L (Logical)**: FMMU 매핑을 통한 *논리 주소* 접근. process data 전송에 사용.
-- **B (Broadcast)**: 모든 슬레이브에 한 번에. DC 시각 latch 등.
+- **Auto Increment (AP)**: 마스터가 position을 *음수*로 넣으면 각 슬레이브가 지나가며 1씩 더하고, 값이 0이 된 슬레이브가 명령을 실행합니다. 데이터시트는 시작 시 망을 훑을 때와 새로 붙은 슬레이브를 찾을 때만 쓰라고 권합니다. 링크가 잠시 끊겼다 붙으면 position이 밀리기 때문입니다.
+- **Configured Station Address (FP)**: 마스터가 시작 때 배정한 station address, 또는 마스터가 활성화한 경우 SII EEPROM에 저장된 alias로 슬레이브를 고릅니다. 이미 식별한 장치의 레지스터에 개별 접근할 때 씁니다.
+- **Broadcast (B)**: 모든 슬레이브가 실행합니다. 초기화와 상태 일괄 확인에 씁니다.
+- **Logical (L)**: FMMU 설정과 맞는 32 bit 논리 주소를 가진 슬레이브가 실행합니다. process data에 씁니다.
 
-**LRW(0x0C)**는 logical 영역의 읽기와 쓰기를 한 datagram에 묶는 명령입니다. 실제 master는 mapping·장치 지원·segment 크기에 따라 LRW 여러 개 또는 LRD/LWR를 사용합니다.
-
-주기 process data 전송의 대표 패턴은 `LRW logical 0x10000~0x101FF`에 512 byte를 실어 보내는 것입니다. 이 한 명령으로 슬레이브들이 input을 읽어 들이는 동시에 output을 가져갑니다. 하나의 datagram으로 다룰 수 있는지는 mapping과 frame 길이·master 구현을 확인해야 하며, 이 설명만으로 특정 cycle 완료가 보장되지는 않습니다.
+디바이스 주소 모드의 offset은 슬레이브의 16 bit 로컬 주소 공간을 가리킵니다. 0x0000~0x0FFF는 레지스터, 0x1000~0xFFFF는 process memory입니다.
 
 ## Working Counter (WKC) — 응답 채널
 
-WKC는 *datagram 끝의 2 byte 카운터*입니다. 마스터가 *0*으로 전송합니다. 슬레이브들이 *데이터를 처리할 때마다 정해진 양만큼 증가*시킵니다.
+WKC는 *datagram 끝의 2 byte 카운터*입니다. 마스터가 0으로 보내고, 슬레이브의 ESC가 하드웨어로 증가시킵니다. 데이터시트 Table 5의 규칙입니다.
 
-| 명령 | 슬레이브가 증가시키는 양 |
-|------|-----------------------|
-| Read 성공 | +1 |
-| Write 성공 | +1 |
-| Read+Write 성공 | +1 (read) + +2 (write) = +3 |
-| 처리 실패 | 0 (증가하지 않음) |
+| 명령 | 결과 | 증가량 |
+|------|------|------|
+| Read | 성공 | +1 |
+| Write | 성공 | +1 |
+| ReadWrite | read만 성공 | +1 |
+| ReadWrite | write만 성공 | +2 |
+| ReadWrite | 둘 다 성공 | +3 |
+| 모든 명령 | 실패 | 변화 없음 |
 
-마스터가 *기대 WKC*를 계산해 두고, 응답 frame의 WKC와 비교합니다. 예를 들어 16개 슬레이브가 모두 4 byte를 R/W하는 LRW라면 기대 WKC는 16 × 3 = 48입니다.
+여기서 "성공"은 주소가 그 ESC를 가리키고, 해당 메모리에 접근할 수 있었다는 뜻입니다(2.4절). 같은 절은 multi-byte datagram에서 한 byte나 한 bit라도 성공하면 WKC가 오르므로, WKC만으로는 전부 성공했는지 일부만 성공했는지 알 수 없다고 적습니다.
 
-- 기대 48에 응답 45면 가중 증가량이 3 부족합니다. 한 장치의 read+write 실패일 수도 있고 여러 접근 실패의 조합일 수도 있어 실패 장치 수를 알 수 없습니다.
-- WKC=0은 성공으로 집계된 접근이 없다는 뜻입니다. 주소·mapping·상태·frame 손실 등을 구별해야 하며 cable break만을 뜻하지 않습니다.
+마스터는 *기대 WKC*를 계산해 두고 응답과 비교합니다. 예를 들어 16대가 모두 같은 LRW 안에 출력 FMMU와 입력 FMMU를 하나씩 가지면 기대 WKC는 16 × 3 = 48입니다.
 
-WKC는 *어느 슬레이브*가 실패했는지 알려 주지 *않습니다*. 성공 접근의 가중 합만 알려 줍니다. 어느 슬레이브가 문제인지 찾으려면 *개별 FPRD*로 polling해야 합니다.
+- 응답이 45면 가중 증가량이 3 모자랍니다. 한 대가 통째로 빠졌을 수도, 세 대가 각각 read만 실패했을 수도 있습니다. 부족량만으로는 몇 대가 실패했는지 모릅니다.
+- WKC가 0이면 성공한 접근이 하나도 없다는 뜻입니다. 프레임이 아예 돌아오지 않은 경우와는 구별됩니다. 그 경우 마스터는 응답 자체를 받지 못해 timeout을 봅니다.
 
-## 합성 frame을 바이트로 읽기
+어느 슬레이브가 문제인지는 WKC가 알려 주지 않으므로, 개별 FPRD로 AL Status(0x0130) 등을 읽어 찾습니다.
 
-아래는 실제 NIC capture가 아닌 **44-byte 합성 송신 frame**입니다. Ethernet padding·preamble·IFG·FCS는 포함하지 않았습니다. 논리 주소0x10, data16 byte, WKC0인 LRW 하나를 담았습니다. 운영망에 송신하는 예제가 아닙니다.
+SOEM은 WKC를 *슬레이브 수 세기*에도 씁니다. `ecx_detect_slaves()`(`ethercatconfig.c` 128~133행)는 모든 슬레이브를 Init으로 돌리는 BWR을 보낸 뒤, 레지스터 0x0000(`ECT_REG_TYPE`)에 BRD를 보내고 돌아온 WKC를 그대로 슬레이브 수로 씁니다. BRD에서는 모든 슬레이브가 WKC를 1씩 올리기 때문입니다.
+
+## 실제 프레임 — SOEM이 veth로 보낸 것
+
+이 동작을 실제 바이트로 보겠습니다. Debian 12 VM(QEMU/HVF, kernel 6.1.0-56-arm64)에서 SOEM v1.4.0을 빌드하고(빌드 과정은 [Ch 5](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)), veth 한 쌍(`veth0`↔`veth1`)을 만든 뒤 `slaveinfo veth0`을 실행하면서 `veth1`에서 tshark로 잡았습니다. 반대편에 슬레이브가 없으므로 프레임은 돌아오지 않습니다.
+
+```text
+$ ./soem-build/test/linux/slaveinfo/slaveinfo veth0
+SOEM (Simple Open EtherCAT Master)
+Slaveinfo
+Starting slaveinfo
+ec_init on veth0 succeeded.
+No slaves found!
+End slaveinfo, close socket
+End program
+```
+
+`veth1`에 찍힌 처음 네 EtherCAT 프레임입니다. 시각은 tshark를 켠 순간부터 센 값이고, 그 앞의 16개는 veth가 올라오며 커널이 보낸 IPv6 프레임입니다.
+
+```text
+   17 2.572107375 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x103, Wc 0
+   18 2.580015095 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
+   19 2.588073066 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
+   20 2.596013786 Private_01:01:01 → Broadcast    ECAT 30 'BRD': Len: 2, Adp 0x0, Ado 0x0, Wc 0
+...
+```
+
+위 `ecx_detect_slaves()` 코드와 한 줄씩 맞습니다. 0x0103(`ECT_REG_DLALIAS`)에 0을 쓰고, 0x0120(`ECT_REG_ALCTL`)에 Init+ACK(0x11)를 두 번 쓴 뒤, 0x0000에 BRD를 보냅니다. SOEM은 이 BWR마다 `EC_TIMEOUTRET3`(6 ms, `ethercattype.h` 66행)까지 응답을 기다리고, 이 VM에서는 프레임 간격이 7.9~8.1 ms로 찍혔습니다. BRD 프레임의 tshark 상세와 바이트는 다음과 같습니다.
+
+```text
+Ethernet II, Src: Private_01:01:01 (01:01:01:01:01:01), Dst: Broadcast (ff:ff:ff:ff:ff:ff)
+    Type: EtherCAT frame (0x88a4)
+EtherCAT frame header
+    .... .000 0000 1110 = Length: 0x00e
+    0001 .... .... .... = Type: EtherCAT command (0x1)
+    EtherCAT datagram: Cmd: 'BRD' (7), Len: 2, Adp 0x0, Ado 0x0, Cnt 0
+            Index: 0x04
+...
+        Working Cnt: 0
+0000  ff ff ff ff ff ff 01 01 01 01 01 01 88 a4 0e 10   ................
+0010  07 04 00 00 00 00 02 00 00 00 00 00 00 00         ..............
+```
+
+몇 가지가 눈에 띕니다. SOEM의 source MAC은 01:01:01:01:01:01이고, tshark는 group 비트가 선 source MAC이라고 경고합니다. 프레임은 30 byte로 Ethernet 최소 길이 60 byte(FCS 제외)보다 짧습니다. veth는 padding을 붙이지 않기 때문입니다. 데이터시트 2장 도입부는 Ethernet 프레임이 64 byte(FCS 포함)보다 짧으면 padding을 붙여야 한다고 적습니다.
+
+## 합성 LRW 프레임을 바이트로 읽기
+
+이번에는 process data용 LRW를 손으로 만들어 Python `AF_PACKET` 소켓으로 같은 veth에 보냈습니다. 논리 주소 0x10, data 16 byte, WKC 0인 44 byte 프레임입니다.
 
 ```text
 ff ff ff ff ff ff 02 00 00 00 00 01 88 a4 1c 10
@@ -111,17 +165,32 @@ ff ff ff ff ff ff 02 00 00 00 00 01 88 a4 1c 10
 | offset | 필드 | 해석 |
 |---|---|---|
 | 0x0C | EtherType | 88 a4 (network order) |
-| 0x0E | EtherCAT header | 1c 10 →0x101c, type1·chain28 B |
+| 0x0E | EtherCAT header | 1c 10 → 0x101c, Type 1·chain 28 B |
 | 0x10 | Cmd / Idx | 0x0C LRW / 1 |
-| 0x12 | Logical address | 10 00 00 00 →0x10 |
-| 0x16 | Len/Flags | 10 00 →16 B·M0 |
+| 0x12 | Logical address | 10 00 00 00 → 0x10 |
+| 0x16 | Len/Flags | 10 00 → 16 B·C 0·M 0 |
 | 0x18 | IRQ | 0 |
 | 0x1A | Data | 16 B |
 | 0x2A | WKC | 0 (송신 시) |
 
-실제 capture에서는 `tcpdump -XX`처럼 Ethernet header 포함 여부를 확인해야 합니다. FCS 보존 여부·VLAN·offload 설정에 따라 offset과 보이는 byte 수가 달라질 수 있습니다. 이 예의 WKC가 실제 망에서 48로 바뀐다고 가정하지 않습니다.
+tshark는 이 바이트를 다음처럼 풉니다.
 
-다음 Node.js parser는 이 글의 **untagged·type1·1500 B payload 범위**를 검사합니다. VLAN·FCS·명령의 application 의미와 slave 상태를 검증하는 도구는 아닙니다.
+```text
+EtherCAT frame header
+    .... .000 0001 1100 = Length: 0x01c
+    0001 .... .... .... = Type: EtherCAT command (0x1)
+EtherCAT datagram(s): 'LRW': Len: 16, Adp 0x10, Ado 0x0, Wc 0
+        Header
+            Cmd        : 12 (Logical ReadWrite)
+            Index: 0x01
+            Log Addr: 0x00000010
+            Length     : 16 (0x10) - No Roundtrip - Last Sub Command
+...
+        Data: 00000000000000000000000000000000
+        Working Cnt: 0
+```
+
+다음 Node.js parser는 이 글의 범위, 즉 VLAN 태그 없는 Type 1 프레임 중 FCS를 뺀 길이가 1514 byte 이하인 것(datagram chain 최대 1498 byte)만 다룹니다. header의 Length와 각 datagram의 M 비트가 서로 맞는지까지 검사합니다.
 
 ```js title="ethercat-frame-parser.mjs"
 export function parseEtherCAT(frame) {
@@ -150,122 +219,145 @@ export function parseEtherCAT(frame) {
 }
 ```
 
-M은 각 datagram의 Len/Flags bit15이며, 다음 datagram은 이전 WKC 뒤에서 시작합니다. Parser는 이 연결과 선언 길이를 검사하고 data를 복사해 반환합니다. 뒤에 붙은 padding은 EtherCAT chain에 포함하지 않습니다.
+`flags & 0x3800`은 Reserved 3 bit가 0인지 보고, C 비트(0x4000)는 검사하지 않습니다. 캡처한 프레임 바이트를 그대로 넣은 결과입니다(Node v24.22.3).
+
+```text
+lrw.pcapng 44 [{"command":12,"index":1,"address":16,"length":16,"more":false,"irq":0,"data":"00000000000000000000000000000000","wkc":0}]
+lrw.pcapng 44 [{"command":5,"index":2,"address":268439553,"length":16,"more":false,"irq":0,"data":"0a00000000130020237a6000e8030000","wkc":0}]
+...
+soem-veth.pcapng 30 [{"command":7,"index":4,"address":0,"length":2,"more":false,"irq":0,"data":"0000","wkc":0}]
+```
+
+두 번째 줄의 address 268439553은 0x10001001입니다. FPWR 같은 디바이스 주소 명령은 4 byte 중 하위 2 byte가 station address(0x1001), 상위 2 byte가 offset(0x1000)이므로, 논리 주소가 아닌 명령에서는 이 값을 둘로 나눠 읽어야 합니다.
 
 ## Logical Addressing — FMMU의 역할
 
-`LRW`/`LRD`/`LWR` 명령은 *논리 주소*를 사용합니다. 32 bit이라 *4 GB 논리 공간*입니다. 실제로는 작은 영역(수 KB)만 씁니다.
+`LRD`/`LWR`/`LRW`는 32 bit *논리 주소*를 씁니다. 공간은 4 GB이지만 실제로는 슬레이브들의 process data를 줄지어 놓은 작은 구간만 씁니다.
 
-마스터의 process image:
+SOEM v1.4.0의 `ecx_config_map_group()`은 모든 슬레이브의 출력을 먼저, 입력을 그 뒤에 이어 붙입니다. 출력 매핑(`ethercatconfig.c` 1205행)이 입력 매핑(1265행)보다 먼저 돌고 매번 비어 있는 다음 FMMU를 쓰므로, 출력과 입력이 모두 있는 슬레이브에서는 FMMU 0이 출력(`FMMUtype = 2`), FMMU 1이 입력(`FMMUtype = 1`)을 맡습니다. 슬레이브 두 대가 각각 출력 4·8 byte, 입력 4·8 byte를 가진다면 배치는 다음과 같습니다. 물리 주소는 예시이며 SOEM 기본 mailbox(0x1000~0x10FF)를 피해 잡았습니다.
 
-```text
-Logical address space (예: 64 slave × 평균 8 byte input + 8 byte output)
-  0x00000000 - 0x000001FF  : input PDO area  (512 byte)
-  0x00000200 - 0x000003FF  : output PDO area (512 byte)
-```
+| 슬레이브 | FMMU | 방향 | 논리 주소 | 물리 주소 |
+|---|---|---|---|---|
+| 1 | 0 | 출력(write) | 0x00~0x03 | 0x1100~0x1103 |
+| 2 | 0 | 출력(write) | 0x04~0x0B | 0x1100~0x1107 |
+| 1 | 1 | 입력(read) | 0x0C~0x0F | 0x1180~0x1183 |
+| 2 | 1 | 입력(read) | 0x10~0x17 | 0x1180~0x1187 |
 
-각 슬레이브의 FMMU 0번이 *input 영역*의 자기 슬롯을, FMMU 1번이 *output 영역*의 자기 슬롯을 *DPRAM 주소*로 매핑합니다.
-
-**Slave 1 FMMU 설정:**
-
-- FMMU 0: logical 0x00000000~0x00000003 → DPRAM 0x1000 (input, read)
-- FMMU 1: logical 0x00000200~0x00000203 → DPRAM 0x1010 (output, write)
-
-**Slave 2 FMMU 설정:**
-
-- FMMU 0: logical 0x00000004~0x0000000B → DPRAM 0x1000 (input, read)
-- FMMU 1: logical 0x00000204~0x0000020B → DPRAM 0x1010 (output, write)
-
-마스터가 *LRW 0x00000000, len=1024*를 한 번 발행하면, 모든 슬레이브가 *자기 슬롯만* R/W합니다. 마스터 입장에서는 *연속된 1024 byte 메모리*를 다루는 것처럼 보입니다.
+마스터가 논리 주소 0에서 24 byte짜리 LRW 하나를 보내면 각 슬레이브가 *자기 구간만* 읽고 씁니다. 마스터는 연속된 24 byte 메모리를 다루는 셈입니다. 이 경우 두 대가 모두 출력과 입력에 성공하면 기대 WKC는 2 × 3 = 6입니다.
 
 ## Mailbox — CoE·SoE·FoE·EoE·AoE
 
-주기 process data는 *작고 빠른* 데이터(위치·속도 등)입니다. *큰 비주기* 데이터(파라미터 설정, 펌웨어 업로드 등)는 *mailbox*로 보냅니다.
+주기 process data는 *작고 매 주기 바뀌는* 데이터입니다. 파라미터 설정이나 펌웨어처럼 *크고 가끔 오가는* 데이터는 mailbox SyncManager를 거칩니다. mailbox header는 6 byte입니다(데이터시트 Table 27).
 
-| 약자 | 풀네임 | 용도 | 기반 |
-|------|--------|------|------|
-| **CoE** | CANopen over EtherCAT | 일반 파라미터, SDO | CANopen object dictionary |
-| **SoE** | Servo profile over EtherCAT | 서보 드라이브 전용 | SERCOS IDN |
-| **FoE** | File over EtherCAT | 펌웨어/config 파일 | TFTP-like |
-| **EoE** | Ethernet over EtherCAT | TCP/IP 터널링 | 표준 IP |
-| **AoE** | ADS over EtherCAT | Beckhoff TwinCAT 통신 | Beckhoff 사유 |
+| 필드 | 크기 | 의미 |
+|---|---|---|
+| Length | 2 B | mailbox header를 뺀 길이 |
+| Address | 2 B | 보낸 쪽의 station address |
+| Channel / Priority | 6 bit / 2 bit | channel은 0, priority 0(낮음)~3(높음) |
+| Type | 4 bit | 0x1 vendor specific(Beckhoff AoE), 0x2 EoE, 0x3 CoE, 0x4 FoE, 0x5 SoE, 0xF VoE |
+| Ctr | 3 bit | 중복 검출용 순번 |
 
-**CoE**는 CANopen 객체 접근을 EtherCAT mailbox에 싣는 방식입니다. CANopen의 *object dictionary*를 그대로 가져옵니다. 16 bit *index* + 8 bit *subindex*로 객체를 식별합니다.
+SOEM v1.4.0의 `ec_mbxheadert`(`ethercatmain.h` 316~322행)도 `length`, `address`, `priority`, `mbxtype` 네 필드 6 byte이고, `ECT_MBXT_*` 열거형이 같은 Type 값을 씁니다.
 
-| index | CiA402 객체의 예 |
+| Type | 약자 | 데이터시트 8.2.1절의 정의 |
+|------|------|------|
+| 0x2 | **EoE** | Ethernet 프레임을 EtherCAT 위로 터널링 |
+| 0x3 | **CoE** | CAN application layer object dictionary 접근, Emergency·PDO 메시지 |
+| 0x4 | **FoE** | 펌웨어와 파일의 download/upload |
+| 0x5 | **SoE** | IEC 61800-7 식별자 접근 |
+| 0x1 | **AoE** | ADS(Automation Device Specification) 메시지 교환 |
+
+**CoE**는 CANopen의 *object dictionary*를 그대로 가져와 16 bit *index*와 8 bit *subindex*로 객체를 식별합니다. 서보 드라이브는 CiA 402 프로파일 객체를 씁니다. Beckhoff [EP7211 표준 객체 문서](https://infosys.beckhoff.com/content/1033/ep7211/7005500299.html)의 PDO 매핑 항목에서 다음 index를 확인할 수 있습니다.
+
+| index | 객체 |
 |---|---|
-| 0x6040 | Controlword (16-bit) |
+| 0x6040 | Controlword |
 | 0x6041 | Statusword |
-| 0x607A | Target Position |
-| 0x6064 | Position Actual Value |
-| 0x60FF | Target Velocity |
-| 0x6071 | Target Torque |
+| 0x607A | Target position |
+| 0x6064 | Position actual value |
+| 0x60FF | Target velocity |
+| 0x6071 | Target torque |
 
-CoE SDO는 지원 mailbox 상태에서 사용합니다. CiA402 Controlword는 16-bit이고, 0x0F 한 번으로 모든 상태의 drive가 Operation Enabled로 간다는 보장은 없습니다. Statusword·fault·mode·상태 전이와 실제 구동기 조건을 확인해야 합니다.
+### CoE SDO 요청 — Hex 예
 
-### CoE 통신 — Hex 예
-
-[SOEM의 `ec_mbxheadert`·SDO 구성](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercatcoe.c)에서 mailbox header는 **6 B**입니다. 아래는 0x607A:00에 4-byte 값1000을 쓰는 expedited download request의 **합성 mailbox payload**이며 실제 drive에 명령을 실행한 결과가 아닙니다.
+SOEM v1.4.0의 `ecx_SDOwrite()`(`ethercatcoe.c` 330행부터)는 4 byte 이하 값을 expedited download로 보냅니다. mailbox Length에 `0x000a`, priority 0, Type에 `ECT_MBXT_COE + (cnt << 4)`, CoE header에 `ECT_COES_SDOREQ << 12`, SDO command에 `ECT_SDO_DOWN_EXP`(0x23)를 넣습니다. 이 규칙대로 0x607A:00에 1000을 쓰는 mailbox payload 16 byte를 만들고, station address 0x1001의 mailbox(0x1000)로 가는 FPWR에 실어 veth로 보냈습니다.
 
 ```text
 0a 00 00 00 00 13 00 20 23 7a 60 00 e8 03 00 00
 ```
 
-처음6 B의 Length=10은 header를 제외한 길이입니다. 0x13은 type3(CoE)·counter1이고, CoE header 00 20 다음의 0x23·7a60·00·e8030000은 command·index·subindex·4-byte data입니다. 요청을 구성한 것만으로 drive의 상태 전이나 실제 위치 변경이 검증되지는 않습니다.
+처음 6 byte가 mailbox header입니다. Length 10은 CoE header 2 byte와 SDO 8 byte를 더한 값이고, 0x13은 Type 3(CoE)과 Ctr 1입니다. SOEM의 `ec_nextmbxcnt()`는 카운터를 1~7로 돌리고 0은 건너뜁니다. tshark는 이를 다음처럼 풉니다.
 
-ASCII로 보면 사람이 즉시 알아보기 어렵지만, Wireshark의 EtherCAT/CoE dissector가 이걸 잘 풀어 줍니다.
+```text
+EtherCAT datagram(s): 'FPWR': Len: 16, Adp 0x1001, Ado 0x1000, Wc 0
+        EtherCAT Mailbox Protocol:CoE SDO Req : 'Initiate Download' (1) Idx=0x607a Sub=0
+            Header
+                Length: 10
+                .... ..00 = Priority: 0
+                Type: CoE (CANopen over EtherCAT) (3)
+                Counter: 1
+            CoE
+                Number: 0
+                Type: SDO Req (2)
+                SDO Req : 'Initiate Download' (1) Idx=0x607a Sub=0
+                    Initiate Download: 0x23
+                        .... ...1 = Size Ind.: Set
+                        .... ..1. = Expedited: Set
+...
+                Index: 0x607a
+                SubIndex: 0x00
+                Data: 0x000003e8
+```
 
-### FoE — 펌웨어 업로드
+0x23은 size indicated와 expedited 비트가 선 download 요청이고, data 0x000003e8은 1000입니다. 슬레이브가 없으니 응답은 없습니다. 실제 드라이브라면 SDO 응답이 다음 mailbox read로 돌아오고, SOEM은 응답의 Type·service·index·subindex가 요청과 맞는지 확인합니다.
 
-FoE는 EtherCAT mailbox에서 파일을 전송합니다. Bootstrap은 장치가 지원하는 update 경로의 하나이며, `ec_FOEwrite()`가 상태 전이·reset·image 검증까지 자동 처리하지는 않습니다.
+### FoE — 펌웨어 전송
 
-[SOEM v1.4.0 `ethercatfoe.c`](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercatfoe.c)는 mailbox 크기와 header를 고려해 segment를 나누고 packet number·ACK·timeout을 처리합니다. 고정1024-byte chunk나 별도 EOF flag를 가정하지 않습니다. 최대 segment보다 짧은 마지막 DATA로 종료하며, 파일 크기가 segment의 정확한 배수이면 마지막 zero-length DATA가 필요합니다. 실제 update는 장치의 상태·파일 형식·권한·복구 절차를 따라야 하며 여기서는 실행하지 않습니다.
+FoE는 mailbox로 파일을 나눠 보냅니다. SOEM v1.4.0의 `ecx_FOEwrite()`(`ethercatfoe.c` 199행)를 보면 segment 크기는 슬레이브 mailbox 길이에서 12 byte를 뺀 값(`maxdata = mbx_l - 12`)입니다. WRITE 요청 후 ACK를 받을 때마다 DATA를 하나씩 보내고, packet number를 붙입니다. 파일 끝은 별도 플래그가 아니라 "maxdata보다 짧은 DATA"로 표시합니다(코드 주석 "EOF is defined as packetsize < full packetsize"). 그래서 파일 크기가 maxdata의 정확한 배수면 마지막에 길이 0인 DATA를 한 번 더 보냅니다(`dofinalzero`). BUSY를 받으면 데이터 포인터와 packet number를 되돌려, 다음 ACK에서 그 segment를 다시 보냅니다.
 
 ### EoE — 보조 IP 채널
 
-EoE는 EtherCAT 망 위에 *TCP/IP 패킷*을 *터널링*합니다. 슬레이브에 *웹 인터페이스*를 띄울 때 흔히 씁니다. mailbox 경로를 사용하지만 같은 링크와 host 시간을 소비합니다. 주기 process data에 영향을 주지 않으려면 master의 bandwidth·queue·scheduling budget을 검증해야 합니다.
-
-성능은 일반 IP에 한참 못 미칩니다. 진단·설정 용도이지 *데이터 전송 메인 채널*이 아닙니다.
+EoE는 EtherCAT 망 위로 *Ethernet 프레임*을 터널링합니다. mailbox를 거치므로 process data와 같은 링크 시간을 나눠 씁니다.
 
 ## 자주 하는 실수
 
 ### "WKC가 기대값이면 모든 게 정상이다"
 
-대부분 그렇지만, *FMMU 매핑이 잘못된 경우*에도 WKC는 증가합니다. 슬레이브가 *엉뚱한 비트*를 R/W하면서도 *명령 자체는 성공*한 것으로 처리합니다. WKC는 *통신*은 보장하지만 *의미*는 보장하지 않습니다. process image와 실제 데이터의 *내용*을 별도로 확인해야 합니다.
+데이터시트 2.4절에 따르면 WKC는 한 byte라도 접근에 성공하면 오릅니다. FMMU 구간을 잘못 잡아 엉뚱한 byte를 읽고 써도 WKC는 오를 수 있습니다. WKC는 *접근*을 확인할 뿐 *의미*를 확인하지 않습니다.
 
 ### "LRW 한 번이면 모든 슬레이브의 모든 데이터를 다 본다"
 
-FMMU에 *매핑된 영역만* 다룹니다. 매핑 안 된 슬레이브 레지스터는 LRW로 못 봅니다. *비매핑 레지스터*(예: AL Status, error counter)는 FPRD로 *개별 polling*해야 합니다.
+FMMU에 *매핑된 구간만* 다룹니다. 매핑되지 않은 논리 주소에서는 ESC가 프레임의 데이터를 건드리지 않습니다(데이터시트 7장). AL Status 같은 레지스터는 FPRD로 따로 읽습니다.
 
-### "Mailbox는 process data와 같은 cycle에서 처리된다"
+### "Mailbox는 process data와 같은 datagram에 실린다"
 
-mailbox는 *별도 Sync Manager*(SM0/SM1)를 씁니다. process data는 SM2/SM3. *동시에* 흐를 수 있지만 *cycle 안에서 우선순위가 낮습니다*. SM 분리가 링크 대역폭과 host 실행 시간을 무한히 분리해 주지는 않습니다.
+SOEM에서는 아닙니다. `ecx_mbxsend()`는 슬레이브의 mailbox 쓰기 주소(`mbx_wo`)로 FPWR을 따로 보내고(`ethercatmain.c` 982행), 응답은 SM1 상태를 FPRD로 확인한 뒤 읽습니다. process data의 LRW와는 다른 프레임입니다.
 
-### "EtherType 0x88A4 패킷이 라우터를 통과한다"
+### "EtherType 0x88A4 프레임은 라우터를 넘을 수 없으니 EtherCAT은 L2에서만 쓴다"
 
-L2 EtherType은 *라우터를 못 넘습니다*. EtherCAT은 *동일 broadcast 도메인* 안에서만 동작합니다. 망 분리가 필요하면 *EtherCAT bridge* 슬레이브로 별도 segment를 만들거나, EoE 위로 IP 패킷을 *터널링*하는 방법을 씁니다.
+Ethernet II 형식은 L2라 라우터를 넘지 못하는 것이 맞습니다. 다만 데이터시트 2.6절은 EtherCAT datagram을 UDP/IP에 넣는 형식도 정의합니다. ESC는 UDP 목적지 포트 0x88A4인 IPv4 프레임을 EtherCAT으로 처리하고, 프레임 내용을 고치면서 checksum을 갱신할 수 없으므로 UDP checksum을 0으로 지웁니다.
 
-### "Datagram 길이는 무한정 길게 된다"
+### "Datagram은 얼마든지 길게 만들 수 있다"
 
-Ethernet MTU가 1500 byte. EtherCAT header 2 byte + datagram header10 B + WKC2 B, 합계12 B이므로 *한 datagram의 data는 최대 1486 byte*입니다. 한 frame에 *여러 datagram*을 chain할 수는 있어도, 한 datagram이 jumbo frame처럼 길어지지는 않습니다.
+데이터시트 Figure 3의 datagram data는 0~1486 byte이고, SOEM의 `EC_MAXLRWDATA`도 1486입니다. 더 큰 process image는 여러 datagram이나 여러 프레임으로 나눕니다.
 
 ## 정리
 
-- EtherCAT 프레임은 EtherType `0x88A4`로 표준 Ethernet 위에 직접 얹힙니다.
-- EtherCAT header(2 byte) 다음에 *여러 datagram*이 체인으로 옵니다.
-- 명령 코드는 *주소 모드 (AP·FP·L·B)*와 *동작(R·W·RW)*의 조합입니다. 핵심은 LRW(0x0C), LRD(0x0A), LWR(0x0B), BRD(0x07), BWR(0x08)입니다.
-- WKC는 명령별 성공 접근의 가중 증가량을 누적합니다. 기대값과 비교해 *통신 건전성*을 판별합니다.
-- 논리 주소(LRW)는 FMMU를 통해 *각 슬레이브의 DPRAM 슬롯*으로 매핑됩니다.
-- mailbox 프로토콜은 CoE(파라미터), SoE(서보), FoE(파일), EoE(IP 터널), AoE(Beckhoff) 다섯입니다.
-- CoE는 CANopen object dictionary(0x6040, 0x6041, 0x607A 등)를 그대로 씁니다.
-- WKC는 *통신 성공*만 보장하지 *의미 정확성*은 보장하지 *않습니다*.
+- EtherCAT 프레임은 EtherType `0x88A4`로 표준 Ethernet 위에 얹히고, ESC는 header Type 0x1만 처리합니다.
+- EtherCAT header(2 byte) 뒤에 10 byte header·data·2 byte WKC로 된 datagram이 체인으로 오고, M 비트가 마지막을 표시합니다.
+- 명령 코드는 *주소 모드(AP·FP·B·L)*와 *동작(R·W·RW·RMW)*의 조합입니다.
+- WKC는 read +1, write +1, read/write +3으로 오르고, 부족량만으로는 실패 장치 수를 알 수 없습니다. WKC가 맞아도 *접근*이 성공했다는 뜻일 뿐 데이터가 맞다는 보장은 없습니다.
+- SOEM은 BRD의 WKC로 슬레이브 수를 셉니다. veth 캡처에서 그 프레임 순서를 그대로 확인했습니다.
+- mailbox header는 6 byte이고 Type으로 EoE·CoE·FoE·SoE·AoE를 구분합니다. tshark가 합성 CoE SDO 요청을 0x607A:00 = 1000으로 풀었습니다.
 
-다음 편은 **Ch 5: EtherCAT Master/Slave — SOEM·IgH**입니다. 오픈소스 master 구현 두 가지를 비교하고, 슬레이브 측 ESC chip 선택, ENI/ESI XML 파일의 구조를 풀어봅니다.
+다음 편은 **Ch 5: EtherCAT Master/Slave — SOEM·IgH**입니다. SOEM을 Debian VM에서 빌드하며 만난 경고, adapter 조회 결과, IgH의 구조, 슬레이브 측 SII·ESI를 다룹니다.
 
 ## 관련 항목
 
 - [Ch 3: EtherCAT 아키텍처 — Processing on the Fly](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)
 - [Ch 5: EtherCAT Master/Slave — SOEM·IgH](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)
 - [Ch 6: PROFINET 개요 — RT·IRT 클래스](/blog/embedded/protocols/industrial-ethernet/chapter06-profinet)
+- [Beckhoff EtherCAT Slave Controller Section I — Technology v2.3](https://download.beckhoff.com/download/document/io/ethercat-development-products/ethercat_esc_datasheet_sec1_technology_2i3.pdf)
+- [SOEM v1.4.0 `ethercattype.h`](https://github.com/OpenEtherCATsociety/SOEM/blob/v1.4.0/soem/ethercattype.h)
 - [원문 — Wireshark EtherCAT dissector](https://wiki.wireshark.org/EtherCAT)
 - [원문 — CiA 402 servo profile](https://www.can-cia.org/can-knowledge/canopen/cia402/)
