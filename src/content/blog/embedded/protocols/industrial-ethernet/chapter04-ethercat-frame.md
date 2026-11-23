@@ -124,17 +124,17 @@ End slaveinfo, close socket
 End program
 ```
 
-`veth1`에 찍힌 처음 네 EtherCAT 프레임입니다. tshark 목록에서 번호·상대 시각·Info 열만 남겼고, 시각은 첫 EtherCAT 프레임(캡처 시각 2.572107375 s)을 0으로 맞췄습니다.
+`veth1`에 찍힌 처음 네 EtherCAT 프레임입니다. 시각은 tshark를 켠 순간부터 센 값이고, 그 앞의 16개는 veth가 올라오며 커널이 보낸 IPv6 프레임입니다.
 
 ```text
-17 0.000  'BWR': Len: 1, Adp 0x0, Ado 0x103, Wc 0
-18 0.008  'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
-19 0.016  'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
-20 0.024  'BRD': Len: 2, Adp 0x0, Ado 0x0, Wc 0
+   17 2.572107375 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x103, Wc 0
+   18 2.580015095 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
+   19 2.588073066 Private_01:01:01 → Broadcast    ECAT 29 'BWR': Len: 1, Adp 0x0, Ado 0x120, Wc 0
+   20 2.596013786 Private_01:01:01 → Broadcast    ECAT 30 'BRD': Len: 2, Adp 0x0, Ado 0x0, Wc 0
 ...
 ```
 
-위 `ecx_detect_slaves()` 코드와 한 줄씩 맞습니다. 0x0103(`ECT_REG_DLALIAS`)에 0을 쓰고, 0x0120(`ECT_REG_ALCTL`)에 Init+ACK(0x11)를 두 번 쓴 뒤, 0x0000에 BRD를 보냅니다. SOEM은 이 BWR마다 `EC_TIMEOUTRET3`(6 ms, `ethercattype.h` 66행)까지 응답을 기다리고, 이 VM에서는 프레임 간격이 약 8 ms로 찍혔습니다. BRD 프레임의 tshark 상세와 바이트는 다음과 같습니다.
+위 `ecx_detect_slaves()` 코드와 한 줄씩 맞습니다. 0x0103(`ECT_REG_DLALIAS`)에 0을 쓰고, 0x0120(`ECT_REG_ALCTL`)에 Init+ACK(0x11)를 두 번 쓴 뒤, 0x0000에 BRD를 보냅니다. SOEM은 이 BWR마다 `EC_TIMEOUTRET3`(6 ms, `ethercattype.h` 66행)까지 응답을 기다리고, 이 VM에서는 프레임 간격이 7.9~8.1 ms로 찍혔습니다. BRD 프레임의 tshark 상세와 바이트는 다음과 같습니다.
 
 ```text
 Ethernet II, Src: Private_01:01:01 (01:01:01:01:01:01), Dst: Broadcast (ff:ff:ff:ff:ff:ff)
