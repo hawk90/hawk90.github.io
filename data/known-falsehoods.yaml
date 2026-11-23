@@ -273,6 +273,25 @@
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
   fixed_in: f3b70730
 
+- id: heaptrack-record-only-option
+  pattern: 'heaptrack --record-only'
+  correction: 'heaptrack 1.4.0에는 --record-only가 없다. 원시 기록만 남기는 옵션은 -r/--raw'
+  source: 'heaptrack v1.4.0 src/track/heaptrack.sh.cmake usage (lines 25-56)'
+  fixed_in: ebdd9ddd
+
+- id: heaptrack-print-most-called-functions
+  pattern: 'MOST CALLED FUNCTIONS'
+  correction: 'heaptrack_print 섹션 이름은 MOST CALLS TO ALLOCATION FUNCTIONS'
+  source: 'heaptrack v1.4.0 src/analyze/print/heaptrack_print.cpp:716'
+  fixed_in: ebdd9ddd
+
+- id: jemalloc-distro-prof-enabled
+  pattern: '배포판 패키지는 보통 \*?이미 활성'
+  correction: 'Debian 12 libjemalloc2 5.3.0은 config.prof: false로 빌드돼 MALLOC_CONF=prof:true가 "Invalid conf pair"로 무시된다'
+  source: 'Debian 12 arm64 libjemalloc2 5.3.0-1, MALLOC_CONF=stats_print:true 출력의 Build-time option settings'
+  fixed_in: f7fe4249
+
+
 - id: esp32c3-i2s-pdm-microphone
   pattern: 'ESP32-C3[^\n]{0,120}PDM (마이크|microphone) (연결|입력)'
   correction: 'ESP32-C3 soc_caps는 SOC_I2S_SUPPORTS_PDM_TX만 정의하고 PDM_RX가 없어 ESP-IDF로 PDM 마이크 입력을 받을 수 없다'
