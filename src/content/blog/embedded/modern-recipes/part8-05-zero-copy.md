@@ -2,7 +2,7 @@
 title: "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice"
 slug: "embedded/modern-recipes/part8-05-zero-copy"
 date: 2026-04-17T09:04:00
-description: "Linux 6.12에서 read/write·sendfile·splice·io_uring·V4L2 DMA-BUF를 직접 돌려, API마다 어디서 CPU 복사가 사라지는지 잽니다."
+description: "DMA-BUF·V4L2의 버퍼 수명과 sendfile·splice·io_uring의 복사·완료·오류 처리 계약을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 93
 tags: [recipes, zero-copy, dma-buf, sendfile, io_uring, splice]
@@ -11,474 +11,323 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Zero-copy = 가능한 경로에서 불필요한 CPU 복사를 줄이는 것."** fd 하나를 넘긴다고 복사가 사라지는 것은 아니고, API마다 "어디서 복사가 사라지는지"가 다릅니다. 이 글은 Linux 6.12에서 `read`/`write`, `sendfile`, `splice`, `io_uring`, V4L2 DMA-BUF를 직접 돌려 그 차이를 잽니다.
+> **Zero-copy는 어느 경계의 복사를 줄였는지와 buffer를 언제 다시 써도 되는지를 함께 설명해야 합니다.** fd를 넘겼거나 비동기 API를 썼다는 사실만으로 복사가 모두 사라지지는 않습니다.
 
 ## 어떤 상황에서 쓰나
 
-4K(3840×2160) 60 fps 카메라를 NV12(픽셀당 1.5 B)로 받으면 3840 × 2160 × 1.5 × 60 = 약 746 MB/s, YUYV(2 B)면 약 995 MB/s입니다. camera driver → user buffer → encoder 입력처럼 경계를 하나 넘을 때마다 CPU가 이만큼을 한 번 더 읽고 씁니다. 이사할 때 짐을 트럭에서 내려 창고에 쌓았다가 다시 다른 트럭에 싣는 대신, 트럭 열쇠만 넘겨주는 것이 zero-copy입니다.
+카메라 frame을 encoder에 넘기고 다시 socket으로 보낼 때, 각 단계가 같은 저장소를 빌릴 수 있다면 일부 CPU 복사를 줄일 수 있습니다. 하지만 raw frame과 압축 bitstream은 다른 데이터이며 encoder output까지 입력과 같은 buffer인 것은 아닙니다. format·stride·modifier 변환과 장치별 mapping이 추가될 수도 있습니다.
 
-또 하나는 CPU 시간입니다. 아래 측정에서 512 MiB 파일을 socket으로 보낼 때 `read`/`write`는 송신 쪽 sys 시간이 0.130초, `sendfile`은 0.022초였습니다. 같은 일을 하면서 CPU를 6분의 1만 썼습니다(다시 돌린 실행에서는 0.109초 대 0.021초).
+공유 buffer는 같은 서류를 여러 부서가 돌려 보는 방식입니다. 서류를 복제하지 않는 대신 누가 수정 중이고 언제 돌려받는지 표시해야 합니다. fd는 보관함 열쇠이지 작업 완료 통지서가 아닙니다. 비동기 큐에 주문을 넣었다는 접수증도 실제 배송 완료와 구분합니다.
 
-## 핵심 개념
+이 글은 Linux에서 buffer 공유와 파일 전송의 **오류·짧은 전송·완료·해제 계약**을 다룹니다. 실제 camera/GPU/encoder 장치가 없는 검증을 그 장치들의 end-to-end zero-copy 성공으로 표시하지 않습니다.
 
-세 갈래로 나눕니다.
+## 서로 다른 세 경계 구분하기
 
-1. **Buffer 공유** — DMA-BUF, shared memory, `mmap`. 같은 page를 여러 주체가 봅니다.
-2. **Kernel 안 전송** — `sendfile`, `splice`. user space를 거치지 않고 fd에서 fd로 옮깁니다.
-3. **Kernel 경계 비용 줄이기·우회** — `io_uring`, XDP, DPDK. syscall을 묶거나 kernel 경로 일부를 건너뜁니다.
+| 방식 | 줄이려는 경계 | 그대로 남는 일 |
+|---|---|---|
+| DMA-BUF·shared mmap | 주체 사이 payload 복사 | format 협상·mapping·cache/fence·소유권 |
+| sendfile·splice | 파일/FD 전송 중 userspace 왕복 | kernel 내부 처리·backpressure·부분 전송 |
+| io_uring | 제출·완료 처리 비용과 일부 등록 비용 | kernel I/O·buffer 접근·opcode별 복사 |
+| XDP·AF_XDP·DPDK | packet 경로 또는 userspace/kernel 경계 | mode·driver·queue·DMA 등록·buffer 반납 |
 
-`sendfile(2)` man page는 이 차이를 이렇게 적습니다. "Because this copying is done within the kernel, sendfile() is more efficient than the combination of read(2) and write(2), which would require transferring data to and from user space." 복사가 kernel 안에서 일어난다는 뜻이지, 복사가 0이라는 뜻은 아닙니다.
+io_uring은 kernel 우회 API가 아닙니다. 일반 `io_uring_prep_read`는 지정한 userspace buffer에 읽고, XDP 자체는 kernel/driver 등의 hook에서 실행됩니다. AF_XDP의 zero-copy mode와 DPDK의 userspace driver 경로도 같은 이름의 기능이 아닙니다.
 
-## 코드 / 실제 사용 예
+## Camera 공유: export와 import 경로 구분하기
 
-아래 사용자 공간 예제는 모두 Apple M2 Pro 위 QEMU(`-accel hvf`) Debian 13 arm64 게스트(6 vCPU, 커널 6.12.116+deb13-arm64, GCC 14.2.0, liburing 2.9)에서 `gcc -O2 -Wall`로 빌드해 돌렸습니다.
+V4L2 driver가 buffer를 **할당하고 export**한다면 MMAP memory 방식으로 REQBUFS한 뒤 EXPBUF로 fd를 얻습니다. 다른 allocator에서 받은 fd를 V4L2가 **import**하려면 DMABUF memory 방식과 QBUF의 plane fd를 사용합니다. DMABUF로 요청한 buffer를 같은 흐름에서 EXPBUF하는 예제로 섞지 않습니다.
 
-### `read`/`write` vs `sendfile` vs `splice`
+다음 helper는 format이 이미 설정된 multi-planar capture queue를 전제로 합니다. 실제 buffer 수와 plane 수는 driver 응답으로 처리합니다.
 
-page cache에 올린 512 MiB 파일을 localhost TCP socket으로 보냅니다. 받는 쪽은 자식 프로세스가 읽고 버립니다. 시간은 송신 프로세스의 wall time과 `getrusage(RUSAGE_SELF)`의 user·sys 시간입니다.
-
-```c
-/* file -> TCP socket on localhost with read/write, sendfile or splice */
+```c title="v4l2-export.c"
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/resource.h>
-#include <sys/sendfile.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
+#endif
 #include <time.h>
-#include <unistd.h>
-
-static double now(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t); return t.tv_sec + t.tv_nsec / 1e9; }
-static double tv(struct timeval t) { return t.tv_sec + t.tv_usec / 1e6; }
-
-int main(int argc, char **argv)
-{
-    const char *mode = argv[1];
-    int file_fd = open(argv[2], O_RDONLY);
-    struct stat st; fstat(file_fd, &st);
-    size_t count = st.st_size;
-
-    int ls = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in a = { .sin_family = AF_INET, .sin_addr.s_addr = htonl(INADDR_LOOPBACK) };
-    bind(ls, (void *)&a, sizeof a); listen(ls, 1);
-    socklen_t al = sizeof a; getsockname(ls, (void *)&a, &al);
-
-    if (fork() == 0) {                       /* sink: read and discard */
-        int c = accept(ls, NULL, NULL);
-        static char sink[1 << 16];
-        while (read(c, sink, sizeof sink) > 0) { }
-        _exit(0);
-    }
-    int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-    connect(sock_fd, (void *)&a, sizeof a);
-
-    struct rusage r0, r1; getrusage(RUSAGE_SELF, &r0);
-    double t0 = now();
-    size_t done = 0;
-    if (!strcmp(mode, "rw")) {
-        static char buf[1 << 16];
-        ssize_t n;
-        while ((n = read(file_fd, buf, sizeof buf)) > 0)
-            for (ssize_t o = 0; o < n; ) o += write(sock_fd, buf + o, n - o);
-        done = count;
-    } else if (!strcmp(mode, "sendfile")) {
-        while (done < count) { ssize_t n = sendfile(sock_fd, file_fd, NULL, count - done); if (n <= 0) break; done += n; }
-    } else {                                  /* splice */
-        int p[2]; pipe(p);
-        while (done < count) {
-            ssize_t n = splice(file_fd, NULL, p[1], NULL, 1 << 16, SPLICE_F_MOVE);
-            if (n <= 0) break;
-            for (ssize_t m = n; m > 0; ) m -= splice(p[0], NULL, sock_fd, NULL, m, SPLICE_F_MOVE);
-            done += n;
-        }
-    }
-    shutdown(sock_fd, SHUT_WR);
-    wait(NULL);
-    double t = now() - t0;
-    getrusage(RUSAGE_SELF, &r1);
-    printf("%-8s %zu MiB  wall %.3f s  sender user %.3f s sys %.3f s\n", mode, done >> 20, t,
-           tv(r1.ru_utime) - tv(r0.ru_utime), tv(r1.ru_stime) - tv(r0.ru_stime));
-    return 0;
-}
-```
-
-```bash
-#!/bin/bash
-# 512 MiB file kept in the page cache; each mode 5 times
-[ -f big.bin ] || head -c $((512<<20)) /dev/urandom > big.bin
-cat big.bin > /dev/null
-gcc -O2 -Wall -o xfer xfer.c
-for m in rw sendfile splice; do for i in 1 2 3 4 5; do ./xfer $m big.bin; done; done
-```
-
-```text
-rw       512 MiB  wall 0.130 s  sender user 0.000 s sys 0.130 s
-rw       512 MiB  wall 0.128 s  sender user 0.000 s sys 0.128 s
-rw       512 MiB  wall 0.130 s  sender user 0.000 s sys 0.130 s
-rw       512 MiB  wall 0.136 s  sender user 0.000 s sys 0.136 s
-rw       512 MiB  wall 0.126 s  sender user 0.000 s sys 0.126 s
-sendfile 512 MiB  wall 0.069 s  sender user 0.000 s sys 0.023 s
-sendfile 512 MiB  wall 0.070 s  sender user 0.000 s sys 0.022 s
-sendfile 512 MiB  wall 0.069 s  sender user 0.000 s sys 0.022 s
-sendfile 512 MiB  wall 0.070 s  sender user 0.000 s sys 0.020 s
-sendfile 512 MiB  wall 0.071 s  sender user 0.000 s sys 0.021 s
-splice   512 MiB  wall 0.065 s  sender user 0.002 s sys 0.020 s
-splice   512 MiB  wall 0.066 s  sender user 0.000 s sys 0.025 s
-splice   512 MiB  wall 0.068 s  sender user 0.000 s sys 0.023 s
-splice   512 MiB  wall 0.065 s  sender user 0.000 s sys 0.024 s
-splice   512 MiB  wall 0.073 s  sender user 0.000 s sys 0.028 s
-```
-
-5회 중앙값으로 정리하면 다음과 같습니다.
-
-| 방식 | wall | 송신 sys | `read`/`write` 대비 sys |
-| --- | ---: | ---: | ---: |
-| `read`/`write` (64 KiB buffer) | 0.130 s | 0.130 s | 1 |
-| `sendfile` | 0.070 s | 0.022 s | 0.17 |
-| `splice` (file → pipe → socket) | 0.066 s | 0.024 s | 0.18 |
-
-- **송신 CPU는 5~6분의 1로 줄었습니다.** 같은 블록을 새 디렉터리에서 다시 돌린 실행에서는 중앙값이 `read`/`write` 0.109초, `sendfile` 0.021초, `splice` 0.024초였습니다. `read`/`write`는 page cache → user buffer, user buffer → socket buffer 두 번을 CPU가 옮기고, `sendfile`·`splice`는 user buffer를 거치지 않습니다.
-- **wall time은 1.9배(다시 돌린 실행에서는 2.4배)만 줄었습니다.** 받는 쪽은 세 경우 모두 `read`로 socket에서 user buffer로 복사하므로, 받는 쪽이 병목이 됩니다. zero-copy 효과는 경로의 한쪽 끝만 바꾸면 그 끝에서만 보입니다.
-- `splice`는 `SPLICE_F_MOVE`를 줬지만 결과가 `sendfile`과 거의 같았습니다. `splice(2)`에서 이 flag는 kernel에 대한 힌트이고, 두 호출 모두 user 공간을 거치지 않는다는 점이 같습니다.
-
-### `io_uring` — async submission
-
-queue depth 1로 4 KiB씩 읽으면 io_uring이 `pread`보다 빠를까요? page cache에 올린 같은 512 MiB 파일로 쟀습니다.
-
-```c
-/* 4 KiB reads of a cached file, queue depth 1: pread vs io_uring read vs read_fixed */
-#include <fcntl.h>
-#include <liburing.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/uio.h>
-#include <time.h>
-#include <unistd.h>
-
-#define BS 4096
-static double now(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC, &t); return t.tv_sec + t.tv_nsec / 1e9; }
-
-int main(int argc, char **argv)
-{
-    int fd = open(argv[1], O_RDONLY);
-    struct stat st; fstat(fd, &st);
-    long n = st.st_size / BS;
-    static char buf[BS] __attribute__((aligned(4096)));
-    struct io_uring ring;
-
-    int ret = io_uring_queue_init(8, &ring, 0);
-    if (ret < 0) { printf("io_uring_queue_init: %s\n", strerror(-ret)); return 1; }
-
-    double t0 = now();
-    for (long i = 0; i < n; i++) pread(fd, buf, BS, i * BS);
-    double t_pread = now() - t0;
-
-    t0 = now();
-    for (long i = 0; i < n; i++) {
-        struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-        io_uring_prep_read(sqe, fd, buf, BS, i * BS);
-        io_uring_submit(&ring);
-        struct io_uring_cqe *cqe;
-        io_uring_wait_cqe(&ring, &cqe);
-        if (cqe->res != BS) { printf("short read %d\n", cqe->res); return 1; }
-        io_uring_cqe_seen(&ring, cqe);
-    }
-    double t_uring = now() - t0;
-
-    struct iovec iov = { .iov_base = buf, .iov_len = BS };
-    io_uring_register_buffers(&ring, &iov, 1);
-    t0 = now();
-    for (long i = 0; i < n; i++) {
-        struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-        io_uring_prep_read_fixed(sqe, fd, buf, BS, i * BS, 0);
-        io_uring_submit(&ring);
-        struct io_uring_cqe *cqe;
-        io_uring_wait_cqe(&ring, &cqe);
-        if (cqe->res != BS) { printf("short read %d\n", cqe->res); return 1; }
-        io_uring_cqe_seen(&ring, cqe);
-    }
-    double t_fixed = now() - t0;
-
-    printf("%ld reads of 4 KiB: pread %.0f ns, io_uring read %.0f ns, read_fixed %.0f ns per read\n",
-           n, t_pread / n * 1e9, t_uring / n * 1e9, t_fixed / n * 1e9);
-    io_uring_queue_exit(&ring);
-    return 0;
-}
-```
-
-```text
-131072 reads of 4 KiB: pread 615 ns, io_uring read 690 ns, read_fixed 722 ns per read
-131072 reads of 4 KiB: pread 583 ns, io_uring read 707 ns, read_fixed 707 ns per read
-131072 reads of 4 KiB: pread 540 ns, io_uring read 630 ns, read_fixed 651 ns per read
-```
-
-다시 돌린 실행에서 `kernel.io_uring_disabled`를 2로 바꿔 같은 프로그램을 돌리고 0으로 되돌린 출력입니다.
-
-```text
-kernel.io_uring_disabled = 2
-io_uring_queue_init: Operation not permitted
-kernel.io_uring_disabled = 0
-```
-
-세 번 모두 `pread`가 가장 빨랐습니다(540~615 ns 대 630~722 ns). 다시 돌린 실행에서도 383 ns 대 482·511 ns로 순서가 같았습니다. 한 번에 요청 하나를 넣고 끝나기를 기다리면 io_uring은 syscall 수를 줄이지 못하고, SQE를 채우고 CQE를 거두는 일만 더해집니다. 등록 buffer(`read_fixed`)도 cache에 있는 4 KiB 읽기에서는 차이가 없었습니다. io_uring의 이점은 요청을 여러 개 쌓아 한 번에 제출하거나, 완료를 기다리는 동안 다른 일을 할 때 생깁니다. 그러니 "io_uring = 빠름"으로 가정하지 말고 대상 workload의 queue depth로 재 봅니다.
-
-두 번째 출력의 가운데 줄이 `sysctl -w kernel.io_uring_disabled=2` 상태에서 실행한 결과입니다. v6.12 `Documentation/admin-guide/sysctl/kernel.rst`의 `io_uring_disabled` 항목대로 "io_uring_setup() always fails with -EPERM"이라 `io_uring_queue_init`이 `Operation not permitted`로 실패했습니다. 보안 정책으로 이 값을 1이나 2로 두는 배포판·컨테이너가 있으면 io_uring 경로는 아예 열리지 않으므로, 실패 시 일반 `read`로 돌아가는 경로를 둡니다.
-
-### DMA-BUF로 driver 간 공유 (kernel)
-
-```c
-/* exporter, e.g. a camera driver */
-DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
-exp_info.ops   = &my_dmabuf_ops;
-exp_info.size  = size;
-exp_info.flags = O_RDWR;
-exp_info.priv  = my_buffer;
-struct dma_buf *buf = dma_buf_export(&exp_info);
-int fd = dma_buf_fd(buf, O_CLOEXEC);
-
-/* importer, e.g. an encoder driver */
-struct dma_buf *imported = dma_buf_get(fd);
-struct dma_buf_attachment *attach = dma_buf_attach(imported, dev);
-struct sg_table *sgt = dma_buf_map_attachment_unlocked(attach, DMA_FROM_DEVICE);
-```
-
-함수 이름은 v6.12 `include/linux/dma-buf.h`(549–628행)에 있습니다. 같은 버전의 `dma_buf_map_attachment()`는 첫머리에서 `dma_resv_assert_held(attach->dmabuf->resv)`를 부르므로, reservation lock을 잡지 않은 importer는 `dma_buf_map_attachment_unlocked()`를 씁니다(`drivers/dma-buf/dma-buf.c:1188`). 하나의 dma-buf가 importer마다 다른 scatter-gather 목록으로 mapping되므로, 각 device는 [8-04](/blog/embedded/modern-recipes/part8-04-dma-allocator)에서 본 것처럼 자기 DMA 주소를 받습니다.
-
-### V4L2 카메라에서 DMA-BUF fd 얻기
-
-`VIDIOC_EXPBUF`는 "an extension to the memory mapping I/O method, therefore it is available only for V4L2_MEMORY_MMAP buffers"입니다(v6.12 `vidioc-expbuf.rst`). `V4L2_MEMORY_DMABUF`는 반대로 *밖에서 만든* dma-buf를 받아들이는 모드입니다. 가상 카메라 드라이버 vivid(`modprobe vivid`)로 두 모드를 모두 시험하고, 내보낸 fd를 CPU로 쓸 때의 sync까지 해 봤습니다.
-
-```c
-/* VIDIOC_EXPBUF needs MMAP buffers; then the dma-buf fd is CPU-accessed with DMA_BUF_IOCTL_SYNC */
 #include <errno.h>
 #include <fcntl.h>
-#include <linux/dma-buf.h>
-#include <linux/videodev2.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <unistd.h>
+#include <linux/videodev2.h>
 
-static int try(int cam, enum v4l2_memory mem, const char *name)
+static int camera_ioctl(int fd, unsigned long request, void *arg)
 {
-    struct v4l2_requestbuffers req = { .count = 4, .type = V4L2_BUF_TYPE_VIDEO_CAPTURE, .memory = mem };
-    if (ioctl(cam, VIDIOC_REQBUFS, &req) < 0) { printf("%s: REQBUFS %s\n", name, strerror(errno)); return -1; }
-    struct v4l2_exportbuffer exp = { .type = V4L2_BUF_TYPE_VIDEO_CAPTURE, .index = 0, .flags = O_RDWR | O_CLOEXEC };
-    int r = ioctl(cam, VIDIOC_EXPBUF, &exp);
-    printf("%s: REQBUFS count=%u, EXPBUF %s", name, req.count, r < 0 ? strerror(errno) : "ok");
-    if (r == 0) printf(" fd=%d", exp.fd);
-    printf("\n");
-    return r < 0 ? -1 : exp.fd;
+    int ret;
+    do { ret = ioctl(fd, request, arg); } while (ret < 0 && errno == EINTR);
+    return ret < 0 ? -errno : 0;
 }
-
-int main(int argc, char **argv)
+int request_mmap_capture_buffers(int fd, unsigned int wanted, unsigned int *actual)
 {
-    int cam = open(argv[1], O_RDWR);
-    struct v4l2_format f = { .type = V4L2_BUF_TYPE_VIDEO_CAPTURE };
-    ioctl(cam, VIDIOC_G_FMT, &f);
-    printf("format %ux%u sizeimage %u\n", f.fmt.pix.width, f.fmt.pix.height, f.fmt.pix.sizeimage);
-
-    try(cam, V4L2_MEMORY_DMABUF, "V4L2_MEMORY_DMABUF");
-    struct v4l2_requestbuffers zero = { .count = 0, .type = V4L2_BUF_TYPE_VIDEO_CAPTURE, .memory = V4L2_MEMORY_DMABUF };
-    ioctl(cam, VIDIOC_REQBUFS, &zero);                          /* free them */
-    int dma_fd = try(cam, V4L2_MEMORY_MMAP, "V4L2_MEMORY_MMAP");
-    if (dma_fd < 0) return 1;
-
-    unsigned char *p = mmap(NULL, f.fmt.pix.sizeimage, PROT_READ | PROT_WRITE, MAP_SHARED, dma_fd, 0);
-    struct dma_buf_sync s = { .flags = DMA_BUF_SYNC_START | DMA_BUF_SYNC_RW };
-    printf("SYNC_START %s\n", ioctl(dma_fd, DMA_BUF_IOCTL_SYNC, &s) ? strerror(errno) : "ok");
-    memset(p, 0x5a, 16);
-    s.flags = DMA_BUF_SYNC_END | DMA_BUF_SYNC_RW;
-    printf("SYNC_END   %s\n", ioctl(dma_fd, DMA_BUF_IOCTL_SYNC, &s) ? strerror(errno) : "ok");
-    munmap(p, f.fmt.pix.sizeimage);
-    close(dma_fd);
+    struct v4l2_requestbuffers req = {
+        .count = wanted, .type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+        .memory = V4L2_MEMORY_MMAP,
+    };
+    int ret;
+    if (!wanted || !actual) return -EINVAL;
+    ret = camera_ioctl(fd, VIDIOC_REQBUFS, &req);
+    if (ret) return ret;
+    if (!req.count) return -ENOMEM;
+    *actual = req.count;
+    return 0;
+}
+int export_capture_plane(int fd, unsigned int index, unsigned int plane, int *out_fd)
+{
+    struct v4l2_exportbuffer exp = {
+        .type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+        .index = index, .plane = plane, .flags = O_CLOEXEC | O_RDWR,
+    };
+    int ret;
+    if (!out_fd || *out_fd != -1) return -EINVAL;
+    ret = camera_ioctl(fd, VIDIOC_EXPBUF, &exp);
+    if (ret) return ret;
+    *out_fd = exp.fd;
     return 0;
 }
 ```
 
-```text
-format 640x360 sizeimage 460800
-V4L2_MEMORY_DMABUF: REQBUFS count=4, EXPBUF Invalid argument
-V4L2_MEMORY_MMAP: REQBUFS count=4, EXPBUF ok fd=4
-SYNC_START ok
-SYNC_END   ok
+실제 capture에는 QUERYBUF·plane 정보·QBUF·STREAMON·DQBUF가 더 필요합니다. 위 코드는 그 전체 driver를 대신하지 않습니다. 여러 plane에 서로 다른 fd가 있을 수 있으므로 plane 0의 fd만으로 frame 전체를 전달했다고 가정하지 않습니다. 종료 때는 queue를 멈추고 consumer의 사용이 끝난 뒤 export fd를 close하며, buffer 해제 시 driver의 orphaned-buffer 지원 여부도 확인합니다.
+
+### 같은 frame을 encoder에 넘기는 수명
+
+다음은 동작 순서의 계약입니다. 호출 이름 하나로 전체 pipeline이 구현되었다고 표현하지 않습니다.
+
+| 단계 | 넘기는 내용 | 재사용 조건 |
+|---|---|---|
+| capture 완료 | DQBUF된 frame과 plane별 fd·offset·stride·format | capture 완료가 실제로 확인되어야 합니다. |
+| encoder input 제출 | 호환되는 raw frame과 buffer 참조 | encoder가 입력을 더 이상 읽지 않을 때까지 camera에 재queue하지 않습니다. |
+| encoder output 완료 | 별도 압축 bitstream buffer·유효 길이 | 소비자가 bitstream을 다 쓸 때까지 유지합니다. |
+| network 제출·완료 | 해당 socket API가 지원하는 저장소 | API별 송신 buffer 재사용 통지를 기다립니다. |
+| 종료·취소 | 새 제출 중단·모든 실행 중 접근 종료 | fd를 닫는 것만으로 다른 장치의 작업 취소가 끝났다고 보지 않습니다. |
+
+DRM PRIME import는 fd를 GEM handle로 연결하는 단계입니다. scanout에는 plane별 handle·pitch·offset·format/modifier와 fencing이 맞아야 하며, fd close와 GEM handle 해제의 수명도 구분합니다. GPU 변환이 필요하면 같은 frame을 그대로 scanout하는 경로와 다릅니다. 자세한 camera/DRM 구성은 [12-10](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)으로 이어집니다.
+
+## DMA-BUF importer의 오류 정리
+
+Linux 6.12 계열에서 encoder처럼 공유 메모리를 **읽는 장치**는 DMA_TO_DEVICE 방향을 사용합니다. 아래는 dma-buf 참조·attachment·장치 mapping을 하나의 수명으로 관리하는 helper입니다. out은 0 초기화되며 호출은 직렬화되어야 합니다.
+
+```c title="frame-import.h"
+#ifndef FRAME_IMPORT_H
+#define FRAME_IMPORT_H
+#include <linux/dma-buf.h>
+#include <linux/err.h>
+#include <linux/errno.h>
+
+struct frame_import {
+    struct dma_buf *buffer;
+    struct dma_buf_attachment *attachment;
+    struct sg_table *table;
+};
+static inline int frame_import_begin(int fd, struct device *dev,
+                                      struct frame_import *out)
+{
+    struct dma_buf *buffer;
+    struct dma_buf_attachment *attachment;
+    struct sg_table *table;
+    int ret;
+    if (!dev || !out) return -EINVAL;
+    if (out->buffer || out->attachment || out->table) return -EBUSY;
+    buffer = dma_buf_get(fd);
+    if (IS_ERR(buffer)) return PTR_ERR(buffer);
+    attachment = dma_buf_attach(buffer, dev);
+    if (IS_ERR(attachment)) { ret = PTR_ERR(attachment); goto put_buffer; }
+    table = dma_buf_map_attachment_unlocked(attachment, DMA_TO_DEVICE);
+    if (IS_ERR(table)) { ret = PTR_ERR(table); goto detach_buffer; }
+    *out = (struct frame_import){ buffer, attachment, table };
+    return 0;
+detach_buffer:
+    dma_buf_detach(buffer, attachment);
+put_buffer:
+    dma_buf_put(buffer);
+    return ret;
+}
+static inline void frame_import_end(struct frame_import *frame)
+{
+    if (!frame || !frame->buffer) return;
+    dma_buf_unmap_attachment_unlocked(frame->attachment, frame->table, DMA_TO_DEVICE);
+    dma_buf_detach(frame->buffer, frame->attachment);
+    dma_buf_put(frame->buffer);
+    *frame = (struct frame_import){ 0 };
+}
+#endif
 ```
 
-`V4L2_MEMORY_DMABUF`로 할당한 buffer에서 `VIDIOC_EXPBUF`는 `Invalid argument`였고, `V4L2_MEMORY_MMAP`으로 할당하자 fd를 돌려줬습니다. 그래서 카메라가 내보내는 쪽이라면 `MMAP` + `EXPBUF`, 다른 장치가 만든 buffer를 카메라가 채우게 하려면 `DMABUF` + `VIDIOC_QBUF`에 그 fd를 주는 방식입니다.
+`_unlocked` wrapper는 reservation lock을 내부에서 다루는 API입니다. lock을 직접 관리하는 map API와 혼동하지 않습니다. 실제 exporter의 이동·pinning·fence 계약과 장치가 mapping을 쓰는 전체 구간도 따릅니다. 위 helper는 implicit/explicit fence를 기다리거나 장치 명령을 취소하는 구현이 아니며, `frame_import_end`는 consumer의 접근이 완전히 끝난 뒤 호출합니다.
 
-CPU가 dma-buf를 `mmap`해 만질 때는 `DMA_BUF_IOCTL_SYNC`로 감쌉니다. v6.12 `include/uapi/linux/dma-buf.h`(26–45행)는 접근 전에 `DMA_BUF_SYNC_START`, 끝나면 같은 방향 flag로 `DMA_BUF_SYNC_END`를 부르라고 하고, 이 ioctl은 "only provides cache coherency"이지 다른 장치의 동시 접근을 막지는 않는다고 적습니다. kernel 안에서는 같은 역할을 `dma_buf_begin_cpu_access()`·`dma_buf_end_cpu_access()`가 합니다.
+CPU가 mmap한 dma-buf를 읽는 경우에는 필요한 device 완료/fence를 기다린 뒤 `DMA_BUF_IOCTL_SYNC`의 START|READ와 END|READ로 CPU 접근 구간을 감쌉니다. write도 실제 접근 방향에 맞춥니다. sync ioctl은 일반적인 상호 배제나 모든 장치 작업의 완료를 대신하지 않습니다. 일부 ioctl의 EINTR/EAGAIN 재시도 계약도 처리합니다.
 
-### DRM/KMS로 카메라 buffer를 화면에
+## Sendfile: 진행 상태를 보존하며 전송하기
 
-```c
-struct drm_prime_handle prime = { .fd = dma_fd_from_camera };
-ioctl(drm_fd, DRM_IOCTL_PRIME_FD_TO_HANDLE, &prime);
+한 번의 sendfile은 요청보다 적게 보낼 수 있습니다. 아래 helper는 현재 offset과 남은 길이를 보관하며 EINTR을 재시도하고 nonblocking socket의 EAGAIN에서 호출자에게 제어를 돌려줍니다. 파일 내용은 전송 동안 유지되어야 합니다.
 
-uint32_t handles[4] = { prime.handle }, pitches[4] = { stride }, offsets[4] = { 0 };
-uint32_t fb_id;
-drmModeAddFB2(drm_fd, w, h, DRM_FORMAT_YUYV, handles, pitches, offsets, &fb_id, 0);
-drmModeSetCrtc(drm_fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
+두 전송 함수가 공유하는 상태와 선언은 별도 header에 둡니다.
+
+```c title="file-transfer.h"
+#ifndef FILE_TRANSFER_H
+#define FILE_TRANSFER_H
+#include <stddef.h>
+#include <sys/types.h>
+struct file_transfer { off_t offset; size_t left; };
+int sendfile_progress(int out_fd, int in_fd, struct file_transfer *state);
+int splice_progress(int out_fd, int in_fd, struct file_transfer *state);
+#endif
 ```
 
-`DRM_IOCTL_PRIME_FD_TO_HANDLE`는 v6.12 `include/uapi/drm/drm.h:1136`에서 "Convert a DMA-BUF FD to a GEM handle"로 정의되고, `drmModeAddFB2`의 인자 순서는 libdrm 2.4.124 `xf86drmMode.h:300-303`입니다. 디스플레이 엔진이 그 포맷과 stride를 scan-out할 수 있어야 하며, 이 게스트에는 KMS 장치가 없어 이 절은 실행하지 않았습니다.
+다음은 sendfile의 부분 전송을 처리하는 구현입니다.
 
-### `mmap`과 POSIX shared memory
+```c title="sendfile-transfer.c"
+#include <errno.h>
+#include <stddef.h>
+#include <sys/types.h>
+#include <sys/sendfile.h>
+#include "file-transfer.h"
+/* 0: 완료, 1: writable 대기 후 재호출, 음수: -errno */
+int sendfile_progress(int out_fd, int in_fd, struct file_transfer *state)
+{
+    if (!state || state->offset < 0) return -EINVAL;
+    while (state->left) {
+        size_t chunk = state->left < 0x7ffff000U ? state->left : 0x7ffff000U;
+        ssize_t n = sendfile(out_fd, in_fd, &state->offset, chunk);
+        if (n > 0) { state->left -= (size_t)n; continue; }
+        if (n == 0) return -ENODATA;
+        if (errno == EINTR) continue;
+        if (errno == EAGAIN || errno == EWOULDBLOCK) return 1;
+        return -errno;
+    }
+    return 0;
+}
+```
 
-```c
-/* the child writes, the parent reads: MAP_SHARED vs MAP_PRIVATE on a POSIX shm object */
+EAGAIN은 완료가 아니라 대기 상태입니다. event loop가 writable을 확인한 뒤 같은 state로 재개합니다. 중간 오류 전에 전송한 byte는 되돌릴 수 없으므로 상위 protocol은 부분 진행을 고려해야 합니다. SIGPIPE/EPIPE 정책도 호출자가 정하며, 수신 peer가 데이터를 실제 처리했다는 보장과 local 전송 진행은 구분합니다.
+
+socket/pipe 경로가 원본 page를 참조한다면 함수가 돌아온 뒤에도 수신 측이 그 영역을 소비할 때까지 전송 영역을 수정하지 않습니다. 원본 fd를 닫는 것과 원본 내용을 덮어쓰는 것은 다른 동작입니다.
+
+sendfile은 userspace payload buffer를 거치지 않는 경로를 제공합니다. kernel·filesystem·socket·TLS 처리에 따라 내부 복사와 실제 경로는 다를 수 있으므로 항상 0 copy 또는 throughput 2~3배라고 단정하지 않습니다.
+
+## Splice: file → pipe → socket을 끝까지 처리하기
+
+아래 예제는 같은 state 구조체와 함께 사용합니다. pipe에 넣은 byte를 socket으로 모두 빼며 짧은 splice와 EINTR을 처리합니다. 원본 파일은 변경되지 않아야 합니다.
+
+```c title="splice-transfer.c"
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <sys/wait.h>
+#include <stddef.h>
 #include <unistd.h>
+#include "file-transfer.h"
 
-static void demo(int flags, const char *name)
+int splice_progress(int out_fd, int in_fd, struct file_transfer *state)
 {
-    int fd = shm_open("/mybuf", O_RDWR | O_CREAT, 0600);
-    ftruncate(fd, 4096);
-    volatile int *p = mmap(NULL, 4096, PROT_READ | PROT_WRITE, flags, fd, 0);
-    *p = 1;
-    if (fork() == 0) { *p = 2; _exit(0); }
-    wait(NULL);
-    int again = *(volatile int *)mmap(NULL, 4096, PROT_READ, MAP_SHARED, fd, 0);
-    printf("%-11s parent sees %d, shm object holds %d\n", name, *p, again);
-    shm_unlink("/mybuf");
-    close(fd);
+    int pipe_fd[2], result = 0;
+    if (!state || state->offset < 0) return -EINVAL;
+    if (!state->left) return 0;
+    if (pipe2(pipe_fd, O_CLOEXEC) < 0) return -errno;
+    while (state->left) {
+        off_t read_offset = state->offset;
+        size_t want = state->left < 65536 ? state->left : 65536;
+        ssize_t staged;
+        do { staged = splice(in_fd, &read_offset, pipe_fd[1], NULL, want, 0); }
+        while (staged < 0 && errno == EINTR);
+        if (staged <= 0) { result = staged == 0 ? -ENODATA : -errno; break; }
+        size_t pending = (size_t)staged;
+        while (pending) {
+            ssize_t n = splice(pipe_fd[0], NULL, out_fd, NULL, pending, 0);
+            if (n < 0 && errno == EINTR) continue;
+            if (n <= 0) { result = n == 0 ? -EIO : -errno; goto done; }
+            pending -= (size_t)n;
+            state->left -= (size_t)n;
+            state->offset += n;
+        }
+    }
+done:
+    close(pipe_fd[0]);
+    close(pipe_fd[1]);
+    return result;
 }
+```
 
-int main(void)
+source를 읽는 별도 offset과 실제 송신된 state를 분리했습니다. 중간에 실패하여 pipe에 남은 byte를 폐기해도 state는 socket에 전송된 지점까지만 진행합니다. 재개하려면 원본이 같은 내용으로 남아 있어야 하고 상위 protocol도 그 재개를 허용해야 합니다. blocking FD를 전제로 하며 nonblocking FD에서 -EAGAIN이 나오면 외부에서 대기 후 재호출합니다. busy loop로 다시 호출하지 않습니다.
+
+`SPLICE_F_MOVE`는 전송 전체가 항상 page 이동이라는 보장이 아닙니다. `tee`로 pipe 참조를 복제해도 느린 consumer의 backpressure와 buffer 보유량은 남습니다. 이 예제의 성공은 파일 내용 전달을 검증하는 것이며 실제 NIC DMA나 wire의 zero-copy 증명은 아닙니다.
+
+## io_uring: CQE와 buffer 재사용을 분리해서 보기
+
+`io_uring_queue_init`·buffer 등록·SQE 획득·submit·wait의 반환값을 각각 처리합니다. liburing 함수의 음수 반환값과 CQE의 `res < 0`은 별도의 오류 경로이며, cqe->res를 먼저 size_t로 cast하면 오류가 큰 길이로 바뀝니다. 아래 helper는 단일 read CQE를 소비하는 부분만 보여 줍니다.
+
+```c title="uring-read-result.h"
+#ifndef URING_READ_RESULT_H
+#define URING_READ_RESULT_H
+#include <errno.h>
+#include <sys/types.h>
+#include <liburing.h>
+
+static inline int consume_read_result(struct io_uring *ring,
+                                      struct io_uring_cqe *cqe,
+                                      size_t requested, ssize_t *bytes)
 {
-    demo(MAP_SHARED, "MAP_SHARED");
-    demo(MAP_PRIVATE, "MAP_PRIVATE");
+    int result;
+    if (!ring || !cqe || !bytes) return -EINVAL;
+    result = cqe->res;
+    io_uring_cqe_seen(ring, cqe);
+    if (result < 0) return result;
+    if ((size_t)result > requested) return -EIO;
+    *bytes = result;
     return 0;
 }
+#endif
 ```
 
-```text
-MAP_SHARED  parent sees 2, shm object holds 2
-MAP_PRIVATE parent sees 1, shm object holds 0
-```
+단일 read에서는 CQE 처리 뒤 반환 byte 수만 유효하며 0은 EOF, 짧은 read도 성공일 수 있습니다. 다만 다른 요청이 같은 buffer를 쓰는지 확인하고 ring과 buffer의 수명을 유지해야 합니다. submit 실패·wait 중단·cancel 요청도 실제 실행 중 요청이 끝났는지 확인한 뒤 정리합니다. SQE를 준비하거나 submit한 직후 buffer를 수정하지 않습니다.
 
-`MAP_SHARED`에서는 자식이 쓴 2를 부모와 shm 객체가 모두 봤습니다. `MAP_PRIVATE`에서는 부모가 쓴 1과 자식이 쓴 2가 각자의 copy-on-write 사본에만 남아, shm 객체는 처음 값 0 그대로였습니다. 두 process가 buffer를 공유하려면 `MAP_SHARED`여야 하고, `fork` 뒤에도 같은 규칙입니다.
+fixed buffer 등록은 반복되는 메모리 pinning·등록 비용을 줄이기 위한 기능이지 일반 read/write의 payload 복사를 모두 없애는 기능이 아닙니다. SEND_ZC 같은 별도 opcode는 데이터 전송 CQE와 buffer 재사용 notification을 구분해야 하므로 “CQE 하나를 받으면 모든 zero-copy buffer를 재사용”하는 규칙으로 일반화하지 않습니다. feature probing·권한·FD 종류·opcode 지원을 확인하며 liburing이 임의의 일반 I/O fallback을 자동 제공한다고 가정하지 않습니다.
 
-### XDP로 NIC 단에서 packet 처리
+## Mmap·shared memory·packet 경로의 경계
 
-```c
-SEC("xdp")
-int xdp_filter(struct xdp_md *ctx)
-{
-    void *data = (void *)(long)ctx->data;
-    void *end  = (void *)(long)ctx->data_end;
+mmap의 반환값은 NULL이 아니라 MAP_FAILED로 실패를 판정합니다. file 크기 0·범위 밖 접근·동시 truncate에 의한 SIGBUS, munmap 이후 참조도 처리해야 합니다. MAP_SHARED는 payload 공유이지 producer/consumer의 준비·완료 통지가 아니며, MAP_PRIVATE는 변경을 상대 프로세스에 전달하는 IPC가 아닙니다.
 
-    if (drop_condition(data, end)) return XDP_DROP;
-    return XDP_PASS;
-}
-```
+POSIX shm은 shm_open 실패·크기 설정·mmap 실패를 정리하고 fd close와 shm_unlink의 이름/객체 수명을 구분합니다. 공유 서류를 같은 곳에 두는 것만으로 누가 쓸 차례인지 정해지지 않듯, 별도 process-shared 동기화와 shutdown protocol이 필요합니다.
 
-eBPF 프로그램이 driver의 수신 경로에서 packet마다 결정합니다. 다만 driver가 XDP를 지원하지 않으면 generic 모드로 붙고, v6.12 `Documentation/networking/af_xdp.rst`는 이 XDP_SKB 모드가 "uses SKBs together with the generic XDP support"라고 적습니다. 그 경우에는 skb를 만든 뒤에 판정하므로, drop 비용을 줄이려면 driver 모드(`XDP_FLAGS_DRV_MODE`, `include/uapi/linux/if_link.h:1856`)로 붙었는지 확인합니다. AF_XDP로 user space까지 올릴 때도 같은 문서는 driver 모드에서 "there is still a copy of the data into user space"라고 적습니다. 이 절은 실행하지 않았습니다.
+XDP는 실행 mode에 따라 경로가 다르며 일반 XDP 프로그램이 NIC을 userspace에 연결하는 것은 아닙니다. packet parsing에는 data_end 경계 검사가 필요합니다. AF_XDP의 copy/zero-copy mode, DPDK의 PMD·mempool·DMA 주소 등록은 각각 확인합니다. DPDK mbuf에서 payload를 얻는 `rte_pktmbuf_mtod`도 첫 segment 접근이며, chained packet 전체가 하나의 연속 배열이라고 가정하지 않습니다.
 
-### DPDK userspace driver
+## 보드 없이 확인할 내용
 
-```c
-struct rte_mbuf *pkts[32];
-uint16_t n = rte_eth_rx_burst(port, 0, pkts, 32);
-for (uint16_t i = 0; i < n; i++) {
-    process_packet(rte_pktmbuf_mtod(pkts[i], void *), rte_pktmbuf_data_len(pkts[i]));
-    rte_pktmbuf_free(pkts[i]);
-}
-```
+| 검사 | 확인할 계약 | 증명하지 않는 것 |
+|---|---|---|
+| V4L2 helper | MMAP 요청·plane export 인자·오류/FD 수명 | 실제 camera format·capture·encoder 연결 |
+| importer | get/attach/map 실패 정리·TO_DEVICE 방향·역순 해제 | exporter별 fence·실제 장치 접근 종료 |
+| sendfile/splice | 실제 Linux FD 전송·부분 진행·EOF·EINTR/EAGAIN·오류 | NIC DMA·내부 복사 수·성능 배수 |
+| io_uring | 실제 SQE/CQE·음수 결과·짧은 read·buffer 수명 | 모든 opcode의 zero-copy·자동 fallback |
+| mmap/shm | 공유·정리·실패와 동기화 계약 | 완성된 IPC protocol |
 
-`rte_mbuf`에는 `data` 필드가 없고, packet 데이터 포인터는 `rte_pktmbuf_mtod()`로 얻습니다(DPDK v23.11 `rte_mbuf_core.h:743`). `rte_eth_rx_burst(port_id, queue_id, rx_pkts, nb_pkts)`는 배열로 여러 개를 한 번에 받습니다(`rte_ethdev.h:6045`). 이 절도 실행하지 않았습니다.
+빈 성능 표와 실측하지 않은 개선 배수 대신, 전송 byte·offset·남은 길이·참조와 FD 정리를 먼저 검증합니다. 제품 성능은 kernel·filesystem·driver·format·buffer 수·동시 부하·암호화 여부와 분포를 기록해서 비교합니다.
 
-## 측정 / 성능 비교
+### 이번 예제 검증 결과
 
-이 글에서 잰 숫자를 모으면 다음과 같습니다. 모두 위 Debian 13 게스트의 값입니다.
+QEMU ARM64의 실제 Linux 6.12.116 환경에서 sendfile과 file→pipe→socket splice로 각각 131101 byte의 내용·offset·잔여 길이를 대조했습니다. 요청보다 파일이 23 byte 짧은 경우의 EOF와 진행 상태, 잘못된 FD, 주입한 EINTR/EAGAIN·짧은 전송·pipe 정리도 확인했습니다. liburing 2.9의 실제 registered read에서는 64-byte 요청에 대한 5-byte CQE와 잘못된 FD의 음수 CQE를 처리했습니다.
 
-| 측정 | 결과 |
-| --- | --- |
-| 512 MiB file → TCP, 송신 sys | `read`/`write` 0.130 s, `sendfile` 0.022 s, `splice` 0.024 s |
-| 같은 전송, wall | 0.130 s, 0.070 s, 0.066 s |
-| 4 KiB 읽기, queue depth 1 | `pread` 540~615 ns, io_uring 630~707 ns, `read_fixed` 651~722 ns |
-| `kernel.io_uring_disabled=2` | `io_uring_queue_init` → `EPERM` |
-| vivid `VIDIOC_EXPBUF` | `V4L2_MEMORY_MMAP`만 성공 |
-
-카메라 → encoder 경로의 실제 CPU·jitter는 encoder와 ISP가 있는 보드에서 재야 하며, 이 글에는 그 측정이 없습니다.
-
-## 자주 보는 함정
-
-> ⚠️ "zero-copy 됐겠지"라는 가정
-
-```c
-read(fd, buf, n);
-write(sock, buf, n);
-```
-
-이 코드는 page cache → `buf`, `buf` → socket buffer로 두 번 복사합니다. 위 측정에서 송신 CPU가 `sendfile`의 5~6배였습니다.
-
-> ⚠️ `VIDIOC_EXPBUF`를 `V4L2_MEMORY_DMABUF` buffer에 부름
-
-위 실행처럼 `EINVAL`입니다. 내보내는 쪽은 `MMAP`으로 할당합니다.
-
-> ⚠️ DMA-BUF를 CPU로 만지면서 sync를 빼먹음
-
-```c
-p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, dma_fd, 0);
-memset(p, 0, size);          /* missing DMA_BUF_IOCTL_SYNC start/end */
-```
-
-coherency가 없는 장치에서는 CPU가 쓴 값이 cache에만 남거나 오래된 사본을 읽습니다. `DMA_BUF_SYNC_START`·`DMA_BUF_SYNC_END`로 감쌉니다.
-
-> ⚠️ io_uring 기능을 버전 확인 없이 가정
-
-liburing 2.9 `io_uring_enter(2)`는 opcode마다 도입 버전을 적습니다. 예를 들어 `IORING_OP_READ`·`IORING_OP_WRITE`는 "Available since 5.6"입니다. 그보다 오래된 커널을 지원해야 한다면 `io_uring_get_probe()`로 opcode 지원을 확인하고, `kernel.io_uring_disabled` 때문에 초기화가 `EPERM`으로 실패하는 경우도 처리합니다.
-
-> ⚠️ Zero-copy send buffer를 완료 전에 재사용
-
-```c
-io_uring_prep_send_zc(sqe, sock, buf, len, 0, 0);
-io_uring_submit(&ring);
-memset(buf, 0, len);   /* the kernel may still be reading buf */
-```
-
-`io_uring_enter(2)`의 `IORING_OP_SEND_ZC` 항목은 첫 CQE에 `IORING_CQE_F_MORE`가 오면 두 번째 notification CQE가 오고, "The user must not modify the data buffer until the notification is posted"라고 적습니다. zero-copy일수록 buffer를 돌려받는 시점이 늦어집니다.
-
-## 재현 환경
-
-QEMU 11.1.3 `-M virt -accel hvf -cpu host`, Debian 13 arm64 게스트(`liburing-dev` 2.9, `v4l-utils` 설치)입니다. `xfer.c`·`run-xfer.sh`·`uring.c`·`expbuf.c`·`forkmap.c`는 위에 전문이 있습니다.
-
-```bash
-bash run-xfer.sh
-gcc -O2 -Wall -o uring uring.c -luring && ./uring big.bin
-sudo sysctl -w kernel.io_uring_disabled=2 && ./uring big.bin; sudo sysctl -w kernel.io_uring_disabled=0
-sudo modprobe vivid && gcc -O2 -Wall -o expbuf expbuf.c && ./expbuf /dev/video0
-gcc -O2 -Wall -o forkmap forkmap.c && ./forkmap
-```
+V4L2 경로는 실제 vivid 가상 video driver에서 검사하며, 물리 camera·GPU·encoder는 사용하지 않습니다. MMAP capture queue·plane export·mmap·CPU sync·해제 흐름과 잘못된 plane 거부를 확인했습니다. 이 결과는 실제 camera→encoder→network 전체의 무복사·성능 보장이 아닙니다.
 
 ## 정리
 
-- Zero-copy는 buffer 공유, kernel 안 전송, kernel 경계 비용 줄이기 세 갈래입니다.
-- 512 MiB file → socket에서 `sendfile`·`splice`는 송신 CPU를 `read`/`write`의 5~6분의 1로 줄였지만, wall time은 받는 쪽 복사 때문에 1.9~2.4배만 줄었습니다.
-- queue depth 1의 4 KiB 읽기에서 io_uring은 `pread`보다 느렸습니다. 이점은 요청을 쌓을 때 나옵니다.
-- `VIDIOC_EXPBUF`는 `V4L2_MEMORY_MMAP` buffer만 내보냅니다.
-- CPU가 dma-buf를 만질 때는 `DMA_BUF_IOCTL_SYNC`(kernel에서는 `begin/end_cpu_access`)로 감쌉니다.
-- `MAP_PRIVATE` mapping은 `fork` 뒤에도 공유되지 않습니다.
-- XDP generic 모드는 skb를 만든 뒤 판정하고, AF_XDP driver 모드도 user space로 한 번 복사합니다.
+- buffer 공유·kernel 내 FD 전송·비동기 제출·packet 경로를 구분합니다.
+- V4L2 MMAP export와 DMABUF import를 같은 초기화 흐름으로 섞지 않습니다.
+- raw frame, encoder input 완료, 별도 bitstream과 network 완료를 구분합니다.
+- DMA-BUF 참조·attachment·mapping은 오류와 종료 경로에서 역순으로 정리합니다.
+- sendfile/splice는 부분 전송·대기·EOF를 처리하고 재개할 진행 상태를 보존합니다.
+- io_uring read CQE와 zero-copy 송신 notification은 buffer 재사용 계약이 다릅니다.
 
-다음 편은 **NUMA 메모리 토폴로지**입니다.
+다음 편은 **NUMA 메모리 토폴로지**입니다. 같은 buffer를 쓰더라도 CPU와 메모리의 위치가 다른 문제를 다룹니다.
 
 ## 관련 항목
 
 - [8-04: DMA Allocator](/blog/embedded/modern-recipes/part8-04-dma-allocator)
 - [8-06: NUMA Memory Topology](/blog/embedded/modern-recipes/part8-06-numa)
-- [12-10: Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
+- [12-10: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
-- [RTOS 3-11: Stream Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)
+- [RTOS: Stream/Message Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)
+
+## 1차 자료
+
+- [Linux 6.12 DMA-BUF](https://docs.kernel.org/6.12/driver-api/dma-buf.html), [pixel buffer exchange](https://docs.kernel.org/6.12/userspace-api/dma-buf-alloc-exchange.html): 참조·mapping·CPU 접근·format/fence 계약입니다.
+- [V4L2 EXPBUF](https://www.kernel.org/doc/html/v6.12/userspace-api/media/v4l/vidioc-expbuf.html), [DMABUF import](https://www.kernel.org/doc/html/v6.12/userspace-api/media/v4l/dmabuf.html): export/import 경로를 구분합니다.
+- [sendfile(2)](https://man7.org/linux/man-pages/man2/sendfile.2.html), [splice(2)](https://man7.org/linux/man-pages/man2/splice.2.html): 부분 전송·offset·오류와 원본 수명 계약입니다.
+- [liburing](https://github.com/axboe/liburing), [io_uring_enter(2)](https://man7.org/linux/man-pages/man2/io_uring_enter.2.html): CQE 결과와 zero-copy notification의 기준입니다.

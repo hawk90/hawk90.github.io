@@ -1,8 +1,8 @@
 ---
-title: "NUMA Memory Topology — numactl·numa_alloc·first touch"
+title: "NUMA Memory Topology — numactl·numa_alloc·HBM 적용"
 slug: "embedded/modern-recipes/part8-06-numa"
 date: 2026-04-17T09:05:00
-description: "NUMA node topology와 numactl·libnuma로 페이지가 놓이는 node를 2-node QEMU에서 페이지 단위로 확인하고, memory-only node(HBM·CXL)와 numa_balancing tiering을 정리합니다."
+description: "Linux NUMA topology와 CPU affinity·memory policy, libnuma 실패 처리, HBM/CXL의 노드 노출 조건을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 94
 tags: [recipes, numa, memory, hbm, cxl]
@@ -11,304 +11,235 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NUMA = node별 local memory."** CPU와 memory를 같은 node에 두는 것이 기본이고, Linux에서 페이지가 어느 node에 놓이는지는 "누가 처음 썼는가"가 정합니다. 이 글은 QEMU로 2-node 시스템을 만들어 first touch, `numa_alloc_onnode`, membind, interleave가 페이지를 실제로 어디에 두는지 페이지 단위로 확인합니다.
+> **NUMA는 Linux가 노출한 CPU·메모리 node와 허용 범위를 확인한 뒤 배치합니다.** CPU affinity, 새 page의 배치 정책, 이미 존재하는 page의 위치는 서로 다른 상태입니다.
 
 ## 어떤 상황에서 쓰나
 
-2-socket 서버에서 main thread가 큰 배열을 할당하고 worker가 다른 socket에서 그 배열을 처리하면, worker는 다른 socket의 memory를 읽게 됩니다. 사무실이 두 건물에 나뉘어 있는데 서류함이 전부 한 건물에 있으면, 다른 건물 사람은 매번 건물을 건너가야 하는 것과 같습니다. 어느 쪽 건물에 서류함을 둘지는 "처음 그 서류를 만든 사람"이 정합니다. 아래 실행에서 CPU 0이 `malloc`한 64 MiB를 CPU 2(node 1)가 먼저 쓰자, 16,384 page 중 16,383 page가 node 1에 놓였습니다.
+worker를 특정 CPU에 고정했는데 데이터는 다른 node에 이미 올라가 있을 수 있습니다. 사람의 자리를 바꿨다고 창고의 물건이 함께 이동하지 않는 것과 같습니다. allocator를 바꿔도 기존 page가 자동으로 worker 가까이 옮겨지는 것은 아닙니다.
 
-같은 원리가 HBM·CXL 같은 이종 메모리에도 쓰입니다. v6.12 `numaperf.rst`는 이런 메모리를 CPU가 없는 "memory only nodes"로 묶어 NUMA node로 보인다고 설명합니다. 그래서 이 글의 API는 서버뿐 아니라 이종 메모리를 가진 SoC에서도 같은 방식으로 씁니다.
+first-touch는 빈 서류함을 처음 예약한 순간보다 실제로 서류를 넣는 순간에 보관 장소를 정하는 과정에 가깝습니다. 새 anonymous page를 처음 쓰는 thread와 policy가 중요합니다. 하지만 malloc이 기존 arena의 resident page를 재사용하면 그 page의 과거 위치도 남습니다.
 
-## 핵심 개념
+이 글은 **실제 Linux node와 cpuset 허용 범위를 관찰하고, 새 mapping에 정책을 설정하며 실패를 처리하는 방법**을 다룹니다. QEMU의 가상 topology에서 page 배치 기능을 검사할 수는 있지만, 그 실행 시간으로 실제 socket·HBM·CXL 성능을 비교하지 않습니다.
 
-2-socket 서버의 토폴로지를 그림으로 보면 local과 remote의 차이가 분명합니다.
+## CPU cluster와 NUMA node는 같은 개념이 아님
 
-![2-socket NUMA topology — 각 socket이 자기 DRAM을 local로 가짐](/images/blog/modern-recipes/diagrams/part3-04-numa-topology.svg)
+다음 그림은 두 node의 CPU와 메모리를 설명하는 개념도입니다. 실제 CPU 수·link·메모리 용량은 시스템의 topology를 읽어 확인합니다.
 
-배치를 정하는 축은 두 가지입니다. 하나는 thread가 도는 CPU(affinity), 다른 하나는 페이지가 놓이는 node(memory policy)입니다. v6.12 `numa_memory_policy.rst`의 "System Default Policy"는 시스템이 올라온 뒤에는 "local allocation", 곧 페이지를 할당하는 순간(첫 page fault) 그 CPU의 node를 쓴다고 적습니다. 그래서 affinity만 묶고 첫 touch를 다른 CPU가 하면, 이후에 같은 node로 thread를 옮겨도 페이지는 처음 놓인 곳에 남습니다.
+![NUMA topology — CPU와 메모리 node의 관계](/images/blog/modern-recipes/diagrams/part3-04-numa-topology.svg)
 
-## 코드 / 실제 사용 예
+Linux NUMA node는 CPU가 없고 메모리만 가질 수도 있고, node ID가 연속이라는 보장도 없습니다. 여러 socket이 하나의 node로 보이거나 하나의 socket이 여러 node로 나뉠 수도 있습니다. 공유 L2가 다른 CPU cluster 두 개라는 이유만으로 서로 다른 NUMA memory node라고 부르지 않습니다.
 
-### 실행 환경
+Cortex-A78AE라는 CPU 이름만으로 “8 core·2 cluster·cluster마다 독립 DRAM channel”을 정할 수 없습니다. 그런 연결은 실제 SoC와 firmware의 구성입니다. Linux node에 차이가 없다면 cache·interconnect·affinity 문제로 분석하고, 근거 없는 mini-NUMA topology를 만들어내지 않습니다. ASIL 같은 안전 요구의 격리는 CPU pinning만으로 달성되지 않습니다.
 
-Apple M2 Pro 위 QEMU 11.1.3(`-M virt -accel hvf -cpu host`)에 node 두 개를 만들어 Debian 13 arm64(커널 6.12.116+deb13-arm64, `numactl`·`libnuma-dev` 2.0.19, GCC 14.2.0)를 올렸습니다.
+### 먼저 읽을 정보
 
-```bash
-qemu-system-aarch64 -M virt,gic-version=3 -accel hvf -cpu host -smp 4 -m 4g \
-  -object memory-backend-ram,id=m0,size=2G -object memory-backend-ram,id=m1,size=2G \
-  -numa node,nodeid=0,cpus=0-1,memdev=m0 -numa node,nodeid=1,cpus=2-3,memdev=m1 \
-  -numa dist,src=0,dst=1,val=21 \
-  -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
-  -drive if=none,id=d0,file=vm.qcow2,format=qcow2 -device virtio-blk-pci,drive=d0 \
-  -nic user,model=virtio-net-pci -nographic
-```
-
-두 node의 memory는 결국 같은 Mac의 RAM이므로, 이 VM은 **토폴로지와 페이지 배치**를 확인하는 용도입니다. remote 접근의 지연·대역폭 차이는 재현되지 않습니다(아래 [측정](#측정--성능-비교)에서 직접 확인합니다).
-
-### `numactl --hardware`로 토폴로지 확인
-
-```text
-$ numactl --hardware
-available: 2 nodes (0-1)
-node 0 cpus: 0 1
-node 0 size: 1976 MB
-node 0 free: 1352 MB
-node 1 cpus: 2 3
-node 1 size: 1942 MB
-node 1 free: 1627 MB
-node distances:
-node     0    1 
-   0:   10   21 
-   1:   21   10 
-```
-
-`node distances`는 firmware(ACPI SLIT 또는 DT)가 준 상대 비용입니다. v6.12 `include/linux/topology.h`는 "Conform to ACPI 2.0 SLIT distance definitions"라는 주석과 함께 `LOCAL_DISTANCE` 10, `REMOTE_DISTANCE` 20을 정의합니다. 21은 이 VM에 `-numa dist,...,val=21`로 준 값이 그대로 보인 것이므로, distance는 측정값이 아니라 firmware가 알려 준 숫자입니다.
-
-### 실행 시 binding
+다음 명령은 시스템의 실제 설정을 조회합니다. 출력 예시를 가상의 장비 측정값처럼 넣지 않습니다.
 
 ```bash
-numactl --cpunodebind=0 --membind=0 ./prog        # CPU and memory on node 0
-numactl --interleave=all ./prog                   # spread pages over all nodes
-numactl --localalloc ./prog                       # allocate on the node of the faulting CPU
+numactl --hardware
+cat /sys/devices/system/node/online
+cat /sys/devices/system/node/node*/cpulist
+cat /sys/devices/system/node/node*/meminfo
+cat /sys/devices/system/node/node*/distance
+grep -E 'Cpus_allowed_list|Mems_allowed_list' /proc/self/status
 ```
 
-`--membind`는 할당을 허용 node로 제한하고, `--interleave`는 페이지를 node마다 번갈아 둡니다. 아래는 2-node QEMU guest에서 `numastat -p python3`을 실행한 출력입니다. node 1에 메모리를 둔 python3 프로세스(PID 1746)가 207.42 MB 중 거의 전부를 node 1에 두고 있습니다. 이 프로세스를 띄운 명령은 기록에 남아 있지 않아, 어떤 정책으로 띄웠는지는 이 출력만으로 말하지 않습니다. 정책별 배치는 바로 아래 절의 `numa_demo`가 페이지 단위로 보여 줍니다.
+distance는 firmware/kernel이 제공하는 상대 비용 지표이며 측정한 ns나 대역폭 비율이 아닙니다. local 값이 10인 시스템의 remote 값 21을 곧바로 latency 2.1배로 해석하지 않습니다. NUMA balancing이나 page migration이 실행되면 page 위치도 관측 시점에 따라 달라질 수 있습니다.
 
-```text
-Per-node process memory usage (in MBs)
-PID                             Node 0          Node 1           Total
----------------------  --------------- --------------- ---------------
-576 (unattended-upgr)             1.71           18.21           19.93
-1746 (python3)                    0.12          207.42          207.55
----------------------  --------------- --------------- ---------------
-Total                             1.84          225.63          227.47
+## Affinity와 memory policy의 적용 범위
+
+다음은 실제 topology와 허용 범위를 확인한 뒤 node 0이 있는 환경에서 실행하는 예입니다. node ID를 제품 전체의 고정 번호로 쓰는 설정은 아닙니다.
+
+```bash
+numactl --cpunodebind=0 --membind=0 ./prog
+numactl --interleave=all ./prog
+numactl --localalloc ./prog
 ```
 
-`numastat -p python3`은 이름에 python3가 들어간 프로세스를 모두 보여 주므로, 같은 Python으로 도는 `unattended-upgrades`도 함께 나왔습니다.
+| 설정 | 의미 | 주의할 점 |
+|---|---|---|
+| CPU affinity | thread가 실행할 수 있는 CPU를 제한합니다. | 기존 page를 이동시키지 않으며 IRQ 격리도 아닙니다. |
+| membind | 허용 node의 allocation policy를 지정합니다. | cpuset·용량·page fault 실패를 처리해야 합니다. |
+| interleave | 대상 node 사이에 page를 분산합니다. | 모든 thread에서 local이 되거나 throughput이 개선되는 보장은 없습니다. |
+| local allocation | 현재 실행 CPU 기준의 local 선호 정책입니다. | migration·허용 node·fallback 영향을 받습니다. |
 
-### 페이지가 실제로 어디 놓이는지 — first touch, `numa_alloc_onnode`, membind, interleave
+worker별 private 데이터는 CPU와 메모리를 가까이 배치하는 후보입니다. 여러 node의 worker가 같은 데이터를 읽거나 memory-only node를 쓸 때는 단일 node 집중이 목표가 아닐 수 있습니다. PCIe 장치의 locality·공유 데이터량·memory bandwidth도 같이 봅니다.
 
-아래 프로그램은 64 MiB 영역을 여러 방법으로 만든 뒤, `move_pages(2)`에 목적 node를 주지 않고(`nodes == NULL`) 불러 각 페이지가 지금 어느 node에 있는지만 묻습니다.
+## Libnuma의 포인터 성공과 정책 성공 구분하기
 
-```c
-/* where do pages land? first touch, numa_alloc_onnode, membind, interleave */
+libnuma의 `numa_alloc_onnode`와 `numa_set_membind`를 호출했다고 반환 포인터만 검사해서 placement 성공으로 판단하지 않습니다. libnuma는 policy 오류를 진단하는 경로와 mapping 반환을 구분하며, 설정 실패 시 warning을 남기고 mapping이 존재할 수 있습니다. `numa_set_membind`는 void API여서 일반적인 int 반환 검사도 할 수 없습니다.
+
+아래는 libnuma의 nodemask를 사용하되 `get_mempolicy`와 `mbind` 반환값을 직접 검사하는 Linux helper입니다. 새 anonymous mapping에만 적용하며 policy를 설정하기 전에 page를 쓰지 않습니다. out은 0 초기화하고 단일 owner가 관리합니다.
+
+```c title="numa-bound-region.c"
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+#include <errno.h>
+#include <stddef.h>
+#include <sys/mman.h>
 #include <numa.h>
 #include <numaif.h>
-#include <pthread.h>
+
+struct bound_region { void *address; size_t length; };
+
+int allocate_bound_region(int node, size_t length, struct bound_region *out)
+{
+    struct bitmask *mask;
+    void *address;
+    int ret;
+    if (!out || node < 0 || !length) return -EINVAL;
+    if (out->address || out->length) return -EBUSY;
+    if (numa_available() < 0) return -ENOSYS;
+    mask = numa_allocate_nodemask();
+    if (!mask) return -ENOMEM;
+    if (get_mempolicy(NULL, mask->maskp, mask->size, NULL, MPOL_F_MEMS_ALLOWED) < 0) {
+        ret = -errno;
+        goto free_mask;
+    }
+    if ((unsigned int)node >= mask->size || !numa_bitmask_isbitset(mask, node)) {
+        ret = -EINVAL;
+        goto free_mask;
+    }
+    numa_bitmask_clearall(mask);
+    numa_bitmask_setbit(mask, node);
+    address = mmap(NULL, length, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (address == MAP_FAILED) { ret = -errno; goto free_mask; }
+    if (mbind(address, length, MPOL_BIND, mask->maskp, mask->size, 0) < 0) {
+        ret = -errno;
+        munmap(address, length);
+        goto free_mask;
+    }
+    *out = (struct bound_region){ address, length };
+    ret = 0;
+free_mask:
+    numa_bitmask_free(mask);
+    return ret;
+}
+
+int release_bound_region(struct bound_region *region)
+{
+    if (!region) return -EINVAL;
+    if (!region->address && !region->length) return 0;
+    if (!region->address || !region->length) return -EINVAL;
+    if (munmap(region->address, region->length) < 0) return -errno;
+    *region = (struct bound_region){ 0 };
+    return 0;
+}
+```
+
+syscall 차단·권한·cpuset·잘못된 node·mmap 실패를 성공처럼 계속 진행하지 않습니다. 실패 시 out은 그대로이고 임시 mask와 mapping을 정리합니다. 이 helper가 성공해도 물리 메모리를 미리 예약한 것은 아닙니다. 나중의 write fault에서 실제 page를 얻는 과정과 memory pressure는 남습니다.
+
+mask의 size를 node 개수처럼 순회하거나 `0..numa_max_node()`의 모든 node가 online·허용이라고 가정하지 않습니다. mask bit를 확인하며 CPU-less memory node도 CPU node와 구분합니다. 위 region 구조체를 복사해서 중복 munmap하지 않습니다.
+
+## 현재 thread의 affinity 설정과 복원
+
+다음 helper는 CPU_SETSIZE 범위의 CPU를 지원하며, 현재 허용 affinity에서 선택한 CPU로 좁힙니다. 더 큰 CPU 집합이 필요한 제품은 동적 CPU mask API를 사용합니다.
+
+```c title="thread-affinity.c"
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <errno.h>
 #include <sched.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
-#define SIZE (64UL << 20)                     /* 64 MiB */
-
-static void pin(int cpu)
+int pin_current_thread(int cpu, cpu_set_t *previous)
 {
-    cpu_set_t set;
-    CPU_ZERO(&set);
-    CPU_SET(cpu, &set);
-    pthread_setaffinity_np(pthread_self(), sizeof set, &set);
-}
-
-/* count which node each page of [p, p+len) is on (move_pages with nodes == NULL only queries) */
-static void where(const char *what, void *p, size_t len)
-{
-    long pg = sysconf(_SC_PAGESIZE), n = len / pg, cnt[8] = { 0 };
-    void **pages = malloc(n * sizeof *pages);
-    int *status = malloc(n * sizeof *status);
-    for (long i = 0; i < n; i++) pages[i] = (char *)p + i * pg;
-    move_pages(0, n, pages, NULL, status, 0);
-    for (long i = 0; i < n; i++) if (status[i] >= 0 && status[i] < 8) cnt[status[i]]++;
-    printf("%-34s node0 %6ld pages, node1 %6ld pages\n", what, cnt[0], cnt[1]);
-    free(pages); free(status);
-}
-
-static void *touch(void *p) { pin(2); memset(p, 1, SIZE); return NULL; }   /* CPU 2 = node 1 */
-
-static void *membind_worker(void *arg)
-{
-    (void)arg;
-    pin(0);                                   /* runs on node 0 ... */
-    struct bitmask *mask = numa_allocate_nodemask();
-    numa_bitmask_setbit(mask, 1);             /* ... but allocates on node 1 */
-    numa_set_membind(mask);
-    numa_free_nodemask(mask);
-    char *p = malloc(SIZE);
-    memset(p, 1, SIZE);
-    where("membind(1) thread on CPU 0", p, SIZE);
-    free(p);
-    return NULL;
-}
-
-int main(void)
-{
-    if (numa_available() < 0) { puts("no NUMA"); return 1; }
-    pin(0);
-    for (int c = 0; c < 4; c++) printf("cpu %d -> node %d\n", c, numa_node_of_cpu(c));
-    printf("numa_distance(0,1) = %d\n", numa_distance(0, 1));
-
-    char *a = malloc(SIZE);                   /* allocated on CPU 0 ... */
-    pthread_t t;
-    pthread_create(&t, NULL, touch, a);       /* ... first touched on CPU 2 */
-    pthread_join(t, NULL);
-    where("malloc on CPU 0, touched on CPU 2", a, SIZE);
-
-    char *b = malloc(SIZE);
-    memset(b, 1, SIZE);
-    where("malloc and touch on CPU 0", b, SIZE);
-
-    char *c = numa_alloc_onnode(SIZE, 1);
-    memset(c, 1, SIZE);
-    where("numa_alloc_onnode(1)", c, SIZE);
-
-    char *d = numa_alloc_interleaved(SIZE);
-    memset(d, 1, SIZE);
-    where("numa_alloc_interleaved", d, SIZE);
-
-    pthread_create(&t, NULL, membind_worker, NULL);
-    pthread_join(t, NULL);
-
-    free(a); free(b); numa_free(c, SIZE); numa_free(d, SIZE);
+    cpu_set_t allowed, chosen;
+    if (!previous || cpu < 0 || cpu >= CPU_SETSIZE) return -EINVAL;
+    if (sched_getaffinity(0, sizeof(allowed), &allowed) < 0) return -errno;
+    if (!CPU_ISSET(cpu, &allowed)) return -EINVAL;
+    CPU_ZERO(&chosen);
+    CPU_SET(cpu, &chosen);
+    if (sched_setaffinity(0, sizeof(chosen), &chosen) < 0) return -errno;
+    *previous = allowed;
     return 0;
 }
-```
-
-```text
-cpu 0 -> node 0
-cpu 1 -> node 0
-cpu 2 -> node 1
-cpu 3 -> node 1
-numa_distance(0,1) = 21
-malloc on CPU 0, touched on CPU 2  node0      1 pages, node1  16383 pages
-malloc and touch on CPU 0          node0  16384 pages, node1      0 pages
-numa_alloc_onnode(1)               node0      0 pages, node1  16384 pages
-numa_alloc_interleaved             node0   8192 pages, node1   8192 pages
-membind(1) thread on CPU 0         node0      0 pages, node1  16384 pages
-```
-
-- **first touch가 node를 정했습니다.** CPU 0에서 `malloc`하고 CPU 2에서 처음 쓴 영역은 16,384 page 중 16,383 page가 node 1에 있었습니다. 남은 1 page는 `malloc`이 CPU 0에서 할당 정보를 쓰느라 먼저 건드린 첫 page입니다.
-- **같은 CPU에서 할당하고 쓰면 전부 local입니다.**
-- **`numa_alloc_onnode(1)`과 membind는 CPU와 무관하게 node 1에 두었습니다.** membind thread는 CPU 0에서 돌았지만 페이지는 모두 node 1이었습니다. CPU와 memory를 다른 node에 묶는 것도 이렇게 쉽게 되므로, 둘을 같은 node로 맞추는 것은 프로그래머의 몫입니다.
-- **interleave는 정확히 반씩 나눴습니다.**
-
-thread마다 CPU와 memory를 같은 node에 묶는 패턴은 위 `pin()`과 `membind_worker()`를 합친 것입니다. CPU를 먼저 고르고, 그 CPU의 node를 `numa_node_of_cpu()`로 얻어 membind에 넣습니다.
-
-### Kernel automatic balancing
-
-```bash
-cat /proc/sys/kernel/numa_balancing     # 1 on this VM
-```
-
-v6.12 `sysctl/kernel.rst`의 `numa_balancing` 항목은 이 기능이 "periodically unmapping pages and later trapping a page fault"로 접근을 표본 추출해 페이지를 옮긴다고 설명합니다. 같은 항목은 그 비용이 "ideally is offset by improved memory locality but there is no universal guarantee"이고, "If the target workload is already bound to NUMA nodes then this feature should be disabled"라고 적습니다. 값 2(`NUMA_BALANCING_MEMORY_TIERING`)는 이종 메모리 node 사이에서 hot page를 빠른 메모리로 올리는 모드입니다.
-
-### Latency-critical CPU 분리
-
-```bash
-# kernel command line
-nohz_full=2-3 rcu_nocbs=2-3
-# run on node 1 CPUs with node 1 memory
-taskset -c 2-3 numactl --membind=1 ./rt_app
-```
-
-v6.12 `kernel-parameters.txt`는 `isolcpus=`를 "[Deprecated - use cpusets instead]"로 표시합니다. 그래서 CPU 분리는 cpuset으로 하고(cgroup v2 `cpuset.cpus.partition`에 `"isolated"`를 쓰면 "Partition root without load balancing"이 됩니다, `cgroup-v2.rst`), `nohz_full`·`rcu_nocbs`로 그 CPU의 tick과 RCU callback을 줄입니다. CPU 분리와 memory node를 같은 쪽으로 맞추는 것이 이 절의 요점입니다. 이 VM에서는 latency를 재지 않았습니다.
-
-## 측정 / 성능 비교
-
-512 MiB 배열을 5번 더하는 `sum.c`를 CPU는 node 0에 두고 memory 정책만 바꿔 각 3번 돌렸습니다.
-
-```c
-/* sum a 512 MiB array 5 times; run under numactl to choose CPU and memory nodes */
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-int main(void)
+int restore_current_thread(const cpu_set_t *previous)
 {
-    size_t n = (512UL << 20) / sizeof(uint64_t);
-    uint64_t *a = malloc(n * sizeof *a), s = 0;
-    memset(a, 1, n * sizeof *a);                       /* first touch under the numactl policy */
-    struct timespec t0, t1;
-    clock_gettime(CLOCK_MONOTONIC, &t0);
-    for (int r = 0; r < 5; r++) for (size_t i = 0; i < n; i++) s += a[i];
-    clock_gettime(CLOCK_MONOTONIC, &t1);
-    printf("%.3f s (sum %llu)\n", (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9, (unsigned long long)s);
-    return 0;
+    if (!previous) return -EINVAL;
+    return sched_setaffinity(0, sizeof(*previous), previous) < 0 ? -errno : 0;
 }
 ```
 
-```text
-numactl --cpunodebind=0 --membind=0: 0.204 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --membind=0: 0.123 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --membind=0: 0.130 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --membind=1: 0.170 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --membind=1: 0.124 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --membind=1: 0.120 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --interleave=all: 0.119 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --interleave=all: 0.116 s (sum 1446803456760217600)
-numactl --cpunodebind=0 --interleave=all: 0.125 s (sum 1446803456760217600)
-```
+설정 뒤 `sched_getcpu`와 affinity를 확인하고, 처리 종료 뒤 복원도 검사합니다. `pthread_setaffinity_np`를 직접 쓰는 변형은 errno가 아니라 함수의 양수 error code를 해석해야 합니다. 호출 실패를 무시한 채 memory policy를 계속 설정하지 않습니다.
 
-local(`--membind=0`), remote(`--membind=1`), interleave 모두 0.12~0.13초였습니다(첫 실행의 0.204·0.170초는 처음 페이지를 채우는 비용이 섞인 값입니다). 재현 절차대로 새로 한 번씩 돌렸을 때는 0.341·0.139·0.373초로, 정책과 무관하게 Mac의 다른 작업에 따라 흔들렸습니다. 정책 사이에 일정한 차이가 없는 것이 정상입니다. 이 VM의 두 node는 같은 Mac RAM이고 QEMU가 지연을 흉내 내지 않기 때문입니다. 위 페이지 배치 결과는 실제 NUMA 하드웨어에서도 같지만, local과 remote의 비용 차이는 multi-socket 서버나 이종 메모리 SoC에서 같은 `sum.c`로 다시 재야 합니다.
+memory policy는 이미 만들어진 모든 malloc 객체를 소급 배치하지 않습니다. thread policy의 상속과 다른 thread의 first write를 함께 봅니다. 프로그램 전체의 default policy를 바꾸는 방식과 특정 새 mapping에만 mbind하는 방식도 구분합니다.
 
-## 자주 보는 함정
+## First write와 실제 page 위치 확인
 
-> ⚠️ first touch를 무시
+새 anonymous mapping을 읽기만 하면 공용 zero page를 볼 수 있어 private page의 first-touch placement를 확인한 것이 아닐 수 있습니다. placement 실험에서는 원하는 CPU·policy를 설정한 뒤 page마다 실제로 씁니다. malloc을 먼저 호출했다는 이유만으로 모든 page가 그 thread의 node에 배치됐다고 결론내리지 않습니다.
 
-```c
-char *data = malloc(huge);   /* no page has a node yet */
-memset(data, 0, huge);       /* main thread on node 0: every page goes to node 0 */
-```
+page 위치는 `move_pages`의 조회 모드 또는 `get_mempolicy`의 MPOL_F_NODE|MPOL_F_ADDR, `/proc/PID/numa_maps` 등으로 확인합니다. 반환 status·권한·page가 아직 존재하지 않는 경우를 처리합니다. policy 조회와 실제 resident page의 node 조회는 다른 검사입니다.
 
-위 실행처럼 처음 쓴 CPU의 node에 페이지가 놓입니다. main thread가 0으로 초기화하고 worker가 다른 node에서 처리하면 worker의 접근은 모두 remote입니다. 각 worker가 자기 몫을 처음 쓰게 하거나 `numa_alloc_onnode`로 명시합니다.
-
-> ⚠️ 일부 thread만 pin
-
-affinity가 없는 thread는 scheduler가 다른 node로 옮길 수 있고, 옮겨 간 뒤에는 이미 놓인 페이지가 remote가 됩니다. hot path thread는 모두 pin하거나 cpuset으로 node 안에 가둡니다.
-
-> ⚠️ 큰 공유 배열을 한 node에
-
-모든 worker가 읽는 큰 배열 하나를 main thread가 초기화하면 한 node에 몰립니다. `numa_alloc_interleaved`나 `numactl --interleave`로 나누면 위 실행처럼 반씩 놓입니다.
-
-> ⚠️ distance를 측정값으로 읽음
-
-`numactl --hardware`의 21은 이 VM에 직접 준 값이었습니다. 실제 지연은 `sum.c` 같은 측정으로 확인합니다.
-
-> ⚠️ binding과 automatic balancing을 함께 켬
-
-이미 node에 묶은 workload라면 `kernel.rst`의 권고대로 `numa_balancing`을 끕니다. 그대로 두면 표본 추출용 page fault가 계속 생깁니다.
-
-## 재현 환경
-
-VM 명령은 위 [실행 환경](#실행-환경)에 있고, 게스트 안에서는 다음과 같이 돌렸습니다.
+다음은 프로세스의 실제 배치와 balancing 설정을 읽는 명령입니다. PID는 조회할 프로세스의 번호로 지정합니다.
 
 ```bash
-apt-get install -y numactl libnuma-dev gcc
-numactl --hardware
-gcc -O2 -Wall -o numa_demo numa_demo.c -lnuma -lpthread && ./numa_demo
-gcc -O2 -o sum sum.c
-numactl --cpunodebind=0 --membind=0 ./sum
-numactl --cpunodebind=0 --membind=1 ./sum
-numactl --cpunodebind=0 --interleave=all ./sum
+numastat -p PID
+cat /proc/PID/numa_maps
+cat /proc/sys/kernel/numa_balancing
+cat /sys/devices/system/cpu/isolated
 ```
+
+numastat의 node별 사용량은 그 시점의 배치 정보이며 모든 memory access의 local/remote 비율은 아닙니다. PMU 기반 traffic을 보려면 먼저 `perf list`에서 해당 CPU가 지원하는 event를 확인합니다. 특정 Intel 이벤트 이름을 ARM 전체에 적용하지 않습니다.
+
+## HBM·CXL tier의 node는 실제 노출 상태로 선택
+
+HBM이라는 이름이 Linux의 일반 node allocation을 뜻하지는 않습니다. CPU 주소 공간에 노출되는 HBM과 GPU의 device-private HBM을 구분합니다. CUDA/ROCm 등 장치 메모리 API로 관리하는 저장소를 libnuma만으로 할당할 수 있다고 가정하지 않습니다.
+
+CXL memory도 devdax 경로인지 System RAM으로 online된 경로인지에 따라 다릅니다. NUMA node와 memory tier로 노출된 경우에만 해당 node의 허용 범위와 capacity를 확인해서 정책을 적용합니다. memory-only node에는 실행할 CPU가 없으므로 `cpunodebind`와 `membind`의 node를 항상 동일하게 만들 수는 없습니다.
+
+cache에 자주 쓰는 물건과 큰 창고에 보관할 물건을 나누듯 hot/cold 배치를 생각할 수는 있습니다. 다만 page를 옮기는 비용과 데이터 공유·대역폭·장치 locality가 있으므로 hot은 HBM, cold는 CXL이라는 이름만으로 최적 배치를 정하지 않습니다. allocator arena를 늘리거나 jemalloc/tcmalloc을 preload하는 것도 NUMA placement 검증을 대신하지 않습니다.
+
+## Balancing·격리·실시간 조건
+
+automatic NUMA balancing은 workload의 접근을 관찰하고 migration을 시도하는 기능입니다. 비용과 효과는 workload·kernel·policy에 따라 달라집니다. 새 정책을 썼다면 기존 page의 migration 여부와 balancing의 상호작용도 기록합니다.
+
+CPU pinning은 실시간 deadline 보증이 아닙니다. IRQ·softirq·timer·RCU·housekeeping·scheduler policy와 공유 bus/cache 간섭을 따로 관리합니다. isolcpus/nohz_full/rcu_nocbs를 나열했다고 코어에서 모든 OS 활동이 사라지지 않으며, 제품의 safety partition을 입증하지도 않습니다. 시스템 전체 balancing 설정을 설명 없이 바꾸는 대신 실험의 전후 상태와 영향 범위를 관리합니다.
+
+## 보드 없이 하는 기능 검증과 성능 측정 구분
+
+가상 2-node Linux에서도 node 존재·allowed mask·affinity·mbind 오류·page 위치 조회를 검사할 수 있습니다. 가상 distance와 CPU 명령 실행 비용이 실제 remote DRAM의 지연·대역폭을 모델링한다는 뜻은 아닙니다.
+
+| 검사 | 기능 확인 | 제품에서 추가할 근거 |
+|---|---|---|
+| topology | online node·CPU/memory mask·CPU-less node를 구분합니다. | 실제 firmware/SoC topology와 접근 비용을 대조합니다. |
+| allocation | node/size 거부·정책 실패 정리·첫 write 뒤 위치를 봅니다. | memory pressure·migration·대형 working set을 확인합니다. |
+| affinity | 허용 CPU 선택·설정 확인·복원·실패를 검사합니다. | IRQ·scheduler·공유 자원 간섭을 측정합니다. |
+| local/remote 비교 | 동일 결과와 실제 page 위치를 확인합니다. | 동일 workload의 latency/throughput 분포를 측정합니다. |
+
+“single-node가 항상 가장 빠름”, “interleave면 throughput이 안정적”, “pinning으로 jitter가 크게 줄어듦”을 빈 측정 표와 함께 결론내리지 않습니다. node별 물리 page 위치가 의도와 맞는지 먼저 확인하고, 성능을 비교할 때는 CPU·node·page size·정책·초기화 thread·balancing·동시 부하를 기록합니다.
+
+### 이번 예제 검증 결과
+
+QEMU가 제공하는 두 memory node의 실제 Linux 6.12.116·libnuma 2.0.19에서 helper를 실행했습니다. thread를 허용 CPU 하나에 고정한 뒤 각 허용 node에 새 mapping을 bind하고 page마다 쓴 후 MPOL_F_NODE|MPOL_F_ADDR로 resident node가 맞는지 검사했습니다. CPU affinity 복원과 잘못된 CPU/node/크기 거부도 확인했습니다.
+
+policy 조회·mbind·munmap 실패를 별도로 주입해 출력 상태 유지와 정리를 검사했습니다. mbind 실패 뒤 임시 mapping이 제거되었는지는 mincore의 ENOMEM으로 확인했습니다. numactl의 membind·interleave·localalloc 명령도 실행했으며 가상 환경의 시간으로 local/remote 성능을 비교하지 않았습니다.
 
 ## 정리
 
-- Linux의 기본 정책은 local allocation이고, 페이지 node는 처음 쓴 CPU가 정합니다. CPU 0이 할당하고 CPU 2가 처음 쓴 64 MiB는 1 page를 빼고 모두 node 1에 놓였습니다.
-- `numa_alloc_onnode`와 membind는 thread가 도는 CPU와 무관하게 지정한 node에 둡니다. CPU와 memory를 같은 node로 맞추는 것은 직접 해야 합니다.
-- interleave는 페이지를 node마다 정확히 번갈아 둡니다.
-- `numactl --hardware`의 distance는 firmware가 준 값이고, Linux의 기준은 local 10, remote 20입니다.
-- 이미 bind한 workload는 `numa_balancing`을 끕니다. `isolcpus=`는 v6.12에서 deprecated이고 cpuset을 씁니다.
-- QEMU NUMA는 배치를 확인하는 도구이고, local·remote 비용은 실제 하드웨어에서 잽니다.
+- Linux NUMA node를 CPU cluster·socket 수와 동일시하지 않습니다.
+- CPU affinity·allocation policy·기존 resident page 위치를 구분합니다.
+- libnuma 호출의 포인터 반환만으로 mbind 성공을 판단하지 않습니다.
+- 허용 mask·크기·node·syscall 실패를 검사하고 임시 자원을 정리합니다.
+- anonymous page의 첫 write와 실제 page node를 확인합니다.
+- HBM/CXL의 실제 노출 형태와 memory-only node를 고려합니다.
+- 가상 topology 기능 검사와 실물 지연·대역폭·실시간 보증을 구분합니다.
 
-다음 편은 **SIMD intrinsics**입니다.
+다음 편은 **SIMD intrinsics**입니다. 메모리 위치를 확인한 뒤 한 명령으로 여러 값을 처리할 때의 타입·정렬·tail 조건을 다룹니다.
 
 ## 관련 항목
 
 - [8-05: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part8-05-zero-copy)
 - [8-07: SIMD](/blog/embedded/modern-recipes/part8-07-simd)
+- [12-10: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)
 - [RTOS 4-07: SMP Scheduling](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)
+
+## 1차 자료
+
+- [Linux 6.12 NUMA policy](https://docs.kernel.org/6.12/admin-guide/mm/numa_memory_policy.html): policy 범위·first touch·cpuset 관계의 기준입니다.
+- [numactl/libnuma](https://github.com/numactl/numactl), [numa(3)](https://man7.org/linux/man-pages/man3/numa.3.html): nodemask·할당·정책 API의 계약입니다.
+- [mbind(2)](https://man7.org/linux/man-pages/man2/mbind.2.html), [get_mempolicy(2)](https://man7.org/linux/man-pages/man2/get_mempolicy.2.html), [move_pages(2)](https://man7.org/linux/man-pages/man2/move_pages.2.html): 정책과 page 위치·오류 조회를 구분합니다.
+- [sched_setaffinity(2)](https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html): 현재 thread·허용 CPU·오류 계약입니다.

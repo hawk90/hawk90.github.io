@@ -11,538 +11,224 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Alignment는 correctness와 성능을 함께 좌우합니다."** 같은 C 코드라도 Cortex-M0에서는 HardFault, Cortex-M3에서는 정상 동작, 설정 비트 하나를 켠 Cortex-M3에서는 다시 HardFault가 됩니다. `packed`는 wire format처럼 필요한 곳에만 쓰고, 접근은 컴파일러가 정렬을 알 수 있는 경로로 합니다.
+> **타입의 정렬·객체의 수명·byte 순서는 서로 다른 계약입니다.** `packed`나 포인터 cast 하나로 전송 buffer를 안전한 객체로 만들 수는 없습니다.
 
 ## 어떤 상황에서 쓰나
 
-UART나 BLE로 받은 byte stream을 struct 포인터로 캐스팅해 읽으려 할 때 가장 먼저 부딪힙니다. 송신측이 정렬을 고려하지 않은 layout을 보내면 `__attribute__((packed))`를 붙이게 되는데, 그 뒤 멤버의 주소를 `int *`로 넘기는 순간 동작이 CPU마다 갈립니다. 아래 실행에서 같은 함수가 Cortex-M3에서는 값을 읽었고 Cortex-M0에서는 HardFault를 냈습니다.
+UART로 받은 byte 배열은 순서가 정해진 봉투에 가깝습니다. 이를 struct 포인터로 바꿔도 수신 주소가 타입에 맞게 정렬되거나, compiler의 field 배치가 송신 규격과 같아지지는 않습니다. C의 유효 타입 규칙과 실제 받은 길이도 별도로 맞아야 합니다.
 
-또 하나는 struct를 정의할 때입니다. 같은 field도 순서에 따라 `sizeof`가 12와 8로 갈립니다. RAM이 빠듯한 MCU에서 이런 struct를 배열로 수천 개 둔다면 그 차이가 그대로 남는 RAM입니다.
+정렬은 책을 정해진 칸의 시작점에 놓는 규칙이고, padding은 다음 책의 시작점을 맞추기 위한 빈칸입니다. field를 재배치하면 빈칸은 줄일 수 있지만 외부 ABI의 약속까지 바꾸므로, 통신·파일·공유 메모리 layout을 성능 목적으로 임의 변경하면 안 됩니다.
 
-## 핵심 개념
+이 글은 C11을 기준으로 합니다. GCC/Clang의 `packed` 예제만 compiler 확장을 사용하며, C++의 `struct alignas(64) Hot` 문법과 C11 선언을 섞지 않습니다. cycle 수치를 가정하는 대신 `sizeof`·`offsetof`·교차 컴파일 결과로 확인할 조건을 분리합니다.
 
-정렬(alignment)은 "이 type의 객체는 주소가 N의 배수인 곳에만 둔다"는 규칙입니다. 책장에 큰 책은 큰 칸에만 꽂는다고 정해 두면, 작은 책 다음에 큰 책을 꽂을 때 사이에 빈 칸(padding)이 생기는 것과 같습니다. C 표준은 멤버 정렬을 구현이 정하게 하고(N1570 6.7.2.1p14, "aligned in an implementation-defined manner"), struct 안의 padding을 허용하되 맨 앞에는 두지 못하게 합니다(같은 절 p15).
+## Natural alignment와 ABI
 
-32비트 Arm에서 그 "구현"은 AAPCS32입니다. AAPCS32 2025Q4의 Fundamental Data Types 표가 정하는 크기와 정렬은 다음과 같고, 오른쪽 두 칸은 이 글에서 실제로 잰 값입니다.
+C는 모든 플랫폼에서 같은 숫자의 alignment를 정하지 않습니다. 아래는 [AAPCS32](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst)의 기본 데이터 layout이며, 모든 32-bit CPU의 규칙이라는 뜻은 아닙니다.
 
-| Type | AAPCS32 크기 / 정렬 | `arm-none-eabi-gcc` 16.2 (M0·M3) `alignof` | Apple clang 21 (arm64 macOS) `alignof` |
-| --- | --- | ---: | ---: |
-| `uint8_t` | 1 / 1 | — | — |
-| `uint16_t` | 2 / 2 | — | — |
-| `uint32_t` | 4 / 4 | — | — |
-| `long long`·`uint64_t` | 8 / 8 | 8 | 8 |
-| `double` | 8 / 8 | 8 | 8 |
-| pointer | 4 / 4 | `sizeof` 4 | `sizeof` 8 |
+| AAPCS32 타입 | 크기 | 자연 정렬 |
+|---|---:|---:|
+| uint8_t | 1 byte | 1 byte |
+| uint16_t | 2 byte | 2 byte |
+| uint32_t | 4 byte | 4 byte |
+| uint64_t | 8 byte | 8 byte |
+| double | 8 byte | 8 byte |
+| data pointer | 4 byte | 4 byte |
 
-32비트 Arm에서도 `uint64_t`의 정렬은 4가 아니라 8입니다. 그래서 `char`, `int`, `long long` 순서의 struct는 `long long` 앞에 padding이 들어갑니다.
+64-bit 정수를 32-bit 명령 두 개로 처리하는 것과 타입의 alignment는 다른 문제입니다. compile flag·ABI가 바뀌면 layout을 재검사합니다. AAPCS32의 public interface stack 정렬과 더 강하게 정렬된 지역 객체의 시작 주소도 구분합니다.
 
-정렬되지 않은 주소로 접근했을 때 무슨 일이 생기는지는 CPU와 명령에 따라 다릅니다. 아래 [실행](#unaligned-접근--cortex-m0과-m3에서-돌려-보기)에서 확인한 결과는 다음과 같습니다(QEMU 11.1.3 `microbit` = Cortex-M0, `mps2-an385` = Cortex-M3).
+### Padding을 줄이되 ABI 보존하기
 
-| 접근 | Cortex-M0 | Cortex-M3 | Cortex-M3 + `CCR.UNALIGN_TRP` |
-| --- | --- | --- | --- |
-| unaligned `LDR`(word) | HardFault | 읽힘 | HardFault (CFSR.UNALIGNED) |
-| unaligned `LDRD` | 명령 없음(ARMv6-M) | HardFault (CFSR.UNALIGNED) | 확인 안 함 |
-| byte 단위로 조립(`LDRB`, byte 루프 `memcpy`) | 읽힘 | 읽힘 | 확인 안 함 |
+다음 코드는 AAPCS32의 4-byte int와 자연 정렬을 전제로 field 순서에 따른 차이를 검사합니다. 외부 layout이 아닌 내부 데이터에 적용하는 예입니다.
 
-`CCR.UNALIGN_TRP` 열은 첫 단계에서 멈췄으므로 그 뒤 두 줄은 실행되지 않았습니다. Cortex-M3 열은 ARMv7-M Architecture Reference Manual(DDI 0403E.b) A3.2.1 "Alignment behavior"와 같습니다. 이 절은 "Non word-aligned LDRD, LDMIA, LDMDB, POP ..."는 항상 alignment fault를 내고, "Non word-aligned LDR{T} and STR{T}"는 unaligned를 지원하되 `CCR.UNALIGN_TRP`가 1일 때만 fault를 낸다고 적습니다. Cortex-M0(ARMv6-M) 열은 이 글이 그 아키텍처 문서를 열지 않았으므로 QEMU에서 관찰한 결과로만 적습니다.
-
-## 코드 / 실제 사용 예
-
-### Struct padding 규칙
-
-```c
-struct s1 {
-    char  a;        /* offset 0 */
-    /* padding 3 byte */
-    int   b;        /* offset 4 */
-    char  c;        /* offset 8 */
-    /* padding 3 byte */
-};
-/* sizeof(s1) = 12 */
-
-struct s2 {
-    int   b;        /* offset 0 */
-    char  a;        /* offset 4 */
-    char  c;        /* offset 5 */
-    /* padding 2 byte */
-};
-/* sizeof(s2) = 8 — 4 byte(33%) smaller */
-```
-
-정렬이 큰 type을 앞에, 작은 type을 뒤에 두면 padding이 줄어듭니다. 끝에 padding이 남는 것은 배열의 다음 원소도 `int` 정렬을 지켜야 하기 때문입니다.
-
-### offsetof, alignof, sizeof로 확인하기
-
-layout은 짐작하지 말고 컴파일러에게 물어봅니다. 아래 프로그램은 이 글의 struct를 모두 출력합니다. `HOSTED`를 정의하면 `printf`로, 아니면 semihosting으로 찍습니다(`bm.h`는 [재현 환경](#재현-환경)에 있습니다).
-
-```c
+```c title="padding-layout.c"
 #include <stddef.h>
-#include <stdint.h>
 #include <stdalign.h>
-
-#ifdef HOSTED
-#include <stdio.h>
-#define SHOW(expr) printf("%-36s = %u\n", #expr, (unsigned)(expr))
-#define DONE() return 0
-#else
-#include "bm.h"
-#define SHOW(expr) do { puts_(#expr " = "); putu((unsigned)(expr)); puts_("\n"); } while (0)
-#define DONE() exit_()
-#endif
+#include <stdint.h>
 
 struct s1 { char a; int b; char c; };
 struct s2 { int b; char a; char c; };
-struct s  { char a; int b; long long c; };
-struct frame { uint8_t type; uint8_t flags; uint16_t len; uint32_t payload; };
-struct __attribute__((packed)) sensor_packet {
-    uint8_t sof; uint16_t length; uint32_t timestamp; int16_t data[8]; uint16_t crc;
-};
+struct natural_sample { char a; int b; long long c; };
 
-int main(void)
-{
-    SHOW(alignof(long long));
-    SHOW(alignof(double));
-    SHOW(sizeof(void *));
-    SHOW(sizeof(struct s1));
-    SHOW(sizeof(struct s2));
-    SHOW(sizeof(struct s));
-    SHOW(offsetof(struct s, b));
-    SHOW(offsetof(struct s, c));
-    SHOW(alignof(struct s));
-    SHOW(sizeof(struct frame));
-    SHOW(offsetof(struct frame, len));
-    SHOW(sizeof(struct sensor_packet));
-    SHOW(alignof(struct sensor_packet));
-    DONE();
-}
+_Static_assert(sizeof(int) == 4 && alignof(int) == 4, "target int ABI");
+_Static_assert(sizeof(struct s1) == 12, "s1 size");
+_Static_assert(offsetof(struct s1, b) == 4, "s1 b");
+_Static_assert(offsetof(struct s1, c) == 8, "s1 c");
+_Static_assert(sizeof(struct s2) == 8, "s2 size");
+_Static_assert(offsetof(struct s2, a) == 4, "s2 a");
+_Static_assert(offsetof(struct s2, c) == 5, "s2 c");
+_Static_assert(sizeof(struct natural_sample) == 16, "sample size");
+_Static_assert(alignof(struct natural_sample) == 8, "sample alignment");
+_Static_assert(offsetof(struct natural_sample, c) == 8, "sample c");
 ```
 
-Cortex-M3·M0(32비트)과 Apple Silicon Mac(64비트)에서 돌린 결과입니다. 포인터 크기를 빼면 모든 값이 같습니다.
+이 ABI에서는 s1에서 s2로 바꾸면 한 요소당 4 byte를 줄입니다. 큰 타입을 앞에 놓는 것은 후보일 뿐이며, field의 타입·배열·용도에 따라 최종 layout을 확인합니다. 큰 배열의 절약량은 요소 수와 두 sizeof의 차이로 계산할 수 있습니다.
 
-```text
-== mps2-an385 (cortex-m3)
-alignof(long long) = 8
-alignof(double) = 8
-sizeof(void *) = 4
-sizeof(struct s1) = 12
-sizeof(struct s2) = 8
-sizeof(struct s) = 16
-offsetof(struct s, b) = 4
-offsetof(struct s, c) = 8
-alignof(struct s) = 8
-sizeof(struct frame) = 8
-offsetof(struct frame, len) = 2
-sizeof(struct sensor_packet) = 25
-alignof(struct sensor_packet) = 1
-```
+### `_Static_assert`가 검사하지 않는 것
 
-```text
-Apple clang version 21.0.0 (clang-2100.4.1.1)
-arm64
-alignof(long long)                   = 8
-alignof(double)                      = 8
-sizeof(void *)                       = 8
-sizeof(struct s1)                    = 12
-sizeof(struct s2)                    = 8
-sizeof(struct s)                     = 16
-offsetof(struct s, b)                = 4
-offsetof(struct s, c)                = 8
-alignof(struct s)                    = 8
-sizeof(struct frame)                 = 8
-offsetof(struct frame, len)          = 2
-sizeof(struct sensor_packet)         = 25
-alignof(struct sensor_packet)        = 1
-```
+다음 struct의 field 위치를 고정해도 wire byte 순서까지 정해지지는 않습니다.
 
-### `_Static_assert`로 layout 고정
+```c title="frame-layout.c"
+#include <stddef.h>
+#include <stdint.h>
 
-```c
 struct frame {
-    uint8_t  type;
-    uint8_t  flags;
+    uint8_t type, flags;
     uint16_t len;
     uint32_t payload;
 };
-
 _Static_assert(sizeof(struct frame) == 8, "frame layout drift");
 _Static_assert(offsetof(struct frame, len) == 2, "len position");
+_Static_assert(offsetof(struct frame, payload) == 4, "payload position");
 ```
 
-컴파일 시점에 layout이 바뀌면 빌드가 실패합니다. 위 실행에서 `sizeof(struct frame)` = 8, `offsetof(struct frame, len)` = 2였으므로 이 assert는 세 환경 모두에서 통과합니다.
+이 검사는 compiler 쪽 layout 변경을 감지하는 울타리입니다. 입력 길이·endianness·유효한 field 값·정합성 검사가 끝났다는 뜻은 아닙니다. 외부 입력을 직접 이 타입으로 cast하는 근거도 되지 않습니다.
 
-### Unaligned 접근 — Cortex-M0과 M3에서 돌려 보기
+## Packed의 직접 접근과 포인터 경유 구분하기
 
-같은 4 byte를 네 가지 방법으로 읽습니다. `buf + 1`은 4의 배수가 아닌 주소이고, `struct bad`의 `b`도 offset 1에 있습니다. HardFault handler는 몇 번째 단계에서 멈췄는지와, Cortex-M3에서는 fault 상태 레지스터 CFSR(`0xE000ED28`)·HFSR(`0xE000ED2C`)을 찍습니다.
+`packed`는 GCC/Clang의 확장으로 member 사이의 빈칸을 줄입니다. compiler가 packed member임을 아는 직접 접근은 target에 따라 byte load 등으로 펼칠 수 있습니다. Cortex-M0에서 packed를 썼다는 이유만으로 반드시 fault한다는 설명은 정확하지 않습니다.
 
-```c
-#include "bm.h"
+다음 예제는 직접 member를 읽는 함수와 일반 int 포인터를 읽는 함수를 구분합니다.
 
-void *memcpy(void *d, const void *s, size_t n);
-struct __attribute__((packed)) bad { char a; int b; };
+```c title="packed-access.c"
+#include <stddef.h>
+#include <string.h>
 
-static struct bad p = { 'x', 0x11223344 };
-static uint8_t buf[16] __attribute__((aligned(4))) = { 0, 0x44, 0x33, 0x22, 0x11, 0x88, 0x77, 0x66, 0x55 };
-static volatile int step;
+struct __attribute__((packed)) packed_sample { char tag; int value; };
+_Static_assert(offsetof(struct packed_sample, value) == 1, "packed offset");
 
-void HardFault_Handler(void)
-{
-    puts_("HardFault in step "); putu(step);
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-    puts_(", CFSR="); putx(*(volatile uint32_t *)0xE000ED28);
-    puts_(" HFSR="); putx(*(volatile uint32_t *)0xE000ED2C);
-#endif
-    puts_("\n");
-    exit_();
+int packed_direct(const struct packed_sample *p) {
+    return p->value;
 }
-
-__attribute__((noinline)) int read_member(struct bad *x) { return x->b; }
-__attribute__((noinline)) int read_memcpy(const void *src) { int v; memcpy(&v, src, sizeof v); return v; }
-__attribute__((noinline)) int read_cast(const void *src) { return *(const int *)src; }
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-__attribute__((noinline)) uint64_t read_ldrd(const void *src)
-{
-    uint32_t lo, hi;
-    __asm volatile("ldrd %0, %1, [%2]" : "=r"(lo), "=r"(hi) : "r"(src));
-    return ((uint64_t)hi << 32) | lo;
+int packed_copy(const struct packed_sample *p) {
+    int value;
+    memcpy(&value, (const unsigned char *)p +
+                   offsetof(struct packed_sample, value), sizeof(value));
+    return value;
 }
-#endif
-
-void *memcpy(void *d, const void *s, size_t n) { uint8_t *o = d; const uint8_t *i = s; while (n--) *o++ = *i++; return d; }
-
-int main(void)
-{
-#ifdef TRAP
-    *(volatile uint32_t *)0xE000ED14 |= 1u << 3;      /* CCR.UNALIGN_TRP */
-    puts_("CCR.UNALIGN_TRP = 1\n");
-#endif
-    step = 1; puts_("1 packed member : "); putx((unsigned)read_member(&p)); puts_("\n");
-    step = 2; puts_("2 memcpy        : "); putx((unsigned)read_memcpy(buf + 1)); puts_("\n");
-    step = 3; puts_("3 (int *) cast  : "); putx((unsigned)read_cast(buf + 1)); puts_("\n");
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-    step = 4; puts_("4 ldrd          : "); putx((unsigned)read_ldrd(buf + 1)); puts_("\n");
-#endif
-    puts_("done\n");
-    exit_();
-}
+int aligned_pointer_read(const int *p) { return *p; }
 ```
 
-```text
-== mps2-an385 (cortex-m3)
-1 packed member : 0x11223344
-2 memcpy        : 0x11223344
-3 (int *) cast  : 0x11223344
-4 ldrd          : HardFault in step 4, CFSR=0x01000000 HFSR=0x40000000
-== microbit (cortex-m0)
-1 packed member : 0x11223344
-2 memcpy        : 0x11223344
-3 (int *) cast  : HardFault in step 3
-== mps2-an385 (cortex-m3), -DTRAP
-CCR.UNALIGN_TRP = 1
-1 packed member : HardFault in step 1, CFSR=0x01000000 HFSR=0x40000000
-```
+반면 `&p->value`를 일반 `int *`로 다른 함수에 넘기면 받는 쪽은 int의 자연 정렬을 전제로 할 수 있습니다. GCC/Clang의 `-Waddress-of-packed-member`는 이런 오용을 잡습니다. 일반 int의 정렬 요구를 지키지 않는 역참조는 C의 계약을 만족하지 않습니다. CPU가 unaligned load를 실행할 수 있다는 사실만으로 정당화할 수 없습니다.
 
-CFSR `0x01000000`은 bit 24, HFSR `0x40000000`은 bit 30입니다. CMSIS 5.9.0 `core_cm3.h`에서 bit 24는 `SCB_CFSR_UNALIGNED_Pos`(UFSR 시작 16 + 8), bit 30은 `SCB_HFSR_FORCED_Pos`입니다. UsageFault handler를 따로 켜지 않았으므로 unaligned UsageFault가 HardFault로 올라간 것(FORCED)입니다. `CCR.UNALIGN_TRP`는 `core_cm3.h`의 `SCB_CCR_UNALIGN_TRP_Pos` = 3입니다.
+`packed_copy`는 유효한 일반 메모리의 byte 표현을 올바르게 정렬된 실제 객체로 복사합니다. 무효 포인터·짧은 입력·MMIO·DMA와의 동시 접근을 해결하지 않으며 endianness도 바꾸지 않습니다. trap 표현이나 padding이 있는 일반 타입까지 무조건 확대하지 않고, wire format은 아래처럼 명시적으로 decode합니다.
 
-결과가 갈린 이유는 컴파일러가 만든 명령에 있습니다. 같은 `read_member`와 `read_cast`를 디스어셈블하면 다음과 같습니다.
+## Wire format은 byte 단위로 decode하기
 
-```text
-== cortex-m0
-00000150 <read_member>:
- 150:	ldrb	r2, [r0, #2]
- 152:	ldrb	r3, [r0, #1]
- 154:	lsls	r2, r2, #8
- 156:	orrs	r2, r3
- 158:	ldrb	r3, [r0, #3]
- 15a:	ldrb	r0, [r0, #4]
- 15c:	lsls	r3, r3, #16
- 15e:	orrs	r3, r2
- 160:	lsls	r0, r0, #24
- 162:	orrs	r0, r3
- 164:	bx	lr
- 166:	nop			@ (mov r8, r8)
+packed struct는 wire format에 필수적이지 않습니다. 여기서는 본문 예제용 25-byte format을 정의합니다. SOF는 0xA5, length는 16-byte sample 영역의 길이, timestamp와 CRC는 little-endian, sample은 16-bit two's complement 표현입니다. CRC field를 꺼낼 뿐 CRC 계산에 의한 검증은 이 함수의 범위 밖입니다.
 
-00000180 <read_cast>:
- 180:	ldr	r0, [r0, #0]
- 182:	bx	lr
+| offset | 폭 | field |
+|---:|---:|---|
+| 0 | 1 | SOF |
+| 1 | 2 | payload length |
+| 3 | 4 | timestamp |
+| 7 | 16 | signed sample 8개 |
+| 23 | 2 | CRC |
 
-== cortex-m3
-00000198 <read_member>:
- 198:	ldr.w	r0, [r0, #1]
- 19c:	bx	lr
- 19e:	nop
+다음 decoder는 짧은 입력과 잘못된 SOF/length를 거부하고 실패 시 출력을 바꾸지 않습니다.
 
-000001a4 <read_cast>:
- 1a4:	ldr	r0, [r0, #0]
- 1a6:	bx	lr
-```
+```c title="sensor-decode.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-- **Cortex-M0용 `read_member`는 `ldrb` 네 번으로 조립합니다.** 컴파일러는 `packed` 멤버가 정렬되지 않았을 수 있음을 알고, unaligned `LDR`이 없는 ARMv6-M에서는 byte 접근을 씁니다. 그래서 1단계는 M0에서도 성공했습니다.
-- **`read_cast`는 두 CPU 모두 `ldr` 하나입니다.** `int *`로 바뀐 순간 컴파일러는 주소가 정렬됐다고 가정합니다. C 표준도 정렬이 맞지 않는 포인터로의 변환을 미정의 동작으로 둡니다(N1570 6.3.2.3p7). M0에서는 이 `ldr`이 HardFault를 냈습니다.
-- **Cortex-M3용 `read_member`는 `ldr.w` 하나입니다.** M3가 unaligned word 접근을 처리하므로 컴파일러가 byte 조립을 생략했습니다. 그래서 `CCR.UNALIGN_TRP`를 켜면 `packed` 멤버를 그냥 읽는 1단계부터 멈춥니다.
-- **`LDRD`는 M3에서도 unaligned를 받지 않았습니다.** 64비트 값을 두 레지스터로 읽는 명령이라, 컴파일러가 정렬된 `uint64_t *`로 알고 이 명령을 고르면 unaligned 주소에서 fault가 납니다.
-
-`memcpy`로 읽은 2단계는 세 경우 모두 성공했습니다. 이 글의 `memcpy`는 byte 루프지만, newlib이나 컴파일러 내장 `memcpy`도 정렬을 가정하지 않는 것이 `memcpy`의 계약입니다(N1570 7.24.2.1은 "copies n characters"라고만 정의합니다).
-
-### Packed의 올바른 쓰임 — wire format
-
-```c
-/* wire format shared with an external device */
-struct __attribute__((packed)) sensor_packet {
-    uint8_t  sof;
-    uint16_t length;     /* little-endian on the wire */
+enum { SENSOR_WIRE_SIZE = 25, SENSOR_PAYLOAD_SIZE = 16 };
+typedef struct {
     uint32_t timestamp;
-    int16_t  data[8];
+    int16_t samples[8];
     uint16_t crc;
-};
+} sensor_fields;
 
-_Static_assert(sizeof(struct sensor_packet) == 25, "wire format");
-```
-
-이 경우 `packed`가 목적입니다. 위 실행에서 `sizeof` 25, `alignof` 1이었습니다. 멤버는 `pkt.length`처럼 직접 읽고(컴파일러가 CPU에 맞는 명령을 고릅니다), 멤버 주소를 `uint16_t *`로 다른 함수에 넘기지 않습니다. 넘겨야 한다면 `memcpy`로 정렬된 지역 변수에 꺼냅니다. byte 순서는 `packed`가 해결하지 않으므로 다른 endianness의 장치와 주고받는다면 변환을 따로 합니다.
-
-### Explicit alignment
-
-DMA buffer나 cache line 단위로 둘 객체는 시작 주소를 명시합니다. 아래 선언을 `arm-none-eabi-gcc` 16.2.0과 Apple clang 21로 `-std=c11 -c`해 assert가 모두 통과하는 것을 확인했습니다.
-
-```c
-#include <stdalign.h>
-#include <stdint.h>
-struct hot { alignas(64) int a; };                       /* C11: on a member */
-__attribute__((aligned(64))) struct x { int a; } y;     /* GCC attribute before 'struct' */
-struct __attribute__((aligned(64))) z { int a; };       /* attribute on the type */
-alignas(8) static uint8_t dma_buf[1024];
-_Static_assert(alignof(struct hot) == 64, "hot");
-_Static_assert(alignof(struct z) == 64, "z");
-_Static_assert(sizeof(struct hot) == 64, "hot size");
-int y_align = __alignof__(y), x_align = alignof(struct x);
-```
-
-세 가지를 구분해야 합니다.
-
-- C11의 `alignas`는 객체와 멤버에 붙습니다. C++처럼 `struct alignas(64) hot { ... };`라고 쓰면 C에서는 컴파일되지 않습니다(gcc: `expected '{' before '_Alignas'`, clang: `declaration of anonymous struct must be a definition`). type 자체를 64 정렬로 만들려면 첫 멤버에 `alignas(64)`를 붙이거나 GCC 속성 `struct __attribute__((aligned(64))) z`를 씁니다.
-- `__attribute__((aligned(64))) struct x { int a; } y;`처럼 속성을 `struct` 앞에 두면 type이 아니라 변수 `y`에 붙습니다. 위 `.data`를 읽으면 두 컴파일러 모두 `__alignof__(y)` = 64, `alignof(struct x)` = 4였습니다.
-- type을 정렬하면 `sizeof`도 정렬의 배수로 늘어납니다. `struct hot`은 `int` 하나인데 `sizeof`가 64입니다.
-
-### Stack 위의 over-aligned 변수
-
-AAPCS32는 public interface에서 "SP mod 8 = 0"만 요구하고(Stack constraints at a public interface), AAPCS64는 "SP mod 16 = 0"을 요구합니다. 그보다 큰 정렬을 지역 변수에 요구하면 어떻게 되는지 직접 봅니다. `g`는 VLA로 SP를 64의 배수가 아닌 만큼 옮긴 뒤 `f`를 부릅니다.
-
-```c
-#include <stdalign.h>
-#ifdef HOSTED
-#include <stdio.h>
-#include <stdint.h>
-#define SHOWADDR(tag, p) printf("%s: addr %% 64 = %u\n", tag, (unsigned)((uintptr_t)(p) % 64))
-#else
-#include "bm.h"
-#define SHOWADDR(tag, p) do { puts_(tag ": addr % 64 = "); putu((unsigned)((uintptr_t)(p) % 64)); puts_("\n"); } while (0)
-#endif
-
-__attribute__((noinline)) void use(volatile char *p) { p[0] = 1; }
-
-__attribute__((noinline)) void f(int depth)
-{
-    alignas(64) char buf[64];
-    use(buf);
-    SHOWADDR("alignas(64) local", buf);
-    if (depth) f(depth - 1);      /* different SP on each call */
+static uint16_t read_le16(const unsigned char *p) {
+    return (uint16_t)((uint16_t)p[0] | ((uint16_t)p[1] << 8));
 }
-
-__attribute__((noinline)) void g(int depth)
-{
-    char pad[depth * 4 + 1];      /* moves SP by a non-multiple of 64 */
-    use(pad);
-    f(0);
+static uint32_t read_le32(const unsigned char *p) {
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
+           ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
 }
-
-int main(void)
-{
-    f(2);
-    for (int d = 1; d <= 3; d++) g(d);
-#ifndef HOSTED
-    exit_();
-#endif
-    return 0;
+bool decode_sensor_fields(const unsigned char *wire, size_t len,
+                          sensor_fields *out) {
+    if (!wire || !out || len < SENSOR_WIRE_SIZE || wire[0] != 0xa5 ||
+        read_le16(wire + 1) != SENSOR_PAYLOAD_SIZE) return false;
+    sensor_fields next;
+    next.timestamp = read_le32(wire + 3);
+    for (size_t i = 0; i < 8; ++i) {
+        uint16_t u = read_le16(wire + 7 + 2 * i);
+        int32_t signed_value = u <= INT16_MAX ? (int32_t)u : (int32_t)u - 65536;
+        next.samples[i] = (int16_t)signed_value;
+    }
+    next.crc = read_le16(wire + 23);
+    *out = next;
+    return true;
 }
 ```
 
-```text
-== mps2-an385 (cortex-m3), arm-none-eabi-gcc 16.2.0 -O2
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-== host arm64, Apple clang version 21.0.0 (clang-2100.4.1.1) -O2
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-alignas(64) local: addr % 64 = 0
-```
+수신 buffer가 정렬되지 않아도 byte 접근은 가능합니다. 음수 sample은 범위 안의 signed 값으로 계산한 뒤 int16_t로 대입하므로, 범위 밖 unsigned 값을 signed로 cast하는 동작에 의존하지 않습니다. 부분 수신의 결합, CRC 대조, timestamp 의미와 상위 계층에서 허용할 sample 범위는 실제 protocol에 추가합니다.
 
-두 컴파일러 모두 모든 호출에서 64 정렬을 지켰습니다. Cortex-M3용 `f`의 앞부분을 보면 방법이 보입니다.
+## C11에서 명시적 정렬 쓰기
 
-```text
-000000c0 <f>:
-  c0:	push	{r4, lr}
-  c2:	sub	sp, #136	@ 0x88
-  c4:	add.w	r4, sp, #79	@ 0x4f
-  c8:	mov	r2, r0
-  ca:	bic.w	r4, r4, #63	@ 0x3f
-  ce:	b.n	d2 <f+0x12>
-  d0:	subs	r2, #1
-  d2:	mov	r0, r4
-  d4:	bl	b8 <use>
-  d8:	ldr	r1, [pc, #32]	@ (fc <f+0x3c>)
-  da:	movs	r0, #4
-  dc:	bkpt	0x00ab
-  de:	movs	r3, #48	@ 0x30
-```
+C11의 `alignas`는 `<stdalign.h>`가 제공하는 `_Alignas`의 macro입니다. C++ 타입 선언과 같은 위치에 쓰지 않습니다. member 정렬을 지정하면 타입 자체의 정렬과 배열 stride에도 반영되며, 배열 객체 하나의 시작만 정렬하는 경우와 구별합니다.
 
-64 B 배열 하나에 frame을 136 B 잡고(`sub sp, #136`), `sp + 79`를 `bic #63`으로 내려 64의 배수 주소를 만듭니다. 정렬은 지켜지지만 frame이 그만큼 커지므로, 작은 task stack에서는 이런 변수를 `static`으로 옮기는 편이 stack을 아낍니다.
+다음은 DMA 저장소, 정렬된 타입과 지역 buffer를 선언하는 C11 코드입니다. consume_aligned는 이 예제의 호출자가 제공하는 동기 처리 함수입니다.
 
-## 측정 / 성능 비교
-
-이 글은 실행 결과(fault 여부, 명령 선택, layout)만 측정했습니다. unaligned 접근이 정렬된 접근보다 몇 사이클 더 드는지는 QEMU로 잴 수 없습니다. QEMU의 `-icount`도 "does not provide cycle accurate emulation"이라고 문서에 적혀 있습니다(QEMU v11.1.0 `qemu-options.hx`). 사이클 비용이 중요하다면 대상 보드에서 DWT `CYCCNT`로 `read_cast`와 `read_memcpy`를 각각 재 봅니다.
-
-RAM 쪽 효과는 위 실행에서 바로 셀 수 있습니다. `struct s1`을 1,000개 배열로 두면 12,000 B, 같은 field를 재배열한 `struct s2`는 8,000 B입니다.
-
-## 자주 보는 함정
-
-> ⚠️ in-memory struct에 `packed`
-
-```c
-struct __attribute__((packed)) cfg {
-    char a;
-    int  b;
-};
-```
-
-`cfg.b`를 직접 읽는 코드는 M0에서도 동작합니다(위 1단계). 문제는 `&cfg.b`를 `int *`로 넘기는 순간 생깁니다(3단계). 그리고 M3용 코드는 unaligned `LDR`에 기대므로 `CCR.UNALIGN_TRP`를 켠 시스템에서는 직접 읽기부터 멈춥니다. 외부와 주고받지 않는 struct라면 `packed`를 빼고 field 순서로 padding을 줄입니다.
-
-> ⚠️ buffer를 struct 포인터로 cast
-
-```c
-struct frame *p = (struct frame *)buf;   /* buf + 1 etc. may be unaligned */
-int v = p->len;
-```
-
-정렬이 맞지 않는 포인터 변환은 C 표준에서 미정의 동작이고(6.3.2.3p7), 위 3단계처럼 M0에서는 HardFault가 됩니다. `memcpy(&s, buf, sizeof s)`로 정렬된 지역 변수에 복사합니다.
-
-> ⚠️ Bit-field를 wire format으로
-
-같은 bit-field 선언도 ABI와 endianness에 따라 byte가 달라집니다. 아래 struct를 `-mlittle-endian`과 `-mbig-endian`으로 각각 컴파일해 `.data`를 덤프했습니다.
-
-```c
-struct bf { unsigned a : 3; unsigned b : 5; unsigned c : 8; };
-struct bf v = { .a = 5, .b = 17, .c = 0xAB };   /* 101, 10001, 10101011 */
-```
-
-```text
-== arm-none-eabi-gcc -mlittle-endian
- 0000 8dab0000                             ....            
-== arm-none-eabi-gcc -mbig-endian
- 0000 b1ab0000                             ....            
-```
-
-little-endian에서는 첫 byte가 `0x8d`(`10001` `101`, `a`가 하위 bit), big-endian에서는 `0xb1`(`101` `10001`, `a`가 상위 bit)입니다. C 표준은 한 단위 안에서 bit-field를 높은 bit부터 채울지 낮은 bit부터 채울지를 구현이 정하게 하고(N1570 6.7.2.1p11), AAPCS32는 Bit-fields 절에서 Arm용 규칙을 정합니다. 다른 컴파일러·CPU와 주고받는 format에는 bit-field 대신 shift와 mask를 씁니다.
-
-> ⚠️ `sizeof`를 숫자로 가정
-
-```c
-char buf[12];
-struct s msg;
-memcpy(buf, &msg, sizeof(buf));    /* sizeof(struct s) is 16 here */
-```
-
-위 실행에서 `sizeof(struct s)`는 16이었습니다. 복사 크기는 `sizeof(struct s)`로 쓰고, wire size는 `_Static_assert`로 고정합니다.
-
-## 재현 환경
-
-도구는 `arm-none-eabi-gcc` 16.2.0(Homebrew, newlib 없음), QEMU 11.1.3, Apple clang 21.0.0입니다. bare-metal 프로그램은 C 라이브러리 없이 semihosting으로 출력하고 끝냅니다.
-
-```c
-/* bm.h */
-/* bare-metal helpers: semihosting output/exit, works on any Cortex-M QEMU machine */
+```c title="explicit-alignment.c"
 #include <stdint.h>
 #include <stddef.h>
+#include <stdalign.h>
 
-static inline int semihost(int op, const void *arg)
-{
-    register int r0 __asm("r0") = op;
-    register const void *r1 __asm("r1") = arg;
-    __asm volatile("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory");
-    return r0;
-}
-static __attribute__((unused)) void puts_(const char *s) { semihost(0x04, s); }           /* SYS_WRITE0 */
-static __attribute__((unused)) void putu(unsigned v)
-{
-    char b[12]; int i = 11; b[i] = 0;
-    do { b[--i] = (char)('0' + v % 10); v /= 10; } while (v);
-    puts_(&b[i]);
-}
-static __attribute__((unused)) void putx(unsigned v)
-{
-    char b[11] = "0x00000000";
-    for (int i = 9; i >= 2; i--, v >>= 4) b[i] = "0123456789abcdef"[v & 15];
-    puts_(b);
-}
-static __attribute__((unused)) void exit_(void) { static const uint32_t a[2] = { 0x20026, 0 }; semihost(0x18, a); for (;;) { } }
-```
-
-```c
-/* startup_bm.c */
-#include <stdint.h>
-#include "bm.h"
-extern uint32_t _etext, _sdata, _edata, _sbss, _ebss, _estack;
-int main(void);
-__attribute__((weak)) void HardFault_Handler(void) { puts_("HardFault\n"); exit_(); }
-void Reset_Handler(void)
-{
-    uint32_t *s = &_etext, *d = &_sdata;
-    while (d < &_edata) *d++ = *s++;
-    for (d = &_sbss; d < &_ebss;) *d++ = 0;
-    main();
-    for (;;) { }
-}
-__attribute__((section(".vectors"), used))
-void (*const vectors[16])(void) = {
-    (void (*)(void))&_estack, Reset_Handler, HardFault_Handler, HardFault_Handler,
-    HardFault_Handler, HardFault_Handler, HardFault_Handler,
+alignas(8) static unsigned char dma_buf[1024];
+struct hot {
+    alignas(64) uint32_t value;
 };
+_Static_assert(alignof(struct hot) == 64, "hot alignment");
+_Static_assert(sizeof(struct hot) == 64, "hot array stride");
+static struct hot hot_slots[2];
+
+void *dma_storage(void) { return dma_buf; }
+void *hot_storage(void) { return hot_slots; }
+
+extern void consume_aligned(void *p, size_t n);
+void with_local_buffer(void) {
+    alignas(64) unsigned char local[64];
+    consume_aligned(local, sizeof(local));
+}
 ```
 
-`link-an385.ld`는 [6-12의 `link.ld`](/blog/embedded/modern-recipes/part6-12-rtos-debugging#재현-환경)와 같고, `link-microbit.ld`는 그 파일에서 FLASH 길이를 `256K`, RAM 길이를 `16K`로 바꾼 것입니다. QEMU `microbit`은 nRF51(Cortex-M0)이고 flash 256 page·SRAM 16 page(page 1 KiB)를 `0x0`·`0x20000000`에 둡니다(QEMU v11.1.0 `hw/arm/nrf51_soc.c`, `include/hw/arm/nrf51.h`).
+지역 buffer는 함수가 돌아오면 수명이 끝납니다. consume_aligned는 그 포인터를 보관하지 않고 호출 중에만 사용해야 하며, 비동기 DMA에 넘긴 채 return하면 안 됩니다. 정렬이 맞아도 수명이 연장되지는 않습니다.
 
-```bash
-#!/bin/bash
-# usage: run-arm.sh prog.c   -> builds for Cortex-M3 (mps2-an385) and Cortex-M0 (microbit), runs both
-p=${1%.c}; shift
-CF="-O2 -g -ffreestanding -nostdlib -fno-builtin -mthumb"
-for m in "mps2-an385 cortex-m3 link-an385.ld" "microbit cortex-m0 link-microbit.ld"; do
-  set -- $m
-  arm-none-eabi-gcc $CF -mcpu=$2 -T $3 -o $p-$2.elf startup_bm.c $p.c -lgcc
-  echo "== $1 ($2)"
-  timeout 10 qemu-system-arm -M $1 -nographic -semihosting -kernel $p-$2.elf
-done
-```
+지원하는 alignment 지정이 compiler에서 조용히 무시된다고 가정하지 않습니다. 지원하는 확장 정렬이면 만족해야 하고, 지원하지 않으면 진단과 toolchain 제한을 확인합니다. GCC의 x86용 `-mstackrealign`은 ARM의 일반적인 해결책이 아닙니다. 정적 객체는 linker의 section alignment와 최종 ELF 배치까지 봅니다.
 
-`./run-arm.sh layout.c`, `./run-arm.sh unal.c`처럼 부릅니다. `CCR.UNALIGN_TRP` 변형은 같은 gcc 명령에 `-DTRAP -mcpu=cortex-m3`를 주고 `mps2-an385`에서 돌립니다. Mac 쪽은 `cc -std=c11 -O2 -DHOSTED layout.c && ./a.out`입니다. bit-field 덤프는 `arm-none-eabi-gcc -std=c11 -ffreestanding -mcpu=cortex-m3 -mthumb -mbig-endian -c bf.c`(또는 `-mlittle-endian`) 뒤 `arm-none-eabi-objdump -s -j .data bf.o`입니다.
+malloc의 기본 보장보다 강한 정렬이 필요한 타입은 사용할 수 있는 aligned allocation API와 올바른 free 조합을 선택합니다. C11 `aligned_alloc`에는 size를 alignment의 배수로 지정하는 등의 계약이 있습니다. stack·heap·static 어디서든 정렬 조건과 DMA 접근 가능 영역은 별개입니다.
+
+## 보드 없이 하는 검증과 fault 분석
+
+Cortex-M0의 packed read가 byte load로 펼쳐지는지, Cortex-M4에서 어떤 unaligned 접근 명령이 생성되는지 target flag로 assembly를 만들어 확인합니다. 생성 명령 검사와 실기 fault·cycle 측정은 구분합니다.
+
+| 검사 | 통과 조건 |
+|---|---|
+| C11 layout | static_assert의 size·offset·alignment가 일치합니다. |
+| wire decode | 홀수 시작 주소·짧은 입력·음수 경계·LE 값을 처리합니다. |
+| packed member pointer | 오용 예제를 경고의 error 처리로 거부합니다. |
+| stack/global alignment | compiler 처리와 최종 ELF symbol 위치를 확인합니다. |
+| Cortex-M fault | 실기의 명령·CCR·memory type·fault status로 원인을 확인합니다. |
+
+ARMv6-M과 ARMv6 일반을 같은 것으로 취급하거나 ARMv7 이후를 일률적으로 2배 cycle이라고 하지 않습니다. unaligned 접근 허용은 architecture·명령·설정·memory type에 달려 있습니다. bit-field 배치도 C 구현에 의존하므로 외부 format에는 byte decode와 mask/shift를 사용합니다.
+
+### 이번 예제 검증 결과
+
+본문 C11 코드를 추출해 Clang 23.1.6의 ASan/UBSan으로 실행했습니다. 시작 주소를 1 byte 어긋나게 놓은 wire 입력, 0~24 byte 부분 입력, 잘못된 SOF/length, signed sample의 -32768·-1·32767 경계와 실패 시 출력 유지를 확인했습니다. packed 직접 접근과 memcpy 결과, 지역 buffer의 64-byte 정렬도 검사했습니다.
+
+ARM GCC 16.2.0으로 Cortex-M0·M4의 size/offset/alignment assert를 통과했으며, M0의 packed 직접 read가 byte load를 사용하는 생성 코드를 확인했습니다. 일반 int 포인터로 packed member 주소를 넘기는 오용은 host compiler의 경고를 error로 처리해 거부했습니다. 최종 ARM ELF에서는 전역 buffer와 정렬된 배열의 symbol 주소도 확인했습니다. 실제 fault·cycle 측정이나 ARM libc의 런타임 검사는 수행하지 않았습니다.
 
 ## 정리
 
-- AAPCS32에서 `long long`·`double`의 정렬은 8입니다. 32비트 Arm이라고 `uint64_t`가 4 정렬인 것은 아닙니다.
-- field를 정렬이 큰 순서로 두면 이 글의 예에서 `sizeof`가 12에서 8로 줄었습니다.
-- unaligned word 읽기는 QEMU Cortex-M0에서 HardFault, Cortex-M3에서 정상, `CCR.UNALIGN_TRP`를 켠 M3에서 HardFault였습니다. M3에서도 `LDRD`는 fault가 났습니다.
-- `packed` 멤버를 직접 읽으면 컴파일러가 CPU에 맞는 명령을 고르지만, 멤버 주소를 일반 포인터로 넘기면 그 보호가 사라집니다.
-- C11 `alignas`는 객체와 멤버에 붙고, `struct alignas(64)`는 C에서 컴파일되지 않습니다.
-- stack의 `alignas(64)`는 두 컴파일러 모두 지켰지만 frame이 커졌습니다(64 B 배열에 136 B).
-- bit-field의 byte 배치는 endianness에 따라 달라지므로 wire format에는 shift·mask를 씁니다.
+- AAPCS32의 uint64_t 자연 정렬은 8 byte이며 처리 명령 폭과 구분합니다.
+- 내부 layout의 padding을 줄이되 공개 ABI는 offset과 size 검사로 보호합니다.
+- packed의 직접 member 접근과 일반 typed pointer의 역참조를 구분합니다.
+- memcpy는 길이·byte 순서·유효한 값·MMIO·동시 접근을 검증하지 않습니다.
+- 명시적 wire decode로 alignment와 endianness를 분리합니다.
+- C11/C++ alignas 문법을 섞지 않고 배열 stride와 최종 배치를 확인합니다.
 
-다음 편은 **Cache Line Alignment**입니다. False sharing 회피와 SoA 변환을 다룹니다.
+다음 편은 **Cache Line Alignment**입니다. 타입 정렬에서 더 나아가 여러 객체가 공유하는 cache line과 데이터 배치를 다룹니다.
 
 ## 관련 항목
 
@@ -550,3 +236,10 @@ done
 - [8-03: Cache Line Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
 - [9-09: False sharing 해결](/blog/embedded/modern-recipes/part9-09-false-sharing)
 - [PE 2-05: Cache Basics](/blog/embedded/performance-engineering/part2-05-cache-basics)
+
+## 1차 자료
+
+- [C11 draft N1570](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf), §6.2.8·6.5·6.7.5·7.15·7.22.3: 정렬·유효 타입·alignment specifier·할당 계약입니다.
+- [Arm AAPCS32](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst): 기본 타입의 size/alignment, aggregate layout과 stack 규약입니다.
+- [GCC type attributes](https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html): packed/aligned 확장 정의입니다.
+- [GCC variable attributes](https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html): 객체의 alignment와 linker 제한입니다.

@@ -11,423 +11,283 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"임베디드에서 범용 `malloc`은 *피하라*가 기본 규칙입니다."** 대신 static, pool, arena, slab 중 *미리 알 수 있는 패턴*에 맞는 것을 고릅니다. 이 글은 다섯 가지 allocator를 FreeRTOS V11.2.0 위에서 한 프로그램으로 돌려, 한 번 할당하는 비용과 단편화가 쌓일 때의 비용이 어떻게 갈리는지 직접 봅니다.
+> **할당 크기·최대 동시 수·해제 시점을 먼저 정하고, 실패를 처리할 수 있는 allocator를 고릅니다.** 고정 pool도 고갈되며, O(1) 연산도 그 자체로 제품의 WCET를 보장하지 않습니다.
 
 ## 어떤 상황에서 쓰나
 
-양산 firmware가 며칠 돌다 할당에 실패했다면 원인은 하나가 아닙니다. 누수(leak), 순간 최대 수요(peak), 그리고 남은 총량은 충분한데 연속된 빈 영역이 없는 단편화가 모두 같은 증상을 냅니다. [6-12](/blog/embedded/modern-recipes/part6-12-rtos-debugging)의 실행에서 heap_4는 28,168 B가 비어 있는데도 1 KiB 할당에 실패했습니다.
+센서 프레임 16개를 보관하는 수신 경로와 연결 수가 달라지는 통신 서버는 같은 할당 전략을 쓸 필요가 없습니다. pool은 같은 크기 사물함을 정해진 개수만 두는 방식이고, arena는 작업이 끝날 때 작업대 전체를 비우는 방식입니다. 어느 쪽도 필요한 총용량을 알아서 늘려 주지는 않습니다.
 
-또 하나는 실행 시간입니다. heap_4 같은 first-fit allocator는 빈 블록 목록을 앞에서부터 훑으므로, 한 번의 호출 비용이 그때까지 쌓인 빈 블록 수에 따라 달라집니다. 제어 루프 안에서는 "평균"이 아니라 "최악"이 문제이므로, 이 비용이 무엇에 비례하는지 알아야 allocator를 고를 수 있습니다. 아래 측정이 그 비례 관계를 보여 줍니다.
+OOM은 leak·최대 동시 수요·외부 fragmentation을 구분해서 진단합니다. 빈 주차 공간의 총합이 커도 긴 차량이 들어갈 연속 구간이 없을 수 있듯이, free heap 합계가 요청 크기보다 커도 할당은 실패합니다. 반대로 largest free block이 충분해도 alignment·metadata 비용을 포함하면 요청이 들어가지 않을 수 있습니다.
 
-## 핵심 개념
+이 글은 **고정 크기 byte buffer의 대여·반납, batch 수명, 관측 항목**을 다룹니다. 일반적인 C++ 객체의 생성·소멸과 allocator 모델은 [ECPP 메모리 전략](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc)에서 이어집니다. 예제의 CPU 기능 검사는 target의 ISR 안전성이나 실행 시간을 대신하지 않습니다.
 
-범용 `malloc`이 만드는 문제는 세 가지입니다.
+## 크기와 수명으로 전략 고르기
 
-- **실행 시간의 변동** — free list를 훑고, 쪼개고, 합치는 비용이 heap 상태에 따라 달라집니다.
-- **단편화** — 빈 공간이 작은 구멍으로 흩어져, 총량이 충분해도 큰 요청이 실패합니다.
-- **실패 처리** — NULL 반환을 모든 호출자가 처리해야 합니다.
+선택 기준은 allocator 이름보다 자원 계약입니다. 특히 실패 후 데이터를 버릴지, 이전 상태를 유지할지, producer에 backpressure를 걸지 정해야 합니다.
 
-대안은 무엇을 미리 아느냐에 따라 갈립니다. 식당에 비유하면 static은 모든 손님의 좌석을 개업 전에 지정하는 것이고, pool은 같은 크기의 2인석만 여러 개 두는 것, arena는 단체 손님에게 한 구역을 통째로 내주고 나갈 때 구역째 치우는 것입니다.
+| 알고 있는 조건 | 선택 후보 | 남는 비용과 실패 |
+|---|---|---|
+| 객체 수와 수명이 고정됨 | static 객체·배열 | 정적 RAM·stack 예산 초과, 내부 객체의 별도 할당 |
+| 크기와 최대 동시 수가 고정됨 | 고정 block pool | 고갈·내부 여유 공간·metadata·경합 |
+| 여러 할당을 한 batch로 폐기함 | arena | 정렬 낭비·고갈·reset 뒤 참조 무효화 |
+| 반복되는 여러 객체 종류가 있음 | 크기별 pool·slab 계열 cache | 크기 class 사이 불균형·캐시 보유량 |
+| 크기가 가변이고 개별 해제가 필요함 | heap_4/5·TLSF 등 | 구현별 metadata·동기화·fragmentation |
 
-| 미리 아는 것 | 대안 | 할당 | 해제 | 단편화 |
-| --- | --- | --- | --- | --- |
-| 객체 수 전부 | static (`*Static` API, 전역 배열) | 컴파일 시 | 없음 | 없음 |
-| 크기가 하나 | pool, free-list cache(slab 형태) | 빈 칸 하나 꺼냄 | 칸 하나 반납 | 외부 단편화 없음 |
-| lifetime이 같은 묶음 | arena | 포인터 전진 | 묶음 전체 reset | reset 전까지 회수 없음 |
-| 크기가 다양함 | heap_4, TLSF 같은 범용 allocator | 탐색 | 병합 | workload 의존 |
+고정 block pool은 block을 더 작은 조각으로 쪼개지 않아 그 pool 내부의 외부 fragmentation을 피합니다. 256-byte block에 20 byte를 넣는 내부 낭비와 비어 있는 다른 크기 pool의 용량을 빌릴 수 없는 문제는 남습니다.
 
-## 코드 / 실제 사용 예
+## 고정 byte pool: 실패와 잘못된 반납 처리
 
-아래 블록들을 순서대로 이어 붙이면 이 글에서 돌린 `allocbench.c` 한 파일이 됩니다. 빌드 명령과 하네스는 맨 뒤 [재현 환경](#재현-환경)에 있습니다.
+다음은 FreeRTOS task 문맥에서 사용하는 C11 예제입니다. `portMUX_TYPE`은 ESP-IDF 계열 port의 API이므로 일반 FreeRTOS 예제에 섞지 않고 `taskENTER_CRITICAL()`/`taskEXIT_CRITICAL()`을 사용합니다. 실제 exclusion 범위는 사용하는 port와 interrupt 우선순위 계약을 따릅니다.
 
-### 공통 머리말
-
-측정 시계는 `mps2-an385`의 CMSDK TIMER0(25 MHz)입니다. QEMU를 `-icount shift=0`으로 돌리면 guest 명령 하나가 가상 시간 2^0 = 1 ns로 계산되므로(QEMU v11.1.0 `qemu-options.hx`의 `-icount` 설명: "The virtual cpu will execute one instruction every 2^N ns of virtual time", 같은 절에 "it does not provide cycle accurate emulation"이라는 경고도 있습니다), TIMER0 한 tick(40 ns)은 guest 명령 40개에 해당합니다. 그래서 아래 숫자는 **사이클이 아니라 QEMU가 센 명령 수**이고, 해상도는 40 명령입니다.
-
-```c
-#include <stdint.h>
+```c title="byte-pool.c"
 #include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdalign.h>
 #include "FreeRTOS.h"
 #include "task.h"
+
+enum { POOL_N = 16, BLOCK_SZ = 256 };
+alignas(max_align_t) static unsigned char pool_buf[POOL_N][BLOCK_SZ];
+static bool pool_used[POOL_N];
+_Static_assert(BLOCK_SZ % alignof(max_align_t) == 0, "block stride alignment");
+
+void *pool_alloc(void) {
+    void *result = NULL;
+    taskENTER_CRITICAL();
+    for (size_t i = 0; i < POOL_N; ++i) {
+        if (!pool_used[i]) {
+            pool_used[i] = true;
+            result = pool_buf[i];
+            break;
+        }
+    }
+    taskEXIT_CRITICAL();
+    return result;
+}
+
+bool pool_free(void *p) {
+    bool released = false;
+    taskENTER_CRITICAL();
+    for (size_t i = 0; i < POOL_N; ++i) {
+        if (p == (void *)pool_buf[i]) {
+            released = pool_used[i];
+            pool_used[i] = false;
+            break;
+        }
+    }
+    taskEXIT_CRITICAL();
+    return released;
+}
+```
+
+`pool_alloc`은 고갈 시 NULL, `pool_free`는 NULL·다른 객체의 주소·block 내부 주소·이미 반납한 block에 false를 반환합니다. 서로 다른 객체의 포인터를 빼서 index를 만드는 코드는 사용하지 않습니다. 포인터 뺄셈은 같은 배열 객체 안이라는 전제가 필요하기 때문입니다.
+
+두 연산 모두 최대 `POOL_N`개를 확인하는 O(N) 구현입니다. critical section 안의 scan도 지연 예산에 포함합니다. 이 코드는 byte 저장소이며 임의 C/C++ 객체의 생성 API가 아닙니다. 초기화된 typed 객체가 필요하면 타입별 배열 또는 생성·소멸을 관리하는 [객체 pool](/blog/embedded/embedded-cpp/part3-03-pool-allocator)을 사용합니다.
+
+포인터 주소만으로 대여 세대를 구별할 수는 없습니다. A가 block을 반납하고 B가 재대여한 뒤 A의 오래된 포인터로 반납하면 B의 대여를 취소할 수 있습니다. 호출자는 반납 뒤 포인터를 사용하지 않아야 하며, 이 계약을 검증해야 하는 경계에는 generation을 포함한 handle을 설계합니다. ISR에서는 이 task용 API를 호출하지 않습니다.
+
+## Arena: 정렬과 overflow를 함께 검사하기
+
+한 번의 프레임 처리에서 만들어진 임시 데이터가 모두 같은 시점에 사라진다면 개별 free가 필요하지 않습니다. arena는 작업대의 다음 빈 위치를 이동시키지만, 시작 주소 정렬과 덧셈 overflow까지 확인해야 안전합니다.
+
+```c title="byte-arena.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdalign.h>
+
+typedef struct {
+    unsigned char *base;
+    size_t cap, off;
+} arena_t;
+
+bool arena_init(arena_t *a, void *mem, size_t cap) {
+    if (!a || !mem || (uintptr_t)mem % alignof(max_align_t) != 0)
+        return false;
+    *a = (arena_t){ .base = mem, .cap = cap, .off = 0 };
+    return true;
+}
+
+void *arena_alloc(arena_t *a, size_t n) {
+    const size_t mask = alignof(max_align_t) - 1;
+    if (!a || !a->base || n == 0 || a->off > a->cap ||
+        a->off % alignof(max_align_t) != 0 || n > SIZE_MAX - mask)
+        return NULL;
+    const size_t rounded = (n + mask) & ~mask;
+    if (rounded > a->cap - a->off) return NULL;
+    void *result = a->base + a->off;
+    a->off += rounded;
+    return result;
+}
+
+void arena_reset(arena_t *a) { if (a) a->off = 0; }
+```
+
+호출자는 살아 있는 배열과 실제 용량을 전달합니다. 다음은 저장소를 함께 준비하는 예입니다.
+
+```c title="arena-storage.c"
+alignas(max_align_t) static unsigned char scratch[1024];
+static arena_t request_arena;
+
+bool init_request_arena(void) {
+    return arena_init(&request_arena, scratch, sizeof(scratch));
+}
+```
+
+호출자는 `cap` byte 이상인 하나의 살아 있는 저장소를 전달하고 `arena_t`의 필드를 임의로 바꾸지 않습니다. 이 구현은 해당 C 구현의 `max_align_t`까지만 정렬하며 over-aligned 타입·특정 DMA 접근 가능 영역을 보장하지 않습니다. 저장소가 선언된 byte 배열인 이 예제는 byte 처리용이며 typed 객체의 유효 타입·수명은 별도 계약입니다.
+
+실패 시 offset은 그대로입니다. `arena_reset`은 offset만 돌리며 내용을 지우거나 C++ 소멸자를 호출하지 않습니다. reset 전에 batch의 비동기 전송과 모든 참조 사용이 끝나야 합니다. 재사용된 주소의 과거 포인터는 새 대여 권한을 뜻하지 않습니다. arena는 단일 owner가 쓰며 공유하려면 전체 할당/reset 계약을 직렬화합니다.
+
+## FreeRTOS 정적 객체와 heap 구현 구분
+
+RTOS 객체를 정적으로 만들면 해당 객체의 저장소 출처를 통제할 수 있습니다. 이것만으로 애플리케이션의 libc·C++·통신 라이브러리까지 무할당이 되지는 않습니다.
+
+아래 예제는 `configSUPPORT_STATIC_ALLOCATION == 1`인 FreeRTOS V11.2.0에서 64개 값의 queue 저장소를 제공합니다.
+
+```c title="static-queue.c"
+#include <stdint.h>
+#include <stdbool.h>
+#include "FreeRTOS.h"
+#include "queue.h"
+
+typedef struct { uint32_t sequence; uint16_t value; } item_t;
+static StaticQueue_t q_control;
+static uint8_t q_storage[64 * sizeof(item_t)];
+static QueueHandle_t q;
+
+bool init_queue(void) {
+    q = xQueueCreateStatic(64, sizeof(item_t), q_storage, &q_control);
+    return q != NULL;
+}
+```
+
+저장소와 control block은 queue 사용이 끝날 때까지 살아 있어야 하며, 위 초기화는 한 번만 수행합니다. queue는 `sizeof(item_t)` byte를 복사하며 C++ 생성자를 호출하지 않습니다. 포인터를 원소에 넣으면 pointee 수명은 별도로 관리합니다.
+
+FreeRTOS의 heap 선택지는 다음과 같습니다. `heap_5`의 여러 region은 자동으로 DMA 접근성이나 cache 속성에 맞는 region을 골라 주는 기능이 아닙니다.
+
+| 구현 | 할당·해제 방식 | 설계에서 확인할 점 |
+|---|---|---|
+| heap_1 | bump 할당, 개별 free 없음 | 누적 수요와 정렬·metadata 예산 |
+| heap_2 | free 가능, 인접 free block 병합 없음 | 외부 fragmentation |
+| heap_3 | libc malloc/free 위임 | 실제 libc 구현과 RTOS 연동 |
+| heap_4 | free list 탐색과 인접 block 병합 | 최악 scan 길이·고갈·경합 |
+| heap_5 | 여러 region에 heap_4 계열 방식 적용 | region 순서·초기화·영역별 접근 제약 |
+
+[FreeRTOS V11.2.0 heap_4.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/MemMang/heap_4.c)의 block header 크기는 `sizeof(BlockLink_t)`와 `portBYTE_ALIGNMENT`로 계산됩니다. 이를 모든 target에서 16 byte라고 고정하면 안 됩니다. 주소 정렬, 요청 반올림, 분할되지 않는 작은 잔여 공간도 실제 RAM 비용에 포함됩니다.
+
+## Slab 계열과 TLSF를 선택할 때
+
+같은 타입을 반복 생성하는 cache는 같은 규격의 재사용 상자를 쌓아 두는 방식입니다. free list의 맨 앞만 떼고 붙이는 고정 pool은 O(1) bookkeeping을 만들 수 있지만, 올바른 block만 한 번 반납한다는 계약과 초기화·alignment 검사가 필요합니다. 메모리를 반환한 뒤 free-list link를 payload로 덮어쓰지 않도록 수명도 분리해야 합니다. Linux slab은 여기에 객체 cache·크기 class·동시성 등 별도 설계가 더해진 구현이며 단순 연결 리스트와 동일하지 않습니다.
+
+TLSF는 크기 class와 bitmap을 사용하는 가변 크기 allocator입니다. 다음은 [mattconte/tlsf 3.1](https://github.com/mattconte/tlsf/tree/deff9ab509341f264addbd3c8ada533678591905)의 API를 사용하는 단일 문맥 예제입니다. 고정 64 KiB 저장소는 해당 구현의 control·pool metadata를 포함하며 모두 payload가 되지는 않습니다.
+
+```c title="tlsf-storage.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdalign.h>
 #include "tlsf.h"
 
-void pr(const char *fmt, ...);
-void hosted_exit(int code);
-void vApplicationStackOverflowHook(TaskHandle_t t, char *n) { (void)t; pr("overflow %s\n", n); hosted_exit(1); }
-void vApplicationMallocFailedHook(void) { }
+alignas(max_align_t) static unsigned char tlsf_mem[64 * 1024];
+static tlsf_t allocator;
 
-/* 25 MHz CMSDK TIMER0 ticks; with -icount shift=0 one tick = 40 guest instructions */
-#define NOW() ((uint32_t)portGET_RUN_TIME_COUNTER_VALUE())
+bool init_allocator(void) {
+    if ((uintptr_t)tlsf_mem % tlsf_align_size() != 0) return false;
+    allocator = tlsf_create_with_pool(tlsf_mem, sizeof(tlsf_mem));
+    return allocator != NULL;
+}
+
+void *my_malloc(size_t n) {
+    return allocator && n != 0 ? tlsf_malloc(allocator, n) : NULL;
+}
+void my_free(void *p) { if (allocator && p) tlsf_free(allocator, p); }
 ```
 
-### Pool allocator (vanilla FreeRTOS)
+초기화는 한 번만 하며 `my_free`에는 이 allocator에서 받은 아직 살아 있는 포인터만 전달합니다. 이 구현은 자체 thread safety를 제공하지 않으므로 여러 task가 공유하면 외부 동기화가 필요합니다. 알고리즘의 bounded bookkeeping과 CPU의 메모리 지연·lock 대기·interrupt를 포함하는 WCET는 구분합니다. 특정 allocator가 가장 빠르거나 fragmentation이 항상 낮다는 비교는 여기서 하지 않습니다.
 
-같은 크기 블록 16개를 배열로 잡고, 사용 여부를 byte 하나로 표시합니다. 보호는 vanilla FreeRTOS의 `taskENTER_CRITICAL()`로 합니다. 이 글이 쓰는 ARM_CM3 포트의 `portENTER_CRITICAL()`은 인자가 없고(`portable/GCC/ARM_CM3/portmacro.h:121`) `portMUX_TYPE`도 없습니다. `portMUX_TYPE`과 `portENTER_CRITICAL(&mux)`는 FreeRTOS-Kernel 안에서도 ESP32용 `portable/ThirdParty/GCC/Xtensa_ESP32` 포트에만 있습니다(`include/portmacro.h:141`, `:200`). `pool_free`는 포인터가 이 pool의 블록 경계인지 먼저 확인합니다.
+## 통계는 할당과 해제를 한 쌍으로 기록하기
 
-```c
-/* ---- fixed-size pool, vanilla FreeRTOS critical section ---- */
-#define POOL_N   16
-#define BLOCK_SZ 256
-static uint8_t pool_buf[POOL_N][BLOCK_SZ] __attribute__((aligned(8)));
-static uint8_t pool_used[POOL_N];
+할당 때만 `used += n`을 하고 free에서 빼지 않으면 현재 사용량이 아니라 누적 요청량입니다. 다음은 metadata에 요청 크기를 저장해 짝을 맞추는 단일 문맥 예제입니다. 실제 malloc이 사용하는 header·정렬 여유는 이 카운터에 포함하지 않습니다.
 
-void *pool_alloc(void)
-{
-    void *p = NULL;
-    taskENTER_CRITICAL();
-    for (int i = 0; i < POOL_N; i++) {
-        if (!pool_used[i]) { pool_used[i] = 1; p = pool_buf[i]; break; }
+```c title="tracked-allocation.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+typedef union {
+    struct { size_t requested; } info;
+    max_align_t alignment;
+} tracked_header;
+typedef struct { size_t used, peak, fail; } heap_stats_t;
+static heap_stats_t g_heap;
+
+static void record_failure(void) {
+    if (g_heap.fail != SIZE_MAX) ++g_heap.fail;
+}
+void *tracked_malloc(size_t n) {
+    if (n == 0 || n > SIZE_MAX - sizeof(tracked_header) ||
+        n > SIZE_MAX - g_heap.used) {
+        record_failure();
+        return NULL;
     }
-    taskEXIT_CRITICAL();
-    return p;
+    tracked_header *h = malloc(sizeof(*h) + n);
+    if (!h) { record_failure(); return NULL; }
+    h->info.requested = n;
+    g_heap.used += n;
+    if (g_heap.used > g_heap.peak) g_heap.peak = g_heap.used;
+    return h + 1;
 }
-
-int pool_free(void *p)
-{
-    uintptr_t off = (uintptr_t)p - (uintptr_t)pool_buf;
-    if (off >= sizeof pool_buf || off % BLOCK_SZ) return -1;   /* not ours */
-    taskENTER_CRITICAL();
-    pool_used[off / BLOCK_SZ] = 0;
-    taskEXIT_CRITICAL();
-    return 0;
-}
-```
-
-빈 칸을 앞에서부터 찾으므로 할당 비용은 앞쪽에 쌓인 사용 중 블록 수에 비례합니다. 블록 수가 많아지면 아래 free-list 방식이 탐색을 없앱니다.
-
-### Arena (linear allocator)
-
-```c
-/* ---- arena ---- */
-typedef struct { uint8_t *base; size_t cap, off; } arena_t;
-
-void *arena_alloc(arena_t *a, size_t n)
-{
-    n = (n + 7) & ~(size_t)7;                /* 8-byte alignment */
-    if (n > a->cap - a->off) return NULL;    /* no overflow in a->off + n */
-    void *p = a->base + a->off;
-    a->off += n;
-    return p;
-}
-void arena_reset(arena_t *a) { a->off = 0; }
-```
-
-한 작업 단위(예: 패킷 하나의 파싱)가 끝나면 `arena_reset` 한 번으로 모든 할당이 사라집니다. 범위 검사를 `a->off + n > a->cap` 대신 `n > a->cap - a->off`로 쓴 것은 `n`이 매우 클 때 덧셈이 넘쳐 검사를 통과하는 일을 막기 위해서입니다.
-
-### Free-list cache (slab 형태)
-
-빈 블록의 첫 word에 다음 빈 블록의 주소를 적어, 별도 관리 배열 없이 free list를 만듭니다. Linux SLUB도 빈 object를 slab 안의 freelist로 잇습니다(v6.12 `mm/slub.c` 73행 주석: "slab->freelist -> List of free objects in a slab"). 블록 크기는 포인터 크기 이상이어야 합니다.
-
-```c
-/* ---- free-list cache of one block size ---- */
-typedef struct { void *free_list; } slab_t;
-
-void slab_init(slab_t *s, void *mem, size_t n, size_t sz)   /* sz >= sizeof(void *) */
-{
-    for (size_t i = 0; i + 1 < n; i++)
-        *(void **)((char *)mem + i * sz) = (char *)mem + (i + 1) * sz;
-    *(void **)((char *)mem + (n - 1) * sz) = NULL;
-    s->free_list = mem;
-}
-void *slab_alloc(slab_t *s) { void *p = s->free_list; if (p) s->free_list = *(void **)p; return p; }
-void slab_free(slab_t *s, void *p) { *(void **)p = s->free_list; s->free_list = p; }
-```
-
-이 코드에는 lock이 없습니다. 여러 task가 쓰면 pool처럼 critical section으로 감싸거나 task마다 따로 둡니다.
-
-### FreeRTOS heap_1~heap_5
-
-FreeRTOS-Kernel V11.2.0 `portable/MemMang/` 각 파일의 머리 주석이 정의하는 차이입니다.
-
-| 파일 | 머리 주석이 말하는 동작 |
-| --- | --- |
-| heap_1 | "does NOT allow allocated memory to be freed again" |
-| heap_2 | 해제는 되지만 "does not combine adjacent free blocks ... (and so will fragment memory)" |
-| heap_3 | "relies on the compilers own malloc() and free() implementations" |
-| heap_4 | 해제할 때 "combines (coalescences) adjacent memory blocks" |
-| heap_5 | heap_4처럼 병합하면서 "across multiple non-contiguous blocks"에 heap을 둠. `vPortDefineHeapRegions()`를 `pvPortMalloc()`보다 먼저 불러야 함 |
-
-heap_4·heap_5의 블록 헤더 `BlockLink_t`는 다음 빈 블록 포인터와 크기 두 필드입니다(`heap_4.c:100-104`). 32비트 Cortex-M에서는 8 B이고, 요청 크기에 이 헤더를 더해 `portBYTE_ALIGNMENT`(8)로 올립니다. 그래서 100 B 요청은 112 B를 씁니다([PRTOS 4-02](/blog/embedded/rtos/practical-internals/part4-02-freertos-heap)의 실행과 같은 값입니다).
-
-### Static 변종
-
-`xQueueCreate`는 queue 구조체와 저장 영역을 heap에서 가져오고, `xQueueCreateStatic`은 호출자가 준 두 버퍼를 씁니다. 이 차이를 heap 감소량으로 확인하는 코드는 아래 `static_vs_dynamic()`에 있고, 결과는 [측정](#측정--성능-비교) 절에 있습니다. `configSUPPORT_STATIC_ALLOCATION 1`이 필요하고, idle·timer task의 static 메모리를 직접 주지 않으려면 V11.2.0의 `configKERNEL_PROVIDED_STATIC_MEMORY 1`을 함께 켭니다(`FreeRTOS.h:2824-2825`).
-
-### TLSF (Two-Level Segregated Fit)
-
-크기가 다양한데 탐색 시간을 빈 블록 수와 떼어 놓고 싶을 때 TLSF를 씁니다. 이 글은 mattconte/tlsf commit `deff9ab`(GitHub master와 같은 commit)를 그대로 빌드했습니다. README가 밝히는 특성은 "O(1) cost for malloc, free, realloc, memalign", 할당당 overhead 4 B, 그리고 "Not designed to be thread safe; the user must provide this"입니다. 쓰는 방법은 pool 메모리를 넘겨 handle을 만드는 것이 전부입니다.
-
-```c
-tlsf_t tl = tlsf_create_with_pool(tlsf_mem, sizeof tlsf_mem);
-void *p = tlsf_malloc(tl, 64);
-tlsf_free(tl, p);
-```
-
-mapping과 bitmap 구조는 [PRTOS 4-03: TLSF](/blog/embedded/rtos/practical-internals/part4-03-tlsf)에서 다룹니다.
-
-### 측정 코드 1 — 한 번의 비용
-
-다섯 allocator에 할당·해제를 1,000번씩 시키고 평균을 냅니다. 측정 구간은 `taskENTER_CRITICAL()`로 감싸 SysTick이 끼지 않게 했고, `sink`는 컴파일러가 결과를 쓰지 않는 루프를 지우지 못하게 하는 volatile 변수입니다.
-
-```c
-/* ---- measurements ---- */
-#define REPS 1000
-static uint8_t arena_mem[REPS * 64] __attribute__((aligned(8)));
-static uint8_t slab_mem[POOL_N * BLOCK_SZ] __attribute__((aligned(8)));
-static uint8_t tlsf_mem[64 * 1024] __attribute__((aligned(8)));
-static void *ptrs[1200];
-
-static uint32_t per_op_insn(uint32_t ticks) { return ticks * 40u / REPS; }
-static void *volatile sink;     /* keeps the loops from being optimised away */
-
-static void bench_average(tlsf_t tl)
-{
-    uint32_t t0, t;
-    arena_t a = { arena_mem, sizeof arena_mem, 0 };
-    slab_t s;
-    slab_init(&s, slab_mem, POOL_N, BLOCK_SZ);
-
-    taskENTER_CRITICAL();
-    t0 = NOW(); for (int i = 0; i < REPS; i++) pool_free(pool_alloc()); t = NOW() - t0;
-    pr("pool   alloc+free  %u insn/op\n", per_op_insn(t));
-    t0 = NOW(); for (int i = 0; i < REPS; i++) { sink = slab_alloc(&s); slab_free(&s, sink); } t = NOW() - t0;
-    pr("slab   alloc+free  %u insn/op\n", per_op_insn(t));
-    t0 = NOW(); for (int i = 0; i < REPS; i++) sink = arena_alloc(&a, 64); t = NOW() - t0;
-    pr("arena  alloc       %u insn/op\n", per_op_insn(t));
-    t0 = NOW(); for (int i = 0; i < REPS; i++) vPortFree(pvPortMalloc(64)); t = NOW() - t0;
-    pr("heap_4 alloc+free  %u insn/op (empty heap)\n", per_op_insn(t));
-    t0 = NOW(); for (int i = 0; i < REPS; i++) tlsf_free(tl, tlsf_malloc(tl, 64)); t = NOW() - t0;
-    pr("tlsf   alloc+free  %u insn/op (empty pool)\n", per_op_insn(t));
-    taskEXIT_CRITICAL();
+void tracked_free(void *p) {
+    if (!p) return;
+    tracked_header *h = (tracked_header *)p - 1;
+    g_heap.used -= h->info.requested;
+    free(h);
 }
 ```
 
-### 측정 코드 2 — 단편화가 쌓일 때
+`tracked_free`도 표준 free처럼 동일 API의 살아 있는 포인터만 한 번 받습니다. handle을 복제하거나 다른 allocator와 섞지 않습니다. 공유하려면 allocator 호출과 통계 갱신 전체를 일관되게 보호해야 합니다. 요청별 counter나 통계 전송을 추가하면 그 비용도 실시간 경로의 일부가 됩니다.
 
-heap을 64 B 블록으로 가득 채운 뒤, 맨 끝 블록 네 개를 풀어 200 B가 들어갈 구멍을 하나 만듭니다. 그다음 앞에서부터 하나 건너 하나씩 풀어 64 B짜리 작은 구멍 K개를 그 앞에 깔고, `malloc(200)` 한 번의 비용을 잽니다. 첫 번째로 맞는 블록을 주소 순서로 찾는 allocator라면 K개를 모두 지나야 끝의 구멍에 닿습니다.
+FreeRTOS heap_4/5에서는 `vPortGetHeapStats`의 현재 free 합계·largest free block·free block 수와 최소 free 이력을 함께 봅니다. largest free block 값은 allocator의 block accounting 값이며 같은 크기 payload 요청이 반드시 성공한다는 보장은 아닙니다. 실패 크기·발생 문맥·동시 대여 수·반납 누락 기록을 함께 남기면 leak와 fragmentation을 구분하기 쉽습니다.
 
-```c
-/* fill with 64 B blocks, free the last 4 (one hole that fits 200 B),
-   then free every other block from the start: K small holes in front */
-static void bench_scan(const char *name, void *(*m)(size_t), void (*f)(void *))
-{
-    int n = 0;
-    while (n < 1200 && (ptrs[n] = m(64)) != NULL) n++;
-    for (int i = n - 4; i < n; i++) f(ptrs[i]);
-    int k = 0;
-    pr("%s: %d blocks of 64 B filled the heap\n", name, n);
-    for (int target = 0; target <= 400 && 2 * target < n - 4; target = target ? target * 2 : 50) {
-        while (k < target) { f(ptrs[2 * k]); k++; }
-        taskENTER_CRITICAL();
-        uint32_t t0 = NOW();
-        void *p = m(200);
-        uint32_t t = NOW() - t0;
-        taskEXIT_CRITICAL();
-        pr("%s: %d small holes in front -> malloc(200) %s, %u insn\n", name, k, p ? "ok" : "NULL", t * 40u);
-        if (p) f(p);
-    }
-    for (int i = 0; i < n - 4; i++) if (i % 2 || i / 2 >= k) f(ptrs[i]);
-}
+## 보드 없이 확인할 항목과 제품 측정
 
-static tlsf_t g_tl;
-static void *tl_m(size_t n) { return tlsf_malloc(g_tl, n); }
-static void tl_f(void *p) { tlsf_free(g_tl, p); }
+검사는 먼저 계산과 상태 전이부터 확인합니다. 빈 pool, 모두 대여한 pool, 반납 후 재사용, 잘못된 반납, arena의 경계·overflow·reset, 요청량 통계의 alloc/free 대칭을 본문 코드에서 재현할 수 있습니다.
 
-#ifdef ISR_MALLOC
-void TIMER1_IRQHandler(void)
-{
-    ((volatile unsigned *)0x40001000)[3] = 1;            /* INTSTATUS, write 1 to clear */
-    pr("ISR: calling pvPortMalloc(32)\n");
-    void *p = pvPortMalloc(32);
-    pr("ISR: got %x\n", (unsigned)p);
-}
-#endif
-```
+| 항목 | 코드·소스로 확인하는 내용 | 제품에서 추가할 측정 |
+|---|---|---|
+| pool | 최대 16개·정렬·반납 검증·O(N) scan | 실제 critical section 지연·producer 고갈 정책 |
+| arena | 반올림·잔여 용량·실패 후 offset 유지 | batch 최대 수요·비동기 사용 종료 |
+| heap_4/5 | free list·병합·region 계약 | 최악 할당/해제 시간·실제 부하의 고갈 |
+| TLSF | 실제 API 초기화·고갈·반납·재사용 | 외부 lock 대기·cache/bus 포함 지연 |
+| 통계 | 요청량과 실제 heap 점유의 구분 | 계측 비용·최대 동시 수요·관측 손실 |
 
-`ISR_MALLOC`을 정의하면 TIMER1 interrupt 안에서 `pvPortMalloc`을 부르는 변형이 됩니다. 마지막 블록이 static 비교와 task, `main`입니다.
+이 장의 검증은 실행 시간 수치를 만들지 않습니다. 고정 pool의 metadata도 `sizeof(pool_used)`만큼 존재하며 alignment 여유와 저장소 자체를 포함해 예산을 계산합니다. static으로 옮긴 자원은 heap 대신 정적 RAM을 차지합니다.
 
-```c
-#include "queue.h"
-typedef struct { uint32_t id, value[3]; } item_t;    /* 16 B */
-static StaticQueue_t q_buf;
-static uint8_t q_storage[64 * sizeof(item_t)];
+### 이번 예제 검증 결과
 
-static void static_vs_dynamic(void)
-{
-    size_t f0 = xPortGetFreeHeapSize();
-    QueueHandle_t qd = xQueueCreate(64, sizeof(item_t));
-    size_t f1 = xPortGetFreeHeapSize();
-    QueueHandle_t qs = xQueueCreateStatic(64, sizeof(item_t), q_storage, &q_buf);
-    size_t f2 = xPortGetFreeHeapSize();
-    pr("xQueueCreate(64, 16):       heap -%u B\n", (unsigned)(f0 - f1));
-    pr("xQueueCreateStatic(64, 16): heap -%u B (sizeof(StaticQueue_t)=%u)\n",
-       (unsigned)(f1 - f2), (unsigned)sizeof(StaticQueue_t));
-    vQueueDelete(qd);
-    vQueueDelete(qs);
-}
+Clang 23.1.6의 ASan/UBSan 기능 검사에서 pool 고갈·재사용과 잘못된 반납 거부, arena의 정렬·경계·SIZE_MAX 거부·reset, 요청량 통계의 해제 반영을 확인했습니다. 실제 TLSF 3.1 구현(commit `deff9ab509341f264addbd3c8ada533678591905`)으로 정렬·고갈·반납 후 큰 요청의 재사용과 내부 일관성 검사를 통과했습니다.
 
-static void bench_task(void *arg)
-{
-    (void)arg;
-    static_vs_dynamic();
-    g_tl = tlsf_create_with_pool(tlsf_mem, sizeof tlsf_mem);
-    bench_average(g_tl);
-    bench_scan("heap_4", pvPortMalloc, vPortFree);
-    bench_scan("tlsf  ", tl_m, tl_f);
-#ifdef ISR_MALLOC
-    volatile unsigned *t1 = (volatile unsigned *)0x40001000;
-    *(volatile unsigned *)0xE000E100 = 1u << 9;          /* NVIC enable IRQ 9 = TIMER1 */
-    *(volatile uint8_t *)(0xE000E400 + 9) = 0xE0;         /* lowest priority */
-    t1[2] = 25000; t1[1] = 25000; t1[0] = 1u | 8u;        /* RELOAD, VALUE, CTRL: enable + IRQ */
-    vTaskDelay(10);
-    pr("no assert\n");
-#endif
-    hosted_exit(0);
-}
-
-int main(void)
-{
-    xTaskCreate(bench_task, "bench", 1024, NULL, 2, NULL);
-    vTaskStartScheduler();
-    return 0;
-}
-```
-
-## 측정 / 성능 비교
-
-QEMU 11.1.3 `mps2-an385`(Cortex-M3), `arm-none-eabi-gcc` 16.2.0 `-O2`에서의 전체 출력입니다. 두 번 돌려 `diff`가 비었습니다.
-
-```text
-xQueueCreate(64, 16):       heap -1112 B
-xQueueCreateStatic(64, 16): heap -0 B (sizeof(StaticQueue_t)=80)
-pool   alloc+free  59 insn/op
-slab   alloc+free  5 insn/op
-arena  alloc       8 insn/op
-heap_4 alloc+free  238 insn/op (empty heap)
-tlsf   alloc+free  388 insn/op (empty pool)
-heap_4: 851 blocks of 64 B filled the heap
-heap_4: 0 small holes in front -> malloc(200) ok, 120 insn
-heap_4: 50 small holes in front -> malloc(200) ok, 720 insn
-heap_4: 100 small holes in front -> malloc(200) ok, 1360 insn
-heap_4: 200 small holes in front -> malloc(200) ok, 2560 insn
-heap_4: 400 small holes in front -> malloc(200) ok, 4920 insn
-tlsf  : 916 blocks of 64 B filled the heap
-tlsf  : 0 small holes in front -> malloc(200) ok, 240 insn
-tlsf  : 50 small holes in front -> malloc(200) ok, 240 insn
-tlsf  : 100 small holes in front -> malloc(200) ok, 240 insn
-tlsf  : 200 small holes in front -> malloc(200) ok, 280 insn
-tlsf  : 400 small holes in front -> malloc(200) ok, 240 insn
-```
-
-결과를 표로 옮기면 다음과 같습니다. 단위는 QEMU 명령 수이고 해상도는 40입니다.
-
-| allocator | 빈 상태 한 번(할당+해제) | 작은 구멍 0 → 400개일 때 `malloc(200)` |
-| --- | ---: | --- |
-| slab(free list) | 5 | — |
-| arena(할당만) | 8 | — |
-| pool(첫 칸에서 찾음 + critical section 진입·해제) | 59 | — |
-| heap_4 | 238 | 120 → 720 → 1,360 → 2,560 → 4,920 |
-| TLSF | 388 | 240 → 240 → 240 → 280 → 240 |
-
-읽을 것은 두 가지입니다.
-
-- **빈 heap에서 한 번의 비용은 TLSF가 heap_4보다 큽니다.** TLSF는 크기를 두 단계 index로 바꾸고 bitmap을 찾는 고정 작업을 매번 합니다. "O(1)"은 빠르다는 뜻이 아니라 빈 블록 수와 무관하다는 뜻입니다.
-- **구멍이 쌓이면 heap_4의 비용은 구멍 수에 비례해 늘고, TLSF는 그대로입니다.** heap_4는 50개 늘 때마다 약 600 명령, 구멍 하나당 약 12 명령씩 늘었습니다. heap_4가 free list를 주소 순서로 앞에서부터 훑는 first fit이기 때문입니다(`heap_4.c:248`). 구멍 0개일 때 120 대 240이던 비용이 50개일 때 720 대 240으로 뒤집혔고, 구멍당 12 명령이라는 기울기로 보면 교차점은 구멍 10개 근처입니다.
-
-`xQueueCreate(64, 16)`는 heap에서 1,112 B를 가져갔습니다. 저장 영역 64 × 16 = 1,024 B, queue 구조체(`sizeof(StaticQueue_t)` = 80 B), heap_4 헤더 8 B를 더한 값입니다. `xQueueCreateStatic`은 heap을 전혀 쓰지 않았습니다.
-
-이 숫자는 QEMU의 명령 수라 실제 Cortex-M3의 사이클(파이프라인, flash wait state, bus)과는 다릅니다. 실제 보드에서는 같은 코드를 DWT `CYCCNT` 같은 사이클 카운터로 다시 재야 합니다. 비례 관계(heap_4는 구멍 수에 비례, TLSF는 무관, slab은 상수, pool은 앞쪽 사용 중 칸 수에 비례)는 코드 경로에서 나오는 성질이라 보드가 바뀌어도 같습니다.
+FreeRTOS V11.2.0 heap_4에서는 512-byte 요청으로 채운 뒤 교대로 반납해, free 합계가 1024 byte보다 큰데도 1024-byte 요청이 실패하는 경우를 재현했습니다. 나머지를 반납하면 largest block과 free 합계가 원래 값으로 돌아오는 것도 확인했습니다. 이 host 검사는 scheduler/critical-section stub을 사용하는 단일 호출자 검사이며 실제 port의 동시성·ISR 안전성은 검사하지 않았습니다. 정적 queue 예제는 실제 FreeRTOS 헤더와 ARM_CM4F port로 Cortex-M4 object까지 컴파일했습니다.
 
 ## 자주 보는 함정
 
-> ⚠️ free heap 총량만 보고 안심함
-
-남은 총량과 가장 큰 연속 블록은 다른 숫자입니다. heap_4·heap_5라면 `vPortGetHeapStats()`의 `xSizeOfLargestFreeBlockInBytes`를 함께 기록합니다. `xPortGetMinimumEverFreeHeapSize()`는 부팅 뒤 가장 적게 남았던 총량이라 단편화를 보여 주지 않습니다.
-
-> ⚠️ 오류 경로의 해제 누락
-
-```c
-buf = pvPortMalloc(len);
-if (parse(buf) < 0)
-    return -1;          /* buf leaks */
-```
-
-오류 경로마다 해제가 필요합니다. C에서는 `goto cleanup`으로 해제를 한 곳에 모으고, C++에서는 소멸자에 맡깁니다. arena를 쓰면 작업 단위 끝의 `arena_reset` 하나가 모든 경로의 해제를 대신합니다.
-
-> ⚠️ ISR에서 `pvPortMalloc`
-
-TIMER1 ISR에서 `pvPortMalloc(32)`를 부른 `ISR_MALLOC` 빌드의 마지막 출력입니다.
-
-```text
-ISR: calling pvPortMalloc(32)
-ASSERT failed: FreeRTOS-Kernel/portable/GCC/ARM_CM3/port.c line 438
-```
-
-heap_4의 `pvPortMalloc`은 `vTaskSuspendAll()`로 시작해 `xTaskResumeAll()`로 끝나고(`heap_4.c:221`, `:334`), `xTaskResumeAll()`은 `taskENTER_CRITICAL()`을 부릅니다(`tasks.c:4027`). ARM_CM3 포트의 `vPortEnterCritical()`은 interrupt 안에서 불리면 `configASSERT`로 멈춥니다(`port.c:430-438`, 주석: "Only API functions that end in "FromISR" can be used in an interrupt"). heap_4에는 `FromISR` 할당 함수가 없으므로, ISR에서는 미리 채워 둔 pool이나 queue에서 꺼내 씁니다. ISR이 pool을 쓴다면 pool의 보호도 `taskENTER_CRITICAL_FROM_ISR()` 쪽으로 바꿔야 합니다.
-
-> ⚠️ 크기 계산의 unsigned underflow
-
-```c
-size_t payload = len - HDR_LEN;   /* len = 10, HDR_LEN = 14 */
-```
-
-`size_t`는 부호가 없으므로 32비트에서 이 값은 2^32 − 4 = 4,294,967,292가 됩니다. 뺄셈 전에 `len < HDR_LEN`을 먼저 검사합니다. heap_4는 헤더를 더하다 넘치는 크기를 `heapADD_WILL_OVERFLOW`로 걸러 NULL을 돌려주지만, 그 전에 호출자가 잘못된 크기를 만든 것이 원인입니다.
-
-> ⚠️ 부팅 때만 만드는 객체를 동적으로 만듦
-
-```c
-QueueHandle_t q = xQueueCreate(64, sizeof(item_t));   /* 1,112 B from heap_4 */
-```
-
-부팅 때 만들고 끝까지 지우지 않는 객체라면 `*Static` 변종으로 옮기면 그 객체 몫의 heap 사용이 0이 됩니다. 위 측정에서 같은 queue가 1,112 B를 덜 썼습니다.
-
-## 재현 환경
-
-하네스(`startup.c`, `io.c`, `link.ld`, `libc/`)와 `FreeRTOSConfig.h`는 [6-12의 재현 환경](/blog/embedded/modern-recipes/part6-12-rtos-debugging#재현-환경)과 같고, 다음 네 군데만 바꿉니다.
-
-- `FreeRTOSConfig.h`: `configSUPPORT_DYNAMIC_ALLOCATION` 아래에 `#define configSUPPORT_STATIC_ALLOCATION 1`과 `#define configKERNEL_PROVIDED_STATIC_MEMORY 1`을 더합니다.
-- `startup.c`: vector table을 `vectors[16 + 32]`로 늘리고 `[16 + 9] = TIMER1_IRQHandler`를 넣습니다. `TIMER1_IRQHandler`는 `Default_Handler`의 weak alias로 선언합니다(`mps2-an385`에서 TIMER1은 IRQ 9입니다. QEMU `hw/arm/mps2.c`가 timer *i*에 IRQ `8 + i`를 줍니다).
-- `libc/assert.h`(새 파일): TLSF가 쓰는 `assert`를 하네스의 `assert_fail`로 잇습니다.
-- `libc/stdio.h`: TLSF의 `printf`를 하네스의 `pr`로 잇습니다.
-
-```c
-/* libc/assert.h */
-#pragma once
-void assert_fail(const char *file, unsigned line);
-#define assert(x) do { if (!(x)) assert_fail(__FILE__, __LINE__); } while (0)
-
-/* libc/stdio.h */
-#pragma once
-#include <stddef.h>
-int snprintf(char *, size_t, const char *, ...);
-void pr(const char *, ...);
-#define printf pr
-```
-
-```bash
-git clone --depth 1 --branch V11.2.0 https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-git clone https://github.com/mattconte/tlsf.git && git -C tlsf checkout deff9ab509341f264addbd3c8ada533678591905
-cp tlsf/tlsf.c tlsf/tlsf.h .
-K=FreeRTOS-Kernel P=$K/portable/GCC/ARM_CM3
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -g -ffreestanding -nostdlib -fno-builtin \
-  -I. -Ilibc -I$K/include -I$P -T link.ld -o allocbench.elf \
-  startup.c io.c allocbench.c tlsf.c $K/tasks.c $K/queue.c $K/list.c $K/timers.c \
-  $P/port.c $K/portable/MemMang/heap_4.c -lgcc
-qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=0 -kernel allocbench.elf
-```
-
-gcc 명령에 `-DISR_MALLOC`을 더하면 ISR 변형이 됩니다. 도구는 `arm-none-eabi-gcc` 16.2.0(newlib 없음)과 QEMU 11.1.3입니다.
+- **ISR에서 일반 allocator 호출:** task용 allocator나 위 critical-section API를 ISR에서 사용하지 않습니다. preallocated pool도 해당 ISR·task의 동시 접근을 지원하는 별도 계약이 있어야 합니다.
+- **큰 free 합계만 보고 성공 가정:** header·alignment·연속 공간과 실패 당시 상태를 함께 봅니다.
+- **size_t로 cast하면 안전하다는 가정:** 음수를 먼저 거부하고, 곱셈 전 `count > SIZE_MAX / element_size`를 검사합니다. unsigned 타입도 overflow·underflow를 막아 주지 않습니다.
+- **reset 뒤 참조 사용:** arena의 메모리가 남아 있어도 과거 대여는 끝났습니다. DMA·callback이 완료된 뒤 reset합니다.
+- **정적 queue로 바꾸면 시스템 heap 0:** 해당 queue의 저장소만 정적으로 바뀝니다. 내부 라이브러리와 다른 객체의 allocation 경로를 따로 조사합니다.
 
 ## 정리
 
-- 범용 `malloc`의 문제는 실행 시간 변동, 단편화, 실패 처리 세 가지이고, 대안은 미리 아는 것(개수·크기·lifetime)에 따라 고릅니다.
-- 이 실행에서 slab 5, arena 8, pool 59, heap_4 238, TLSF 388 명령이 한 번의 비용이었습니다.
-- heap_4의 비용은 앞쪽 빈 구멍 수에 비례해 0개 120 → 400개 4,920 명령으로 늘었고, TLSF는 240~280에 머물렀습니다. O(1)은 "빠르다"가 아니라 "빈 블록 수와 무관하다"입니다.
-- heap_4 블록 헤더는 32비트에서 8 B, TLSF는 할당당 4 B입니다.
-- `*Static` 변종으로 옮긴 queue 하나가 heap 1,112 B를 덜 썼습니다.
-- ISR에서 `pvPortMalloc`을 부르면 V11.2.0 ARM_CM3 포트는 `port.c:438`의 assert로 멈춥니다. ISR은 미리 채운 pool에서 꺼냅니다.
+- 크기·최대 동시 수·개별 해제 여부로 allocator를 선택합니다.
+- pool은 고갈·내부 낭비·잘못된 반납과 오래된 대여를 다룹니다.
+- arena는 정렬·덧셈 overflow·잔여 용량을 검사하고 batch 종료 뒤 reset합니다.
+- FreeRTOS heap_4/5의 metadata와 scan은 실제 port·구현을 기준으로 계산합니다.
+- TLSF의 알고리즘 계약과 동기화·하드웨어를 포함한 WCET를 구분합니다.
+- 현재 요청량은 해제 때 감소시켜야 하며, free 합계·largest block·실패 요청도 함께 봅니다.
 
-다음 편은 **메모리 정렬과 패딩**입니다. natural alignment, struct padding, packed의 함정을 다룹니다.
+다음 편은 **메모리 정렬과 패딩**입니다. 같은 저장소라도 타입·ABI·접근 방법에 따라 달라지는 조건을 다룹니다.
 
 ## 관련 항목
 
@@ -436,6 +296,11 @@ gcc 명령에 `-DISR_MALLOC`을 더하면 ISR 변형이 됩니다. 도구는 `ar
 - [PRTOS 4-03: TLSF](/blog/embedded/rtos/practical-internals/part4-03-tlsf)
 - [PRTOS 4-04: Static Allocation](/blog/embedded/rtos/practical-internals/part4-04-static-allocation)
 - [PRTOS 4-05: Memory Pool](/blog/embedded/rtos/practical-internals/part4-05-memory-pool)
-- [ECPP 3-01: No Dynamic Alloc](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc)
-- [6-12: RTOS 디버깅 기법](/blog/embedded/modern-recipes/part6-12-rtos-debugging)
 - [8-02: 메모리 정렬](/blog/embedded/modern-recipes/part8-02-memory-alignment)
+
+## 1차 자료
+
+- [C11 draft N1570](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf), §6.2.8·6.5·6.5.6·7.22.3: 정렬·유효 타입·포인터 연산·할당 계약입니다.
+- [FreeRTOS V11.2.0 heap_4](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/MemMang/heap_4.c), [heap_5](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/MemMang/heap_5.c): metadata·탐색·병합·통계 구현입니다.
+- [FreeRTOS V11.2.0 queue.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/queue.h): 정적 queue 저장소와 byte-copy 계약입니다.
+- [mattconte/tlsf 3.1](https://github.com/mattconte/tlsf/tree/deff9ab509341f264addbd3c8ada533678591905): 이 장이 사용하는 C API·alignment와 thread-safety 계약의 구현입니다.

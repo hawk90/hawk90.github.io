@@ -11,296 +11,216 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"전력은 각 상태의 전류와 그 상태에 머문 시간의 곱으로 결정됩니다."** 펌웨어가 바꿀 수 있는 것은 깨어 있는 시간과 잠든 동안의 상태입니다. 이 글은 그중 "얼마나 자주 깨어나는가"를 FreeRTOS tickless idle로 직접 세어 보고(10초 동안 SysTick 10,000번 → 20번), STM32L4의 저전력 레지스터 코드를 ST 헤더로 컴파일해 바로잡습니다.
+> 평균 전류와 에너지는 상태별 소비량, 체류 시간, 전환 비용으로 계산합니다. 낮은 정격 sleep 전류만으로 제품 배터리 수명을 예측할 수는 없습니다.
 
 ## 어떤 상황에서 쓰나
 
-배터리로 몇 년을 버텨야 하는 BLE beacon이나 sensor logger가 전형적인 예입니다. 이런 장치는 대부분의 시간을 잠들어 있고, 평균 전류는 "깨어 있는 동안의 전류 × 깨어 있는 비율 + 잠든 동안의 전류 × 잠든 비율"로 정해집니다. 냉장고 문을 자주 열수록 전기를 많이 쓰는 것처럼, 1 ms마다 tick interrupt로 깨어나는 펌웨어는 할 일이 없어도 그만큼 잠을 깹니다.
+배터리 IoT device, BLE beacon, sensor logger처럼 장시간 동작해야 하는 펌웨어가 전형적입니다. 목표 평균 전류는 배터리의 유효 용량·방전 특성·온도와 목표 수명으로 계산합니다. Active 전류만으로 평균 전류를 판단하지 말고 sleep 체류 시간과 wake·radio·sensor 동작을 포함합니다.
 
-각 상태의 전류는 칩마다 다르고 datasheet의 전기적 특성 표가 정합니다. 전류를 재는 장비 없이 썼으므로 이 글은 전류 값을 싣지 않고, 펌웨어 쪽에서 셀 수 있는 것(깨어난 횟수)과 코드의 정확성을 다룹니다.
+자동차·산업 장비의 ECO 모드에서도 deadline, wake latency, 유지해야 할 memory·peripheral과 전원 안전 상태를 함께 정해야 합니다.
 
 ## 핵심 개념
 
-평균 전력은 다음과 같이 쓸 수 있습니다.
+측정 지점에서 상태별 평균 전류는 다음처럼 계산합니다.
 
-$$
-P_{avg} = V \times \frac{I_{active}\,t_{active} + I_{sleep}\,t_{sleep}}{t_{active} + t_{sleep}}
-$$
+```text
+I_avg = Σ(I_state × t_state) / T
+```
 
-펌웨어가 움직일 수 있는 축은 세 가지입니다.
+평균 전력은 `P_avg = Σ(V_state × I_state × t_state) / T`입니다. 배터리 측정에서는 regulator 효율·전원 레일·전환 에너지도 경계에 포함합니다. 예를 들어 1초 중 2 ms를 5 mA, 나머지를 5 µA로 쓴다면 전환 비용을 무시한 평균은 약 15 µA입니다. 이는 가상 duty cycle의 산술 예시이지 측정값이 아닙니다.
 
-- **잠드는 시간(t_sleep)을 늘림** — 할 일이 없으면 즉시 `WFI`로 잠들고, 주기적 tick 때문에 깨지 않게 합니다(tickless idle).
-- **잠든 동안의 전류(I_sleep)를 줄임** — 더 깊은 저전력 모드로 들어가고, 쓰지 않는 peripheral의 clock을 끊고, 떠 있는 GPIO를 정리합니다.
-- **깨어 있는 동안의 전류(I_active)를 줄임** — clock 주파수와 전압을 함께 낮춥니다(DVFS).
+저전력 상태를 나눠 보는 일반적인 축입니다. 명칭과 실제 동작은 MCU별로 다릅니다.
 
-동적 전력은 α·C·V²·f(α: switching activity)이므로 주파수만 낮추면 같은 일을 더 오래 하게 되어 이득이 작고, 전압을 함께 낮춰야 효과가 큽니다. 이 비례식은 누설 전류를 빼 단순화한 것이라, 실제 이득은 대상 보드에서 재야 합니다.
+| 동작 상태 | 일반적인 동작 | 확인할 점 |
+|---|---|---|
+| run | CPU와 선택한 clock/peripheral 동작 | 전압·주파수·주변 회로 부하 |
+| shallow sleep | CPU 정지, 선택 clock·memory 유지 가능 | interrupt 빈도, debug 설정, 유지 clock |
+| deep/stop 계열 | clock 일부 정지, 구현에 따라 memory/peripheral 유지 | wake source, 보존 영역, 재시작 지연 |
+| standby/shutdown 계열 | 더 많은 전원 영역 정지 | reset 동작, retention 영역, wake 원인 |
+
+이름·전류·보존 범위·wake 지연은 MCU마다 다릅니다. 대상 part의 datasheet/reference manual과 보드 회로를 기준으로 정합니다.
+
+Mode 전환 외에 자주 쓰는 절감 기법은 세 가지입니다.
+
+- **peripheral clock gating** — 사용하지 않는 peripheral clock을 끌 후보입니다. 절감량과 재기동 비용을 part에서 확인합니다.
+- **DVFS** — dynamic voltage/frequency를 바꾸며 workload 완료시간과 전체 energy를 비교합니다.
+- **tickless idle** — 지원되는 RTOS port에서 periodic tick이 불필요한 wake를 만드는지 확인합니다.
 
 ## 코드 / 실제 사용 예
 
-### WFI로 잠들기
+### WFI 한 줄로 시작
 
 ```c
-int main(void)
-{
+int main(void) {
     hw_init();
-    for (;;) {
+    while (1) {
         process_events();
-        __WFI();          /* sleep until the next interrupt */
+        /* 간단한 형태만 보인 예. 실제 event flag 검사와 WFI 사이의 race를 막아야 함 */
+        __WFI();
     }
 }
 ```
 
-`WFI`는 interrupt가 올 때까지 core를 멈춥니다. 문제는 그 interrupt가 1 ms마다 오는 SysTick이라면 1초에 1,000번 깨어난다는 점입니다. 아래 tickless idle이 그 횟수를 줄입니다.
+`WFI`는 CPU를 대기 상태로 전환하라는 명령이지, 특정 저전력 전류나 mode를 보장하지 않습니다. interrupt가 이미 pending이면 곧바로 깨어날 수 있고, 실제 상태는 MCU의 sleep/deep-sleep bit, clock tree, debug·peripheral 설정에 달립니다. RTOS에서는 port와 idle 정책을 확인합니다.
 
-### Tickless idle — 깨어나는 횟수 세기
+### MCU별 stop mode 진입 순서
 
-FreeRTOS V11.2.0의 ARM_CM3 port는 `configUSE_TICKLESS_IDLE 1`이면 idle task에서 `vPortSuppressTicksAndSleep()`을 불러, 다음 task가 깨어날 때까지 SysTick을 멈추고 `wfi`로 잡니다(`port.c:520-609`). 깬 뒤에는 잠든 tick 수만큼 `vTaskStepTick()`으로 kernel 시간을 앞당깁니다(`port.c:729`). 이 효과를 QEMU `mps2-an385`에서 셌습니다. task 하나가 1초마다 10번 깨어나고, SysTick interrupt와 idle의 잠듦 횟수를 각각 셉니다.
+1. 진행 중인 DMA/peripheral transaction을 완료하거나 안전하게 중단합니다.
+2. sleep 중 필요한 wake source와 retention 영역을 설정합니다.
+3. 기존 wake flag를 정리하고 power/clock mode를 설정합니다.
+4. reference manual의 순서와 barrier 조건에 따라 WFI/WFE를 실행합니다.
+5. wake 후 reset 여부와 clock tree를 확인하고 peripheral을 복원합니다.
 
-[6-12의 재현 환경](/blog/embedded/modern-recipes/part6-12-rtos-debugging#재현-환경) 하네스에서 `FreeRTOSConfig.h`의 stack 검사·malloc hook·run-time stats를 0으로 두고, `INCLUDE_vTaskDelay` 아래에 다음을 더했습니다.
+STM32도 세대별로 STOP mode의 수, 보존 SRAM·peripheral, wake 후 system clock, register와 flag clearing 순서가 다릅니다. mode 번호나 전류를 제품 전체에 일반화하지 않고 해당 부품의 [reference manual](https://www.st.com/en/microcontrollers-microprocessors/stm32u5-series/documentation.html)·datasheet에서 검증합니다. [STM32U5 저전력 application note](https://www.st.com/resource/en/application_note/an5652-how-to-optimize-power-consumption-on-stm32u5-mcus-stmicroelectronics.pdf)는 특정 시리즈의 동작 예입니다.
 
-```c
-/* tickless idle: on with -DTICKLESS=1 */
-#ifndef TICKLESS
-#define TICKLESS 0
-#endif
-#define configUSE_TICKLESS_IDLE                 TICKLESS
-extern volatile unsigned sleeps;
-#define configPRE_SLEEP_PROCESSING(x)           do { sleeps++; } while (0)
-#define INCLUDE_vTaskSuspend                    1
-#define INCLUDE_xTaskGetSchedulerState          1
-#define INCLUDE_xSemaphoreGetMutexHolder        1
-```
+### Standby 계열 mode
 
-`startup.c`는 SysTick vector를 횟수를 세는 함수로 감쌉니다.
+standby/shutdown 진입은 해당 MCU의 documented procedure를 따릅니다. wake source를 설정하고 필요한 retention 상태를 저장한 뒤, wake flag를 정확한 write semantics로 정리하고 deep-sleep 진입을 요청합니다. 순서는 MCU별로 다르므로 generic register snippet으로 대체하지 않습니다. 이 mode는 wake 시 reset 경로를 거치는 경우가 많으며 retention 가능한 backup 영역도 part별로 다릅니다. wake 원인과 reset flag를 읽고, 전류·복귀시간은 datasheet 조건으로 확인합니다.
+
+### Peripheral clock gating
 
 ```c
-#include <stdint.h>
-extern uint32_t _etext, _sdata, _edata, _sbss, _ebss, _estack;
-extern int main(void);
-extern void vPortSVCHandler(void), xPortPendSVHandler(void), xPortSysTickHandler(void);
-void pr(const char *f, ...);
-void hosted_exit(int code);
+/* 설명용 platform API: 실제 이름과 순서는 MCU/driver 구현에 따름 */
+board_uart_quiesce(UART_CONSOLE);
+board_clock_disable(CLOCK_UART_CONSOLE);
 
-volatile unsigned systicks;                 /* every SysTick interrupt, counted */
-void SysTick_Handler(void) { systicks++; xPortSysTickHandler(); }
-
-void Reset_Handler(void)
-{
-    uint32_t *s = &_etext, *d = &_sdata;
-    while (d < &_edata) *d++ = *s++;
-    for (d = &_sbss; d < &_ebss;) *d++ = 0;
-    main();
-    for (;;) { }
-}
-void Default_Handler(void)   { hosted_exit(99); }
-void HardFault_Handler(void) { pr("HardFault\n"); hosted_exit(98); }
-
-__attribute__((section(".vectors"), used))
-void (*const vectors[16])(void) = {
-    (void (*)(void))&_estack, Reset_Handler, Default_Handler, HardFault_Handler,
-    Default_Handler, Default_Handler, Default_Handler, 0, 0, 0, 0,
-    vPortSVCHandler, Default_Handler, 0, xPortPendSVHandler, SysTick_Handler,
-};
+/* 재사용 시 clock 안정화·reset·pin mux·baud 설정을 복원 */
+board_clock_enable(CLOCK_UART_CONSOLE);
+board_uart_resume(UART_CONSOLE, configured_baud);
 ```
+
+이 API는 MCU에 그대로 복사할 수 없습니다. peripheral idle 상태와 pending flag, DMA/interrupt 의존성, clock enable 이후 안정화 시간을 driver에서 처리합니다. clock gating은 MCU 내부 전력만 바꿀 수 있고 외부 transceiver/sensor 전원 차단을 대신하지 않습니다.
+
+### Tickless idle (FreeRTOS)
 
 ```c
-/* one task wakes once per second for 10 s; count SysTick interrupts and idle sleeps */
-#include "FreeRTOS.h"
-#include "task.h"
-void pr(const char *f, ...);
-void hosted_exit(int code);
-extern volatile unsigned systicks;
-volatile unsigned sleeps;
+/* FreeRTOSConfig.h: 선택한 port가 tickless idle을 지원하는지 확인 */
+#define configUSE_TICKLESS_IDLE 1
+#define configPRE_SLEEP_PROCESSING(x) board_pre_sleep(&(x))
+#define configPOST_SLEEP_PROCESSING(x) board_post_sleep(x)
 
-static void worker(void *arg)
-{
-    (void)arg;
-    unsigned t0 = systicks;
-    TickType_t k0 = xTaskGetTickCount();
-    for (int i = 0; i < 10; i++) vTaskDelay(pdMS_TO_TICKS(1000));
-    pr("configUSE_TICKLESS_IDLE=%d: kernel ticks %u, SysTick interrupts %u, idle sleeps %u\n",
-       configUSE_TICKLESS_IDLE, (unsigned)(xTaskGetTickCount() - k0), systicks - t0, sleeps);
-    hosted_exit(0);
+void board_pre_sleep(TickType_t *modifiable_idle_ticks) {
+    board_prepare_sleep_peripherals();
+    /* *modifiable_idle_ticks = 0 only if this hook itself performs WFI/WFE. */
 }
 
-int main(void)
-{
-    xTaskCreate(worker, "worker", 256, NULL, 2, NULL);
-    vTaskStartScheduler();
-    return 0;
+void board_post_sleep(TickType_t expected_idle_ticks) {
+    (void)expected_idle_ticks; /* expected ticks are not the measured sleep duration */
+    board_restore_sleep_peripherals();
 }
 ```
 
-```bash
-#!/bin/bash
-K=${K:-FreeRTOS-Kernel}; P=$K/portable/GCC/ARM_CM3
-for t in 0 1; do
-  arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -g -ffreestanding -nostdlib -fno-builtin -DTICKLESS=$t \
-    -I. -Ilibc -I$K/include -I$P -T link.ld -o idle.elf \
-    startup.c io.c idle.c $K/tasks.c $K/queue.c $K/list.c $K/timers.c $P/port.c $K/portable/MemMang/heap_4.c -lgcc
-  timeout 60 qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5,sleep=off -kernel idle.elf
-done
-```
+FreeRTOS tickless idle은 port가 예상 idle tick 수에 맞춰 tick interrupt를 억제하고, wake 뒤 tick을 보정하는 경로입니다. 위 hook은 peripheral 준비와 복원을 위한 예시이며 함수명과 macro 계약은 사용 port에서 확인해야 합니다. FreeRTOS ARM_CM4F port는 pre-sleep hook에 mutable tick-count copy를 전달하고, 값이 0이면 자체 WFI를 건너뜁니다. post-sleep hook의 인자는 예상 idle tick 수이지 실제 sleep 시간 측정값이 아닙니다. system/tick clock을 바꾸면 port의 tick 계산·복귀 절차도 그 clock 변화와 일치해야 합니다. port가 이미 wake timer·tick 보정·WFI를 처리한다면 같은 일을 hook에서 중복하지 않습니다. 임의 `vTaskStepTick()` 호출은 정상 port 경로를 깨뜨릴 수 있습니다. [FreeRTOS low-power support](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/07-Lower-power-support)와 [V11.2.0 ARM_CM4F port](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c)를 확인합니다.
 
-```text
-configUSE_TICKLESS_IDLE=0: kernel ticks 10000, SysTick interrupts 10000, idle sleeps 0
-configUSE_TICKLESS_IDLE=1: kernel ticks 10000, SysTick interrupts 20, idle sleeps 20
-```
-
-- **kernel 시간은 둘 다 정확히 10,000 tick이었습니다.** tickless에서도 `xTaskGetTickCount()`는 같은 값을 가리킵니다.
-- **SysTick interrupt는 10,000번에서 20번으로 줄었습니다.** core가 깨어난 횟수가 500분의 1이 된 것입니다.
-- **1초 delay 한 번에 두 번씩 잠들었습니다(20 = 10 × 2).** SysTick은 24-bit counter라, port는 한 번에 잘 수 있는 최대 tick을 `portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick`으로 정합니다(`port.c:749`). 이 설정(`configCPU_CLOCK_HZ` 25 MHz)과 1 kHz tick에서는 0xFFFFFF / 25,000 = 671 tick이므로, 1,000 tick을 자려면 671 + 329로 두 번 나눠 잡니다. 더 길게 자려면 SysTick 대신 저전력 timer(RTC·LPTIM)로 `vPortSuppressTicksAndSleep()`을 직접 구현합니다.
-
-QEMU는 전류를 모델링하지 않으므로 이 결과는 깨어난 횟수이지 전력이 아닙니다. 전류는 아래처럼 보드에서 잽니다.
-
-### `configPRE_SLEEP_PROCESSING`·`configPOST_SLEEP_PROCESSING` 바로 쓰기
+### DVFS
 
 ```c
-/* FreeRTOSConfig.h */
-#define configUSE_TICKLESS_IDLE                1
-#define configPRE_SLEEP_PROCESSING(x)          board_pre_sleep(&(x))
-#define configPOST_SLEEP_PROCESSING(x)         board_post_sleep(x)
-
-void board_pre_sleep(TickType_t *ticks)
-{
-    clock_slow();             /* optional: run from a slower clock while asleep */
-    /* setting *ticks = 0 tells the port that this hook already slept (no wfi) */
-}
-
-void board_post_sleep(TickType_t expected_ticks)
-{
-    (void)expected_ticks;     /* the port steps the tick count itself */
-    clock_fast();
+/* 순서와 API는 MCU의 voltage/frequency operating point에 맞게 구현 */
+void set_operating_point(enum operating_point target) {
+    if (target == LOW_POWER) {
+        set_clock_lower_first();
+        wait_for_clock_switch();
+        set_voltage_range_for_low_clock();
+        wait_for_voltage_ready();
+    } else {
+        set_voltage_range_for_high_clock();
+        wait_for_voltage_ready();
+        set_flash_latency_for_target_clock();
+        set_clock_higher();
+        wait_for_clock_switch();
+    }
 }
 ```
 
-V11.2.0 ARM_CM3 `port.c`를 보면 두 hook에는 정해진 계약이 있습니다. `configPRE_SLEEP_PROCESSING(xModifiableIdleTime)`은 값을 바꿀 수 있는 변수를 받고, hook이 그 값을 0으로 만들면 port는 `wfi`를 건너뜁니다(599–605행). `configPOST_SLEEP_PROCESSING(xExpectedIdleTime)`은 실제로 잔 시간이 아니라 *예상* 시간을 받습니다(609행). 그리고 tick을 앞당기는 `vTaskStepTick()`은 port가 729행에서 직접 부릅니다. 그래서 post hook에서 `vTaskStepTick()`을 다시 부르면 kernel 시간이 두 번 앞당겨집니다.
+`P ≈ αCV²f`는 switching power의 단순 근사입니다. leakage, regulator 효율, memory wait state, 주변 회로와 실행시간이 전체 에너지에 영향을 줍니다. 낮은 주파수로 실행시간이 늘어 누설 에너지가 커질 수도 있습니다. 전압 범위, flash latency와 전환 순서는 target reference manual에서 확인합니다.
 
-### STM32L4 Stop·Standby와 clock gating
+### µA-level 측정
 
-아래 코드는 STM32L476을 대상으로, ST `cmsis_device_l4`(GitHub master, commit `ca0bfa2`)의 `stm32l476xx.h`와 CMSIS 5.9.0 core 헤더로 `arm-none-eabi-gcc -mcpu=cortex-m4 -c`해 컴파일되는 것을 확인했습니다. 보드가 없어 실행하지는 않았습니다.
+| 도구 | 특징 |
+|------|------|
+| DMM/ammeter | range·burden voltage·sampling 속도가 짧은 burst 포착에 영향 |
+| shunt + oscilloscope | shunt 값과 bandwidth를 정하고 순간 전류를 시간축으로 확인 |
+| power analyzer | range·noise floor·sample rate·입력 전압 범위를 측정 조건에 맞춤 |
+
+계측 장비는 정확도·burden voltage·range 전환·bandwidth·trigger 동기화를 확인해 고릅니다. 장비 이름만으로 µA 정확도나 burst 포착을 보장할 수 없습니다. 측정 지점과 외부 부하(LED, regulator, sensor, radio)를 기록합니다.
+
+### Pin float 방지
 
 ```c
-/* STM32L476 low-power snippets, compile-checked against ST cmsis_device_l4 + CMSIS 5.9.0 */
-#include "stm32l476xx.h"
-
-void enter_stop1(void)
-{
-    PWR->CR1 = (PWR->CR1 & ~PWR_CR1_LPMS_Msk) | PWR_CR1_LPMS_STOP1;   /* LPMS is a 3-bit field */
-    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-    __WFI();
-    SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
-    /* after wake-up: restore the system clock before using peripherals */
-}
-
-void enter_standby(void)
-{
-    PWR->CR1 = (PWR->CR1 & ~PWR_CR1_LPMS_Msk) | PWR_CR1_LPMS_STANDBY;
-    PWR->SCR = PWR_SCR_CWUF;                                          /* clear wake-up flags */
-    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-    __WFI();                                                         /* SRAM2 is kept only if PWR_CR3_RRS is set */
-}
-
-void gate_unused_clocks(void)
-{
-    RCC->APB1ENR1 &= ~(RCC_APB1ENR1_USART2EN | RCC_APB1ENR1_SPI3EN);
-    RCC->AHB2ENR &= ~RCC_AHB2ENR_ADCEN;
-}
-
-void uart2_send(char c)
-{
-    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
-    (void)RCC->APB1ENR1;                         /* read back: let the enable take effect */
-    USART2->CR1 = USART_CR1_UE | USART_CR1_TE;
-    while (!(USART2->ISR & USART_ISR_TXE)) { }
-    USART2->TDR = (uint8_t)c;
-}
+/* board schematic과 MCU pin leakage 조건에 맞춰 개별 설정 */
+configure_pin_from_board_policy(pin, PIN_ANALOG_OR_SAFE_BIAS);
 ```
 
-흔히 보는 STM32 예제 코드와 다른 곳은 세 군데입니다.
-
-- **LPMS는 3-bit 필드입니다**(`PWR_CR1_LPMS_Msk` = `0x7`, 헤더 9593행). `PWR->CR1 |= PWR_CR1_LPMS_STOP1`처럼 OR만 하면 이전 값(예: Standby의 `0x3`)이 남아 Stop 1이 아닌 다른 모드로 들어갑니다. 필드를 먼저 지우고 씁니다. 위 코드를 디스어셈블하면 `bic.w r3, r3, #7` 다음 `orr.w r3, r3, #1`입니다.
-- **L4에는 `RCC->APB1ENR`과 `USART2->DR`이 없습니다.** APB1 enable 레지스터는 `APB1ENR1`·`APB1ENR2`로 나뉘고, USART 송신은 `TDR`입니다. 예전 코드를 같은 헤더로 컴파일하면 다음 오류가 납니다.
-
-```text
-orig.c:2:20: error: 'RCC_TypeDef' has no member named 'APB1ENR'; did you mean 'AHB1ENR'?
-orig.c:2:44: error: 'USART_TypeDef' has no member named 'DR'; did you mean 'RDR'?
-```
-
-- **ADC clock은 L4에서 `AHB2ENR_ADCEN`입니다.** `RCC_APB2ENR_ADC1EN`은 이 헤더에 없습니다.
-
-Stop·Standby 모드에서 무엇이 유지되고 얼마의 전류가 흐르는지, 깨어난 뒤 어떤 clock이 기본값으로 돌아오는지는 STM32L4 reference manual과 datasheet가 정합니다. 이 글은 그 문서를 열지 못해 그 값을 싣지 않습니다. 코드에는 깨어난 직후 system clock을 다시 설정하라는 자리만 표시했습니다.
-
-### 전류 측정
-
-전류는 장비로 잽니다. 잠든 상태의 µA와 깨어난 순간의 mA가 섞인 파형을 보려면, 일반 멀티미터의 평균값보다 sample 단위로 기록하는 power profiler나 shunt 저항 + oscilloscope가 낫습니다. 멀티미터의 전류 측정 범위를 µA로 두면 내부 shunt에 걸리는 전압(burden voltage) 때문에 깨어나는 순간 MCU 전원이 흔들릴 수 있다는 점도 확인합니다. 이 글은 측정 장비가 없어 전류를 재지 않았습니다.
-
-### 떠 있는 GPIO 정리
-
-```c
-configure_unused_pins_as_analog_or_pulled();   /* no floating digital inputs */
-```
-
-연결되지 않은 핀을 digital input으로 두면 입력이 중간 전압에서 흔들려 input buffer가 전류를 씁니다. 쓰지 않는 핀을 어떤 상태로 둘지(analog, pull-up/down, output low)는 MCU reference manual의 GPIO 장이 권하는 대로 정합니다.
+floating input, 외부 회로가 구동하는 pin, analog 입력을 한 설정으로 처리하지 않습니다. MCU의 low-power pin guidance와 보드 회로를 보고 pull, analog, output 또는 retention 설정을 선택합니다. 모든 미사용 pin을 무조건 pull-down하거나 output-low로 만들면 외부 회로와 충돌할 수 있습니다.
 
 ## 측정 / 성능 비교
 
-이 글에서 잰 것은 깨어난 횟수입니다.
+측정 계획을 세울 때 아래와 같이 단계별 차이를 기록합니다. 예시 글은 board, 부품, 계측 원자료가 없어 실측 수치를 제시하지 않습니다.
 
-| 설정 (FreeRTOS V11.2.0, QEMU mps2-an385, 10초) | kernel tick | SysTick interrupt | idle에서 잠든 횟수 |
-| --- | ---: | ---: | ---: |
-| `configUSE_TICKLESS_IDLE 0` | 10,000 | 10,000 | 0 (port의 tickless 경로 미사용) |
-| `configUSE_TICKLESS_IDLE 1` | 10,000 | 20 | 20 |
+| 시나리오 | 평균 전류 | 배터리(CR2032) 수명 |
+|----------|-----------|-----------------------|
+| WFI 없이 run loop | 측정 필요 | 배터리 조건으로 계산 |
+| WFI in idle | 측정 필요 | 배터리 조건으로 계산 |
+| + peripheral clock gating | 측정 필요 | 배터리 조건으로 계산 |
+| + stop mode (1초마다 wake) | 측정 필요 | 배터리 조건으로 계산 |
+| + tickless idle + RTC wake-up | 측정 필요 | 배터리 조건으로 계산 |
 
-평균 전류와 배터리 수명은 위 식에 대상 보드에서 잰 각 상태의 전류와 체류 시간을 넣어 계산합니다. tickless로 깨어나는 횟수가 줄어드는 효과는, 깨어날 때마다 드는 전류·시간(clock 안정화 포함)이 클수록 커집니다.
+각 단계의 효과와 배터리 수명은 wake 패턴·부하·측정 조건에 따라 달라지므로 단계별로 검증합니다.
+
+DVFS 비교에서는 operating point별 voltage/frequency, workload 완료시간, 전환비용과 전체 energy를 함께 기록합니다. clock과 voltage를 낮추는 것만으로 총 energy 감소가 보장되지는 않습니다.
 
 ## 자주 보는 함정
 
-> ⚠️ Idle에서 바쁘게 돎
+> Busy loop를 low-power idle이라고 가정
 
 ```c
-for (;;) { do_things(); }    /* no WFI */
+while (1) { do_things(); }    /* WFI 없음 */
 ```
 
-할 일이 없을 때도 core가 계속 돕니다. idle 경로에 `WFI`(또는 RTOS의 idle hook·tickless)를 둡니다.
+busy loop는 CPU가 계속 일을 하므로 sleep 상태와 구분합니다. FreeRTOS에서는 tickless port 또는 해당 port가 문서화한 idle 진입을 사용하고, idle hook 안의 WFI를 임의로 추가해 race를 만들지 않습니다.
 
-> ⚠️ Tickless를 켜고 post hook에서 tick을 또 앞당김
-
-위 절처럼 port가 이미 `vTaskStepTick()`을 부릅니다. 두 번 부르면 `vTaskDelay`와 timeout이 일찍 끝납니다.
-
-> ⚠️ 필드를 OR로만 씀
-
-`PWR->CR1 |= PWR_CR1_LPMS_STOP1`은 이전 모드 값과 섞입니다. 다중 bit 필드는 mask로 지운 뒤 씁니다.
-
-> ⚠️ 모든 peripheral clock을 켜 둠
+> Peripheral clock을 모두 켜둠
 
 ```c
-RCC->APB1ENR1 = 0xFFFFFFFF;    /* every APB1 clock on */
+/* 임의의 all-ones write: reserved bit/다른 peripheral 상태를 망가뜨릴 수 있음 */
+PERIPH_CLOCK_REGISTER = 0xFFFFFFFF;
 ```
 
-부팅 때 필요한 것만 켜고, 쓰지 않을 때 끕니다. enable 직후에 레지스터를 쓰기 전 한 번 읽어 두는 것은 위 `uart2_send`처럼 clock이 실제로 켜질 시간을 주기 위해서입니다.
+register 전체를 상수로 덮어쓰지 않습니다. driver와 MCU reference manual에 맞는 clock API/bit mask를 사용하고, 필요한 기능의 전원·clock 상태를 검증합니다.
 
-> ⚠️ 깨우는 source가 너무 많음
+> Wake-up source 너무 많음
 
 ```c
-EXTI->IMR1 = 0xFFFFFFFF;    /* every EXTI line can wake the core */
+/* 모든 wake line을 무조건 활성화하는 설정은 피함 */
+configure_wakeup_lines(ALL_LINES);
 ```
 
-잠들어도 곧 다시 깨면 tickless의 효과가 사라집니다. 정말 필요한 line만 켭니다.
+불필요한 wake source는 sleep을 짧게 하고 반복 진입 비용을 늘릴 수 있습니다. part가 지원하는 필요한 source만 설정하고 pending flag와 debounce 조건을 확인합니다.
 
-## 재현 환경
+> Stop mode 후 clock 미복원
 
-- tickless 측정: `arm-none-eabi-gcc` 16.2.0, FreeRTOS-Kernel V11.2.0, QEMU 11.1.3 `mps2-an385` `-icount shift=5,sleep=off`. `K=FreeRTOS-Kernel bash run.sh`. 하네스(`io.c`·`link.ld`·`libc/`·`FreeRTOSConfig.h`)는 6-12와 같고 위 차이만 있습니다.
-- STM32L4 코드: ST `cmsis_device_l4` master(`ca0bfa2`), CMSIS 5.9.0 `CMSIS/Core/Include`, `arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -Wall -I<l4>/Include -I<cmsis>/CMSIS/Core/Include -c l4_power.c`.
+```c
+enter_platform_stop_mode();
+/* wake 이후 clock/peripheral 상태를 확인한 뒤 driver 사용 */
+uart_send_byte(UART_CONSOLE, 'X');
+```
+
+일부 MCU는 stop wake 후 system clock을 기본 source로 전환합니다. 동작은 part마다 다르므로 wake 이후 clock source·frequency·peripheral 상태를 확인하고 필요한 driver 복원을 합니다.
+
+> µA를 multimeter로 측정
+
+계측기 한 종류를 무조건 배제하지 않습니다. 요구하는 전류 범위와 시간해상도, burden voltage, noise floor에 맞는 장비인지 사양과 검교정 상태를 확인합니다.
 
 ## 정리
 
-- 평균 전력은 상태별 전류 × 체류 시간으로 정해지고, 펌웨어는 잠드는 시간과 잠든 상태를 바꿉니다.
-- tickless idle은 10초 동안 SysTick interrupt를 10,000번에서 20번으로 줄였고, kernel 시간은 그대로였습니다.
-- SysTick tickless는 24-bit 한계 때문에 이 설정에서 한 번에 671 tick까지만 잡니다. 더 길게는 RTC·LPTIM으로 직접 구현합니다.
-- post-sleep hook에서 `vTaskStepTick()`을 다시 부르지 않습니다. port가 이미 부릅니다.
-- STM32L4의 LPMS는 3-bit 필드라 mask 후 쓰고, `APB1ENR1`·`TDR`·`AHB2ENR_ADCEN`처럼 그 칩의 레지스터 이름을 씁니다.
-- 각 모드의 전류는 datasheet와 측정 장비로 확인합니다. 이 글에는 전류 값이 없습니다.
+- 평균 전류는 상태별 전류와 체류 시간으로, 평균 전력은 상태별 voltage/current/시간으로 계산합니다.
+- WFI는 sleep mode 설정·wake source와 함께 검증합니다.
+- Stop/standby 특성은 정확한 MCU part의 datasheet/reference manual에서 확인합니다.
+- peripheral clock gating은 driver·DMA·interrupt 의존성과 복귀 순서를 함께 처리합니다.
+- Tickless idle은 port 구현과 sleep hook 계약을 확인한 뒤 적용합니다.
+- DVFS로 active 전력 자체를 줄일 수 있습니다.
+- 계측기는 정확도·burden voltage·bandwidth·sample rate를 요구 조건에 맞춥니다.
+- pin 상태는 회로도와 MCU의 저전력 pin guidance를 기준으로 정합니다.
 
 다음 편은 **WCET 분석**입니다. Worst-case execution time과 cache 영향을 다룹니다.
 

@@ -11,448 +11,319 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DMA buffer 요구사항은 device·IOMMU·cache 정책에 맞춰 정합니다."** 드라이버가 정하는 것은 "어떤 주소를 device에 줄지"와 "언제 cache를 넘길지" 두 가지이고, Linux에서는 둘 다 DMA API가 답합니다. 이 글은 그 답을 Debian 13 arm64 커널 모듈로 직접 받아 보고, Cortex-M7처럼 OS가 없는 경우의 대응을 CMSIS·ST 헤더 기준으로 정리합니다.
+> **DMA 저장소의 CPU 주소, 장치 주소, 소유권과 해제 시점을 따로 관리합니다.** coherent라고 완료·순서가 보장되지는 않으며, linker section 이름이 cache 속성을 정하지도 않습니다.
 
 ## 어떤 상황에서 쓰나
 
-Cortex-M7 보드에서 ADC가 DMA로 buffer를 채우는데 CPU가 읽으면 옛 값만 보인다면, CPU는 cache에 남은 사본을 읽고 있습니다. 반대로 CPU가 buffer를 채우고 DMA를 시작했는데 예전 내용이 나간다면, 새 값이 아직 cache에만 있고 memory에 내려가지 않았습니다. 우체통(memory)에 편지를 넣어야 집배원(DMA)이 가져가는데, 책상 위(cache)에만 올려 두고 넣었다고 생각한 상황과 같습니다.
+DMA가 이전 데이터를 보내거나 CPU가 이전 수신 값을 읽는다면 cache 유지보수 누락을 조사합니다. 다만 주소 변환·길이·전송 방향·장치 완료 전에 buffer를 재사용하는 문제도 같은 증상을 만들 수 있습니다. cache 함수 하나를 추가하기 전에 어느 주체가 어느 주소로 언제 접근하는지 기록합니다.
 
-Linux 드라이버에서는 CPU가 쓰는 주소와 device가 쓰는 주소가 다를 수 있습니다. 아래 실행에서 32비트 DMA mask를 가진 device에 `kmalloc` buffer의 물리 주소(4 GiB 위)를 그대로 주었다면 device는 그 주소에 닿지 못합니다. `dma_map_single`은 같은 buffer에 대해 4 GiB 아래의 다른 주소를 돌려주었습니다.
+CPU 가상 주소와 DMA 주소는 한 건물의 우편 주소와 배송 창구 번호처럼 용도가 다릅니다. Linux의 `void *`, `phys_addr_t`, `dma_addr_t`를 같은 정수로 취급하지 않습니다. IOMMU가 없어도 host bridge 변환이나 bounce buffer 때문에 DMA 주소가 CPU 물리 주소와 같다고 보장할 수 없습니다.
 
-## 핵심 개념
+이 글은 Linux 6.12 계열 DMA API와 Cortex-M7의 정적 저장소를 구분합니다. 장치별 register·descriptor format·interrupt 코드를 지어 넣지 않고, 드라이버가 완성해야 할 제출·완료·취소 계약을 명시합니다.
 
-DMA buffer가 만족해야 할 조건은 다섯 가지입니다.
+## 먼저 정할 계약
 
-1. **device가 접근할 수 있는 mapping** — 연속 물리 메모리가 필요할 수도 있고, scatter-gather나 IOMMU가 대신할 수도 있습니다.
-2. **cache 일관성** — 하드웨어가 보장하거나(coherent), 소프트웨어가 정해진 시점에 clean·invalidate합니다.
-3. **정렬** — DMA 엔진의 burst 조건을 맞추고, cache line을 다른 데이터와 나누지 않아야 합니다.
-4. **주소 범위** — device가 낼 수 있는 주소 폭(32비트 등) 안에 있어야 합니다.
-5. **할당 비용** — 자주 할당·해제한다면 미리 잡아 둔 pool을 씁니다.
+연속성은 한 가지가 아닙니다. CPU에서 연속인 가상 주소, 물리적으로 연속인 page, 장치가 보는 연속 DMA 주소를 구분합니다. 여러 장의 서류를 한 봉투처럼 보여 주는 IOMMU 매핑도 장치의 segment 수·길이·경계 제한까지 없애지는 않습니다.
 
-Linux `dma-api-howto.rst`(v6.12)는 mapping을 두 종류로 나눕니다. **Consistent(coherent)** mapping은 "usually mapped at driver initialization"이고, device와 CPU가 "explicit software flushing" 없이 서로의 갱신을 봅니다. 문서가 드는 예는 network card DMA ring descriptor입니다. **Streaming** mapping은 "usually mapped for one DMA transfer"이고, 예는 device가 보내고 받는 networking buffer입니다. 같은 문서는 cache가 DMA-coherent가 아닌 시스템에서 buffer가 다른 데이터와 cache line을 나누지 않아야 한다고 덧붙입니다.
+| 항목 | 확인할 내용 |
+|---|---|
+| 주소 범위 | 장치의 DMA mask와 coherent mask, segment/boundary 제약을 설정합니다. |
+| 저장소 출처 | 해당 DMA API가 지원하는 메모리를 사용합니다. stack·vmalloc 주소를 dma_map_single에 넘기지 않습니다. |
+| 일관성 | coherent인지 streaming map/sync/unmap 계약인지 구분합니다. |
+| 수명 | 제출 전부터 완료 또는 장치 정지 확인까지 저장소와 mapping을 유지합니다. |
+| 실패 정책 | allocation·mapping 실패와 제출 실패의 정리 경로를 만듭니다. |
 
-## 코드 / 실제 사용 예
+32-bit DMA 장치라면 probe 등에서 `dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32))`의 반환값을 검사합니다. 이 호출은 실제 장치의 능력에 맞춘 설정이며, 임의로 64-bit mask를 선택하는 대안이 아닙니다. DMA 주소 0도 유효할 수 있으므로 0인지 검사하는 대신 해당 mapping API의 오류 판정을 사용합니다.
 
-### 실행 환경과 실험 모듈
+## Coherent 할당: cache 일관성과 전송 완료는 별개
 
-아래 Linux 코드는 모두 하나의 실험 모듈(`dmademo.c`, [재현 환경](#재현-환경))에 들어 있고, Apple M2 Pro 위 QEMU(`-accel hvf`) Debian 13 arm64 게스트(커널 6.12.116+deb13-arm64, GCC 14.2.0)에서 `insmod`로 돌렸습니다. device는 DT 없이 `platform_device_register_simple`로 만든 가짜 device이고, DMA mask를 32비트로 줍니다. 이 게스트의 부팅 로그는 메모리 배치를 이렇게 보고합니다.
+coherent allocation은 CPU와 장치가 데이터를 관찰하는 일관성 계약을 제공합니다. 그렇다고 CPU store 순서·descriptor 게시·doorbell ordering·장치 완료까지 자동으로 처리하지는 않습니다. 같은 종이를 함께 볼 수 있어도 어느 줄을 다 쓴 뒤 넘기는지는 별도 약속입니다.
 
-```text
-cma: Reserved 64 MiB at 0x00000000fc000000 on node -1
-software IO TLB: area num 8.
-software IO TLB: mapped [mem 0x00000000f8000000-0x00000000fc000000] (64MB)
-```
+다음은 allocation의 원래 device·size·CPU/DMA 주소를 한곳에 보관하는 보조 코드입니다. 호출자는 구조체를 0으로 초기화하며 이 객체를 복사해 소유자를 늘리지 않습니다.
 
-모듈의 전체 출력입니다.
-
-```text
-dmademo: dev_is_dma_coherent=0
-dmademo: coherent 4 KiB: cpu=ffff80008257d000 is_vmalloc=1 dma=0x00000000d9c30000
-dmademo: coherent 16 MiB: cpu=ffff800084955000 dma=0x00000000fc300000
-dmademo: kmalloc buf phys=0x0000000102dec000 -> dma_map_single=0x00000000f8801000 (bounced: not the physical address)
-dmademo: sg[0] dma=0x00000000f8802000 len=2048
-dmademo: sg[1] dma=0x00000000f8802800 len=2048
-dmademo: sg[2] dma=0x00000000f8803000 len=2048
-dmademo: sync_for_device    4096 B: 101 ns/call
-dmademo: sync_for_device   65536 B: 1564 ns/call
-dmademo: sync_for_device 1048576 B: 24544 ns/call
-```
-
-### Linux `dma_alloc_coherent`
-
-```c
+```c title="dma-coherent-lease.h"
+#ifndef DMA_COHERENT_LEASE_H
+#define DMA_COHERENT_LEASE_H
 #include <linux/dma-mapping.h>
+#include <linux/errno.h>
 
-dma_addr_t dma_handle;
-void *cpu_addr = dma_alloc_coherent(dev, 4096, &dma_handle, GFP_KERNEL);
-/* cpu_addr: for the CPU; dma_handle: for the device (bus address / IOVA) */
+struct coherent_lease {
+    struct device *dev;
+    void *cpu;
+    dma_addr_t dma;
+    size_t size;
+    bool in_flight;
+};
 
-memcpy(cpu_addr, data, len);
-hw_set_dma_addr(dma_handle);      /* device-specific register write */
-hw_dma_start();
-
-dma_free_coherent(dev, 4096, cpu_addr, dma_handle);
-```
-
-위 출력의 `coherent 4 KiB` 줄에서 `cpu`는 vmalloc 영역 주소(`is_vmalloc=1`)이고 `dma`는 4 GiB 아래 `0xd9c30000`이었습니다. 이 device는 `dev_is_dma_coherent=0`(하드웨어 coherency 없음)이라, 커널은 페이지를 cache를 끈 속성으로 다시 mapping해 CPU에게 줍니다. 그래서 cache 관리 호출 없이 CPU와 device가 같은 내용을 보는 대신, CPU의 접근도 cache를 거치지 않습니다. CPU가 이 영역을 많이 읽고 쓰는 용도라면 아래 streaming이 맞습니다. coherent 메모리도 쓰기 순서까지 보장하지는 않으므로, descriptor의 두 word 순서가 중요하면 `wmb()`를 넣으라고 같은 문서가 적습니다.
-
-### Streaming mapping
-
-```c
-dma_addr_t dma = dma_map_single(dev, kbuf, len, DMA_TO_DEVICE);
-if (dma_mapping_error(dev, dma))
-    return -ENOMEM;
-hw_dma_tx(dma, len);
-wait_dma_done();
-dma_unmap_single(dev, dma, len, DMA_TO_DEVICE);
-```
-
-방향은 데이터가 움직이는 쪽입니다. `DMA_TO_DEVICE`는 "from main memory to the device", `DMA_FROM_DEVICE`는 "from the device to main memory"입니다(`dma-api-howto.rst`). arm64의 비-coherent device에서 그 방향이 하는 일은 `arch/arm64/mm/dma-mapping.c`에 있습니다.
-
-| 호출 | arm64 동작 (v6.12) |
-| --- | --- |
-| `dma_sync_*_for_device` / map | `dcache_clean_poc`: CPU cache의 더러운 line을 memory로 내림 (15–21행) |
-| `dma_sync_*_for_cpu` / unmap, `DMA_FROM_DEVICE`·`BIDIRECTIONAL` | `dcache_inval_poc`: CPU cache의 사본을 버림 (23–32행) |
-| `dma_sync_*_for_cpu`, `DMA_TO_DEVICE` | 아무것도 하지 않음 (`if (dir == DMA_TO_DEVICE) return;`) |
-
-이 clean·invalidate는 byte가 아니라 cache line 단위로 범위를 훑으므로 비용이 크기에 비례합니다. 위 출력의 마지막 세 줄이 4 KiB 101 ns, 64 KiB 1,564 ns, 1 MiB 24,544 ns로, 크기가 16배 늘 때마다 시간도 15~16배 늘었습니다. 1 KiB당 약 24 ns입니다. 이 값은 hvf 가상화 위 M2 Pro에서 잰 것이라 임베디드 Cortex-A의 절대값과는 다릅니다.
-
-### 주소가 닿지 않을 때 — swiotlb bounce
-
-출력의 `kmalloc buf` 줄에서 buffer의 물리 주소는 `0x102dec000`(4 GiB 위)인데, `dma_map_single`이 돌려준 주소는 `0xf8801000`이었습니다. 이 device의 mask가 32비트라 원래 주소에 닿지 못하자, 커널이 부팅 때 4 GiB 아래에 잡아 둔 swiotlb 영역(`0xf8000000`–`0xfc000000`)의 bounce buffer로 바꿨습니다. `kernel/dma/direct.h`의 `dma_direct_map_page`가 `dma_capable()`이 실패하면 `swiotlb_map()`으로 넘어가는 경로입니다(84–104행). 그래서 device에는 반드시 DMA API가 준 주소를 넘깁니다. bounce가 일어나면 map·unmap 때 복사가 더해지므로, 처음부터 device가 닿는 영역에서 할당하는 것이 빠릅니다.
-
-### Scatter-Gather
-
-여러 개의 떨어진 buffer를 한 번의 map으로 device 주소 목록으로 바꿉니다. `sgt.sgl[i]`처럼 배열로 index하면 sg table이 여러 조각으로 chain될 때 틀리므로 `for_each_sg`로 돕니다. 위 출력의 `sg[0]`~`sg[2]` 줄이 이 코드의 결과입니다.
-
-```c
-#define NUM_BUFS 3
-#define BUF_SIZE 2048
-
-static void sg_demo(struct device *dev)
+static inline int coherent_lease_alloc(struct device *dev, size_t size,
+                                       struct coherent_lease *out)
 {
-	struct sg_table sgt;
-	struct scatterlist *sg;
-	void *buffers[NUM_BUFS] = { 0 };
-	int i;
-
-	if (sg_alloc_table(&sgt, NUM_BUFS, GFP_KERNEL))
-		return;
-	for_each_sg(sgt.sgl, sg, NUM_BUFS, i) {
-		buffers[i] = kmalloc(BUF_SIZE, GFP_KERNEL);
-		if (!buffers[i])
-			goto out;
-		sg_set_buf(sg, buffers[i], BUF_SIZE);
-	}
-	if (dma_map_sgtable(dev, &sgt, DMA_TO_DEVICE, 0))
-		goto out;
-	for_each_sgtable_dma_sg(&sgt, sg, i)       /* program the device from these */
-		pr_info("dmademo: sg[%d] dma=%pad len=%u\n", i, &sg_dma_address(sg), sg_dma_len(sg));
-	dma_unmap_sgtable(dev, &sgt, DMA_TO_DEVICE, 0);
-out:
-	for (i = 0; i < NUM_BUFS; i++)
-		kfree(buffers[i]);
-	sg_free_table(&sgt);
+    void *cpu;
+    dma_addr_t dma;
+    if (!dev || !out || !size) return -EINVAL;
+    if (out->cpu || out->in_flight) return -EBUSY;
+    cpu = dma_alloc_coherent(dev, size, &dma, GFP_KERNEL);
+    if (!cpu) return -ENOMEM;
+    *out = (struct coherent_lease){ .dev = dev, .cpu = cpu,
+                                  .dma = dma, .size = size };
+    return 0;
 }
+
+static inline int coherent_lease_free(struct coherent_lease *lease)
+{
+    if (!lease) return -EINVAL;
+    if (lease->in_flight) return -EBUSY;
+    if (lease->cpu)
+        dma_free_coherent(lease->dev, lease->size, lease->cpu, lease->dma);
+    *lease = (struct coherent_lease){ 0 };
+    return 0;
+}
+#endif
 ```
 
-`dma_map_sgtable()`은 성공하면 0을 돌려주고, device에 줄 항목은 `for_each_sgtable_dma_sg`로 읽습니다(`kernel/dma/mapping.c:288`, `include/linux/scatterlist.h:209`). 이번 실행에서는 세 buffer 모두 4 GiB 위에 잡혀 swiotlb로 bounce됐습니다.
+본 coherent helper의 할당·해제와 SG table 생성은 IRQ가 활성인 task 문맥에서 수행합니다. allocation 경로는 GFP_KERNEL을 사용하므로 잠들 수 있으며, hard IRQ나 spinlock을 잡은 채 호출하는 일반 API로 사용하지 않습니다.
 
-### CMA — 큰 연속 영역 예약
+`in_flight`는 드라이버가 실제 제출·완료 절차와 함께 관리할 상태입니다. 제출 전에 참으로 바꾸고, 장치의 접근 종료를 확인한 뒤에만 거짓으로 바꿉니다. timeout이 났다는 이유만으로 거짓으로 바꾸거나 free하면 안 됩니다. 여러 문맥이 접근하면 상태 검사와 제출·해제 전체를 직렬화해야 하며 bool 하나가 race를 해결하지 않습니다.
 
-```dts
-reserved-memory {
+coherent descriptor에서 payload/주소를 먼저 쓰고 소유권 bit를 나중에 공개하려면 `dma_wmb()` 같은 DMA ordering 규칙을 장치 protocol에 맞춰 적용합니다. CPU가 완료 bit를 본 뒤 payload를 읽는 쪽도 필요한 ordering을 따릅니다. MMIO doorbell과 posted write 처리까지 장치 문서와 Linux DMA API 문서를 기준으로 정합니다.
+
+작은 descriptor를 여러 개 관리할 때는 실제 Linux `dma_pool_create`·`dma_pool_alloc`·`dma_pool_free`도 후보입니다. 생성 시 alignment와 boundary를 설정하며 반환 CPU 주소와 dma_addr_t를 함께 보관합니다. block을 모두 반납하고 장치가 멈춘 뒤 pool을 파괴합니다.
+
+## Streaming mapping: 실패 판정과 짝 맞추기
+
+streaming mapping은 CPU가 준비한 메모리를 장치에 빌려주는 계약입니다. 다음 예제는 `kmalloc` 계열 등 dma_map_single에 적합한 단일 TX buffer를 전제로 합니다. `kbuf`의 할당·해제는 호출자가 담당하며 mapping이 끝날 때까지 살아 있어야 합니다.
+
+```c title="dma-tx-map.h"
+#ifndef DMA_TX_MAP_H
+#define DMA_TX_MAP_H
+#include <linux/dma-mapping.h>
+#include <linux/errno.h>
+
+struct tx_mapping {
+    struct device *dev;
+    dma_addr_t dma;
+    size_t len;
+    bool mapped, in_flight;
+};
+
+static inline int tx_mapping_prepare(struct device *dev, void *kbuf,
+                                      size_t len, struct tx_mapping *out)
+{
+    dma_addr_t dma;
+    if (!dev || !kbuf || !out || !len) return -EINVAL;
+    if (out->mapped || out->in_flight) return -EBUSY;
+    dma = dma_map_single(dev, kbuf, len, DMA_TO_DEVICE);
+    if (dma_mapping_error(dev, dma)) return -EIO;
+    *out = (struct tx_mapping){ .dev = dev, .dma = dma,
+                               .len = len, .mapped = true };
+    return 0;
+}
+
+static inline int tx_mapping_release(struct tx_mapping *map)
+{
+    if (!map) return -EINVAL;
+    if (map->in_flight) return -EBUSY;
+    if (map->mapped)
+        dma_unmap_single(map->dev, map->dma, map->len, DMA_TO_DEVICE);
+    *map = (struct tx_mapping){ 0 };
+    return 0;
+}
+#endif
+```
+
+mapping 실패에는 unmap하지 않습니다. 성공한 mapping은 같은 device·DMA 주소·size·direction으로 해제합니다. `DMA_TO_DEVICE`는 장치가 메모리를 읽는 TX 방향이며, map 뒤 CPU가 buffer를 수정하면 안 됩니다. 제출 실패 시 장치에 공개되지 않았음을 확인하고 해제하며, 완료 또는 취소 시에는 장치의 접근이 끝났음을 먼저 확인합니다.
+
+mapping을 유지하면서 CPU와 장치가 번갈아 접근한다면 ownership을 넘길 때 sync 규칙을 따릅니다. 아래 표는 CPU/장치 사이의 계약이며 특정 cache instruction 목록이 아닙니다. DMA API가 bounce buffer 등을 사용할 수도 있습니다.
+
+| 방향 | 장치의 메모리 접근 | CPU로 돌려받을 때와 재제출 |
+|---|---|---|
+| DMA_TO_DEVICE | CPU가 준비한 내용을 읽습니다. | CPU 수정 전에 필요한 sync-for-CPU, 수정 후 sync-for-device를 적용합니다. |
+| DMA_FROM_DEVICE | 수신 내용을 씁니다. | 완료 뒤 CPU가 읽기 전에 sync-for-CPU, 재제출 전에 sync-for-device를 적용합니다. |
+| DMA_BIDIRECTIONAL | 읽고 씁니다. | 양쪽 전환마다 해당 계약을 지키며 소유권을 겹치지 않습니다. |
+
+최종 unmap은 mapping의 짝을 닫습니다. coherent와 streaming 중 어느 쪽이 빠른지는 이 분류만으로 정하지 않습니다. allocation·map/unmap·sync 빈도와 실제 접근 패턴을 비교합니다.
+
+## Scatter-gather: chained list와 entry 수 구분
+
+scatterlist는 큰 표를 여러 묶음의 페이지에 나눠 보관할 수 있으므로 `sgt.sgl[i]`로 전체를 순회하지 않습니다. 입력 entry 수와 장치용 mapping 후의 entry 수도 다를 수 있습니다.
+
+아래 helper는 호출자가 소유한 정상 page 배열을 받아 page당 한 entry를 만듭니다. 장치 제출은 하지 않으며, out은 0 초기화되고 아직 소유한 table이 없어야 합니다.
+
+```c title="dma-sg-pages.h"
+#ifndef DMA_SG_PAGES_H
+#define DMA_SG_PAGES_H
+#include <linux/dma-mapping.h>
+#include <linux/scatterlist.h>
+#include <linux/mm.h>
+
+static inline int map_page_table(struct device *dev, struct page **pages,
+                                 unsigned int count, struct sg_table *out)
+{
+    struct sg_table table = { 0 };
+    struct scatterlist *sg;
+    unsigned int i;
+    int ret;
+    if (!dev || !pages || !count || !out || out->sgl) return -EINVAL;
+    for (i = 0; i < count; ++i) if (!pages[i]) return -EINVAL;
+    ret = sg_alloc_table(&table, count, GFP_KERNEL);
+    if (ret) return ret;
+    for_each_sg(table.sgl, sg, count, i)
+        sg_set_page(sg, pages[i], PAGE_SIZE, 0);
+    ret = dma_map_sgtable(dev, &table, DMA_TO_DEVICE, 0);
+    if (ret) { sg_free_table(&table); return ret; }
+    *out = table;
+    return 0;
+}
+
+static inline void release_page_table(struct device *dev, struct sg_table *table)
+{
+    if (!table || !table->sgl) return;
+    dma_unmap_sgtable(dev, table, DMA_TO_DEVICE, 0);
+    sg_free_table(table);
+    *table = (struct sg_table){ 0 };
+}
+#endif
+```
+
+장치 descriptor를 만들 때는 `for_each_sgtable_dma_sg`와 `sg_dma_address`·`sg_dma_len`을 사용합니다. `orig_nents`는 원래 목록, `nents`는 mapped 목록의 entry 수입니다. 저수준 `dma_map_sg`는 반환값 0을 실패로 처리하고, 해제에는 반환 entry 수가 아니라 원래 입력 수를 넘깁니다. 위 sgtable API는 이 차이를 table에 보관합니다.
+
+release에는 매핑 때와 같은 device를 전달합니다. release 전에 모든 DMA를 멈추고 page의 수명을 유지합니다. SG를 쓴다고 한 transaction으로 전송되거나 장치의 descriptor 한계가 없어지는 것은 아닙니다. coherent한 IOMMU mapping이 있더라도 page pinning·ownership·device mask가 별도로 필요합니다.
+
+## CMA와 IOMMU가 해결하는 범위
+
+CMA는 큰 물리 연속 영역을 제공하기 위한 경로입니다. 다음은 root와 reserved-memory가 모두 2-cell 주소/크기를 사용하는 DTS 예제이며 64 MiB의 동적 shared pool을 기술합니다. 실제 board의 cell 수와 예약 영역은 그 board DTS를 따릅니다.
+
+```dts title="dma-cma-example.dts"
+/dts-v1/;
+/ {
     #address-cells = <2>;
     #size-cells = <2>;
-    ranges;
-
-    cma_buffer: cma_buffer {
-        compatible = "shared-dma-pool";
-        reusable;
-        size = <0x0 0x04000000>;     /* 64 MiB, sized for the board */
-        alignment = <0x0 0x100000>;
-        linux,cma-default;
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+        dma_pool: dma-pool {
+            compatible = "shared-dma-pool";
+            reusable;
+            size = <0x0 0x04000000>;
+            alignment = <0x0 0x00100000>;
+            linux,cma-default;
+        };
     };
 };
 ```
 
-v6.12 `kernel/dma/contiguous.c`의 `rmem_cma_setup()`은 `compatible = "shared-dma-pool"` 노드에서 `reusable`이 없거나 `no-map`이 있으면 거부하고, `linux,cma-default`가 있으면 그 영역을 기본 CMA로 씁니다(457–498행). 커널 명령줄로 CMA 크기를 줬다면 이 노드는 건너뜁니다. 이 게스트는 DT 노드 대신 커널 설정 `CONFIG_CMA_SIZE_MBYTES=64`로 64 MiB를 `0xfc000000`에 잡았고, 위 출력에서 16 MiB `dma_alloc_coherent`가 그 범위 안 `0xfc300000`을 받았습니다.
+`dma_alloc_coherent` 호출이 반드시 이 CMA pool에서 물리 연속 메모리를 받는다고 단정하지 않습니다. DMA ops·IOMMU·allocation context와 platform 구성이 실제 경로를 결정합니다. 예약량이 있어도 모든 큰 요청의 성공이나 특정 latency를 보장하지 않습니다.
 
-### IOMMU/SMMU
+IOMMU는 장치 주소를 물리 page로 변환하고 격리 domain을 구성할 수 있습니다. 활성화·domain·passthrough 설정과 장치 그룹이 중요하며, IOMMU가 있다는 사실만으로 격리가 완료된 것은 아닙니다. GPU의 private VRAM도 호스트의 일반 DMA buffer와 같은 주소 공간이라고 가정하지 않습니다.
 
-`dma-api-howto.rst`의 "CPU and DMA addresses" 절은 세 종류의 주소를 구분합니다. CPU가 쓰는 가상 주소, CPU 물리 주소, 그리고 device가 쓰는 bus 주소입니다. 문서는 "In some systems, bus addresses are identical to CPU physical addresses, but in general they are not. IOMMUs and host bridges can produce arbitrary mappings"라고 적습니다. 이 게스트에는 IOMMU가 없어 bus 주소가 물리 주소와 같거나(4 GiB 아래), swiotlb가 대신 주소를 바꿨습니다. IOMMU가 있으면 `dma_map_single`이 IOMMU page table에 mapping을 만들고 그 IOVA를 돌려줍니다. 어느 경우든 드라이버 코드는 같고, device에는 API가 준 값만 씁니다.
+## Cortex-M7: 저장소 배치와 MPU 속성을 따로 설정
 
-### Cortex-M7: 정적 DMA pool
+Cortex-M에서는 Linux DMA API 대신 MCU의 bus·cache·MPU 계약을 따릅니다. 여기서는 STM32H743의 D2 AHB SRAM 시작 주소 0x30000000 중 앞 32 KiB를 예제로 예약합니다. 이 주소를 SRAM2라고 부르거나 모든 H7·모든 DMA controller에 같은 map을 적용하지 않습니다.
 
-OS가 cache를 관리해 주지 않는 MCU에서는 DMA buffer를 전용 section에 모으고, 그 영역을 MPU로 non-cacheable로 만들거나 cache 유지 명령을 직접 부릅니다. pool은 [8-01](/blog/embedded/modern-recipes/part8-01-dynamic-memory)의 free-list cache에 정렬만 더하면 됩니다.
+[8-01의 byte pool](/blog/embedded/modern-recipes/part8-01-dynamic-memory)의 저장소 선언만 아래처럼 바꾸는 예입니다. POOL_N=16·BLOCK_SZ=256, used metadata와 task 문맥의 대여·반납 검사는 앞 글을 그대로 사용합니다. metadata까지 NOLOAD 영역으로 옮기지 않습니다.
 
-```c
-#define BLOCK_SIZE 512                       /* multiple of the 32 B M7 line */
-#define POOL_SIZE  8
-
-__attribute__((section(".dma_buffer"), aligned(32)))
-static uint8_t dma_pool_storage[POOL_SIZE * BLOCK_SIZE];
-
-struct dma_pool {
-    void *free_list;
-    SemaphoreHandle_t lock;                  /* task context only, not ISR */
-};
-
-void *dma_pool_alloc(struct dma_pool *p)
-{
-    xSemaphoreTake(p->lock, portMAX_DELAY);
-    void *b = p->free_list;
-    if (b) p->free_list = *(void **)b;
-    xSemaphoreGive(p->lock);
-    return b;
-}
+```c title="dma-pool-placement.c"
+alignas(32) static unsigned char pool_buf[POOL_N][BLOCK_SZ]
+    __attribute__((section(".dma_buffer")));
+_Static_assert(BLOCK_SZ % 32 == 0, "whole-line block stride");
 ```
 
-정렬은 Cortex-M7 D-cache line 32 B(CMSIS 5.9.0 `cachel1_armv7.h`의 `__SCB_DCACHE_LINE_SIZE`)에 맞추고 블록 크기도 그 배수로 둡니다. 그래야 [8-03](/blog/embedded/modern-recipes/part8-03-cache-alignment#자주-보는-함정)에서 본 것처럼 invalidate가 이웃 변수를 함께 지우지 않습니다.
+다음은 DMA 영역만 보이는 linker script 조각입니다. 실제 firmware의 FLASH·다른 RAM·vector·data/bss 초기화와 함께 통합해야 합니다.
 
-### Linker script로 DMA 영역 지정
-
-```text
+```ld title="dma-region.ld"
 MEMORY {
-    AXI_SRAM (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
-    DMA_RAM  (rwx) : ORIGIN = 0x30000000, LENGTH = 32K   /* start of D2 AHB SRAM */
+    DMA_RAM (rw) : ORIGIN = 0x30000000, LENGTH = 32K
 }
-
 SECTIONS {
     .dma_buffer (NOLOAD) : {
-        *(.dma_buffer)
+        . = ALIGN(32);
+        __dma_start = .;
+        KEEP(*(.dma_buffer .dma_buffer.*))
+        . = ALIGN(32);
+        __dma_end = .;
     } > DMA_RAM
+}
+ASSERT(__dma_end <= ORIGIN(DMA_RAM) + LENGTH(DMA_RAM), "DMA region overflow")
+```
+
+NOLOAD는 buffer 내용을 초기화하거나 non-cacheable로 만드는 지시가 아닙니다. 사용 전에 필요한 내용을 채우며, 앞 장에서 설명한 full-line ownership을 지킵니다. 실제 DMA controller의 접근 가능 영역·clock·power domain도 확인합니다.
+
+다음 CMSIS 코드는 **cache를 활성화하기 전 초기 부팅**에 이 부분 영역을 Normal non-cacheable·execute-never로 설정하는 예입니다. region 0이 이 용도로 예약되어 있다고 가정하며 다른 MPU region과의 우선순위·권한을 검토해야 합니다.
+
+```c title="dma-mpu-config.c"
+#include "stm32h743xx.h"
+#include "mpu_armv7.h"
+
+_Static_assert(D2_AHBSRAM_BASE == 0x30000000UL, "H743 D2 base");
+_Static_assert(D2_AHBSRAM_BASE % (32U * 1024U) == 0, "MPU region alignment");
+
+void configure_dma_region_at_boot(void)
+{
+    ARM_MPU_Disable();
+    ARM_MPU_SetRegion(ARM_MPU_RBAR(0, D2_AHBSRAM_BASE),
+        ARM_MPU_RASR(1, ARM_MPU_AP_FULL, 1, 0, 0, 0, 0, ARM_MPU_REGION_SIZE_32KB));
+    ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
 }
 ```
 
-주소는 ST `cmsis_device_h7` v1.10.6의 `stm32h743xx.h`에서 가져왔습니다. `D1_AXISRAM_BASE`는 `0x24000000`("up to 512KB ... over AXI"), `D2_AHBSRAM_BASE`는 `0x30000000`("up to 288KB ... over AXI->AHB Bridge")입니다. 어느 DMA 컨트롤러가 어느 SRAM에 닿는지는 reference manual의 bus matrix 장에서 확인해야 하고, 이 글은 그 문서를 열지 못해 다루지 않습니다.
+TEX/C/B의 조합까지 지정해야 Normal non-cacheable을 뜻합니다. cache가 이미 활성화되었거나 다른 alias가 있거나 DMA가 진행 중일 때 위 코드를 실행하는 전환 절차는 다루지 않습니다. non-cacheable이어도 전송 방향·완료·ordering·buffer 수명은 사라지지 않습니다. CPU가 값을 바로 읽는다고 해서 DMA가 완전히 끝났다고 판단할 수도 없습니다.
 
-### Cortex-M7 MPU non-cacheable region
+## DPDK와 고정 buffer의 위치
 
-```c
-HAL_MPU_Disable();
+DPDK mempool은 NIC queue가 재사용할 packet buffer를 관리하는 한 가지 방식입니다. EAL 초기화·pool 생성 실패·장치 설정·NUMA socket 선택·DMA 주소 mode를 확인해야 하며, HugePages를 사용했다는 이유만으로 IOMMU page-walk 비용이 특정 비율로 줄지는 않습니다.
 
-MPU_Region_InitTypeDef region = {0};
-region.Enable           = MPU_REGION_ENABLE;
-region.Number           = MPU_REGION_NUMBER0;
-region.BaseAddress      = 0x30000000;
-region.Size             = MPU_REGION_SIZE_32KB;
-region.AccessPermission = MPU_REGION_FULL_ACCESS;
-region.TypeExtField     = MPU_TEX_LEVEL1;            /* TEX=001 */
-region.IsCacheable      = MPU_ACCESS_NOT_CACHEABLE;  /* C=0 */
-region.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE; /* B=0 */
-region.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
-region.DisableExec      = MPU_INSTRUCTION_ACCESS_DISABLE;
-HAL_MPU_ConfigRegion(&region);
+`io_uring` fixed buffer도 사용자 메모리 등록 기능이지 모든 device의 DMA 주소를 미리 영구 설정하는 기능은 아닙니다. mmap·pinning·I/O·DMA mapping 경계를 구분합니다. 해당 I/O 경로는 [다음 글](/blog/embedded/modern-recipes/part8-05-zero-copy)에서 다룹니다.
 
-HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-```
+## 검증할 실패 경로
 
-이 설정에서 자주 틀리는 곳은 두 군데입니다. 하나는 `Enable`을 비워 두는 실수입니다. ST `stm32h7xx_hal_driver` v1.11.5의 `MPU_Region_InitTypeDef` 첫 필드가 `Enable`이고 `MPU_REGION_DISABLE`이 0이라, `{0}`으로 시작한 region은 꺼진 채 남습니다. 다른 하나는 TEX = 0, C = 0, B = 1 조합입니다. ARMv7-M ARM(DDI 0403E.b) Table B3-13에서 이 조합은 Normal이 아니라 "Shared device"이고, Normal non-cacheable은 TEX = 001, C = 0, B = 0입니다. 같은 문서 A3.2.1은 Device 메모리 접근이 항상 natural alignment여야 한다고 적으므로, Device로 잡힌 영역에 `memcpy`가 unaligned로 접근하면 fault가 납니다. 같은 설정을 [PE 3-03](/blog/embedded/performance-engineering/part3-03-dma-performance)도 씁니다.
+아래 helper의 계약은 정상 호출만 보고 판단하지 않습니다. 크기 0·NULL·이미 소유한 객체·allocation 실패·mapping 실패·전송 중 release·해제 후 재사용을 검사합니다. SG에는 table 생성 실패와 DMA mapping 실패를 별도로 넣고, 성공 시에만 정확한 정리를 수행하는지 봅니다.
 
-이 영역의 buffer는 cache 유지 호출이 필요 없는 대신 CPU의 읽기·쓰기도 cache를 쓰지 못합니다. 보드가 없어 이 MCU 절의 코드는 실행하지 않았고, 이름과 값은 위 ST·CMSIS 헤더와 ARMv7-M ARM에서 확인했습니다.
+| 층 | 보드 없이 확인할 내용 | 실제 장치에서 확인할 내용 |
+|---|---|---|
+| Linux helper | 실제 kernel header 빌드와 실패 주입 시 정리 순서 | 장치 제출·완료·취소·race·DMA API debug |
+| SG | chained 순회·orig/mapped entry 수·실패 정리 | descriptor 한계·실제 매핑 경로 |
+| CMA DTS | cell 수·크기 encoding·dtc 구문 | board 예약·할당 경로·연속 요청 성공 |
+| MPU/linker | 실제 헤더의 base/attribute와 최종 ELF 배치·영역 초과 거부 | cache alias·bus 접근·DMA 종료·권한 |
 
-### DPDK hugepage mempool
+이 장은 STM32H7 ADC나 NVMe에서 실측하지 않은 latency·jitter·개선 배수를 제시하지 않습니다. Linux memory allocator, DMA mapping과 장치 전송은 서로 다른 비용입니다.
 
-```c
-rte_eal_init(argc, argv);
-struct rte_mempool *mp = rte_pktmbuf_pool_create("MP", 8192, 256, 0,
-                                                  RTE_MBUF_DEFAULT_BUF_SIZE,
-                                                  rte_socket_id());
-```
+### 이번 예제 검증 결과
 
-인자는 DPDK v23.11 `rte_mbuf.h:710`의 `(name, n, cache_size, priv_size, data_room_size, socket_id)` 순서입니다. DPDK Linux 시작 가이드(`sys_reqs.rst`)는 packet buffer용 대용량 pool에 hugepage가 필요하다고 하고, 이유로 page 수가 줄어 TLB miss가 줄어드는 것을 듭니다. 이 글은 DPDK를 실행하지 않았습니다.
+Linux 6.12.107 계열의 실제 kernel header로 coherent·streaming·SG·DMA-BUF helper를 모듈로 빌드하고 modpost를 통과했습니다. 이 모듈은 장치에 연결하거나 load하지 않았습니다. 별도의 synthetic DMA 동작으로 allocation/map/attachment 실패, 유효한 DMA 주소 0, 전송 중 해제 거부, 원래 SG 3개와 mapped 2개, 역순 해제를 검사했습니다. 이 실패 주입은 실제 DMA나 kernel ABI의 런타임 검사가 아닙니다.
 
-## 측정 / 성능 비교
-
-위 모듈 실행에서 잰 것은 streaming sync의 비용입니다. 64 B를 쓴 뒤 `dma_sync_single_for_device(DMA_TO_DEVICE)`를 100번 부른 평균입니다.
-
-| 크기 | 호출당 시간 | 4 KiB 대비 |
-| ---: | ---: | ---: |
-| 4 KiB | 101 ns | 1 |
-| 64 KiB | 1,564 ns | 15.5 |
-| 1 MiB | 24,544 ns | 243 |
-
-같은 모듈을 새 디렉터리에서 다시 빌드해 넣었을 때 세 값은 101·1,477·24,182 ns로 6% 안쪽에서 같았고, `kmalloc` 주소와 bounce 주소(`0x103205000` → `0xf9000000`)는 실행마다 바뀌었습니다. 비용은 크기에 거의 정확히 비례했습니다. cache 유지 명령이 line마다 하나씩 나가기 때문입니다(`dcache_clean_poc`). 그래서 RT 경로에서 큰 buffer를 자주 넘긴다면 coherent(non-cacheable) 영역을 쓰거나, 실제로 바뀐 범위만 sync합니다. 이 숫자는 hvf 게스트의 것이고, Cortex-M7 보드에서의 `SCB_CleanDCache_by_Addr` 비용은 그 보드에서 따로 재야 합니다.
+실제 STM32H743/CMSIS 헤더와 ARM GCC 16.2.0으로 MPU 코드를 교차 컴파일하고 Normal non-cacheable·XN·enable bit encoding을 검사했습니다. GNU 최종 ELF에서 DMA 저장소의 32-byte 정렬·NOLOAD와 영역 초과 거부를 확인했으며 DTS는 dtc 구문 검사를 통과했습니다. 실제 MPU·DMA·cache 동작은 실행하지 않았습니다.
 
 ## 자주 보는 함정
 
-> ⚠️ 일반 `malloc` 결과를 DMA 주소로
-
-```c
-uint8_t *buf = malloc(1024);
-HAL_DMA_Start(&hdma, src, (uint32_t)buf, 1024);
-```
-
-MMU가 없는 Cortex-M에서는 주소 자체는 맞지만, buffer가 cacheable이고 정렬이 보장되지 않습니다. 시작과 크기를 32 B로 맞춘 DMA pool에서 꺼내고, cacheable이라면 전송 전 clean, 수신 후 invalidate를 부릅니다.
-
-> ⚠️ Stack에 DMA buffer
-
-```c
-void func(void)
-{
-    uint8_t buf[256];
-    HAL_DMA_Start_IT(&hdma, src, (uint32_t)buf, 256);
-    return;   /* buf is gone while the DMA is still writing */
-}
-```
-
-함수가 돌아가면 DMA가 그 stack 영역을 계속 덮어씁니다. Linux도 stack 주소는 DMA에 쓰지 말라고 적습니다(`dma-api-howto.rst` "What memory is DMA'able?"). buffer는 `static`이나 pool에 둡니다.
-
-> ⚠️ Cache 유지 누락
-
-```c
-fill_data(dma_buf, len);
-DMA_start(dma_buf, len);   /* the DMA reads memory; the new data may still be in the cache */
-```
-
-cacheable buffer라면 Cortex-M7에서는 `SCB_CleanDCache_by_Addr`를, Linux에서는 `dma_map_single`이나 `dma_sync_single_for_device`를 전송 전에 부릅니다.
-
-> ⚠️ CPU 주소를 DMA 주소로
-
-```c
-DMA_REG = (uint32_t)cpu_addr;   /* virtual address */
-```
-
-위 실행에서 `dma_alloc_coherent`가 준 `cpu`는 `0xffff80008257d000`, `dma`는 `0xd9c30000`이었습니다. device 레지스터에는 `dma_handle`을 씁니다.
-
-> ⚠️ 32 B line MCU에서 크기를 line 배수로 올리지 않음
-
-정렬만 맞추고 크기를 line 배수로 올리지 않으면 buffer의 마지막 line을 뒤 변수와 나눕니다. CMSIS `SCB_InvalidateDCache_by_Addr`는 범위가 걸친 line 전체를 invalidate합니다.
-
-## 재현 환경
-
-모듈은 Debian 13 arm64 게스트(QEMU 11.1.3 `-M virt -accel hvf -cpu host`, 8 GiB)에서 `linux-headers-6.12.116+deb13-arm64`로 빌드했습니다.
-
-```bash
-printf 'obj-m += dmademo.o\n' > Makefile
-make -C /lib/modules/$(uname -r)/build M=$PWD modules
-sudo dmesg -C && sudo insmod dmademo.ko && sudo dmesg && sudo rmmod dmademo
-```
-
-```c
-// SPDX-License-Identifier: GPL-2.0
-/* Prints what the DMA API hands back on this machine, and how long streaming syncs take. */
-#include <linux/module.h>
-#include <linux/platform_device.h>
-#include <linux/dma-mapping.h>
-#include <linux/dma-map-ops.h>
-#include <linux/slab.h>
-#include <linux/gfp.h>
-#include <linux/mm.h>
-#include <linux/ktime.h>
-#include <linux/scatterlist.h>
-
-static struct platform_device *pdev;
-
-static void time_sync(struct device *dev, unsigned int order)
-{
-	size_t len = PAGE_SIZE << order;
-	struct page *pg = alloc_pages(GFP_KERNEL | GFP_DMA, order);
-	void *buf;
-	dma_addr_t h;
-	u64 t0, t;
-	int i;
-
-	if (!pg)
-		return;
-	buf = page_address(pg);
-	h = dma_map_single(dev, buf, len, DMA_TO_DEVICE);
-	if (dma_mapping_error(dev, h))
-		goto out;
-	t0 = ktime_get_ns();
-	for (i = 0; i < 100; i++) {
-		memset(buf, i, 64);                       /* CPU writes ... */
-		dma_sync_single_for_device(dev, h, len, DMA_TO_DEVICE);   /* ... then hands over */
-	}
-	t = (ktime_get_ns() - t0) / 100;
-	pr_info("dmademo: sync_for_device %7zu B: %llu ns/call\n", len, t);
-	dma_unmap_single(dev, h, len, DMA_TO_DEVICE);
-out:
-	__free_pages(pg, order);
-}
-
-#define NUM_BUFS 3
-#define BUF_SIZE 2048
-
-static void sg_demo(struct device *dev)
-{
-	struct sg_table sgt;
-	struct scatterlist *sg;
-	void *buffers[NUM_BUFS] = { 0 };
-	int i;
-
-	if (sg_alloc_table(&sgt, NUM_BUFS, GFP_KERNEL))
-		return;
-	for_each_sg(sgt.sgl, sg, NUM_BUFS, i) {
-		buffers[i] = kmalloc(BUF_SIZE, GFP_KERNEL);
-		if (!buffers[i])
-			goto out;
-		sg_set_buf(sg, buffers[i], BUF_SIZE);
-	}
-	if (dma_map_sgtable(dev, &sgt, DMA_TO_DEVICE, 0))
-		goto out;
-	for_each_sgtable_dma_sg(&sgt, sg, i)       /* program the device from these */
-		pr_info("dmademo: sg[%d] dma=%pad len=%u\n", i, &sg_dma_address(sg), sg_dma_len(sg));
-	dma_unmap_sgtable(dev, &sgt, DMA_TO_DEVICE, 0);
-out:
-	for (i = 0; i < NUM_BUFS; i++)
-		kfree(buffers[i]);
-	sg_free_table(&sgt);
-}
-
-static int __init dmademo_init(void)
-{
-	struct device *dev;
-	dma_addr_t h, h16;
-	void *cpu, *cpu16, *kbuf;
-
-	pdev = platform_device_register_simple("dmademo", -1, NULL, 0);
-	if (IS_ERR(pdev))
-		return PTR_ERR(pdev);
-	dev = &pdev->dev;
-	if (dma_coerce_mask_and_coherent(dev, DMA_BIT_MASK(32)))
-		pr_info("dmademo: no 32-bit DMA\n");
-	pr_info("dmademo: dev_is_dma_coherent=%d\n", dev_is_dma_coherent(dev));
-
-	cpu = dma_alloc_coherent(dev, 4096, &h, GFP_KERNEL);
-	pr_info("dmademo: coherent 4 KiB: cpu=%px is_vmalloc=%d dma=%pad\n",
-		cpu, is_vmalloc_addr(cpu), &h);
-
-	cpu16 = dma_alloc_coherent(dev, 16 << 20, &h16, GFP_KERNEL);
-	pr_info("dmademo: coherent 16 MiB: cpu=%px dma=%pad\n", cpu16, &h16);
-
-	kbuf = kmalloc(4096, GFP_KERNEL);
-	if (kbuf) {
-		phys_addr_t pa = virt_to_phys(kbuf);
-		dma_addr_t s = dma_map_single(dev, kbuf, 4096, DMA_TO_DEVICE);
-
-		pr_info("dmademo: kmalloc buf phys=%pa -> dma_map_single=%pad%s\n", &pa, &s,
-			dma_mapping_error(dev, s) ? " (error)" :
-			(s != pa ? " (bounced: not the physical address)" : ""));
-		if (!dma_mapping_error(dev, s))
-			dma_unmap_single(dev, s, 4096, DMA_TO_DEVICE);
-		kfree(kbuf);
-	}
-
-	sg_demo(dev);
-	time_sync(dev, 0);   /* 4 KiB */
-	time_sync(dev, 4);   /* 64 KiB */
-	time_sync(dev, 8);   /* 1 MiB */
-
-	if (cpu16)
-		dma_free_coherent(dev, 16 << 20, cpu16, h16);
-	if (cpu)
-		dma_free_coherent(dev, 4096, cpu, h);
-	return 0;
-}
-
-static void __exit dmademo_exit(void)
-{
-	platform_device_unregister(pdev);
-}
-
-module_init(dmademo_init);
-module_exit(dmademo_exit);
-MODULE_LICENSE("GPL");
-```
+- **CPU 포인터를 DMA register에 쓰기:** Linux에서는 DMA API가 반환한 dma_addr_t를 사용합니다. virt_to_phys로 임의 대체하지 않습니다.
+- **coherent allocation 직후 전송하고 바로 free:** 완료 또는 장치 정지를 확인하기 전에는 CPU/DMA 주소 쌍을 유지합니다.
+- **타이머 만료를 취소 완료로 취급:** timeout은 장치가 여전히 buffer를 사용할 가능성을 없애지 않습니다.
+- **64-byte 시작 정렬이면 32-byte cache line도 안전:** 64-byte 정렬은 32-byte 정렬을 포함하지만 끝 경계와 다른 객체의 line 공유까지 보장하지는 않습니다.
+- **heap이면 수명이 자동 유지됨:** heap도 조기 free하면 위험합니다. stack도 API가 동기적으로 끝나고 접근성 조건을 만족하는 경우와 비동기 DMA가 남는 경우를 구분합니다. Linux streaming DMA에는 stack을 사용하지 않습니다.
 
 ## 정리
 
-- Coherent mapping은 driver 초기화 때 잡아 두는 ring descriptor 같은 용도이고, streaming은 전송마다 map·unmap하는 data buffer 용도입니다.
-- 하드웨어 coherency가 없는 device에서 `dma_alloc_coherent`는 cache를 끈 vmalloc 영역 주소를 CPU에 줬습니다.
-- 32비트 mask device에 4 GiB 위 buffer를 map하자 swiotlb bounce 주소가 돌아왔습니다. device에는 항상 DMA API가 준 주소를 씁니다.
-- arm64에서 for-device sync는 clean, for-cpu sync는 invalidate이고, 비용은 크기에 비례했습니다(4 KiB 101 ns → 1 MiB 24.5 µs).
-- 큰 연속 영역은 CMA로 예약합니다. 이 게스트에서 16 MiB coherent 할당이 CMA 영역에서 나왔습니다.
-- Cortex-M7 MPU non-cacheable region은 `Enable`을 채우고 TEX = 001, C = 0, B = 0으로 둡니다. TEX = 0, B = 1은 Device 메모리입니다.
-- Stack과 일반 heap 결과는 DMA buffer로 쓰지 않습니다.
+- CPU·물리·DMA 주소와 각 연속성 요구를 구분합니다.
+- coherent는 cache 일관성 계약이며 완료·순서·소유권을 대신하지 않습니다.
+- streaming mapping은 오류 판정과 동일 인자의 unmap/sync 규칙을 따릅니다.
+- SG는 chain을 순회하며 원래 entry 수와 DMA entry 수를 구분합니다.
+- CMA·IOMMU·HugePages는 수명과 장치별 제약을 제거하지 않습니다.
+- linker 배치와 MPU 속성을 분리하고 non-cacheable에서도 종료·ordering을 지킵니다.
 
-다음 편은 **Zero-Copy Pipeline**입니다.
+다음 편은 **Zero-Copy Pipeline**입니다. 같은 buffer를 넘기면서도 완료·재사용·오류 경로를 잃지 않는 방법을 다룹니다.
 
 ## 관련 항목
 
 - [8-03: Cache Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
 - [8-05: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part8-05-zero-copy)
-- [12-10: Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
+- [12-10: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
 - [RTOS 4-02: FreeRTOS Heap](/blog/embedded/rtos/practical-internals/part4-02-freertos-heap)
+
+## 1차 자료
+
+- [Linux 6.12 DMA API guide](https://docs.kernel.org/6.12/core-api/dma-api-howto.html), [DMA API](https://docs.kernel.org/6.12/core-api/dma-api.html): 주소·mask·mapping·sync·SG·pool 계약입니다.
+- [Linux v6.12 dma-mapping.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/dma-mapping.h), [scatterlist.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/scatterlist.h): helper의 실제 API와 순회 정의입니다.
+- [reserved-memory shared-dma-pool binding](https://github.com/torvalds/linux/blob/v6.12/Documentation/devicetree/bindings/reserved-memory/shared-dma-pool.yaml): CMA DTS의 필드와 제약입니다.
+- [ST STM32H743 device header](https://github.com/STMicroelectronics/cmsis-device-h7/blob/master/Include/stm32h743xx.h), [CMSIS MPU API](https://arm-software.github.io/CMSIS_6/main/Core/group__mpu__functions.html): 주소와 MPU register encoding의 기준입니다.

@@ -11,260 +11,233 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Flash가 모자라면 `-Os` + section gc + LTO가 1차 답입니다."** FreeRTOS 기반 예제 하나가 `-O2`의 22,368 B에서 세 옵션으로 7,732 B가 됐습니다. 그다음은 C 라이브러리입니다. `printf` 한 줄짜리 프로그램이 newlib에서 27 KB, newlib-nano에서 7 KB였고, nano에서 `%f`를 켜자 20 KB가 됐습니다.
+> Flash 사용량을 먼저 측정하고, 빌드 옵션·미사용 section·라이브러리 의존성을 하나씩 바꿔 비교합니다. `-Os`, LTO, section GC는 후보이지 모든 프로젝트에 통하는 처방은 아닙니다.
 
 ## 어떤 상황에서 쓰나
 
-64 KB flash MCU에 기능을 계속 더하다 보면 링커가 `region FLASH overflowed`로 멈춥니다. 더 큰 MCU로 바꾸기 전에 컴파일·링크 옵션과 C 라이브러리 선택만으로 얼마나 줄어드는지 먼저 봅니다. 이삿짐을 줄일 때 가구를 버리기 전에 상자마다 무엇이 들었는지부터 확인하는 것과 같습니다. 이 글은 각 단계의 효과를 실제 빌드의 `size` 출력으로 봅니다.
+64 KB MCU에 기능을 자꾸 추가하다 보면 link error로 flash 영역이 넘을 수 있습니다. 새 MCU로 옮기기 전에 컴파일·link 옵션과 libc 선택을 검토할 수 있지만 절감 폭은 코드와 toolchain에 따라 측정해야 합니다.
 
-secure boot처럼 서명할 image의 최대 크기가 정해진 환경에서도 같은 순서로 줄입니다.
+또 한 가지 흔한 상황은 secure boot의 image 크기 제한입니다. signed image의 *max size*가 정해진 환경에서는 코드 줄이기가 필수입니다.
 
 ## 핵심 개념
 
-| 단계 | 하는 일 | 이 글의 측정 |
-| --- | --- | --- |
-| `-Os` | 크기를 늘리는 `-O2` 최적화를 빼고 크기 기준으로 조정 | 22,368 → 18,512 B |
-| `-ffunction-sections -fdata-sections` + `-Wl,--gc-sections` | 함수·변수마다 section을 나누고, 도달하지 않는 section을 링커가 버림 | → 9,588 B |
-| `-flto` | 링크 때 모든 object를 한 번에 최적화 | → 7,732 B |
-| `--specs=nano.specs` | newlib 대신 newlib-nano | `printf` 프로그램 27,068 → 7,057 B |
-| `printf`의 `%f` 지원 | nano는 `-u _printf_float`를 줘야 링크 | 7,981 → 20,021 B |
-| `strip` | ELF 파일의 symbol·debug 정보 제거 | flash image는 그대로 |
+| 1. -Os | 크기 최적화 |
+|---|---|
+| 2. -ffunction-sections + --gc-sections | 사용 안 된 함수 제거 |
+| 3. -flto | 링크 시 전역 최적화 |
+| 4. strip --strip-debug / --strip-unneeded | ELF symbol/debug 정보 정리 |
+| 5. newlib-nano | 작은 libc |
+| 6. printf-tiny / iprintf | printf 단순화 |
+| 7. dead code 분석 | nm, size, bloaty |
 
-GCC 14.2 매뉴얼은 `-Os`를 "enables all -O2 optimizations except those that often increase code size"이고 "causes the compiler to tune for code size rather than execution speed"라고 설명합니다. 반대로 `-O3`는 이 글의 예제에서 `-O2`보다 6,956 B 컸습니다.
+각 단계는 서로 상호작용할 수 있어 절감량이 단순 합산되지는 않습니다. 같은 toolchain·linker script·입력으로 한 항목씩 비교합니다.
+
+효과 (참고):
+
+| Step | 효과 |
+|------|------|
+| `-Os` vs `-O2` | 대상 빌드에서 측정 |
+| + LTO | 대상 빌드에서 측정 |
+| + section gc | 대상 빌드에서 측정 |
+| + newlib-nano | libc 사용 경로별 측정 |
+| + printf-tiny | printf 사용량·기능별 측정 |
 
 ## 코드 / 실제 사용 예
 
-### 컴파일 옵션 단계별 크기
-
-[8-01](/blog/embedded/modern-recipes/part8-01-dynamic-memory)의 allocator 벤치마크(FreeRTOS-Kernel V11.2.0 + heap_4 + TLSF)를 옵션만 바꿔 다섯 번 빌드했습니다. 소스와 하네스는 8-01의 재현 환경과 같고, `K`는 FreeRTOS-Kernel 경로입니다.
+### `-Os` (크기 최적화)
 
 ```bash
-#!/bin/bash
-# FreeRTOS V11.2.0 + heap_4 + TLSF + the 8-01 benchmark, built five ways; text/data/bss from arm-none-eabi-size
-K=${K:-FreeRTOS-Kernel}; P=$K/portable/GCC/ARM_CM3
-SRC="startup.c io.c allocbench.c tlsf.c $K/tasks.c $K/queue.c $K/list.c $K/timers.c $P/port.c $K/portable/MemMang/heap_4.c"
-BASE="-mcpu=cortex-m3 -mthumb -g -ffreestanding -nostdlib -fno-builtin -I. -Ilibc -I$K/include -I$P -T link.ld"
-build() {   # name, flags...
-  local name=$1; shift
-  /usr/bin/time -p arm-none-eabi-gcc $BASE "$@" -o $name.elf $SRC -lgcc 2> $name.time || return
-  printf "%-34s %s  (build %ss)\n" "$name" "$(arm-none-eabi-size $name.elf | awk 'NR==2{printf "text %6d data %4d bss %6d", $1, $2, $3}')" "$(awk '/^real/{print $2}' $name.time)"
-}
-arm-none-eabi-gcc --version | head -1
-build O2           -O2
-build O3           -O3
-build Os           -Os
-build Os+gc        -Os -ffunction-sections -fdata-sections -Wl,--gc-sections
-build Os+gc+lto    -Os -ffunction-sections -fdata-sections -Wl,--gc-sections -flto
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -c main.c -o main.o
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os main.o -T linker.ld -o firmware.elf
+# -O0 디버깅용
+# -O1 가벼운 최적화
+# -O2 일반 성능
+# -Os 크기 우선
+# -O3 더 많은 throughput 최적화 후보 (크기 변화는 측정)
 ```
 
-```text
-arm-none-eabi-gcc (GCC) 16.2.0
-O2                                 text  22368 data    4 bss 211996  (build 1.18s)
-O3                                 text  29324 data    4 bss 211996  (build 1.37s)
-Os                                 text  18512 data    4 bss 211996  (build 1.02s)
-Os+gc                              text   9588 data    4 bss 211996  (build 0.96s)
-Os+gc+lto                          text   7732 data    4 bss 211992  (build 0.76s)
-```
+GCC의 `-Os`는 `-O2` 최적화 대부분을 사용하면서 코드 크기를 늘리는 경향이 있는 몇 가지 최적화를 끄고, 크기 기준으로 조정합니다. 성능·크기 trade-off는 target과 workload에서 비교하고, `-O2`가 더 작거나 더 빠를 수도 있습니다. `-Oz`는 toolchain이 지원할 때 더 공격적으로 크기를 우선합니다. [GCC 최적화 옵션](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html)을 확인합니다.
 
-- **section gc가 가장 크게 줄였습니다(18,512 → 9,588 B).** `-Os` 빌드와 `-Os` + gc 빌드의 `nm` 출력을 비교하면 코드 symbol 116개가 사라졌습니다. `eTaskGetState`, `pcTaskGetName`, `pcTimerGetName`처럼 예제가 부르지 않는 FreeRTOS API와 `arena_reset`, TLSF의 `default_walker`·`integrity_walker` 같은 함수입니다. 함수마다 section이 나뉘자 링커가 도달하지 않는 것을 버렸습니다. 두 옵션은 짝입니다. `-ffunction-sections`만 주면 section이 나뉘기만 하고 버려지지 않습니다.
-- **LTO는 그 위에서 1,856 B를 더 줄였습니다.** 파일 경계를 넘어 inline하고 쓰이지 않는 코드를 지웁니다. 이 예제에서는 빌드 시간도 늘지 않았지만(0.96 → 0.76초), 큰 프로젝트에서는 링크 단계가 무거워집니다.
-- **`bss`(211,996 B)는 LTO에서 4 B 준 것 말고는 옵션과 무관했습니다.** FreeRTOS heap 64 KiB, TLSF pool 64 KiB, 벤치마크 배열이 정적으로 잡혀 있기 때문입니다. flash와 RAM은 따로 봐야 합니다.
-
-### 무엇이 큰지 찾기
+### Function/data sections + GC
 
 ```bash
-#!/bin/bash
-# what strip changes: the ELF file, not the bytes that go to flash
-cp Os+gc+lto.elf fw.elf
-arm-none-eabi-objcopy -O binary fw.elf fw.bin
-arm-none-eabi-strip --strip-all -o fw-stripped.elf fw.elf
-arm-none-eabi-objcopy -O binary fw-stripped.elf fw-stripped.bin
-ls -l fw.elf fw-stripped.elf fw.bin fw-stripped.bin | awk '{printf "%-18s %8d bytes\n", $9, $5}'
-cmp fw.bin fw-stripped.bin && echo "flash image identical"
-echo "-- 8 largest symbols (Os+gc+lto)"
-arm-none-eabi-nm --size-sort -S fw.elf | grep -i " [tT] " | tail -8
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os \
+    -ffunction-sections -fdata-sections -c main.c -o main.o
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os main.o \
+    -Wl,--gc-sections -T linker.ld -o firmware.elf
 ```
+
+`-ffunction-sections`와 `-fdata-sections`는 함수와 데이터를 개별 input section에 두고, `--gc-sections`는 linker가 root로 삼은 section에서 도달할 수 없는 section을 제거합니다. linker script의 `KEEP`, vector table, 생성자, 간접 참조나 외부에서 쓰는 symbol은 root·참조 관계에 따라 남을 수 있습니다. `used`는 컴파일러가 항목을 버리지 않게 할 뿐, linker의 section GC까지 항상 막는 표식은 아닙니다. 필요하면 linker script의 `KEEP()` 또는 toolchain이 지원하는 retain 기능을 사용하고 map 파일로 확인합니다.
+
+### LTO (Link-Time Optimization)
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -flto \
+    -ffunction-sections -fdata-sections -c file1.c -o file1.o
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -flto \
+    -ffunction-sections -fdata-sections -c file2.c -o file2.o
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -flto \
+    file1.o file2.o -Wl,--gc-sections -T linker.ld -o firmware.elf
+```
+
+LTO는 link 시 LTO intermediate representation이 있는 object 간 최적화를 수행할 수 있습니다. GCC driver로 최종 link하고 compile과 link에 맞는 옵션을 전달해야 합니다. 일반 object나 archive의 최적화 범위는 구성에 따라 다르며, assembly·외부에서 참조되는 symbol·ABI 경계는 link 결과와 map으로 확인합니다. 크기뿐 아니라 실행시간, RAM, 빌드 재현성도 비교합니다. [GCC LTO 설명](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html)을 참고합니다.
+
+### strip
+
+```bash
+arm-none-eabi-objcopy -O binary firmware.elf firmware.bin
+# 배포용 ELF가 필요하면 원본 debug ELF를 보존한 뒤 별도 복사본만 strip
+cp firmware.elf firmware-stripped.elf
+arm-none-eabi-strip --strip-debug firmware-stripped.elf
+```
+
+debug 정보는 보통 raw `.bin`에 포함되지 않으므로 ELF에서 debug symbol을 strip해도 이미 생성된 firmware image의 loadable section 크기가 줄지는 않습니다. 배포 ELF 전송 크기는 작아질 수 있습니다. Flash 사용량은 `.text`뿐 아니라 vector table, `.rodata`, 초기값이 있는 `.data` load image와 linker 배치로 확인합니다. 원본 ELF와 map은 디버깅·현장 분석용으로 보존합니다.
+
+### Newlib-nano
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os --specs=nano.specs \
+    main.c -T linker.ld -o firmware.elf
+```
+
+`nano.specs`는 설치된 GNU Arm toolchain의 newlib-nano 구성을 선택합니다. 사용할 syscall stub, locale, wide-character, floating-point formatting 지원은 toolchain 구성과 link 옵션을 확인해야 합니다. 최소 기능이라고 가정하지 말고 map과 실제 포맷 테스트로 확인합니다.
 
 ```text
-fw-stripped.bin        7736 bytes
-fw-stripped.elf       12688 bytes
-fw.bin                 7736 bytes
-fw.elf               115540 bytes
-flash image identical
--- 8 largest symbols (Os+gc+lto)
-00000538 000000fc t prvAddNewTaskToReadyList
-00000aa8 00000148 t pvPortMalloc
-000013b8 00000164 t tlsf_malloc
-00000940 00000168 t xTaskResumeAll
-000007b4 0000018c t xTaskIncrementTick
-00000ea4 00000290 t prvTimerTask
-0000152c 00000298 t bench_task
-000018a0 000002fc T Reset_Handler
+대표 절약 (ARM Cortex-M4)
+newlib              측정 필요
+newlib-nano         측정 필요
 ```
 
-`nm --size-sort -S`의 둘째 열이 크기(16진)입니다. 여기서 가장 큰 `Reset_Handler`(0x2fc = 764 B)는 LTO가 `main`과 초기화 코드를 그 안으로 inline한 결과입니다. LTO를 켜면 symbol 이름과 실제 코드의 대응이 달라지므로, 함수별 크기를 볼 때는 LTO를 끈 빌드와 함께 봅니다.
+### printf 대안
 
-### `strip`은 flash를 줄이지 않는다
-
-같은 출력의 위쪽이 그 확인입니다. `strip --strip-all`로 ELF 파일은 115,540 B에서 12,688 B로 줄었지만, `objcopy -O binary`로 뽑은 flash image는 두 경우 모두 7,736 B로 byte 단위까지 같았습니다(`cmp`). `strip`이 지우는 symbol table과 debug section은 flash에 올라가지 않습니다. 줄어드는 것은 전송·보관하는 ELF 파일 크기이고, 대신 그 ELF로는 symbol 단위 디버깅을 할 수 없습니다.
-
-### C 라이브러리: newlib vs newlib-nano
-
-Homebrew의 `arm-none-eabi-gcc`에는 C 라이브러리가 없어서, 이 절은 Debian 13 게스트의 `gcc-arm-none-eabi` 14.2.1 + `libnewlib-arm-none-eabi` 4.5.0으로 했습니다.
-
-```c
+```c title="printf-call.c"
 #include <stdio.h>
-volatile int x = 42;
-volatile float f = 3.14f;
-int main(void)
-{
-    printf("value=%d\n", x);
-#ifdef WITH_FLOAT
-    printf("f=%.2f\n", f);
-#endif
-    return 0;
+
+void report_count(unsigned count) {
+    printf("count=%u\n", count);
 }
 ```
 
+newlib-nano에서 floating-point `printf` 포맷이 필요하다면 최종 link에 `-u _printf_float`가 필요한 toolchain 구성이 있습니다. tinyprintf 계열은 API와 지원 포맷이 구현마다 다르므로 선택한 구현의 header/API에 맞게 교체하고 `%`, 폭·정밀도, 오류 출력 동작까지 확인합니다.
+
+### Compiler 옵션 추가 정리
+
 ```bash
-#!/bin/bash
-# newlib vs newlib-nano, Debian gcc-arm-none-eabi 14.2.1 + libnewlib-arm-none-eabi 4.5.0
-CF="-mcpu=cortex-m3 -mthumb -Os -ffunction-sections -fdata-sections -Wl,--gc-sections --specs=nosys.specs"
-sz() { arm-none-eabi-size $1 | awk 'NR==2{printf "text %6d data %5d bss %5d", $1, $2, $3}'; }
-arm-none-eabi-gcc $CF                                   -o a.elf pf.c && echo "newlib,      %d only        $(sz a.elf)"
-arm-none-eabi-gcc $CF -DWITH_FLOAT                      -o b.elf pf.c && echo "newlib,      %d and %.2f    $(sz b.elf)"
-arm-none-eabi-gcc $CF --specs=nano.specs                -o c.elf pf.c && echo "newlib-nano, %d only        $(sz c.elf)"
-arm-none-eabi-gcc $CF --specs=nano.specs -DWITH_FLOAT   -o d.elf pf.c && echo "newlib-nano, %d and %.2f    $(sz d.elf)"
-arm-none-eabi-gcc $CF --specs=nano.specs -DWITH_FLOAT -u _printf_float -o e.elf pf.c && echo "newlib-nano + -u _printf_float $(sz e.elf)"
+# 예시: compile과 최종 link에 target/optimization/LTO 설정 전달
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -flto \
+    -ffunction-sections -fdata-sections -c main.c -o main.o
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -flto --specs=nano.specs \
+    main.o -T linker.ld -Wl,--gc-sections,--print-memory-usage \
+    -o firmware.elf
 ```
 
-```text
-newlib,      %d only        text  27068 data  1768 bss   808
-newlib,      %d and %.2f    text  27108 data  1768 bss   808
-newlib-nano, %d only        text   7057 data   104 bss   504
-newlib-nano, %d and %.2f    text   7981 data   108 bss   504
-newlib-nano + -u _printf_float text  20021 data   472 bss   504
+옵션을 무조건 한 묶음으로 복사하지 않습니다. 예를 들어 `-fno-builtin`은 library 호출 대체를 막아 크기·성능을 악화시킬 수 있고, unwind table 제거도 예외·unwind·진단 기능에 영향을 줍니다. 실제 toolchain이 지원하는 옵션과 제품 요구를 확인한 뒤 하나씩 비교합니다.
+
+### Size 분석 도구
+
+```bash
+arm-none-eabi-size firmware.elf
+
+arm-none-eabi-nm --size-sort firmware.elf | tail -20
+# 가장 큰 symbol 20개
+
+# bloaty (Google) — 가장 직관적
+bloaty firmware.elf
 ```
 
-(링커가 `_write is not implemented and will always fail` 같은 경고를 함께 내는데, `nosys.specs`가 시스템 호출을 빈 함수로 채우기 때문이고 크기 측정과는 무관해 위에서 뺐습니다.)
+`size`와 linker map은 section별 합계를 보여주고, `nm --size-sort`는 symbol 크기를 정렬합니다. Bloaty는 지원 포맷과 symbol/debug 정보가 있는 ELF에서 파일·compile unit·symbol 관점으로 분해할 수 있지만 결과는 binary와 디버그 정보 구성에 좌우됩니다. 수치가 Flash image 크기와 같은지 확인합니다.
 
-- **newlib-nano로 바꾸자 `printf` 한 줄 프로그램이 27,068 B에서 7,057 B가 됐습니다.** `data`도 1,768 B에서 104 B로 줄었습니다.
-- **nano에서 `%.2f`를 써도 크기는 924 B만 늘었습니다.** 실수 형식화 코드가 아직 링크되지 않았기 때문이고, 그 결과 출력이 비어 나옵니다(아래 실행).
-- **`-u _printf_float`로 실수 형식화를 켜자 20,021 B가 됐습니다.** `%f` 하나가 nano의 이점 대부분을 되돌립니다.
-
-### nano에서 `%f`가 비어 나오는 것 확인
-
-같은 프로그램을 semihosting(`rdimon.specs`)으로 링크해 QEMU 10.0.13 `mps2-an385`에서 돌렸습니다. `vec.c`는 vector table 두 칸(초기 SP, `_start`)만 둔 파일입니다.
+### Section을 직접 정리
 
 ```c
-extern void _start(void);
-extern unsigned long __stack;
-__attribute__((section(".isr_vector"), used)) void (*const vtab[2])(void) = { (void (*)(void))0x20400000, _start };
+/* 실행 위치 변경 예시. linker script/startup의 load·run 주소 처리 필요 */
+__attribute__((section(".ramfunc")))
+void hot_function(void) { ... }
+
+/* section 이름만으로 초기화 코드가 실행 후 flash에서 제거되지는 않음 */
+__attribute__((section(".init_text")))
+void board_init(void) { ... }
 ```
 
-```bash
-#!/bin/bash
-# run the %d/%.2f program on QEMU mps2-an385 with newlib-nano + semihosting (rdimon)
-for f in "" "-u _printf_float"; do
-  arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Os --specs=nano.specs --specs=rdimon.specs -DWITH_FLOAT $f \
-    -Wl,--section-start=.isr_vector=0 -Wl,-Ttext=0x400 -Wl,-Tdata=0x20000000 -o r.elf vec.c pf.c
-  echo "== nano.specs $f"
-  timeout 10 qemu-system-arm -M mps2-an385 -nographic -semihosting -kernel r.elf
-done
-```
-
-```text
-== nano.specs 
-value=42
-f=
-== nano.specs -u _printf_float
-value=42
-f=3.14
-```
-
-`-u _printf_float` 없이는 `f=` 뒤가 비었고, 링크 오류나 경고도 없었습니다. 실수를 찍는 코드가 있는데 결과가 비어 있다면 이 옵션부터 봅니다. 정수만 찍는다면 기본 nano로 충분합니다.
-
-### 권장 옵션 묶음
-
-```bash
-arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb \
-    -Os -flto \
-    -ffunction-sections -fdata-sections \
-    --specs=nano.specs \
-    -Wl,--gc-sections -Wl,--print-memory-usage \
-    -o firmware.elf $SRCS
-```
-
-`-Wl,--print-memory-usage`는 링크가 끝날 때 region마다 사용량과 비율을 찍습니다. `-fno-common`은 GCC 14.2 매뉴얼이 기본값이라고 적고("The default is -fno-common"), GCC 10 변경 사항에 "GCC now defaults to -fno-common"이 있어 따로 줄 필요가 없습니다. `-fno-unwind-tables`·`-fno-asynchronous-unwind-tables`는 unwind 정보를 빼지만, C++ 예외나 backtrace를 쓰는 빌드에서는 그 기능이 함께 사라지므로 이 글에서는 넣지 않았습니다.
+linker script와 startup copy table이 section 배치를 결정합니다. `.ramfunc`는 실행 중 RAM 점유를 늘리고 초기값을 flash에서 복사한다면 flash image에도 load copy가 필요합니다. section을 `.init_text`로 이름 붙였다고 초기화 후 flash에서 제거되지는 않습니다. section 이름만으로 flash 공간이 회수되지 않습니다.
 
 ### Inline 정책
 
 ```c
-static inline int max_i(int a, int b) { return a > b ? a : b; }   /* small: inline */
+/* 작은 함수는 inline */
+static inline int max(int a, int b) { return a > b ? a : b; }
 
-__attribute__((noinline)) void log_line(const char *s);            /* large, cold: keep one copy */
+/* 큰 함수는 inline 금지 (`-Os`는 보통 자동 처리) */
+__attribute__((noinline)) void big_func(void) { ... }
 ```
 
-크기가 큰 함수를 여러 곳에서 inline하면 호출 위치마다 코드가 복제됩니다. `-Os`는 크기 기준으로 inline 여부를 정하지만, 오류 처리처럼 드물게 도는 큰 함수는 `noinline`으로 한 벌만 두는 편이 확실합니다. 이 절은 별도로 재지 않았습니다.
+`inline`과 `noinline`은 크기·실행속도에 영향을 주지만 결과는 최적화·호출 지점·LTO에 따라 달라집니다. hot은 inline, cold는 noinline으로 일괄 지정하지 말고 map·disassembly와 workload로 비교합니다.
 
 ## 측정 / 성능 비교
 
-| 빌드 (FreeRTOS + heap_4 + TLSF 예제, Cortex-M3) | text | `-O2` 대비 |
-| --- | ---: | ---: |
-| `-O2` | 22,368 B | 100% |
-| `-O3` | 29,324 B | 131% |
-| `-Os` | 18,512 B | 83% |
-| `-Os` + section gc | 9,588 B | 43% |
-| `-Os` + section gc + LTO | 7,732 B | 35% |
+| 비교 단계 | 결과 |
+|---|---|
+| baseline `-O2` | 대상 빌드에서 측정 |
+| `-Os` | 대상 빌드에서 측정 |
+| `-Os -ffunction-sections -Wl,--gc-sections` | 대상 빌드에서 측정 |
+| 위 설정 + `-flto` | 대상 빌드에서 측정 |
+| 위 설정 + newlib-nano | 해당 toolchain/link 경로에서 측정 |
+| 위 설정 + 선택한 작은 printf 구현 | 필요한 format 기능을 포함해 측정 |
 
-| `printf` 프로그램 (Cortex-M3, `-Os` + gc) | text |
-| --- | ---: |
-| newlib, `%d` | 27,068 B |
-| newlib-nano, `%d` | 7,057 B |
-| newlib-nano, `%d`+`%.2f` (실수 출력 안 됨) | 7,981 B |
-| newlib-nano + `-u _printf_float` | 20,021 B |
+다섯 옵션의 합성 효과는 코드·toolchain·linker script별로 측정해야 합니다.
 
-이 숫자는 이 예제의 것입니다. section gc의 효과는 "쓰지 않는 코드가 얼마나 링크되어 있었나"에 달려 있어, 라이브러리를 통째로 넣은 프로젝트일수록 큽니다. 속도 변화는 재지 않았습니다.
+빌드 시간은 반대로 늘어날 수 있습니다. `-flto`의 link 비용은 project 규모와 toolchain에서 측정합니다.
+
+LTO는 link 시간과 메모리 사용을 늘릴 수 있고 실행속도도 바뀔 수 있습니다. 최종 firmware에서 크기와 runtime 영향을 모두 비교합니다.
 
 ## 자주 보는 함정
 
-> ⚠️ 디버깅 빌드를 양산에 올림
+> `-O0` 디버깅 빌드로 양산
 
 ```bash
-arm-none-eabi-gcc -O0 -g ...      # debug build
+gcc -O0 main.c       # 크기·성능 변화는 빌드별 측정
 ```
 
-`-O0`은 크기 최적화를 하지 않습니다. 빌드 시스템에서 release 설정의 최적화 옵션을 검사해 `-O0` 빌드가 서명·배포 단계로 넘어가지 않게 합니다.
+디버깅 빌드를 양산에 올리는 사고는 가끔 발생합니다. 빌드 system에서 `-O0`을 차단합니다.
 
-> ⚠️ `-ffunction-sections`만 주고 `--gc-sections`를 빠뜨림
+> `-ffunction-sections` 없이 section GC granularity가 거친 경우
 
-section만 나뉘고 아무것도 버려지지 않습니다. 위 표의 18,512 → 9,588 B는 두 옵션을 함께 줬을 때의 값입니다.
+```bash
+arm-none-eabi-gcc -Os -ffunction-sections -c main.c -o main.o
+arm-none-eabi-gcc main.o -T linker.ld -o firmware.elf
+```
 
-> ⚠️ gc가 필요한 코드를 지움
+`--gc-sections`가 켜져도 각 object가 하나의 큰 `.text` section으로 묶여 있으면, 그 안의 미사용 함수만 개별적으로 제거하기 어렵습니다. function/data section을 나누고 GC를 켠 뒤 map 파일에서 제거 범위를 확인합니다.
 
-vector table처럼 코드에서 직접 참조하지 않지만 하드웨어가 쓰는 데이터는 `--gc-sections`가 지울 수 있습니다. vector table 하나짜리 파일을 `arm-none-eabi-gcc` 16.2로 링크해 보면, `__attribute__((used))`만 붙인 경우는 `--gc-sections`에 지워졌고, 링커 스크립트의 `KEEP(*(.vectors))`만 둔 경우는 LTO 없이는 남았지만 `-flto`를 켜자 지워졌습니다. 둘 다 둔 경우만 LTO 유무와 상관없이 남았습니다. 이 글의 하네스(8-01·6-12)가 vector table에 `used`와 `KEEP`을 둘 다 두는 이유입니다.
+> LTO와 호환 안 되는 코드
 
-> ⚠️ nano에서 `%f`가 조용히 비어 나옴
+inline assembly는 operand, clobber와 side effect를 compiler에 정확히 선언해야 합니다. 외부에서 참조하는 weak/assembly symbol은 linker가 볼 수 있는 참조와 script root를 확인합니다. `used`는 compiler 단계와 linker GC를 모두 해결하는 일반 해법이 아닙니다.
 
-위 실행처럼 경고 없이 빈 문자열이 나옵니다. 실수를 찍어야 하면 `-u _printf_float`를 주고 약 12 KB(7,981 → 20,021 B)를 감수하거나, 정수로 바꿔 찍습니다(`printf("%d.%02d", v / 100, v % 100)`).
+> Newlib-nano의 float 제거 무시
 
-> ⚠️ 큰 함수를 `inline`으로
+```c
+printf("%.2f\n", 3.14);    /* 선택한 libc 설정에서 지원 여부를 link/test */
+```
 
-호출 위치마다 복제되어 크기가 늘어납니다. `-O3`는 이 글의 예제를 31% 키웠습니다.
+newlib-nano의 float formatter는 toolchain에 따라 별도 link option이 필요할 수 있습니다. 지원되지 않을 때 동작을 추측하지 말고 link 결과와 target test를 확인합니다.
 
-## 재현 환경
+> Inline 남용
 
-- 옵션 단계별 크기: Apple M2 Pro, `arm-none-eabi-gcc` 16.2.0(Homebrew, newlib 없음), FreeRTOS-Kernel V11.2.0, 8-01의 `allocbench.c`·하네스. `K=FreeRTOS-Kernel bash sizes.sh`, 이어서 `bash strip.sh`.
-- C 라이브러리: Debian 13 arm64 게스트의 `gcc-arm-none-eabi` 14.2.1, `libnewlib-arm-none-eabi` 4.5.0, `qemu-system-arm` 10.0.13. `bash libc.sh`, `bash run-pf.sh`.
+```c
+inline void log_line(const char *s) { /* 50 줄 */ }
+```
+
+큰 함수를 inline하면 호출 site별 코드 복제로 크기가 증가할 수 있습니다. 최종 disassembly와 section 크기를 보고 결정합니다.
 
 ## 정리
 
-- `-Os`, section gc, LTO 세 단계로 이 예제의 text가 22,368 B에서 7,732 B(35%)가 됐고, 가장 큰 몫은 section gc였습니다.
-- `-O3`는 `-O2`보다 31% 컸습니다.
-- `strip`은 ELF 파일(115,540 → 12,688 B)만 줄이고 flash image(7,736 B)는 바꾸지 않았습니다.
-- newlib-nano는 `printf` 프로그램을 27 KB에서 7 KB로 줄였지만, `%f`를 켜면(`-u _printf_float`) 20 KB가 됩니다.
-- nano에서 `-u _printf_float` 없이 `%f`를 쓰면 경고 없이 빈 문자열이 나왔습니다.
-- `--gc-sections`를 쓸 때는 vector table처럼 하드웨어만 참조하는 것을 `KEEP`과 `used` 둘 다로 지킵니다.
+- `-Os`, `-ffunction-sections + --gc-sections`, `-flto`는 1차로 검토할 수 있는 옵션입니다.
+- newlib-nano의 크기·기능 차이는 toolchain과 사용 API로 확인합니다.
+- printf의 float 지원 제거 효과는 대상 빌드에서 측정합니다.
+- map, `nm`, `size`와 지원되는 경우 `bloaty`로 큰 section·symbol의 원인을 좁힙니다.
+- inline 정책은 hot/cold 경로와 code size를 측정해 정합니다.
+- LTO는 build cost와 최종 크기·실행시간을 함께 비교합니다.
+- 디버깅 빌드(-O0)는 양산 차단합니다.
 
 다음 편은 **전력 최적화**입니다. Sleep, peripheral clock gating, DVFS를 다룹니다.
 

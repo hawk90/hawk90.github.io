@@ -11,474 +11,236 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Cache line alignment는 false sharing을 줄이는 한 수단입니다."** 다만 "64바이트"는 상수가 아닙니다. 이 글의 측정에서 Apple M2 Pro는 64바이트 간격으로 떼어 놓은 두 카운터가 128바이트 간격보다 2.3배 느렸고, 같은 기계의 Linux 게스트는 line 크기를 64로 보고했습니다. 대상에서 재 보고 그 값으로 element 사이 간격을 정합니다.
+> **객체의 시작 정렬, 배열 원소의 간격, 함께 읽는 데이터의 배치를 각각 설계합니다.** false sharing 완화와 DMA cache 관리는 목적이 다르며, alignment 하나로 동기화나 소유권 문제가 해결되지는 않습니다.
 
 ## 어떤 상황에서 쓰나
 
-멀티코어에서 두 코어가 각자 자기 카운터만 증가시키는데도, 두 카운터가 같은 cache line에 있으면 그 line이 두 코어 사이를 오가며 느려집니다. 두 사람이 각자 다른 칸에 적는데 공책이 한 권뿐이라 계속 건네주고 받는 상황과 같습니다. 아래 측정에서 같은 line에 둔 두 카운터는 128바이트 떨어뜨려 둔 경우보다 5.5배 느렸습니다.
+서로 다른 코어가 독립적인 카운터를 갱신해도 같은 cache line을 공유하면 소유권을 주고받는 traffic이 생길 수 있습니다. 같은 건물의 별도 방을 쓰더라도 공용 출입문 하나를 번갈아 잠그는 상황과 비슷합니다. 필요한 것은 카운터의 주소가 다르다는 사실보다 실제 coherence 단위가 겹치는지입니다.
 
-DMA buffer를 cacheable 영역에 둘 때도 line 단위가 문제가 됩니다. cache 유지 보수 명령은 byte가 아니라 line 단위로 동작하므로, buffer의 시작과 끝이 line 경계에 맞지 않으면 옆 변수가 같은 line에 섞여 함께 clean·invalidate됩니다.
+반면 SoA는 한 종류의 부품만 쓰는 조립 라인에 필요한 상자만 가까이 두는 방식입니다. cache line마다 관심 없는 field를 함께 가져오는 일을 줄이려는 설계이며, atomic 카운터를 떨어뜨리는 문제와 구별합니다. DMA에서는 한 묶음의 캐시 라인을 통째로 소유하는 것이 중요합니다. 한 장의 종이를 나눠 쓰다가 한쪽 메모를 지우면 옆 메모도 잃을 수 있듯, invalidate 범위에 다른 객체의 dirty byte가 끼어 있으면 데이터가 사라질 수 있습니다.
 
-## 핵심 개념
+이 글은 **정렬과 데이터 배치를 만드는 코드**에 집중합니다. 상세한 false-sharing 진단·부하 비교는 [9-09](/blog/embedded/modern-recipes/part9-09-false-sharing), DMA 할당 영역과 장치 계약은 [8-04](/blog/embedded/modern-recipes/part8-04-dma-allocator)로 이어집니다. 보드 실측 없이 고정 cycle이나 배속을 제시하지 않습니다.
 
-두 hot counter가 같은 line에 있을 때와 line이 분리된 경우의 차이를 그림으로 먼저 봅니다.
+## 먼저 분리할 세 가지 조건
+
+다음 그림은 같은 line의 독립 counter와 분리된 counter를 비교합니다. 그림의 line 폭은 설명용이며 모든 CPU에서 같은 byte 수를 뜻하지 않습니다.
 
 ![Cache line alignment — false sharing 회피](/images/blog/modern-recipes/diagrams/part3-01-cache-alignment.svg)
 
-그림은 64바이트 line을 가정했습니다. 실제 크기는 CPU마다 다르고, 같은 CPU에서도 어디에 묻느냐에 따라 답이 달랐습니다.
+| 조건 | 검사 방법 | 보장하지 않는 것 |
+|---|---|---|
+| 객체 시작 정렬 | alignof와 주소 나머지 | 내부 field가 서로 다른 line에 있음 |
+| 배열 원소 간격 | sizeof와 인접 원소 주소 차이 | 실제 CPU의 coherence 단위와 일치함 |
+| 접근할 데이터의 밀집 | field offset·loop의 접근 집합 | throughput·vectorization 개선 |
 
-| 출처 | 값 | 확인 방법 |
-| --- | ---: | --- |
-| Cortex-M7 D-cache line | 32 B | CMSIS 5.9.0 `cachel1_armv7.h`: "Cortex-M7 cache line size is fixed to 32 bytes (8 words)" |
-| Linux v6.12 arm64 `L1_CACHE_BYTES` | 64 B | `arch/arm64/include/asm/cache.h`의 `L1_CACHE_SHIFT (6)` |
-| Apple M2 Pro, macOS `sysctl hw.cachelinesize` | 128 B | 이 글의 실행 |
-| 같은 Mac의 Debian 13 게스트, `sysconf(_SC_LEVEL1_DCACHE_LINESIZE)` | 64 B | 이 글의 실행(Linux 6.12.116, GCC 14.2) |
-| Apple clang 21 `std::hardware_destructive_interference_size` | 256 B | 이 글의 실행. 같은 실행의 `hardware_constructive_interference_size`는 64 |
+C++17의 `std::hardware_destructive_interference_size`는 구현이 제공하는 배치 권고 상수입니다. runtime에서 현재 CPU의 모든 cache level을 조회한 결과가 아니며, library에서 해당 기능을 제공하는지도 feature-test macro로 확인합니다. 이 값을 공개 ABI에 직접 넣으면 toolchain 옵션에 따라 구조체 layout이 바뀔 수 있으므로 안정된 ABI에서는 프로젝트의 배치 상수를 명시적으로 관리합니다.
 
-C++17의 `std::hardware_destructive_interference_size`는 컴파일러가 정한 권장 상수이지 실행 중인 CPU를 잰 값이 아닙니다. 그래서 가장 확실한 방법은 아래처럼 간격을 바꿔 가며 직접 재는 것입니다. 같은 M2 Pro에서 thread 수와 접근 방식을 더 넓게 바꾼 측정은 [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)에 있고, 이 글의 결과도 그 글과 같은 방향입니다.
+Linux에서 `sysconf(_SC_LEVEL1_DCACHE_LINESIZE)`를 쓰는 경우도 해당 상수가 지원되는지와 실패 반환을 처리해야 합니다. L1 line 크기 하나를 SMP 전체의 모든 간섭 범위나 DMA 최소 정렬로 일반화하지 않습니다. 아래 C++ 예제는 **64-byte 간격을 선택한 배치 실험**이며 실행 중인 Mac이나 target의 실제 line 크기라는 주장이 아닙니다.
 
-## 코드 / 실제 사용 예
+## 타입 정렬로 배열 원소 간격 만들기
 
-아래 layout은 모두 Apple clang 21.0.0 `-std=c++17 -O2`로 컴파일해 `sizeof`·`offsetof`를 찍어 확인했습니다(전체 확인 코드는 [재현 환경](#재현-환경)의 `layouts.cpp`).
+배열 시작만 정렬하면 원소는 원래 sizeof만큼 이어집니다. 각 원소가 떨어져 있어야 한다면 원소 타입에 alignment를 부여하고 실제 stride를 검사합니다. 빈 padding 배열을 직접 계산하면 `line - sizeof(T)`의 underflow나 길이 0 배열 문제가 생길 수 있으므로 compiler의 tail padding을 활용합니다.
 
-```text
-Apple clang version 21.0.0 (clang-2100.4.1.1)
-sizeof(hot_data)=64 alignof=64
-counters_padded: sizeof=128 offsetof(b)=64
-counters (no pad): sizeof=128 offsetof(b)=64
-spsc_ring<int,16>: offsetof(tail)=64 offsetof(buf)=128 sizeof=192
-guest: offsetof(email)=64 sizeof=448
-foo: offsetof(b)=4 sizeof=64
-percpu.c: cc -std=c11 -c OK
-```
+다음 C++17 코드는 선택한 간격보다 큰 payload를 컴파일 시 거부합니다.
 
-### `alignas`로 struct 시작 정렬
-
-```cpp
+```cpp title="cache-slot.hpp"
+#pragma once
 #include <atomic>
+#include <cstddef>
 
-struct alignas(64) hot_data {
-    std::atomic<int> counter;
+template<std::size_t Spacing, class T>
+struct alignas(Spacing) CacheSlot {
+    static_assert(Spacing != 0 && (Spacing & (Spacing - 1)) == 0,
+                  "spacing must be a power of two");
+    static_assert(sizeof(T) <= Spacing && alignof(T) <= Spacing,
+                  "payload exceeds chosen spacing");
+    T value{};
 };
 
-hot_data g_data;   /* &g_data % 64 == 0 */
+constexpr std::size_t kSpacing = 64;
+using CounterSlot = CacheSlot<kSpacing, std::atomic<unsigned>>;
+static_assert(alignof(CounterSlot) == kSpacing, "slot alignment");
+static_assert(sizeof(CounterSlot) == kSpacing, "slot stride");
 ```
 
-type에 붙인 `alignas(64)`는 객체의 시작 주소와 `sizeof`(64)를 정합니다. C에서는 type이 아니라 멤버나 객체에 `_Alignas(64)`(`alignas`)를 붙이고, GCC·Clang 속성 `__attribute__((aligned(64)))`도 씁니다([8-02](/blog/embedded/modern-recipes/part8-02-memory-alignment#explicit-alignment)).
+`CounterSlot counters[2]`에서는 시작 정렬뿐 아니라 원소 사이 간격도 64 byte입니다. 실제 coherence 단위가 더 크면 두 slot이 여전히 같은 단위를 공유할 수 있습니다. 반대로 간격을 과하게 키우면 RAM·cache 용량·TLB 부담이 커집니다. 배열 하나의 시작에만 alignas를 붙이는 것과는 구별합니다.
 
-### Element 사이 간격으로 false sharing 차단
+### SPSC head/tail은 배치와 순서 보장 구분하기
 
-```cpp
-struct counters {
-    alignas(64) std::atomic<int> a;
-    alignas(64) std::atomic<int> b;
-};
+다음은 head/tail을 떨어뜨리는 저장 구조만 보여 줍니다. `CacheSlot`의 정의와 함께 사용합니다.
 
-static_assert(offsetof(counters, b) == 64 && sizeof(counters) == 128, "one line each");
-```
+```cpp title="spsc-layout.hpp"
+#pragma once
+#include "cache-slot.hpp"
 
-멤버마다 `alignas(64)`를 붙이면 `b`는 이미 offset 64에서 시작합니다. 위 출력에서 `char pad_a[64 - sizeof(...)]`를 넣은 `counters_padded`와 넣지 않은 `counters`는 `sizeof`·`offsetof(b)`가 같았습니다. 수동 padding은 멤버에 `alignas`를 붙일 수 없는 경우(예: 다른 사람이 정의한 type을 배열로 둘 때)에만 필요합니다. 반대로 struct 머리에만 `alignas(64)`를 붙이고 멤버에는 안 붙이면(`foo`) `b`는 offset 4로 `a`와 같은 line에 붙습니다.
-
-### SPSC ring buffer head/tail 분리
-
-```cpp
-template<typename T, size_t N>
-struct spsc_ring {
-    alignas(64) std::atomic<size_t> head;
-    alignas(64) std::atomic<size_t> tail;
-    alignas(64) T buf[N];
-};
-```
-
-producer는 `head`만, consumer는 `tail`만 씁니다. 위 출력에서 `tail`은 offset 64, `buf`는 128에서 시작했습니다. 다만 두 쪽이 상대방 index를 읽어야 full/empty를 판단하므로, 서로 다른 line에 두어도 그 읽기 때문에 line 이동이 0이 되지는 않습니다. 줄이는 방법(상대 index 캐시)은 [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)에서 다룹니다. M2 Pro처럼 128바이트 간격이 필요한 CPU라면 64를 그 값으로 바꿉니다.
-
-### AoS → SoA 변환
-
-```cpp
-/* AoS: one particle = 28 B; the loop uses x and vx only */
-struct particle { float x, y, z, vx, vy, vz, mass; };
-
-/* SoA: each field is its own array */
-struct particles_soa {
-    alignas(64) float x[N];
-    alignas(64) float y[N];
-    alignas(64) float vx[N];
-    alignas(64) float vy[N];
+template<class T, std::size_t N>
+struct SpscLayout {
+    static_assert(N > 1, "at least two slots required");
+    CacheSlot<kSpacing, std::atomic<std::size_t>> head;
+    CacheSlot<kSpacing, std::atomic<std::size_t>> tail;
+    alignas(kSpacing) T buf[N]{};
 };
 ```
 
-`x += vx * dt` 루프는 particle 하나에서 `x`와 `vx` 8 B만 쓰지만, AoS에서는 28 B 전체가 같은 line들로 함께 올라옵니다. 가져온 byte 중 (28 − 8) / 28 ≈ 71%를 이 루프는 쓰지 않습니다. SoA에서는 가져온 line이 모두 이 루프의 데이터입니다. 4 Mi개 particle에 50번 갱신한 시간을 M2 Pro에서 쟀습니다.
+producer가 head를 쓰고 consumer가 tail을 쓰더라도 양쪽은 상대 index를 읽습니다. index 게시·조회와 payload 전달에 필요한 coherence traffic은 남습니다. alignment가 release/acquire 순서, 슬롯 재사용, full/empty 판정이나 atomic의 lock-free 성질을 보장하지 않습니다. 실제 queue 연산은 [SPSC 구현](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 별도 계약입니다.
 
-```cpp
-// AoS vs SoA: x += vx * dt over N particles, 50 sweeps, median of 5
-#include <algorithm>
-#include <chrono>
-#include <cstdio>
-#include <vector>
+## AoS와 SoA는 같은 데이터를 유지하며 비교하기
 
-constexpr int N = 1 << 22;                    // 4 Mi particles
-struct particle { float x, y, z, vx, vy, vz, mass; };   // 28 B
-struct particles_soa {
-    alignas(64) float x[N];
-    alignas(64) float y[N];
-    alignas(64) float vx[N];
-    alignas(64) float vy[N];
+x와 vx만 읽는 loop라면 AoS의 다른 field가 같은 line에 들어올 수 있습니다. SoA는 x와 vx를 연속 배열로 만들지만 모든 field를 함께 쓰는 loop에서는 AoS도 후보입니다. 비교할 때 한쪽 데이터나 field를 없애서 이득처럼 보이게 만들지 않습니다.
+
+다음 예제는 두 layout 모두 동일한 7개 float field를 유지하며 x만 갱신합니다.
+
+```cpp title="particle-layout.hpp"
+#pragma once
+#include <cstddef>
+
+constexpr std::size_t kParticles = 128;
+struct Particle { float x, y, z, vx, vy, vz, mass; };
+struct ParticleSoa {
+    alignas(64) float x[kParticles]{};
+    alignas(64) float y[kParticles]{};
+    alignas(64) float z[kParticles]{};
+    alignas(64) float vx[kParticles]{};
+    alignas(64) float vy[kParticles]{};
+    alignas(64) float vz[kParticles]{};
+    alignas(64) float mass[kParticles]{};
 };
 
-static particle parts[N];
-static particles_soa soa;
-
-template <class F> static double median5(F f)
-{
-    std::vector<double> v;
-    for (int r = 0; r < 5; r++) {
-        auto t0 = std::chrono::steady_clock::now();
-        f();
-        v.push_back(std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
-    }
-    std::sort(v.begin(), v.end());
-    return v[2];
+inline void advance_aos(Particle (&p)[kParticles], float dt) {
+    for (std::size_t i = 0; i < kParticles; ++i) p[i].x += p[i].vx * dt;
 }
-
-int main()
-{
-    const float dt = 0.001f;
-    for (int i = 0; i < N; i++) { parts[i].vx = soa.vx[i] = 1.0f; }
-    double aos = median5([&] { for (int s = 0; s < 50; s++) for (int i = 0; i < N; i++) parts[i].x += parts[i].vx * dt; });
-    double so  = median5([&] { for (int s = 0; s < 50; s++) for (int i = 0; i < N; i++) soa.x[i] += soa.vx[i] * dt; });
-    std::printf("sizeof(particle) = %zu B\n", sizeof(particle));
-    std::printf("AoS %.3f s, SoA %.3f s (50 sweeps x %d)\n", aos, so, N);
-    std::printf("check %.1f %.1f\n", parts[N - 1].x, soa.x[N - 1]);
+inline void advance_soa(ParticleSoa& p, float dt) {
+    for (std::size_t i = 0; i < kParticles; ++i) p.x[i] += p.vx[i] * dt;
 }
 ```
 
-```text
-sizeof(particle) = 28 B
-AoS 0.124 s, SoA 0.029 s (50 sweeps x 4194304)
-check 0.3 0.3
-```
+x와 vx 두 field만 읽는다고 해서 정확히 나머지 비율만큼 메모리 traffic이 낭비된다고 계산하지 않습니다. cache line 재사용·write allocate·prefetch·vectorization·working set이 실제 traffic을 결정합니다. SIMD를 적용하면 별도로 tail·load 범위·floating-point 계산 순서도 확인합니다.
 
-SoA가 4.3배 빨랐습니다. `-Rpass=loop-vectorize`로 보면 clang은 두 루프를 모두 폭 4로 vectorize했지만, AoS 루프는 interleave 1, SoA 루프는 interleave 4였습니다(`soa.cpp:35`, `:36`). 그래서 이 차이에는 가져오는 byte 수의 차이와 SIMD 코드 품질의 차이가 함께 들어 있습니다.
+### Hot/cold는 배열 단위로 분리하기
 
-### Hot/Cold 분리
+큰 struct의 앞부분에 hot field를 모아도 다음 요소까지의 stride에는 cold 영역이 들어갑니다. 자주 순회하는 데이터가 작다면 두 배열로 나눠 hot 요소끼리 모으는 방법을 비교할 수 있습니다.
 
-```cpp
-struct guest {
-    /* hot: touched every frame */
-    alignas(64) int id;
-    int active;
-    int last_login;
+다음은 같은 index가 한 사용자를 뜻하는 배치 예제입니다.
 
-    /* cold: only when shown on screen */
-    alignas(64) char email[128];
-    char address[256];
+```cpp title="hot-cold.hpp"
+#pragma once
+#include <cstddef>
+#include <cstdint>
+
+constexpr std::size_t kGuests = 128;
+struct GuestHot { std::uint32_t id, active, last_login; };
+struct GuestCold { char email[128]; char address[256]; };
+struct GuestStore {
+    GuestHot hot[kGuests]{};
+    GuestCold cold[kGuests]{};
 };
 ```
 
-자주 접근하는 필드는 line 하나에 모으고, 드물게 보는 필드는 다음 line부터 둡니다. 수동 `pad` 배열 대신 cold 쪽 첫 멤버에 `alignas(64)`를 붙이면 hot 필드를 늘려도 계산을 다시 할 필요가 없습니다. 위 출력에서 `email`은 offset 64에서 시작했습니다.
+삭제·정렬·압축 시 두 배열의 index 대응을 함께 유지해야 합니다. hot 필드를 여럿이 동시에 갱신하면 이 배열에도 false sharing이 생길 수 있습니다. 데이터 밀집과 독립 writer의 격리는 서로 다른 목표이므로 무조건 모든 요소에 padding을 넣지는 않습니다.
 
-### Per-CPU counter
+## C11 카운터의 정렬과 합산 의미
 
-```c
+C11에서는 C++의 `struct alignas(...)` 문법 대신 member에 alignas를 붙입니다. 다음은 4개 shard를 갖는 예제이며 `cpu` 값은 호출자가 매핑한 유효 index입니다. 배열을 만든 것만으로 scheduler가 task를 코어에 고정하지는 않습니다.
+
+```c title="counter-shards.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdalign.h>
 #include <stdatomic.h>
 
-#define NUM_CORES 8
-#define LINE 128            /* measured on Apple M2 Pro; use the target's value */
+enum { COUNTER_SHARDS = 4, COUNTER_SPACING = 64 };
+struct counter_shard { alignas(COUNTER_SPACING) _Atomic(uint64_t) value; };
+_Static_assert(sizeof(struct counter_shard) == COUNTER_SPACING, "shard stride");
+static struct counter_shard counters[COUNTER_SHARDS];
 
-struct counter_per_cpu {
-    alignas(LINE) atomic_long value;
-} per_cpu_counters[NUM_CORES];
-
-_Static_assert(sizeof(struct counter_per_cpu) == LINE, "one slot per line");
-
-void inc(int cpu)
-{
-    atomic_fetch_add_explicit(&per_cpu_counters[cpu].value, 1, memory_order_relaxed);
+bool counter_add(size_t cpu, uint64_t delta) {
+    if (cpu >= COUNTER_SHARDS) return false;
+    atomic_fetch_add_explicit(&counters[cpu].value, delta, memory_order_relaxed);
+    return true;
 }
-
-long sum_all(void)
-{
-    long s = 0;
-    for (int i = 0; i < NUM_CORES; i++)
-        s += atomic_load_explicit(&per_cpu_counters[i].value, memory_order_relaxed);
-    return s;
+uint64_t counter_sum(void) {
+    uint64_t result = 0;
+    for (size_t i = 0; i < COUNTER_SHARDS; ++i)
+        result += atomic_load_explicit(&counters[i].value, memory_order_relaxed);
+    return result;
 }
 ```
 
-core마다 자기 line의 slot만 쓰고, 읽을 때만 합칩니다. slot 간격이 실제로 얼마나 중요한지 thread 수를 늘리며 쟀습니다. 각 thread가 자기 slot을 1억 번 증가시킨 시간(5회 중앙값)입니다.
+각 load는 atomic이어도 전체 합은 한 시점의 일관된 snapshot이 아닙니다. 종료 후 모든 writer와 join한 상태에서는 최종 합을 비교할 수 있습니다. unsigned 합산은 64-bit 범위를 넘으면 modulo로 돌아가며, payload를 게시하는 동기화 용도로 쓰지 않습니다. `_Atomic(uint64_t)`가 target에서 lock-free인지도 별도 확인하며 ISR에 적합하다고 가정하지 않습니다.
 
-```text
-slot stride   8 B:  T=1 0.210 s  T=2 1.208 s  T=4 5.970 s  T=8 8.069 s
-slot stride 128 B:  T=1 0.262 s  T=2 0.259 s  T=4 0.217 s  T=8 0.251 s
-```
+Linux kernel의 [v6.12 include/linux/cache.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/cache.h)는 `____cacheline_aligned`를 `SMP_CACHE_BYTES` 기반 alignment attribute로 정의합니다. `CONFIG_SMP`에 따른 변종과 section을 함께 지정하는 변종도 있습니다. 사용자 공간의 C++ 상수를 kernel macro와 섞거나 모든 kernel 구성에서 같은 byte 수라고 가정하지 않습니다.
 
-128 B 간격에서는 thread가 8개로 늘어도 시간이 0.22~0.26초로 그대로였습니다. 일이 thread 수만큼 늘었는데 시간이 같으니 처리량은 thread 수에 비례해 늘었습니다. 8 B 간격(배열에 붙여 둔 경우)은 자기 T=1 시간(0.210초)보다 thread 2개에서 5.8배, 4개에서 약 28배 오래 걸렸습니다. 8개에서는 이 실행에서 38배였지만, 독립 검증으로 다시 돌리자 25배와 78배로 크게 흔들렸습니다. 이 Mac의 P-core는 8개라(`hw.perflevel0.physicalcpu` = 8) T=8까지만 쟀습니다.
+## DMA에서는 line 전체의 소유권 관리하기
 
-### Linux 커널 매크로
+invalidate는 단순히 hot data를 cache에서 빼는 문제가 아닙니다. CPU가 수정했지만 메모리에 쓰지 않은 dirty line을 버리면 옆 객체의 최신 값까지 잃을 수 있습니다. receive buffer는 시작 주소와 전체 저장 크기를 cache line에 맞춰 다른 객체와 line을 나누어 쓰지 않는 것이 한 가지 설계입니다.
 
-```c
-#include <linux/cache.h>
+다음은 CMSIS의 Cortex-M7 D-cache API에 맞춰 32-byte line을 사용하는 예입니다. 실제 DMA 전송 길이는 65 byte지만 소유하는 저장소는 96 byte입니다. `SCB_InvalidateDCache_by_Addr` 선언은 사용 중인 device/CMSIS 헤더를 통해 포함합니다.
 
-struct foo {
-    int a;
-    int b ____cacheline_aligned;   /* starts a new line */
-};
+```c title="dma-cache-storage.c"
+#include <stdint.h>
+#include <stdalign.h>
 
-static struct bar ____cacheline_aligned g_bar;
-```
+enum { M7_LINE = 32, RX_BYTES = 65 };
+enum { RX_STORAGE = ((RX_BYTES + M7_LINE - 1) / M7_LINE) * M7_LINE };
+alignas(M7_LINE) static uint8_t dma_rx[RX_STORAGE];
+_Static_assert(sizeof(dma_rx) % M7_LINE == 0, "whole cache lines");
 
-v6.12 `include/linux/cache.h:67`은 `____cacheline_aligned`를 `__attribute__((__aligned__(SMP_CACHE_BYTES)))`로 정의하고, `SMP_CACHE_BYTES`는 `L1_CACHE_BYTES`입니다(`:13`). arm64에서 이 값은 64입니다. v6.12 소스의 `.c`·`.h` 165개 파일에서 정의를 뺀 332곳이 이 매크로를 씁니다(`grep -rw`).
-
-## 측정 / 성능 비교
-
-두 thread가 각자 `std::atomic<long>` 카운터를 `fetch_add(1, relaxed)`로 1억 번 증가시킨 시간입니다. Apple M2 Pro, macOS, Apple clang 21.0.0 `-std=c++17 -O2 -pthread`, 각 배치 5회 중앙값입니다. macOS에서 Mach `THREAD_AFFINITY_POLICY`는 이 M2 Pro에서 `KERN_NOT_SUPPORTED`(46)를 돌려주고 thread를 특정 core에 고정하는 API는 없어, thread마다 `QOS_CLASS_USER_INTERACTIVE`로 P-core 배치를 요청만 했습니다.
-
-```cpp
-// false sharing: two threads, each fetch_add on its own counter, 1e8 times
-#include <atomic>
-#include <chrono>
-#include <cstddef>
-#include <cstdio>
-#include <cstdlib>
-#include <thread>
-#include <vector>
-#include <algorithm>
-#include <pthread.h>
-
-struct same_line   { std::atomic<long> a, b; };
-struct alignas(64) start_only64 { std::atomic<long> a, b; };
-struct each64      { alignas(64) std::atomic<long> a; alignas(64) std::atomic<long> b; };
-struct each128     { alignas(128) std::atomic<long> a; alignas(128) std::atomic<long> b; };
-
-static constexpr long N = 100000000;
-
-template <class S>
-static double run_once()
-{
-    static S s;                              // static storage: alignment honoured
-    s.a = 0; s.b = 0;
-    auto work = [](std::atomic<long> *c) {
-#ifdef __APPLE__
-        pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
-#endif
-        for (long i = 0; i < N; i++) c->fetch_add(1, std::memory_order_relaxed);
-    };
-    auto t0 = std::chrono::steady_clock::now();
-    std::thread t1(work, &s.a), t2(work, &s.b);
-    t1.join(); t2.join();
-    auto t = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-    if (s.a != N || s.b != N) std::abort();
-    return t;
+void rx_before_dma(void) {
+    SCB_InvalidateDCache_by_Addr(dma_rx, (int32_t)sizeof(dma_rx));
 }
-
-template <class S>
-static void report(const char *name)
-{
-    std::vector<double> v;
-    for (int r = 0; r < 5; r++) v.push_back(run_once<S>());
-    std::sort(v.begin(), v.end());
-    std::printf("%-14s b-a=%3zu B  median %.3f s  (min %.3f, max %.3f)\n", name,
-                offsetof(S, b) - offsetof(S, a), v[2], v[0], v[4]);
-}
-
-int main()
-{
-    static_assert(offsetof(each64, b) == 64 && sizeof(each64) == 128, "each64");
-    report<same_line>("same line");
-    report<start_only64>("alignas(64) struct");
-    report<each64>("alignas(64) each");
-    report<each128>("alignas(128) each");
+void rx_after_dma_complete(void) {
+    SCB_InvalidateDCache_by_Addr(dma_rx, (int32_t)sizeof(dma_rx));
 }
 ```
 
-```text
-Apple clang version 21.0.0 (clang-2100.4.1.1)
-hw.cachelinesize=128 machdep=Apple M2 Pro
-same line      b-a=  8 B  median 1.142 s  (min 1.101, max 1.184)
-alignas(64) struct b-a=  8 B  median 1.160 s  (min 1.050, max 1.212)
-alignas(64) each b-a= 64 B  median 0.481 s  (min 0.374, max 0.604)
-alignas(128) each b-a=128 B  median 0.206 s  (min 0.204, max 0.209)
-```
+호출자는 전용 buffer의 이전 내용을 버려도 되는 상태에서 첫 함수를 호출하고, DMA가 실제로 멈춘 뒤 두 번째 함수를 호출합니다. 그 사이 CPU는 해당 buffer에 접근하지 않습니다. DMA error·취소도 장치가 더 이상 쓰지 않는지 확인한 뒤 소유권을 돌려줍니다. 이 코드는 cache 관리 단계만 보이며 DMA stream 설정·interrupt·완료 판정은 구현하지 않습니다.
 
-| 배치 | 두 카운터 간격 | 중앙값 | 128 B 간격 대비 |
-| --- | ---: | ---: | ---: |
-| 같은 struct에 나란히 | 8 B | 1.142 s | 5.5배 |
-| struct 머리에만 `alignas(64)` | 8 B | 1.160 s | 5.6배 |
-| 멤버마다 `alignas(64)` | 64 B | 0.481 s | 2.3배 |
-| 멤버마다 `alignas(128)` | 128 B | 0.206 s | 1.0 |
+TX에서는 CPU가 준비한 데이터를 DMA가 읽기 전에 clean하는 등 방향별 protocol이 다릅니다. coherent DMA와 non-cacheable 영역은 별도 계약을 사용합니다. cache 함수가 내부에서 범위를 확장해 준다고 해도 shared boundary line의 소유권 문제를 해결해 주지는 않습니다. 자세한 allocator·영역 선택은 다음 장에서 다룹니다.
 
-- **struct 머리의 `alignas(64)`는 아무것도 바꾸지 못했습니다.** 두 카운터가 여전히 8 B 간격입니다.
-- **이 CPU에서는 64 B 간격으로도 부족했습니다.** `hw.cachelinesize`가 보고한 128 B 간격에서 차이가 사라졌습니다. 64 B 줄은 5회 안에서도 0.374~0.604초로 가장 많이 흔들렸고, 같은 프로그램을 한 번 더 돌린 실행에서는 중앙값이 0.340초(1.6배)였습니다. 다른 세 줄은 두 실행의 차이가 5% 안쪽이었습니다(1.142·1.190, 1.160·1.188, 0.206·0.208초). 같은 기계의 Linux 게스트가 64를 보고한 것과 다르므로, 숫자를 가져다 쓰지 말고 이 측정처럼 간격을 바꿔 봅니다.
-- 이 숫자는 M2 Pro의 것입니다. 임베디드 Cortex-A에서는 같은 프로그램을 그 보드에서 돌려 표를 다시 채웁니다.
+## 검증할 것은 배치, 결과 동일성, 제품 성능
 
-## 자주 보는 함정
+먼저 코드가 의도한 layout을 만드는지 검사합니다. C++17의 over-aligned 타입은 지원되는 toolchain과 allocator에서 올바르게 배치되어야 합니다. 지역 객체의 alignas가 조용히 무시된다고 설명하거나 ARM에서 x86용 stack 옵션을 권하지 않습니다. 전역 객체는 최종 linker 배치도 검사합니다.
 
-> ⚠️ struct 머리에만 `alignas`
+| 대상 | 기능·구조 검사 | 별도 제품 검증 |
+|---|---|---|
+| CacheSlot | type alignment·배열 stride·큰 payload 거부 | 실제 coherence 단위·RAM/working set 비용 |
+| SPSC layout | head/tail/buffer offset | 게시 순서·race·목표 부하 |
+| AoS/SoA | 같은 입력의 결과와 미갱신 field 유지 | compiler vectorization·cache traffic·처리량 |
+| shard counter | index 거부·동시 갱신 뒤 최종 합 | affinity·NUMA·주기적 합산 비용 |
+| DMA buffer | 시작 정렬·저장 크기 96 byte | cache API·장치 종료·dirty line 소유권 |
 
-```cpp
-struct foo {
-    alignas(64) int a;
-    int b;   /* offset 4: same line as a */
-};
-```
+기존의 Cortex-A72 고정 load cycle, 측정하지 않은 8~10배 개선, 코어 수에 따른 선형 scaling 주장은 사용하지 않습니다. 최종 성능 비교에는 CPU/SoC·clock·compiler/flag·thread 배치·메모리 속성·반복 조건·분포와 실제 입력을 함께 기록합니다.
 
-위 출력에서 `offsetof(foo, b)`는 4였습니다. thread마다 나눠 쓰는 멤버라면 각 멤버에 `alignas`를 붙입니다.
+### 이번 예제 검증 결과
 
-> ⚠️ Stack 변수의 큰 alignment를 믿지 못함
+Clang 23.1.6의 ASan/UBSan에서 stack·C++17 new 배열의 slot 정렬과 stride, SPSC 저장 구조의 offset, 너무 큰 payload의 컴파일 거부를 확인했습니다. AoS/SoA에 동일한 128개 입력을 넣어 x의 계산 결과와 나머지 6개 field가 같음을 검사했습니다. shard별 4개 host thread가 각각 10000회 갱신한 뒤 join하고 최종 합 40000을 확인했으며 실행 시간은 비교하지 않았습니다.
 
-[8-02](/blog/embedded/modern-recipes/part8-02-memory-alignment#stack-위의-over-aligned-변수)의 실행에서 `arm-none-eabi-gcc` 16.2와 Apple clang 21은 `alignas(64)` 지역 변수를 모두 64 정렬로 만들었습니다(frame을 더 잡고 `bic`로 주소를 내립니다). 따로 옵션을 켤 필요는 없지만 frame이 커지므로 작은 task stack에서는 `static`으로 옮기는 편이 낫습니다. GCC의 `-mstackrealign`은 x86 옵션이라 Arm에는 해당하지 않습니다.
-
-> ⚠️ 32 B line 칩에 64 정렬
-
-```c
-/* Cortex-M7 D-cache line = 32 B (CMSIS cachel1_armv7.h) */
-alignas(64) static uint8_t rx_buf[32];   /* half of the 64 B slot is padding */
-```
-
-Cortex-M7은 32 B line이므로 32 정렬이면 충분하고, 64로 맞추면 작은 객체마다 그만큼 padding이 늡니다. 반대로 M2 Pro처럼 128 B가 필요한 CPU에 64를 쓰면 위 표처럼 효과가 절반에 그칩니다.
-
-> ⚠️ DMA buffer 정렬 누락
-
-```c
-uint8_t buf[1000];   /* alignment 1: shares its first and last line with neighbours */
-SCB_InvalidateDCache_by_Addr(buf, sizeof buf);
-```
-
-CMSIS 5.9.0 `SCB_InvalidateDCache_by_Addr`의 설명은 "D-Cache is invalidated starting from a 32 byte aligned address in 32 byte granularity"이고, 구현은 `addr`의 하위 5비트를 크기에 더해 line 단위로 반복합니다(`cachel1_armv7.h` 318–345행). 그래서 `buf`가 line 중간에서 시작하면 앞 변수의 일부가 같은 line에 있어 함께 invalidate되고, CPU가 그 변수에 막 쓴 값이 cache에만 있었다면 사라집니다. DMA buffer는 시작을 32 B로 정렬하고 크기도 32의 배수로 올려 다른 변수와 line을 나누지 않게 합니다. 이 함정은 Cortex-M7 보드가 없어 실행하지 않았고, 위 CMSIS 소스로만 확인했습니다.
-
-## 재현 환경
-
-모든 측정은 Apple M2 Pro(macOS)에서 Apple clang 21.0.0으로 했습니다. Linux 게스트 값은 같은 Mac의 QEMU(`-accel hvf`) Debian 13 arm64에서 GCC 14.2로 얻었습니다.
-
-```bash
-c++ -std=c++17 -O2 -pthread fs.cpp -o fs && ./fs
-c++ -std=c++17 -O2 -pthread pc.cpp -o pc && ./pc
-c++ -std=c++17 -O2 soa.cpp -o soa && ./soa
-c++ -std=c++17 -O2 layouts.cpp -o layouts && ./layouts
-cc -std=c11 -O2 -Wall -Wextra -c percpu.c
-sysctl -n hw.cachelinesize hw.perflevel0.physicalcpu
-```
-
-`pc.cpp`는 thread 수를 바꿔 가며 같은 일을 시키는 per-thread counter 측정입니다.
-
-```cpp
-// per-thread counters: T threads, each fetch_add 1e8 on its own slot
-#include <atomic>
-#include <chrono>
-#include <cstdio>
-#include <cstdlib>
-#include <thread>
-#include <vector>
-#include <algorithm>
-#include <pthread.h>
-
-template <std::size_t Align> struct slot { alignas(Align) std::atomic<long> value; };
-
-static constexpr long N = 100000000;
-
-template <std::size_t Align>
-static double run_once(int T)
-{
-    static slot<Align> s[8];
-    for (auto &x : s) x.value = 0;
-    std::vector<std::thread> th;
-    auto t0 = std::chrono::steady_clock::now();
-    for (int i = 0; i < T; i++)
-        th.emplace_back([i] {
-#ifdef __APPLE__
-            pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
-#endif
-            for (long k = 0; k < N; k++) s[i].value.fetch_add(1, std::memory_order_relaxed);
-        });
-    for (auto &t : th) t.join();
-    double t = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-    long sum = 0;
-    for (int i = 0; i < T; i++) sum += s[i].value.load();
-    if (sum != N * T) std::abort();
-    return t;
-}
-
-template <std::size_t Align>
-static void row()
-{
-    std::printf("slot stride %3zu B:", sizeof(slot<Align>));
-    for (int T : {1, 2, 4, 8}) {
-        std::vector<double> v;
-        for (int r = 0; r < 5; r++) v.push_back(run_once<Align>(T));
-        std::sort(v.begin(), v.end());
-        std::printf("  T=%d %.3f s", T, v[2]);
-    }
-    std::printf("\n");
-}
-
-int main() { row<8>(); row<128>(); }
-```
-
-`layouts.cpp`는 이 글의 struct를 모아 `sizeof`·`offsetof`를 찍습니다.
-
-```cpp
-#include <atomic>
-#include <cstddef>
-#include <cstdio>
-
-struct alignas(64) hot_data { std::atomic<int> counter; };
-
-struct counters_padded {
-    alignas(64) std::atomic<int> a;
-    char pad_a[64 - sizeof(std::atomic<int>)];
-    alignas(64) std::atomic<int> b;
-    char pad_b[64 - sizeof(std::atomic<int>)];
-};
-struct counters { alignas(64) std::atomic<int> a; alignas(64) std::atomic<int> b; };
-
-template <typename T, std::size_t N>
-struct spsc_ring {
-    alignas(64) std::atomic<std::size_t> head;
-    alignas(64) std::atomic<std::size_t> tail;
-    alignas(64) T buf[N];
-};
-
-struct guest {
-    alignas(64) int id;
-    int active;
-    int last_login;
-    alignas(64) char email[128];      /* cold: starts on the next line */
-    char address[256];
-};
-
-struct foo { alignas(64) int a; int b; };
-
-using ring16 = spsc_ring<int, 16>;
-
-int main()
-{
-    std::printf("sizeof(hot_data)=%zu alignof=%zu\n", sizeof(hot_data), alignof(hot_data));
-    std::printf("counters_padded: sizeof=%zu offsetof(b)=%zu\n", sizeof(counters_padded), offsetof(counters_padded, b));
-    std::printf("counters (no pad): sizeof=%zu offsetof(b)=%zu\n", sizeof(counters), offsetof(counters, b));
-    std::printf("spsc_ring<int,16>: offsetof(tail)=%zu offsetof(buf)=%zu sizeof=%zu\n",
-                offsetof(ring16, tail), offsetof(ring16, buf), sizeof(ring16));
-    std::printf("guest: offsetof(email)=%zu sizeof=%zu\n", offsetof(guest, email), sizeof(guest));
-    std::printf("foo: offsetof(b)=%zu sizeof=%zu\n", offsetof(foo, b), sizeof(foo));
-}
-```
+실제 CMSIS 6 헤더로 Cortex-M7 cache API 호출을 교차 컴파일하고, 최종 ARM ELF에서 dma_rx의 32-byte 시작 정렬과 96-byte 저장소를 확인했습니다. 이 결과는 DMA·cache 유지보수 명령을 실제 보드에서 실행했다는 뜻이 아닙니다.
 
 ## 정리
 
-- line 크기는 Cortex-M7 32 B, Linux arm64 매크로 64 B, M2 Pro `hw.cachelinesize` 128 B로 서로 달랐고, 같은 Mac의 Linux 게스트는 64를 보고했습니다.
-- struct 머리의 `alignas(64)`는 멤버 사이 간격을 바꾸지 않습니다. 멤버마다 `alignas`를 붙이면 수동 padding은 필요 없습니다.
-- M2 Pro에서 같은 line의 두 카운터는 128 B 간격보다 5.5배, 64 B 간격도 2.3배 느렸습니다.
-- 128 B 간격의 per-thread counter는 thread 8개까지 시간이 그대로였습니다. 8 B 간격은 4개에서 1개일 때의 약 28배가 걸렸고, 8개에서는 실행마다 25~78배로 흔들렸습니다.
-- SoA는 이 루프에서 AoS보다 4.3배 빨랐습니다(가져오는 byte 수와 vectorize된 코드의 차이가 함께 들어 있습니다).
-- DMA buffer는 시작과 크기를 line 단위로 맞춥니다. CMSIS의 invalidate는 32 B line 단위로 동작합니다.
-- Linux는 `____cacheline_aligned`(`SMP_CACHE_BYTES` 정렬)를 v6.12에서 332곳에 씁니다.
+- 타입 정렬은 sizeof와 배열 stride에 반영되며, 배열 시작만 정렬하는 것과 구별합니다.
+- 64 byte는 본문 배치 실험의 선택값이며 실제 target의 coherence 단위로 일반화하지 않습니다.
+- head/tail을 분리해도 index와 payload 전달에 필요한 traffic·동기화는 남습니다.
+- AoS/SoA는 같은 field와 결과를 유지하며, hot/cold 분리는 index 대응을 지킵니다.
+- shard별 atomic 갱신과 전체 합의 snapshot 의미는 다릅니다.
+- non-coherent DMA의 cache 관리는 line 소유권과 전송 방향·완료를 함께 다룹니다.
 
-다음 편은 **DMA Allocator**입니다.
+다음 편은 **DMA Allocator**입니다. alignment 외에 DMA가 접근할 수 있는 영역과 할당·반납 계약을 확인합니다.
 
 ## 관련 항목
 
+- [8-02: 메모리 정렬](/blog/embedded/modern-recipes/part8-02-memory-alignment)
 - [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
 - [8-04: DMA Allocator](/blog/embedded/modern-recipes/part8-04-dma-allocator)
-- [8-02: 메모리 정렬](/blog/embedded/modern-recipes/part8-02-memory-alignment)
 - [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)
 - [PE 2-07: Cache Line](/blog/embedded/performance-engineering/part2-07-cache-line)
+
+## 1차 자료
+
+- [C++ draft hardware interference size](https://eel.is/c++draft/hardware.interference): 구현이 제공하는 배치 권고값의 의미입니다.
+- [C++ draft alignment](https://eel.is/c++draft/basic.align), [sizeof](https://eel.is/c++draft/expr.sizeof): 타입 정렬·배열 stride의 근거입니다.
+- [C11 draft N1570](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf), §6.7.5·7.17: C11 정렬 문법과 atomic 계약입니다.
+- [CMSIS Cortex-M7 D-cache API](https://arm-software.github.io/CMSIS_6/main/Core/group__Dcache__functions__m7.html): 주소·크기·clean/invalidate 계약입니다.
+- [Linux v6.12 cache.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/cache.h): cache alignment macro의 실제 정의입니다.
