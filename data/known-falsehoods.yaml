@@ -272,3 +272,15 @@
   correction: 'QEMU pxb-cxl 단일 dport에서 port1의 decoder1.0은 cxl_switch_port_probe의 passthrough decoder ("Fallback to passthrough decoder")'
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
   fixed_in: f3b70730
+
+- id: heaptrack-record-only-option
+  pattern: 'heaptrack --record-only'
+  correction: 'heaptrack 1.4.0에는 --record-only가 없다. 원시 기록만 남기는 옵션은 -r/--raw'
+  source: 'heaptrack v1.4.0 src/track/heaptrack.sh.cmake usage (lines 25-56)'
+  fixed_in: e0826b79
+
+- id: heaptrack-print-most-called-functions
+  pattern: 'MOST CALLED FUNCTIONS'
+  correction: 'heaptrack_print 섹션 이름은 MOST CALLS TO ALLOCATION FUNCTIONS'
+  source: 'heaptrack v1.4.0 src/analyze/print/heaptrack_print.cpp:716'
+  fixed_in: e0826b79
