@@ -272,3 +272,9 @@
   correction: 'QEMU pxb-cxl 단일 dport에서 port1의 decoder1.0은 cxl_switch_port_probe의 passthrough decoder ("Fallback to passthrough decoder")'
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
   fixed_in: f3b70730
+
+- id: ethercat-fp-fixed-position
+  pattern: 'FP \(Fixed Position\)'
+  correction: 'FPRD/FPWR/FPRW use the Configured Station Address (node addressing), not a "fixed position"'
+  source: 'Beckhoff EtherCAT Slave Controller Section I v2.3, Table 4/Table 6 (Configured Address Read/Write)'
+  fixed_in: industrial-ethernet ch04
