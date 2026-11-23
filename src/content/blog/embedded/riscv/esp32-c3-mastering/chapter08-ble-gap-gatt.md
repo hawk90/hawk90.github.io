@@ -2,7 +2,7 @@
 title: "ESP32-C3 BLE 5.0 분석 — GAP·GATT·Coded PHY"
 slug: "embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt"
 date: 2026-05-20T09:08:00
-description: "ESP-IDF v5.4.2와 고정 NimBLE의 GAP·GATT 등록, notify buffer 소유권·MTU·pairing 조건을 확인합니다."
+description: "ESP-IDF v5.4.2의 NimBLE로 ESP32-C3에서 advertising·GATT 서비스·notify·Coded PHY를 구성하고, NimBLE과 Bluedroid의 image 크기, 연결 수 한도, MTU·bond 저장 기본값을 빌드 결과와 Kconfig로 확인합니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 8
 tags: [ble, bluetooth, gap, gatt, esp32-c3]
@@ -12,37 +12,37 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **PHY의 전송률을 application 처리량·거리의 고정 배수로 읽지 않습니다.** GAP는 발견·연결 절차를, GATT는 attribute 기반 데이터 접근을 다룹니다.
+> **GAP는 "어떻게 만나는가", GATT는 "무엇을 주고받는가"를 다룹니다.** C3의 BLE 5는 Coded PHY와 Extended Advertising을 지원하지만, 기본 설정에서는 연결 3개, bond 비저장, Extended Advertising 꺼짐으로 시작합니다.
 
-기준은 ESP-IDF v5.4.2 commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`와 그 submodule인 esp-nimble commit `0225775e49669cd4f070400908f73718bddce83b`입니다. BR/EDR을 지원하지 않는 C3에서 host/controller 설정·peer 기능·동시 역할 자원 제한을 함께 확인합니다. Wi-Fi와 radio를 공유해도 처리량이 항상 절반이 되는 것은 아닙니다.
+C3는 Bluetooth LE만 지원하고 BR/EDR(Classic)은 없습니다(Ch 1). 이 장은 [ESP-IDF v5.4.2](https://github.com/espressif/esp-idf/tree/v5.4.2)에 submodule로 들어 있는 NimBLE host를 기준으로 하고, 전체 host 초기화·sync·event 흐름은 [v5.4.2 `bleprph` 예제](https://github.com/espressif/esp-idf/tree/v5.4.2/examples/bluetooth/nimble/bleprph)를 따릅니다.
 
-아래 예는 host lifecycle에 연결할 advertising·Battery Service 구성 요소입니다. 전체 host/controller 초기화·sync·event loop는 [고정 bleprph 예제](https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0/examples/bluetooth/nimble/bleprph)를 기준으로 준비합니다. 이 장에서는 실제 phone·RF·pairing을 실행하지 않았습니다.
+아래 코드 조각 세 개는 `bleprph` 예제 project에 넣어 esp32c3로 빌드를 통과시켰습니다. 실제 휴대폰과의 연결, pairing, RF 거리는 시험하지 않았고, Espressif QEMU도 Bluetooth를 흉내 내지 않습니다.
 
 ## GAP와 GATT — 두 축의 분리
 
-BLE를 처음 만지면 GAP와 GATT가 *섞여 보입니다*. 분리하면 단순해집니다.
+BLE를 처음 다루면 GAP와 GATT가 섞여 보이지만, 나눠 보면 단순합니다.
 
 | 영역 | 다루는 것 | 비유 |
 |------|---------|------|
-| GAP (Generic Access Profile) | *어떻게 만나는가* — advertising, scanning, connection, pairing | 명함 교환과 통화 연결 |
-| GATT (Generic Attribute Profile) | *무엇을 주고받는가* — service, characteristic, descriptor | 통화 내용 |
+| GAP (Generic Access Profile) | advertising, scanning, connection, pairing | 명함을 돌리고 통화를 연결하는 일 |
+| GATT (Generic Attribute Profile) | service, characteristic, descriptor | 연결된 통화에서 오가는 내용 |
 
-advertise → scan → connect 까지는 *GAP의 영역*입니다. 일단 연결이 서면 그때부터 *GATT*로 데이터가 흐릅니다. *역할*도 다릅니다.
+advertise, scan, connect까지가 GAP이고, 연결이 서면 그다음부터 GATT로 데이터가 흐릅니다.
 
 | GAP role | 설명 | 예 |
 |---------|------|-----|
-| Central | 스캔하고 연결을 *시작* | 스마트폰 |
-| Peripheral | 광고하고 연결을 *수락* | 센서, 시계, ESP32-C3 |
-| Broadcaster | 광고만, 연결 없음 | iBeacon, Eddystone |
-| Observer | 스캔만, 연결 없음 | 비콘 수집기 |
+| Central | scan하고 연결을 시작 | 스마트폰 |
+| Peripheral | 광고하고 연결을 수락 | 센서, 시계, ESP32-C3 |
+| Broadcaster | 광고만, 연결 없음 | 비콘 |
+| Observer | scan만, 연결 없음 | 비콘 수집기 |
 
-여러 GAP 역할의 조합은 controller/host build 설정·connection/advertising set 수와 peer 조건을 확인합니다. 역할 이름이 지원된다고 네 역할의 임의 workload를 동시에 보장하는 것은 아닙니다.
+C3 데이터시트 v2.5 4.3.3.2절은 "Multiple connections in simultaneous central and peripheral roles"와 "Simultaneous advertising and scanning"을 지원한다고 적습니다. 다만 동시에 쓸 수 있는 수에는 설정 한도가 있습니다. v5.4.2 C3 controller의 `CONFIG_BT_CTRL_BLE_MAX_ACT`는 연결·scan·sync·advertising을 모두 합친 "BLE maximum activities"이고 기본값 6, 범위 1~10입니다. NimBLE host 쪽 `CONFIG_BT_NIMBLE_MAX_CONNECTIONS`는 C3에서 기본값 3, 범위 1~9입니다.
 
 ## BLE 5.0이 가져온 변화
 
-1M/2M/Coded PHY의 선택은 controller와 peer 양쪽의 지원을 필요로 합니다. Coded PHY는 coding과 link 조건의 trade-off이며12dB·거리4배·특정 야외 거리를 모든 제품에서 보장하지 않습니다. Phone의 OS 버전이나 모델 이름만으로 PHY 지원을 단정하지 않고 실제 협상 event와 peer 기능을 확인합니다.
+데이터시트 4.3.3.1절에 따르면 C3의 BLE PHY는 1 Mbps, 2 Mbps, Coded PHY 125 Kbps·500 Kbps입니다. Coded PHY는 같은 bit를 여러 번 부호화해 보내는 방식이라, 시끄러운 방에서 같은 말을 천천히 여러 번 반복하는 것과 비슷합니다. 속도를 내주는 대신 수신 감도를 얻습니다. 데이터시트 Features 절의 수신 감도 "Up to -105 dBm ... (125 Kbps)"가 이 PHY의 값입니다.
 
-기준 NimBLE에는 다음 API가 있습니다. 기존의 미정의 `ble_gap_set_phy_args` 구조체 없이 실제 인자를 사용합니다.
+PHY 변경 요청은 NimBLE의 `ble_gap_set_prefered_le_phy(conn_handle, tx_phys_mask, rx_phys_mask, phy_opts)`로 합니다. `phy_opts`에는 `BLE_GAP_LE_PHY_CODED_ANY`, `_S2`, `_S8` 중 하나를 줍니다. S8이 125 Kbps, S2가 500 Kbps에 해당합니다.
 
 ```c title="c3-ble-phy.c"
 #include "host/ble_hs.h"
@@ -54,19 +54,28 @@ int c3_request_coded_phy(uint16_t connection) {
 }
 ```
 
-Return0은 요청 처리 단계이며 최종 PHY 전환·throughput 성공까지 증명하지 않습니다. Peer의 응답과 PHY update event를 확인합니다.
+반환값 0은 요청을 controller에 넘겼다는 뜻입니다. 상대가 Coded PHY를 지원하지 않으면 PHY는 바뀌지 않으므로, 실제 결과는 `BLE_GAP_EVENT_PHY_UPDATE_COMPLETE` event로 확인합니다.
 
-Legacy advertising의31byte 한도와 Extended Advertising의 PDU별/chain별 data는 다릅니다. Extended advertising 전체가 무조건255byte까지라는 설명은 제거했습니다. 선택한 host/controller의 설정·data 길이·advertising mode·peer parser 지원을 확인합니다. Periodic advertising과 LE Audio의 지원도 Bluetooth version 숫자 하나로 자동 결정하지 않습니다.
+advertising payload 크기도 BLE 5에서 달라졌습니다. legacy advertising의 data는 31 byte이고, Extended Advertising은 여러 PDU를 이어 붙여 더 긴 data를 보냅니다. v5.4.2의 `CONFIG_BT_NIMBLE_EXT_ADV_MAX_SIZE`는 범위 0~1650, Extended Advertising을 켰을 때 기본값 1650입니다. `bleprph` 예제를 기본 설정으로 빌드한 `sdkconfig`에는 `CONFIG_BT_NIMBLE_50_FEATURE_SUPPORT=y`와 `# CONFIG_BT_NIMBLE_EXT_ADV is not set`이 함께 찍힙니다. BLE 5 기능이 켜져 있어도 Extended Advertising은 따로 켜야 한다는 뜻입니다.
 
 ## NimBLE vs Bluedroid
 
-NimBLE과 Bluedroid는 API·지원 profile·설정·port 의존성이 다릅니다. C3에서 Bluedroid를 선택해도 chip에 BR/EDR 기능이 생기지 않습니다. 검증하지 않은 고정RAM/flash 크기와 "항상 NimBLE이 정답"이라는 순위는 사용하지 않습니다.
+ESP-IDF에는 BLE host가 두 개 있습니다. NimBLE은 Apache Mynewt에서 온 BLE 전용 host이고, Bluedroid는 Classic BT까지 다루는 host입니다. C3에서 Bluedroid를 골라도 칩에 BR/EDR이 생기지는 않습니다.
 
-동일한 connection 수·MTU·profile·보안·log 설정에서 map/heap/stack과 interoperability를 비교합니다. 이 장의 코드는 NimBLE용이며 Bluedroid event/API와 혼용하지 않습니다.
+크기 차이는 빌드로 바로 확인됩니다. 비슷한 역할의 두 GATT server 예제를 esp32c3, 기본 설정으로 빌드한 `idf.py size` 결과입니다.
+
+| 항목 | NimBLE `bleprph` | Bluedroid `gatt_server` |
+|------|------|------|
+| Flash Code | 436936 byte | 568540 byte |
+| Flash Data | 85584 byte | 124628 byte |
+| DRAM 사용 | 103682 byte | 99286 byte |
+| app `.bin` | 0x963b0 (615344 byte), 1 MiB의 41% 남음 | 0xbd510 (775440 byte), 26% 남음 |
+
+app `.bin`은 NimBLE 쪽이 160096 byte(약 156 KiB) 작습니다. 두 예제는 서비스 구성과 로그 양이 같지 않으므로 이 차이가 host만의 차이는 아니지만, OTA 슬롯 1 MiB에 Wi-Fi까지 올려야 하는 C3에서는 이 정도 차이가 슬롯 여유를 가릅니다. 정적 DRAM은 Bluedroid 쪽이 4396 byte 적게 나왔습니다. 실행 중 heap 사용량은 이 표에 없고 측정하지 않았습니다.
 
 ## Advertising — 자기를 알리기
 
-Host sync 뒤 own address를 준비·추론한 owner가 advertising을 시작합니다. 다음 helper는 address type과 callback을 caller에게 받으며 각 API 오류를 그대로 반환합니다.
+host가 controller와 sync된 뒤 advertising을 시작합니다. 아래 helper는 이름과 flag를 넣은 advertising data를 설정하고, 연결 가능·일반 발견 모드로 광고를 시작합니다. address type과 GAP event callback은 caller가 넘깁니다.
 
 ```c title="c3-ble-advertise.c"
 #include <string.h>
@@ -93,11 +102,11 @@ int c3_advertise(uint8_t own_address_type, ble_gap_event_fn *callback, void *con
 }
 ```
 
-Connect 실패와 disconnect 뒤의 재광고는 GAP event를 처리하는 owner가 판단합니다. 광고 중지·host reset·종료와 중복 start를 함께 관리합니다. `BLE_GAP_ADV_FAST_INTERVAL1_MIN/MAX`의 실제 값은 선택한 build 설정을 따르며, interval만으로 평균 전류·발견 latency를 보장하지 않습니다.
+`BLE_HS_ADV_F_BREDR_UNSUP`(0x04)은 "BR/EDR을 지원하지 않는다"는 flag라 C3의 실제 능력과 맞습니다. NimBLE `ble_gap.h`는 `BLE_GAP_ADV_FAST_INTERVAL1_MIN`을 30 ms(high duty 설정이면 5 ms), `_MAX`를 60 ms로 정의하고, `BLE_GAP_ADV_ITVL_MS()`가 ms를 0.625 ms 단위(`BLE_HCI_ADV_ITVL` 625 µs)로 바꿉니다. 30~60 ms 간격은 휴대폰이 빨리 찾는 대신 전류를 더 쓰는 쪽입니다. 연결이 끊긴 뒤 다시 광고할지는 GAP event를 처리하는 쪽이 정합니다.
 
 ## GATT 서비스 — 데이터 모델
 
-Battery Service0x180F의 Battery Level0x2A19는0~100 값으로 설명할 수 있습니다. 다음 예는 GATT 등록·read callback·notify payload 소유권을 묶습니다. Application이 관련 호출을 host context에서 직렬화하고 Battery Service를 중복 등록하지 않는 조건입니다.
+GATT는 장치 안의 데이터를 service와 characteristic의 표로 보여 줍니다. 아래 예제는 Bluetooth SIG 표준 Battery Service(UUID 0x180F)의 Battery Level characteristic(0x2A19)을 등록하고, 읽기 callback과 notify를 구현합니다.
 
 ```c title="c3-battery-gatt.c"
 #include <stdbool.h>
@@ -147,13 +156,13 @@ int c3_battery_notify(uint16_t connection, bool subscribed, uint8_t level) {
 }
 ```
 
-Host owner는 GAP/GATT 기본 service 준비와 이 등록을 startup 순서에 연결합니다. `val_handle`은 실제 GATT database가 준비된 뒤 유효하며 UUID와 attribute handle을 혼동하지 않습니다. Peer별 CONNECT/SUBSCRIBE/DISCONNECT 상태와 해당 value handle을 확인해 `connection`·`subscribed`를 전달합니다. 비동기 task에 보관한 옛 handle을 새 연결에 재사용하지 않습니다.
+`val_handle`은 GATT database가 시작된 뒤 host가 채우는 attribute handle입니다. UUID(0x2A19)와 handle은 다른 값이므로 notify에는 handle을 씁니다. 구독 여부는 `BLE_GAP_EVENT_SUBSCRIBE` event로 peer마다 관리하고, 연결이 끊기면 그 connection handle을 버립니다.
 
-[고정 ble_gatt.h](https://github.com/espressif/esp-nimble/blob/0225775e49669cd4f070400908f73718bddce83b/nimble/host/include/host/ble_gatt.h)는 `ble_gatts_notify_custom()`이 **성공·실패와 무관하게 mbuf를 소비**한다고 명시합니다. 호출 뒤 application에서 다시 free하지 않습니다. 이 free-form API가 CCCD 정책을 대신 확인한다고 가정하지 않으며 application이 peer별 구독·보안 상태를 검사합니다. Local battery 값 갱신과 notification 전달 성공도 별개입니다. Return0은 phone application의 수신 확인이 아닙니다.
+notify buffer는 한번 넘기면 host 소유입니다. v5.4.2 NimBLE의 `ble_gatt.h`는 `ble_gatts_notify_custom()` 설명에 "This function consumes the supplied mbuf regardless of the outcome"이라고 적습니다. 그러니 실패했다고 caller가 `os_mbuf_free_chain()`을 부르면 이중 해제가 됩니다. 반환값 0은 notification을 보낼 준비가 끝났다는 뜻이고, 휴대폰 앱이 값을 받았다는 확인은 아닙니다. 확인이 필요하면 indication을 씁니다.
 
 ## 표준 service와 자체 service
 
-자주 쓰는 *표준 service UUID*입니다.
+자주 쓰는 SIG 표준 service UUID입니다.
 
 | Service | UUID | 비고 |
 |---------|------|------|
@@ -164,46 +173,53 @@ Host owner는 GAP/GATT 기본 service 준비와 이 등록을 startup 순서에 
 | Heart Rate | 0x180D | 심박수 |
 | Health Thermometer | 0x1809 | 체온계 |
 | HID over GATT | 0x1812 | 키보드·마우스·게임패드 |
-| Nordic UART (NUS) | 6E400001-... | 시리얼 over BLE (de facto) |
+| Nordic UART (NUS) | 6E400001-... | 시리얼 over BLE (Nordic 정의, SIG 표준 아님) |
 
-UUID만 맞췄다고 모든 phone app이 자동 해석하는 것은 아닙니다. Profile의 데이터 형식·동작·보안과 client의 지원을 확인합니다. 자체 service도 generic GATT client로 탐색할 수 있지만 의미 해석에는 별도 schema가 필요합니다.
+표준 UUID를 쓰면 nRF Connect 같은 범용 앱이 service 이름을 보여 주지만, 데이터 형식까지 해석해 주는지는 앱마다 다릅니다. 자체 service는 128-bit UUID를 정하고 데이터 형식을 문서로 남겨야 합니다.
 
 ## Pairing과 Bonding
 
-연결 자체는 *암호화 없이*도 동작합니다. 보안이 필요하면 *pairing*을 합니다. Pairing 결과를 영구 저장하면 *bonding*입니다.
+연결 자체는 암호화 없이도 동작합니다. 암호화와 인증이 필요하면 pairing을 하고, 그 결과 key를 저장해 두면 bonding입니다. 어떤 pairing 방식이 쓰일지는 양쪽의 I/O capability가 정합니다(Bluetooth Core Specification Vol 3 Part H).
 
-| 모드 | I/O 요구 | 보안 | 비고 |
-|------|---------|------|------|
-| Just Works | 없음 | MITM 취약 | 가장 흔함 |
-| Passkey Entry | 디스플레이 또는 키패드 | MITM 방어 | 6자리 숫자 |
-| Numeric Comparison | 양쪽 숫자 표시와 사용자 확인 입력 | MITM 방어 | LE Secure Connections |
-| Out-of-Band (OOB) | 별도 신뢰 채널 | 채널의 인증·보호에 의존 | 별도 채널로 키 교환 |
+| 방식 | 필요한 I/O | MITM 보호 |
+|------|---------|------|
+| Just Works | 없음 | 없음 |
+| Passkey Entry | 한쪽 디스플레이, 다른 쪽 키패드 | 있음 |
+| Numeric Comparison | 양쪽 디스플레이 + yes/no 입력 (LE Secure Connections) | 있음 |
+| Out-of-Band (OOB) | NFC 같은 별도 채널 | 별도 채널의 보호에 의존 |
 
-I/O capability는 실제 display·입력·사용자 확인 수단과 맞아야 합니다. `NO_IO`로 Just Works를 선택한 상태에서 `sm_mitm=1`만 켜면 인증된 MITM 방어가 생긴다는 뜻은 아닙니다. Secure Connections 사용 여부와 authenticated pairing은 별도 조건입니다. 실제 association method·실패·재연결과 잘못된 key를 시험합니다.
+NimBLE에서는 `ble_hs_cfg`의 `sm_io_cap`, `sm_bonding`, `sm_mitm`, `sm_sc`로 이를 설정합니다. `ble_hs.h` 주석에 따르면 `sm_mitm`은 Pairing Request/Response에 MITM 요구 flag를 세우는 비트입니다. `sm_sc`를 켜면 상대도 지원할 때 LE Secure Connections를 쓰고, 아니면 legacy pairing으로 내려갑니다. 화면도 버튼도 없는 장치(`BLE_HS_IO_NO_INPUT_OUTPUT`)에서 `sm_mitm = 1`을 세워도 MITM 보호는 생기지 않습니다. NimBLE의 `ble_sm_sc.c`(`ble_sm_sc_io_action()`)는 양쪽 I/O capability 표에서 방식을 고르는데, NoInputNoOutput이면 Just Works로 pairing을 끝내고 key는 unauthenticated로 남습니다.
 
-Bond 저장은 선택한 store backend와 NVS 구성·초기화·erase/migration 정책에 달려 있습니다. Namespace를 무조건 `ble_hs_store`라고 가정하거나 partition table 변경만으로 항상 삭제된다고 설명하지 않습니다. OTA/복구 과정에서 기존 bond가 유지·폐기되어야 할 조건을 정합니다.
+bond 저장은 기본으로 꺼져 있습니다. v5.4.2의 `CONFIG_BT_NIMBLE_NVS_PERSIST`("Persist the BLE Bonding keys in NVS")는 기본값 n이고, `bleprph` 예제의 `sdkconfig`에도 `# CONFIG_BT_NIMBLE_NVS_PERSIST is not set`으로 남습니다. 이 상태에서는 재부팅하면 bond가 사라져 휴대폰이 다시 pairing해야 합니다. 켜면 NimBLE의 `ble_store_nvs.c`가 NVS namespace `"nimble_bond"`에 key를 씁니다. Ch 3의 NVS partition을 지우면 bond도 함께 지워진다는 뜻입니다.
 
-## WiFi와 BLE 동시 운영
+## Wi-Fi와 BLE 동시 운영
 
-C3는 Wi-Fi와 BLE가 radio를 공유합니다. Arbitration은 workload·connection interval·scan/advertising·PHY·coexistence 설정에 달려 있어 고정50:50 timeline을 사용하지 않습니다. 기존 ASCII/TODO 도식은 잘못된 비율을 암시하므로 제거했습니다.
+C3는 Wi-Fi와 BLE가 안테나와 RF를 함께 씁니다. 데이터시트 Features 절은 "Internal co-existence mechanism between Wi-Fi and Bluetooth to share the same antenna"라고 적고, ESP-IDF v5.4.2에서는 `CONFIG_ESP_COEX_SW_COEXIST_ENABLE`("Software controls WiFi/Bluetooth coexistence")은 Wi-Fi와 BT를 함께 켜면 기본값이 y입니다. 어느 쪽이 얼마만큼 시간을 받는지는 workload에 따라 달라지고, 이 장에서는 측정하지 않았습니다.
 
-Coexistence 설정 이름과 지원 조건을 고정 SDK의 Kconfig에서 확인하고 Wi-Fi만·BLE만·동시 사용의 전달률·tail latency·reconnect·전류를 같은 조건에서 측정합니다. 중간에 Wi-Fi를 끊거나 advertising을 멈추는 정책은 제품의 연결 요구와 함께 검토합니다.
+## MTU와 notify payload
 
-## 자주 하는 실수와 troubleshooting
+ATT의 Handle Value Notification은 opcode 1 byte와 attribute handle 2 byte 뒤에 값을 싣습니다. 그래서 한 notification의 최대 payload는 `ATT_MTU - 3`입니다([Bluetooth Core 5.4 ATT](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host/attribute-protocol--att-.html)).
 
-연결 직후 끊김을 무조건 MTU·전원 문제로 진단하지 않습니다. GAP status/reason, 보안 협상과 controller/host log를 확인합니다. 광고·구독·notify handle·buffer 부족·bond store를 단계별로 분리합니다.
+| ATT_MTU | notify payload 최대 |
+|------|------|
+| 23 (BLE 기본) | 20 byte |
+| 247 | 244 byte |
+| 256 (NimBLE 기본 preferred) | 253 byte |
 
-단일 ATT Handle Value Notification에는 opcode1byte와 handle2byte가 있어 payload 한계는 `ATT_MTU - 3`입니다. 따라서23에서는20byte,247에서는244byte입니다. [Bluetooth ATT 명세](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host/attribute-protocol--att-.html)의 이 계산을 적용하되 attribute 최대 길이·host buffer 한도도 만족해야 합니다. 이 명세 참조가 C3의 Bluetooth5.4 기능 지원을 뜻하지는 않습니다.
-
-`ble_att_set_preferred_mtu(247)`는 preference이며 peer와의 실제 negotiated MTU를 조회해 사용합니다. ATT message와 Link Layer PDU 하나를 같은 packet으로 취급하지 않습니다. 큰 MTU를 설정한다고 BLE link의 reliability·application throughput이 자동 향상되지 않습니다.
+v5.4.2의 `CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU` 기본값은 256이고, `ble_att_set_preferred_mtu()`로 바꿀 수 있습니다. preferred는 희망값일 뿐이라 실제 값은 상대와의 MTU exchange로 정해지며, 연결 뒤 `ble_att_mtu(conn_handle)`로 읽습니다. 휴대폰이 MTU exchange를 하지 않으면 23이 그대로 남고, 이때 21 byte 이상을 notify하면 잘립니다.
 
 ## 정리
 
-GAP·GATT·PHY·보안 협상을 구분하고 고정 host API의 수명과 buffer 소유권을 지킵니다. Advertising 설정과 GATT 등록 예는 완성된 host startup·phone interoperability 시험이 아닙니다. 실제 negotiated state·구독·MTU·bond 저장과 실패 경로를 제품에서 관찰합니다.
+- GAP는 advertising·연결·pairing을, GATT는 service·characteristic을 다룹니다.
+- C3의 BLE PHY는 1M, 2M, Coded(125/500 Kbps)이고, PHY 변경은 요청 뒤 `PHY_UPDATE_COMPLETE` event로 확인합니다.
+- 기본 설정은 controller activity 6, NimBLE 연결 3, Extended Advertising 꺼짐, bond NVS 저장 꺼짐입니다.
+- 같은 역할의 예제에서 NimBLE의 app `.bin`은 Bluedroid보다 약 156 KiB 작았습니다.
+- `ble_gatts_notify_custom()`은 성공·실패와 무관하게 mbuf를 가져갑니다.
+- notify payload는 `ATT_MTU - 3`이고, 실제 MTU는 연결 뒤 `ble_att_mtu()`로 읽습니다.
 
 ## 다음 편
 
-[Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build)에서는 무선 코드를 *어떻게 빌드해서 칩에 올리는지*를 다룹니다. idf.py CLI, CMake 컴포넌트, Kconfig, Component Manager까지 한 번에 풉니다.
+[Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build)에서는 무선 코드를 어떻게 빌드해서 칩에 올리는지를 다룹니다. idf.py CLI, CMake 컴포넌트, Kconfig, Component Manager까지 한 번에 풉니다.
 
 ## 관련 항목
 
@@ -211,5 +227,5 @@ GAP·GATT·PHY·보안 협상을 구분하고 고정 host API의 수명과 buffe
 - [Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build)
 - [Ch 12: 전력 관리 — Modem/Light/Deep Sleep](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management) — sleep mode와 측정 조건
 - [원문 — Apache NimBLE Tutorials](https://mynewt.apache.org/latest/tutorials/ble/ble.html)
-- [원문 — ESP-IDF NimBLE Examples](https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0/examples/bluetooth/nimble)
+- [원문 — ESP-IDF NimBLE Examples](https://github.com/espressif/esp-idf/tree/v5.4.2/examples/bluetooth/nimble)
 - [원문 — Bluetooth Core 5.0 Specification](https://www.bluetooth.com/specifications/specs/core-specification-5-0/)
