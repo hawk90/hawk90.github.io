@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"WCET는 *최악*의 실행 시간입니다."** Average가 아니라 worst가 마감 안에 들어와야 hard real-time이 성립합니다. cache, branch prediction, 분기 입력이 모두 변수입니다.
+> WCET는 명시한 코드·입력·하드웨어·간섭 조건에서 가능한 실행시간의 상한입니다. 측정 중 관찰한 최댓값과 구분하고, 시스템의 deadline은 선점·blocking·IRQ 간섭까지 포함해 분석합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -27,188 +27,127 @@ topics: ["embedded"]
 | WCET | Worst-Case Execution Time |
 | BCET | Best-Case Execution Time |
 
-WCET 분석은 두 갈래로 나뉜다.
+접근은 보통 세 가지로 조합합니다.
 
-- **measurement-based** — 여러 입력으로 측정해 worst를 추정
-- **static analysis** — control flow + 칩 모델로 상한 증명
+- **measurement-based** — 정한 시험 범위에서 실행을 측정. 관측 최댓값은 상한 증명이 아님
+- **static analysis** — control flow와 processor/platform model 및 가정으로 upper bound 계산
+- **hybrid** — 정적 구조 분석과 target 측정·실험을 결합하고 각 증거 범위를 기록
 
-WCET를 키우는 4대 요인입니다.
+실행시간 상한에 영향을 주는 대표 요소입니다.
 
-| 1. branch | 분기 입력에 따라 다른 path |
+| 요소 | 영향 예 |
 |---|---|
-| 2. loop | iteration 수가 input에 따라 변함 |
-| 3. cache | miss/hit이 stream에 따라 달라짐 |
-| 4. ISR | 다른 IRQ가 끼어들어 elongate |
+| branch | 입력에 따라 control-flow path가 달라짐 |
+| loop | 입력·상태에 따라 반복 수가 달라짐 |
+| cache/memory | hit/miss, bus contention, memory latency |
+| interrupt | IRQ와 higher-priority task의 interference |
 
 | 등급 | 의미 |
 |------|------|
-| hard real-time | WCET ≤ deadline 필수 (mathematical guarantee) |
-| firm real-time | 일부 miss 허용 (quality 저하) |
-| soft real-time | 늦으면 useless이지만 안전엔 무관 |
+| hard real-time | 시스템 응답시간 상한이 deadline 이내여야 함. 실행시간 외 blocking·선점·IRQ도 포함 |
+| firm real-time | 늦게 끝난 결과의 가치는 보통 없지만, 시스템이 일부 miss를 허용할 수 있음 |
+| soft real-time | 늦을수록 유용성이 낮아지는 경향. 안전 영향은 응용 시스템으로 판단 |
 
 ## 코드 / 실제 사용 예
 
 ### 측정 기반 WCET 접근
 
 ```c
-#include "DWT.h"    /* Cortex-M3+ Data Watchpoint and Trace */
+#include "core_cm4.h" /* 예: CMSIS header. DWT가 있는 core와 구현에서만 사용 */
 
 uint32_t max_cycles = 0;
 
 void measure_loop(void) {
-    DWT->CYCCNT = 0;
+    uint32_t start = DWT->CYCCNT; /* counter initialization is platform-specific */
     do_work();
-    uint32_t c = DWT->CYCCNT;
+    uint32_t c = DWT->CYCCNT - start; /* unsigned wrap; 구간은 counter 한 주기보다 짧아야 함 */
     if (c > max_cycles) max_cycles = c;
 }
 
 /* 여러 입력 시나리오로 반복 호출 후 max 추출 */
 ```
 
-DWT cycle counter는 지원되는 Cortex-M과 debug/trace 설정에서 cycle 단위 측정에 사용할 수 있습니다. 입력을 광범위하게 변화시켜 관측된 최대값을 찾되, 이것만으로 WCET를 증명할 수는 없습니다.
+DWT CYCCNT는 모든 Cortex-M에 있는 기능이 아니며, core·debug 구현·clock 설정에 따라 사용 조건이 다릅니다. 초기화에서 trace/cycle counter enable과 counter wrap을 확인하고 계측 구간의 함수 호출·interrupt 조건을 기록합니다. measurement interval에 선점 IRQ가 포함되는지, timer read와 wrapper의 계측 비용이 얼마인지도 정의합니다. 반복 측정의 최대값은 관측 결과이지 WCET 증명이 아닙니다. [CMSIS DWT register map](https://arm-software.github.io/CMSIS_6/latest/Core/regMap_pg.html).
 
 ### Loop bound 명시
 
 ```c
-/* 정적 분석 도구에 loop bound를 알리는 annotation */
-for (int i = 0; i < N; i++)
+/* fragment: MAX_N은 입력 계약이 보장하는 최대 record 수 */
+if (n > MAX_N) return INPUT_OUT_OF_RANGE;
+for (size_t i = 0; i < n; i++) {
     process(buf[i]);
-/* 이 N이 컴파일 시 결정되어야 정적 WCET 분석이 가능 */
-
-/* 동적 N은 명시적 cap 필수 */
-if (n > MAX_N) n = MAX_N;
-for (int i = 0; i < n; i++) ...
+}
 ```
 
-WCET 분석 도구는 loop iteration 수의 상한을 알아야 합니다. unbounded loop은 도구에 *불가능 신호*를 줍니다.
+분석에는 loop 반복 수의 상한과 입력 범위가 필요합니다. 정적 분석기가 상한을 추론하지 못하면 결과가 미산출되거나 보수적으로 커질 수 있습니다. 상한을 문서·annotation으로 보탤 때는 제품 입력 계약과 실제 코드 검사를 일치시킵니다.
 
 ### Worst-case input 만들기
 
-```c
-/* string parser의 WCET 측정 — escape 가 가장 비쌈 */
-void test_worst(void) {
-    char s[64];
-    memset(s, '\\', 63);     /* 모두 escape */
-    s[63] = 0;
-    measure(parser, s);
-}
-
-void test_nominal(void) {
-    measure(parser, "hello world");
-}
-```
-
-worst-case input을 의도적으로 만들어 측정하면 측정 기반 분석의 한계를 메울 수 있습니다.
+parser 입력은 정상 길이, 최대 길이, escaping, malformed data와 error path 등 요구사항의 partition으로 나눠 시험합니다. 어떤 입력 경로가 느린지는 코드와 compiler output으로 확인한 뒤 target에서 측정합니다. 특정 escape 문자가 항상 worst라고 가정하지 않으며, 입력 집합 시험은 미실행 경로·IRQ 간섭·hardware state를 자동으로 증명하지 않습니다.
 
 ### Cache의 영향 측정
 
-```c
-/* cold cache vs hot cache */
-void measure_cold(void) {
-    invalidate_dcache();
-    DWT->CYCCNT = 0;
-    work();
-    cold = DWT->CYCCNT;
-}
-
-void measure_hot(void) {
-    work();     /* warm-up */
-    DWT->CYCCNT = 0;
-    work();
-    hot = DWT->CYCCNT;
-}
-/* WCET = cold time */
-```
-
-cache 상태가 cold인 경로가 느릴 수 있지만 항상 전체 worst case인 것은 아닙니다. cache·버스 경쟁·분기 예측·ISR 상태를 요구사항에 맞게 조합해 분석합니다.
+실험 전에 cache state를 명시하고 hot·cold·전이 상태의 입력과 계측 경계를 나눕니다. cold cache가 항상 worst case는 아닙니다. 임의의 `invalidate_dcache()`는 dirty line 처리·다른 task 영향·instruction cache를 고려하지 않으면 안전하지 않습니다. target에 맞는 cache maintenance 절차를 사용하고, DMA·bus contention·interrupt와 cache 상태의 조합을 분석합니다.
 
 ### ISR jitter 가산
 
-```text
-실제 WCET = code WCET + IRQ preemption + cache eviction
-```
+응답시간 상한에는 분석 대상 실행시간, 우선순위가 높은 작업과 IRQ 간섭, blocking, 포함하기로 한 계측·scheduler overhead를 반영합니다. 실제 response-time analysis는 IRQ 주기·최악 실행시간·중첩/우선순위·비선점 구간과 shared-resource blocking을 포함합니다. mock 측정만으로 시스템 간섭의 상한을 확정하지 않습니다.
 
-다른 ISR이 들어와 cache를 깨면 다음 iteration의 WCET가 더 늘어납니다. 시스템 전체 IRQ를 mock하여 측정합니다.
+### Static analysis 결과 읽기
 
-### Static analysis tool
+도구를 선택할 때는 target ISA/CPU와 memory hierarchy 지원, compiler/binary 형식, loop-bound 입력 방식, 분석 결과의 가정·미해결 경로를 확인합니다. 분석 보고서는 binary hash, tool/model version, 설정·annotation, 경고와 미분석 경로를 함께 보존합니다. 도구의 상한은 그 processor model과 명시된 가정 범위 안에서만 해석하며, certification 적합성은 도구 이름만으로 결정되지 않습니다.
 
-| 도구 | 특징 |
-|---|---|
-| aiT (AbsInt) | ARM, PowerPC, AVR 지원, certification-grade |
-| Bound-T | 오픈 source, control flow 분석 |
-| Heptane | academic, simpler |
-| TimeWeaver | Microsoft Research |
-
-aiT 같은 도구는 binary와 칩 model을 함께 분석해 가정과 모델 범위 안에서 WCET 상한을 계산합니다. 인증 표준의 적용 여부와 필요한 증거는 프로젝트·도메인·심사 계획에 따라 다릅니다.
+도구 예로 AbsInt는 aiT를 binary 기반 static WCET analyzer로, Rapita는 RapiTime을 measurement와 분석을 결합하는 timing/WCET 도구로 소개합니다. 둘은 접근 방식이 다르므로 대상 processor, compiler와 요구 assurance 수준을 공급자 문서에서 대조합니다. ([aiT overview](https://www.absint.com/flyers/aiT.pdf), [RapiTime overview](https://www.rapitasystems.com/products/rapitime))
 
 ### Cache-aware coding
 
 ```c
-/* hot path를 cache line에 모음 */
-__attribute__((section(".hot_text"), aligned(64)))
+/* 특정 section 배치는 linker와 cache 모델을 함께 설계해야 함 */
+__attribute__((section(".critical_text"), aligned(64)))
 void critical_loop(void) {
-    /* 모든 함수 호출이 같은 line 내에 있도록 */
+    /* 함수 정렬만으로 호출·데이터의 cache hit을 보장하지 않음 */
 }
 ```
 
-WCET를 줄이려면 cache miss 가능성을 줄입니다. 작은 hot path는 cache lock으로 잠가두기도 합니다.
+section 배치와 정렬은 cache line 크기와 실제 linker placement를 맞추기 위한 수단일 뿐 cache hit이나 WCET를 보장하지 않습니다. instruction/data cache, eviction, bus arbitration과 code/data 경로를 포함해 분석합니다.
 
-### Cache lock (Cortex-A)
+### Cache lockdown
 
-```c
-/* L2 cache lock — hot path를 evict 안 되게 */
-l2_lock_range((uint32_t)critical_loop, 4096);
-```
-
-Cortex-A의 cache lockdown 지원과 범위는 세대·구현별로 다릅니다. 지원되는 경우에도 다른 메모리·버스 간섭까지 제거해야 deterministic latency를 주장할 수 있습니다.
+Cache lockdown은 core 이름만으로 지원 여부나 범위를 단정할 수 없습니다. 해당 core와 SoC manual을 확인하고, 사용 가능한 way/line 범위와 memory·bus 간섭을 분석해야 deterministic latency를 주장할 수 있습니다.
 
 ### Disable cache (극단)
 
-```c
-/* 가장 결정적이지만 가장 느림 — control loop 안에서만 */
-SCB_DisableDCache();
-critical_section();
-SCB_EnableDCache();
-```
-
-Cache를 끄면 접근 경로가 바뀌지만 모든 access가 동일한 RAM 비용이 되거나 deterministic해지는 것은 아닙니다. 평균 성능과 시스템 영향까지 측정한 뒤 검토합니다.
+cache를 끄면 접근 경로·latency·coherency·DMA 동작이 바뀝니다. 모든 access가 같은 시간이 되거나 deterministic해지는 것은 아니며, 임의 critical section에서 cache 상태를 바꾸지 않습니다.
 
 ## 측정 / 성능 비교
 
-PID control loop의 측정 결과 예시입니다.
+다음 수치는 설명을 위한 가정값이며 보드 측정 결과가 아닙니다. cycle-to-time 환산은 다음과 같습니다.
 
 ```text
-시나리오                  cycles      µs (Cortex-M4 72 MHz)
-nominal input, hot cache  5400        75
-nominal input, cold cache 8200        114
-worst input, hot cache    9100        126
-worst input, cold cache   13800       192
-worst + IRQ preemption    18400       256
+가정한 구간               cycles      µs (72 MHz 가정)
+sample A                   5400        75.0
+sample B                   8200        113.9
+sample C                  13800        191.7
+sample D                  18400        255.6
 ```
 
-평균 75 µs인 loop의 WCET가 256 µs입니다. 100 µs 주기로는 쓸 수 없고, 300 µs는 되어야 안전합니다.
+계산은 `time = cycles / clock_hz`입니다. 이 가정값은 평균·WCET를 나타내지 않으며, cycle만으로 100 µs 주기의 schedulability나 300 µs deadline의 안전성을 결론내릴 수 없습니다.
 
-```text
-도구별 결과 차이 (같은 코드)
-measurement-based       9100 cycles (찾은 worst)
-aiT static analysis    11400 cycles (증명된 상한)
-```
-
-정적 분석은 항상 더 보수적입니다. 안전한 상한을 *증명*하기 때문입니다.
+측정 기반 최대와 static upper bound를 나란히 기록할 때는 binary·입력 범위·processor model·interrupt 조건을 맞추고, 각 결과가 포함하는 overhead를 적습니다. static 결과가 항상 측정보다 크거나, 도구 출력만으로 요구사항에 대한 안전성이 증명되는 것은 아닙니다.
 
 ## 자주 보는 함정
 
 > ACET로 마감 계산
 
-평균 50 µs인 loop을 100 µs 주기로 돌리면 가끔 fail합니다. deadline 계산은 *WCET 기반*입니다. 평균이 아닙니다.
+평균 50 µs라는 정보만으로 100 µs deadline을 만족한다고 판단할 수 없습니다. task response time에는 실행시간 외 선점·blocking·IRQ와 release jitter를 포함합니다.
 
 > Hot cache로만 측정
 
 ```c
-for (int i = 0; i < 1000; i++) measure(work);
+for (int i = 0; i < 1000; i++) measure(work); /* 뒤의 표본은 같은 cache state가 아님 */
 ```
 
-1000번 반복하면 cache가 모두 hot이라 WCET 측정이 의미가 없습니다. 매 측정 전에 cache를 invalidate해야 합니다.
+반복 호출은 cache와 predictor state를 바꿉니다. hot/cold/상태 전이별 측정 목표를 정하고, cache invalidate는 dirty line·DMA coherency·다른 task 영향을 반영한 target-specific 절차로 수행합니다. invalidate가 항상 요구되는 것은 아닙니다.
 
 > Unbounded loop
 
@@ -216,7 +155,7 @@ for (int i = 0; i < 1000; i++) measure(work);
 while (!data_ready);    /* 언제 끝날지 모름 */
 ```
 
-unbounded loop은 WCET 분석 자체가 불가능합니다. timeout으로 상한을 둡니다.
+loop 종료 조건과 최대 반복 횟수를 입력 계약·코드로 제한합니다. timeout도 timer 오차와 timeout 처리 경로를 포함해 분석해야 합니다.
 
 > Recursion
 
@@ -224,7 +163,7 @@ unbounded loop은 WCET 분석 자체가 불가능합니다. timeout으로 상한
 int fact(int n) { return n <= 1 ? 1 : n * fact(n - 1); }
 ```
 
-recursion 깊이가 input에 의존하면 stack과 WCET 모두 unbounded입니다. iteration으로 변환합니다.
+recursion depth가 제한되지 않거나 증명되지 않으면 stack과 실행시간 상한 분석이 어려워집니다. 최대 깊이를 제한·검사하거나 반복문으로 바꾸고, 선택한 분석 도구의 recursion 지원과 stack 모델을 확인합니다.
 
 > Dynamic allocation 사용
 
@@ -234,16 +173,16 @@ void rt_loop(void) {
 }
 ```
 
-malloc의 WCET는 free list 길이에 의존합니다. real-time path에서는 pool 또는 static을 씁니다.
+allocator의 worst-case는 구현·heap state·동기화에 좌우됩니다. critical path에서는 allocation을 피하거나 bounded request/state와 synchronization을 전제로 상한을 분석한 allocator를 사용합니다.
 
 ## 정리
 
 - WCET는 *worst case*입니다. ACET로 deadline을 계산하면 가끔 fail합니다.
-- 측정 기반은 worst input을 의도적으로 만들어 cold cache로 측정합니다.
+- 측정 기반은 입력 경계와 cache/interrupt 상태를 정의해 관측 결과의 범위를 기록합니다.
 - 정적 분석 도구는 명시한 모델과 가정 범위에서 상한을 계산하며, 인증 필요 여부는 시스템 표준과 프로젝트 범위로 정합니다.
-- WCET를 키우는 4대 요인은 branch, loop, cache, ISR입니다.
-- Cache lock과 cache disable은 deterministic latency를 위한 최후 수단입니다.
-- malloc, recursion, unbounded loop은 real-time path에서 금지합니다.
+- branch, loop, cache와 IRQ는 가능한 실행시간·간섭에 영향을 주는 요소입니다.
+- Cache lockdown/disable은 target이 지원하는지 확인하고 전체 memory hierarchy와 coherency 영향을 분석합니다.
+- allocation·recursion·loop은 bounded 동작과 상한을 입증할 수 있는지 확인합니다.
 - WCET와 deadline 사이의 margin은 간섭·측정 오차·요구사항으로 정하고 근거를 남깁니다.
 
 다음 편부터 Part 9 **Concurrency 응용**으로 넘어갑니다.

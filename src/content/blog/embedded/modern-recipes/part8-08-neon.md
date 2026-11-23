@@ -2,312 +2,203 @@
 title: "ARM NEON 심화 — Matrix Multiply·FFT·Image Filter 적용"
 slug: "embedded/modern-recipes/part8-08-neon"
 date: 2026-04-17T09:07:00
-description: "NEON 실전 사례를 matrix multiply, color conversion, box filter, Sobel, FFT, crypto로 묶어 정리합니다."
+description: "NEON 행렬·픽셀 연산과 CMSIS-DSP FFT의 데이터 형식, 경계·수치 계약을 확인합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 96
-tags: [recipes, neon, matrix, fft, image, simd]
+tags: [recipes, neon, matrix, fft, image]
 topics: ["embedded"]
 ---
 
 ## 한 줄 요약
 
-> **"NEON은 matrix, FFT, image processing처럼 반복적인 데이터 병렬 연산에서 유용하다."** 가속 폭은 ISA·메모리·컴파일러·알고리즘과 측정 조건에 따라 달라집니다.
+NEON은 ARM의 Advanced SIMD 명령을 C intrinsic으로 표현하는 방법입니다. lane별 산술뿐 아니라 load/store, interleaved 데이터, tail과 수치 의미까지 맞아야 결과가 올바릅니다.
 
-## 어떤 상황에서 쓰나
+행렬과 픽셀 처리는 같은 연산을 반복해 벡터화 후보가 되지만, 작은 데이터셋에서는 setup·메모리 이동이 계산보다 클 수 있습니다. 먼저 스칼라 기준 결과를 만들고 입력 형식·stride·overflow를 명시한 뒤 NEON 결과와 비교합니다. 실제 CPU에서 실행하거나 측정하지 않은 코드는 동작·가속 검증으로 부르지 않습니다.
 
-자율주행 perception은 매 frame에 카메라 input을 preprocessing합니다. 1080p RGB를 YUV로 변환하고 box filter로 노이즈를 줄이고 Sobel로 edge를 찾는 시간 예산은 제품과 frame rate에 따라 달라집니다. Scalar와 NEON의 차이는 포맷·메모리 배치·라이브러리 구현을 포함해 대상 장치에서 측정해야 합니다.
+NEON lane은 같은 작업대 위의 여러 칸과 비슷합니다. 한 칸에 들어가는 값의 형식과 순서를 맞춰야 하며, 배열이 그 칸 수보다 짧을 때 마지막 칸을 어떻게 처리할지도 정해야 합니다.
 
-자동차·드론의 attitude 제어에서는 quaternion 회전처럼 작은 벡터 연산이 반복됩니다. 4-element vector가 NEON 레지스터에 맞더라도 정렬·로드·스케줄링·전체 파이프라인을 확인해야 하며, 별도 최적화 없이 특정 배수의 가속을 보장하지 않습니다.
+## 대상 ISA와 도구
 
-## 핵심 개념
+AArch64 NEON은 128-bit Advanced SIMD register를 사용합니다. 32-bit float 네 개나 8-bit 정수 열여섯 개를 한 vector register에 담을 수 있지만, 이 폭은 lane 표현을 설명할 뿐 명령 하나로 전체 알고리즘이 끝난다는 뜻은 아닙니다. AArch32와 AArch64는 ABI와 지원 instruction set이 다를 수 있으므로 compile target을 명시합니다.
 
-ARMv8-A AArch64 NEON은 128-bit SIMD 레지스터 32개를 사용하며, AArch32의 레지스터 표현과 사용 가능한 명령은 다를 수 있습니다. 128-bit 벡터에는 float32 4개, int16 8개, int8 16개가 들어갑니다. Cortex-M55/M85의 MVE는 별도 ISA로 유사한 데이터 병렬 연산과 predication을 제공합니다.
+NEON intrinsic의 타입·함수·lane 제한은 [Arm ACLE Advanced SIMD 문서](https://developer.arm.com/documentation/101028/latest/)를 따릅니다. Cortex-M55/M85의 MVE는 NEON과 구별되는 ISA이며 이 글의 `arm_neon.h` 예제를 MVE 코드로 바꿔 쓸 수 없습니다. CMSIS-DSP의 target별 구현은 [공식 CMSIS-DSP 문서](https://arm-software.github.io/CMSIS-DSP/latest/)와 library build 옵션을 확인합니다.
 
-```text
-ARMv8 AArch64 NEON
-  V0~V31, 128 bit each
-  float32 4, float64 2, int16 8, int8 16
+## 4×4 행렬 곱
 
-ARMv8 crypto extension
-  AES, SHA-1/256, PMULL (hardware)
+다음 함수는 row-major 4×4 행렬 `a`, `b`를 곱해 별도 `out`에 씁니다. 입력과 출력은 16개 float을 제공하고 서로 겹치지 않아야 합니다. 각 `b` 행을 vector로 읽고 `a` 한 행의 원소를 scalar lane 계수로 곱해 결과 행을 구성합니다.
 
-ARMv9 SVE2 (Neoverse V1/V2, Cortex-X)
-  vector length는 구현별로 runtime 확인
-```
+각 결과 행은 네 개의 가중치로 상대 행들을 섞는 계산입니다. 행과 열의 방향을 바꾸면 그럴듯한 숫자가 나오면서도 다른 행렬 연산이 되므로 비대칭 입력을 기준 결과와 비교합니다.
 
-핵심 patterns는 *load → compute → store* 단순 흐름, multiple accumulator로 latency 숨기기, interleaved load (`vld2`, `vld3`)로 색상 채널 분리입니다.
-
-## 코드 / 실제 사용 예
-
-### 4×4 Matrix Multiply
-
-```c
+```c title="neon-matmul-4x4.c"
 #include <arm_neon.h>
 
-void mat_mul_4x4(const float A[16], const float B[16], float C[16]) {
-    float32x4_t b0 = vld1q_f32(&B[0]);
-    float32x4_t b1 = vld1q_f32(&B[4]);
-    float32x4_t b2 = vld1q_f32(&B[8]);
-    float32x4_t b3 = vld1q_f32(&B[12]);
-
-    for (int i = 0; i < 4; i++) {
-        float32x4_t a   = vld1q_f32(&A[i * 4]);
-        float32x4_t row = vmulq_lane_f32(b0, vget_low_f32(a), 0);
-        row = vfmaq_lane_f32(row, b1, vget_low_f32(a), 1);
-        row = vfmaq_lane_f32(row, b2, vget_high_f32(a), 0);
-        row = vfmaq_lane_f32(row, b3, vget_high_f32(a), 1);
-        vst1q_f32(&C[i * 4], row);
+void matmul4_neon(const float * restrict a, const float * restrict b,
+                  float * restrict out) {
+    const float32x4_t b0 = vld1q_f32(b + 0);
+    const float32x4_t b1 = vld1q_f32(b + 4);
+    const float32x4_t b2 = vld1q_f32(b + 8);
+    const float32x4_t b3 = vld1q_f32(b + 12);
+    for (int row = 0; row < 4; ++row) {
+        const float *ar = a + row * 4;
+        float32x4_t v = vmulq_n_f32(b0, ar[0]);
+        v = vfmaq_n_f32(v, b1, ar[1]);
+        v = vfmaq_n_f32(v, b2, ar[2]);
+        v = vfmaq_n_f32(v, b3, ar[3]);
+        vst1q_f32(out + row * 4, v);
     }
 }
 ```
 
-`vmulq_lane_f32(b, a, idx)`는 vector × scalar입니다. 이 예시는 행렬 배치와 compiler가 허용하는 경우의 한 구현이며, load·FMA·store 수는 데이터 배치와 최적화에 따라 달라집니다. 자동차 sensor fusion과 자세 제어에서 검토할 수 있는 패턴입니다.
+FMA는 곱셈과 덧셈을 한 번 반올림할 수 있어 별도 multiply/add와 마지막 bit가 달라질 수 있습니다. 기존 scalar 구현과 bitwise 일치가 필요한지, 허용 오차 비교가 가능한지 정합니다. 이 고정 크기 예제는 알고리즘을 설명하며 일반 행렬 곱이나 특정 CPU의 빠른 구현을 대신하지 않습니다.
 
-### YUV422 → RGB Conversion
+## RGB 픽셀을 회색조로 변환
 
-```c
-void yuv422_to_rgb(const uint8_t *yuv, uint8_t *rgb, int N) {
-    for (int i = 0; i + 16 <= N; i += 16) {
-        uint8x16x2_t yuv_pair = vld2q_u8(&yuv[i * 2]);
-        uint8x16_t y  = yuv_pair.val[0];
-        uint8x16_t uv = yuv_pair.val[1];
+픽셀의 byte 순서가 RGB인지 BGR인지, stride에 padding이 있는지, 계수가 full-range인지 제한 범위인지 확인해야 합니다. 아래 예제는 **연속된 RGB byte 3개씩**을 입력으로 받고 `Y = (77R + 150G + 29B + 128) >> 8`로 회색조 byte 하나를 출력합니다. 입력·출력은 겹치지 않아야 하고 `pixels`개 전체가 유효해야 합니다.
 
-        /* Y, U, V 분리 후 BT.601 계수 적용 */
-        /* ... (~10 NEON ops) ... */
+RGB pixel은 세 열짜리 표처럼 세 byte가 한 묶음입니다. `vld3`는 이 interleaved 묶음을 색상별 lane으로 나누므로, 입력이 BGR이거나 padding이 끼어 있으면 같은 계산을 다른 channel에 적용하게 됩니다.
 
-        uint8x16x3_t out = { r, g, b };
-        vst3q_u8(&rgb[i * 3], out);
+```c title="neon-rgb-gray.c"
+#include <arm_neon.h>
+#include <stddef.h>
+#include <stdint.h>
+
+void rgb_to_gray(const uint8_t * restrict rgb,
+                 uint8_t * restrict gray, size_t pixels) {
+    while (pixels >= 8) {
+        const uint8x8x3_t p = vld3_u8(rgb);
+        uint16x8_t y = vmull_u8(p.val[0], vdup_n_u8(77));
+        y = vmlal_u8(y, p.val[1], vdup_n_u8(150));
+        y = vmlal_u8(y, p.val[2], vdup_n_u8(29));
+        y = vaddq_u16(y, vdupq_n_u16(128));
+        vst1_u8(gray, vshrn_n_u16(y, 8));
+        rgb += 24; gray += 8; pixels -= 8;
+    }
+    while (pixels != 0) {
+        const unsigned y = 77u * rgb[0] + 150u * rgb[1] + 29u * rgb[2] + 128u;
+        *gray++ = (uint8_t)(y >> 8);
+        rgb += 3; --pixels;
     }
 }
 ```
 
-`vld2q_u8`과 `vst3q_u8`은 interleaved 데이터를 벡터 레지스터로 분리·저장하는 연산을 표현합니다. 실제 명령 수와 비용은 target ISA와 compiler에 따라 다르며, 포맷의 stride·packing이 예시와 일치해야 합니다.
+계수 합은 256이고 최대 중간값은 16-bit unsigned 범위 안에 있습니다. 이 함수는 camera YUV buffer를 직접 변환하지 않으며 RGB byte order와 colorimetry가 다르면 결과식부터 바꿔야 합니다. 마지막 1~7 pixel은 scalar tail이 처리합니다.
 
-### 3×3 Box Filter
+## Sobel 수평 gradient와 경계
 
-```c
-void box_filter_3x3(const uint8_t *in, uint8_t *out, int W, int H) {
-    for (int y = 1; y < H - 1; y++) {
-        for (int x = 0; x + 16 <= W; x += 16) {
-            const uint8_t *p = &in[y * W + x];
+Sobel은 가장자리 pixel을 계산할 때 주변 행·열을 읽으므로 입력 폭·높이와 border 정책이 필요합니다. 아래 함수는 grayscale 8-bit image에서 `Gx`만 계산하고, `|Gx|`를 0~255로 saturate해 내부 영역에 기록합니다. 첫·마지막 행과 열의 출력은 그대로 두며 입력과 출력은 겹치지 않아야 합니다.
 
-            uint16x8_t sum0 = vmovl_u8(vld1_u8(p - W));
-            uint16x8_t sum1 = vmovl_u8(vld1_u8(p));
-            uint16x8_t sum2 = vmovl_u8(vld1_u8(p + W));
+각 출력은 중심 pixel 하나가 아니라 주변 3×3 이웃을 보는 작은 창에서 계산됩니다. 그래서 화면 바깥을 읽지 않도록 내부 영역만 처리하고, border는 호출자가 정한 기존 값으로 남깁니다.
 
-            uint16x8_t sum = vaddq_u16(vaddq_u16(sum0, sum1), sum2);
+```c title="neon-sobel-gx.c"
+#include <arm_neon.h>
+#include <stddef.h>
+#include <stdint.h>
 
-            uint16x8_t left  = vextq_u16(sum, sum, 7);
-            uint16x8_t right = vextq_u16(sum, sum, 1);
-            uint16x8_t total = vaddq_u16(vaddq_u16(left, sum), right);
+static int gx_scalar(const uint8_t *p, size_t w) {
+    const int right = p[-w + 1] + 2 * p[1] + p[w + 1];
+    const int left  = p[-w - 1] + 2 * p[-1] + p[w - 1];
+    const int d = right - left;
+    return d < 0 ? -d : d;
+}
 
-            uint8x8_t result = vshrn_n_u16(total, 4);   /* approximate /16 */
-            vst1_u8(&out[y * W + x], result);
+void sobel_gx(const uint8_t * restrict in, uint8_t * restrict out,
+              size_t width, size_t height) {
+    if (width < 3 || height < 3) return;
+    for (size_t y = 1; y < height - 1; ++y) {
+        const uint8_t *p = in + y * width;
+        size_t x = 1;
+        for (; width - x > 8; x += 8) {
+            const int16x8_t ur = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p - width + x + 1)));
+            const int16x8_t mr = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + x + 1)));
+            const int16x8_t dr = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + width + x + 1)));
+            const int16x8_t ul = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p - width + x - 1)));
+            const int16x8_t ml = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + x - 1)));
+            const int16x8_t dl = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + width + x - 1)));
+            int16x8_t g = vaddq_s16(vaddq_s16(ur, dr), vshlq_n_s16(mr, 1));
+            g = vsubq_s16(g, vaddq_s16(vaddq_s16(ul, dl), vshlq_n_s16(ml, 1)));
+            vst1_u8(out + y * width + x, vqmovun_s16(vabsq_s16(g)));
         }
+        for (; x < width - 1; ++x) out[y * width + x] = (uint8_t)gx_scalar(p + x, width);
     }
 }
 ```
 
-세 row를 add하고 좌우 neighbor를 더해 9-element sum을 만듭니다. Computer vision preprocessing에서 자주 쓰이는 패턴 중 하나입니다.
+중간값 `Gx`의 범위는 입력 byte가 0~255일 때 -1020~1020이므로 signed 16-bit lane에 들어갑니다. 이 코드는 gradient magnitude `sqrt(Gx²+Gy²)`나 방향 판정까지 구현하지 않습니다. 입력 크기 곱 `width * height`와 row stride가 실제 버퍼 범위에 맞는지는 호출자가 보장해야 합니다.
 
-### Sobel Edge Detection
+## Saturation과 wrapping
 
-```c
-void sobel_neon(const uint8_t *in, uint8_t *out, int W, int H) {
-    for (int y = 1; y < H - 1; y++) {
-        for (int x = 1; x + 16 <= W - 1; x += 16) {
-            const uint8_t *p = &in[y * W + x];
+8-bit unsigned 더하기는 일반 `vadd`에서 255 다음에 0으로 wrap하고, `vqadd`는 255에 포화합니다. 두 연산은 출력 범위와 이미지 의미가 다르므로 “이미지 처리는 늘 saturation”처럼 일괄 선택하지 않습니다. 실제 format이 modulo arithmetic을 요구하는지도 확인합니다.
 
-            int16x8_t up_l  = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p - W - 1)));
-            int16x8_t up_r  = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p - W + 1)));
-            int16x8_t dn_l  = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + W - 1)));
-            int16x8_t dn_r  = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + W + 1)));
-            int16x8_t mid_l = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p - 1)));
-            int16x8_t mid_r = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p + 1)));
+```c title="neon-saturating-add.c"
+#include <arm_neon.h>
 
-            int16x8_t gx = vsubq_s16(
-                vaddq_s16(vaddq_s16(up_r, dn_r), vshlq_n_s16(mid_r, 1)),
-                vaddq_s16(vaddq_s16(up_l, dn_l), vshlq_n_s16(mid_l, 1)));
+uint8x16_t add_wrapping(uint8x16_t a, uint8x16_t b) {
+    return vaddq_u8(a, b);
+}
 
-            uint8x8_t result = vqmovun_s16(vabsq_s16(gx));
-            vst1_u8(&out[y * W + x], result);
-        }
-    }
+uint8x16_t add_saturating(uint8x16_t a, uint8x16_t b) {
+    return vqaddq_u8(a, b);
 }
 ```
 
-`Gx = [-1 0 1; -2 0 2; -1 0 1]` kernel을 NEON 6개 load + add/sub/shift로 표현합니다. ARM Compute Library가 production용 구현을 제공합니다.
+vector 연산을 scalar reference와 비교할 때는 `255 + 1` 같은 경계, lane 순서, 잘못된 format tag를 포함합니다. sanitizer는 호스트에서 실행한 scalar fixture의 메모리 오류를 찾는 데 도움이 되지만 ARM intrinsic 실행 결과를 대신하지 않습니다.
 
-### CMSIS-DSP FFT
+## CMSIS-DSP real FFT
 
-```c
+CMSIS-DSP real FFT의 initializer는 요청 길이를 지원하지 않으면 status를 반환하므로 무시하지 않습니다. `arm_rfft_fast_f32`의 packed output은 `N`개 float buffer에 저장되며 index 0은 DC, index 1은 Nyquist, 나머지는 양의 주파수 bin의 실수·허수 쌍입니다. 따라서 packed buffer의 시작 주소를 그대로 `arm_cmplx_mag_f32`에 넘기면 DC/Nyquist를 일반 복소수 쌍으로 잘못 해석합니다. [공식 Real FFT API](https://arm-software.github.io/CMSIS-DSP/latest/group__RealFFTF32.html)의 함수별 입출력 형식을 따릅니다.
+
+아래 후처리는 scalar/Cortex-M API 형태의 forward real FFT 결과를 `magnitude[0..N/2]`의 크기 스펙트럼으로 바꿉니다. CMSIS-DSP의 AArch64 NEON 버전은 별도의 FFT 임시 buffer 인자를 받으므로 이 호출 signature를 그대로 재사용하면 안 됩니다. 해당 target의 [API와 buffer 크기 표](https://arm-software.github.io/CMSIS-DSP/latest/group__RealFFTF32.html)를 확인합니다.
+
+```c title="cmsis-real-fft-magnitude.c"
 #include "arm_math.h"
+#include <math.h>
 
-#define FFT_SIZE 512
-arm_rfft_fast_instance_f32 fft;
-arm_rfft_fast_init_f32(&fft, FFT_SIZE);
+enum { FFT_SIZE = 512 };
+static arm_rfft_fast_instance_f32 fft;
+static float input[FFT_SIZE], packed[FFT_SIZE];
+static float magnitude[FFT_SIZE / 2 + 1];
 
-float32_t input[FFT_SIZE];
-float32_t output[FFT_SIZE];
-float32_t magnitude[FFT_SIZE / 2];
+int init_fft(void) {
+    return arm_rfft_fast_init_f32(&fft, FFT_SIZE) == ARM_MATH_SUCCESS;
+}
 
-arm_rfft_fast_f32(&fft, input, output, 0);
-arm_cmplx_mag_f32(output, magnitude, FFT_SIZE / 2);
-```
-
-CMSIS-DSP는 Arm이 배포하는 DSP 라이브러리로 target에 따라 NEON·MVE 최적화 경로를 제공합니다. 오디오·radar·진동 분석에서 사용할 수 있지만 지원 ISA와 build 옵션을 확인해야 합니다.
-
-### Quaternion Rotation
-
-```c
-float32x4_t q = vld1q_f32(quat);   /* (x, y, z, w) */
-float32x4_t v = vld1q_f32(vec);    /* (x, y, z, 0) */
-
-float32x4_t q_v   = quat_mul(q, v);
-float32x4_t q_inv = quat_conjugate(q);
-float32x4_t result = quat_mul(q_v, q_inv);
-```
-
-IMU와 VR 헤드셋의 자세 표현이 quaternion입니다. 4-element 자체가 NEON register와 1:1 대응이라 자연스럽게 SIMD화됩니다.
-
-### AES + SHA crypto extension
-
-```c
-uint8x16_t state = ...;
-uint8x16_t key   = ...;
-
-state = vaesmcq_u8(vaeseq_u8(state, key));   /* AES round */
-
-uint32x4_t s = vsha256hq_u32(s, t, msg);     /* SHA-256 */
-```
-
-ARMv8 crypto extension은 AES·SHA 관련 primitive를 하드웨어 명령으로 가속할 수 있습니다. TLS와 secure boot의 실제 이득은 라이브러리 경로·키 길이·버퍼 크기와 target 지원 여부를 측정해야 합니다.
-
-### Cortex-M Helium (MVE)
-
-```c
-#include <arm_mve.h>
-
-void scale_mve(int16_t *a, int16_t k, int N) {
-    for (int n = N; n > 0; n -= 8) {
-        mve_pred16_t p = vctp16q(n);
-        int16x8_t v = vld1q_z_s16(a, p);
-        v = vmulq_x_s16(v, vdupq_n_s16(k), p);
-        vst1q_p_s16(a, v, p);
-        a += 8;
+void calculate_spectrum(void) {
+    arm_rfft_fast_f32(&fft, input, packed, 0);
+    magnitude[0] = fabsf(packed[0]);
+    magnitude[FFT_SIZE / 2] = fabsf(packed[1]);
+    for (unsigned k = 1; k < FFT_SIZE / 2; ++k) {
+        const float re = packed[2 * k], im = packed[2 * k + 1];
+        magnitude[k] = sqrtf(re * re + im * im);
     }
 }
 ```
 
-Cortex-M55/M85에서 MCU 단에 들어온 SIMD입니다. NEON과 ISA가 다르지만 컨셉은 동일합니다. Predication으로 tail loop를 자동 처리합니다.
+이 API는 입력 buffer를 수정할 수 있습니다. 코드는 magnitude를 계산할 뿐 windowing·정규화·dB 변환·입력 범위 검사를 하지 않습니다. CMSIS-DSP의 prototype과 buffer 크기는 library version에서 재확인하고, target에 맞는 최적화 macro와 source/library를 함께 빌드합니다.
 
-### Multiple accumulator로 latency hide
+## 빌드와 수치 검증
 
-```c
-float32x4_t acc0 = vdupq_n_f32(0);
-float32x4_t acc1 = vdupq_n_f32(0);
-float32x4_t acc2 = vdupq_n_f32(0);
-float32x4_t acc3 = vdupq_n_f32(0);
+각 코드 조각은 대상 ISA를 지정해 compile하고 warning을 오류로 취급합니다. RGB 변환은 모든 byte 입력의 범위와 대표 색상을 scalar 식으로 대조하고, Sobel은 작은 영상의 모든 내부 좌표와 border 보존·폭이 8의 배수가 아닌 tail을 확인합니다. 행렬 곱은 단위행렬, 영행렬, 비대칭 행렬을 사용해 transpose 오류를 찾습니다.
 
-for (int i = 0; i + 16 <= N; i += 16) {
-    acc0 = vfmaq_f32(acc0, vld1q_f32(&a[i]),    vld1q_f32(&b[i]));
-    acc1 = vfmaq_f32(acc1, vld1q_f32(&a[i+4]),  vld1q_f32(&b[i+4]));
-    acc2 = vfmaq_f32(acc2, vld1q_f32(&a[i+8]),  vld1q_f32(&b[i+8]));
-    acc3 = vfmaq_f32(acc3, vld1q_f32(&a[i+12]), vld1q_f32(&b[i+12]));
-}
-
-float32x4_t acc = vaddq_f32(vaddq_f32(acc0, acc1), vaddq_f32(acc2, acc3));
-float result = vaddvq_f32(acc);
+```bash title="neon-cross-compile"
+aarch64-linux-gnu-gcc -std=c11 -O2 -Wall -Wextra -Werror -march=armv8-a+simd -c kernels.c
+aarch64-linux-gnu-objdump -d kernels.o
 ```
 
-VFMA latency와 실행 포트 수는 Cortex-A 세대와 구현에 따라 다릅니다. 누산기를 여러 개 사용하면 의존성을 줄일 수 있지만 register pressure와 memory bandwidth를 함께 측정해야 합니다.
-
-## 측정 / 성능 비교
-
-Cortex-A72에서 측정할 수 있는 workload별 benchmark 형식입니다. 실제 값은 compiler·cache·주파수·메모리 배치와 구현에 따라 달라집니다.
-
-```text
-Workload                       Scalar      NEON     Speedup
-4x4 matrix multiply            측정 필요   측정 필요  측정 필요 (load/store 지배 가능)
-1024 dot product                측정 필요   측정 필요  측정 필요
-3x3 box filter (1080p)         측정 필요   측정 필요  측정 필요
-Sobel edge (1080p)             측정 필요   측정 필요  측정 필요
-512-point FFT                  측정 필요   측정 필요  측정 필요
-AES-128 1 KB encrypt           측정 필요   측정 필요  측정 필요
-YUV → RGB 1080p                측정 필요   측정 필요  측정 필요
-```
-
-이미지·crypto·DSP는 NEON 적용을 검토하기 좋은 영역입니다. Matrix multiply의 이득은 load/store와 cache가 병목인지에 따라 달라집니다.
-
-## 자주 보는 함정
-
-> Saturating과 wrapping 혼동
-
-```c
-v = vaddq_u8(a, b);    /* 255 + 1 = 0 */
-v = vqaddq_u8(a, b);   /* 255 + 1 = 255 */
-```
-
-이미지와 오디오는 saturating이 정답입니다. Wrapping을 쓰면 white pixel이 black으로 뒤집힙니다.
-
-> Misaligned load
-
-```c
-float *p = malloc(N * 4);   /* 필요한 정렬은 allocator·ABI 확인 */
-float32x4_t v = vld1q_f32(p);   /* 정렬 요구와 성능은 target ISA 확인 */
-```
-
-`aligned_alloc(16, ...)`이나 `posix_memalign`을 사용합니다.
-
-> Interleaved vs planar 혼동
-
-| vld1q_u8 | sequential |
-|---|---|
-| vld2q_u8 | 2-way (예: YUV422) |
-| vld3q_u8 | 3-way (예: RGB pixel) |
-| vld4q_u8 | 4-way (예: RGBA) |
-
-Data layout을 명확히 결정하고 nq의 숫자를 맞춰야 합니다.
-
-> Tail handling 누락
-
-```c
-for (i = 0; i + 4 <= N; i += 4) { ... }
-```
-
-N이 vector 배수가 아니면 마지막 element가 빠집니다. Scalar tail loop를 붙이거나 MVE/SVE predication을 사용합니다.
-
-> Register pressure
-
-```c
-/* 16 accumulator + 16 load — 32개 register 한계 */
-```
-
-Cortex-A는 V0~V31의 32개 register를 갖지만 spill이 시작되면 stack access로 속도가 떨어집니다. Loop unroll 폭을 4~8로 제한합니다.
-
-> FPU enable 누락
-
-```c
-/* Cortex-M에서 CPACR로 FPU 활성화 안 하면 UsageFault */
-```
-
-NEON·FPU 명령은 reset 직후 disabled입니다. Startup 코드에서 enable해야 합니다.
+Cross compile과 disassembly는 대상 명령이 생성됐는지 확인하지만, 실행 결과나 target 성능은 확인하지 않습니다. 보드가 없으면 host scalar reference와 sanitizer로 계약을 테스트하고, ARM 실행은 emulator가 해당 instruction을 지원하는지 별도로 확인해 결과 범위를 기록합니다.
 
 ## 정리
 
-- NEON이 빛나는 영역은 matrix, FFT, image, crypto입니다.
-- Image filter는 데이터 배치·메모리·구현에 따라 큰 가속이 가능하지만 대상 장치에서 측정합니다.
-- CMSIS-DSP는 Arm이 배포하는 라이브러리이며 target과 build 옵션별 지원 범위를 확인합니다.
-- `vld2`/`vld3`로 색상 채널 분리를 한 명령에 끝냅니다.
-- ARMv8 crypto extension은 AES와 SHA를 hardware로 가속합니다.
-- Cortex-M55/M85의 MVE로 MCU에서도 SIMD가 가능합니다.
-- Multiple accumulator로 latency를 숨기고, alignment와 tail 처리를 잊지 않습니다.
+- 행렬·픽셀 예제는 layout, stride, overlap, border와 tail을 코드 계약으로 둡니다.
+- NEON lane arithmetic의 saturation·rounding은 scalar 수학과 같다고 가정하지 않습니다.
+- CMSIS-DSP FFT는 initialization status와 packed output 형식을 확인합니다.
+- cross compile/assembly는 실행·측정 결과와 구분합니다.
+- 실제 적용은 대표 입력, 극단 크기, reference 결과와 대상 CPU에서 확인합니다.
 
-이 시리즈 Part 3은 여기까지입니다.
+다음 편은 high-water, 정적 stack 사용량, FreeRTOS 검사와 MPU guard를 구분합니다.
 
 ## 관련 항목
 
-- [3-05: SIMD 활용](/blog/embedded/modern-recipes/part8-07-simd)
-- [3-01: Cache Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
+- [8-07: SIMD](/blog/embedded/modern-recipes/part8-07-simd)
+- [8-09: Stack Analysis](/blog/embedded/modern-recipes/part8-09-stack-analysis)
+- [8-03: Cache Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
 - [PE 2-09: SIMD NEON](/blog/embedded/performance-engineering/part2-09-simd-neon)
-- [PE 2-07: Cache Line](/blog/embedded/performance-engineering/part2-07-cache-line)
