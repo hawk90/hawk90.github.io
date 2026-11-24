@@ -8,8 +8,9 @@ public/og-default.png
 # OG generator manifest
 .cache/
 
-# dependencies
-node_modules/
+# dependencies (no trailing slash: a worktree symlink named node_modules
+# must be ignored too, and `node_modules/` only matches directories)
+/node_modules
 
 # logs
 npm-debug.log*
