@@ -179,6 +179,7 @@ enum class GpioMode : uint32_t {
 using GPIOA_MODER = Reg32<0x40020000>;
 template<int Pin>
 void set_mode(GpioMode mode) {
+    if (static_cast<uint32_t>(mode) > 3u) return;
     static_assert(Pin >= 0 && Pin < 16, "pin out of range");
     constexpr uint32_t shift = Pin * 2;
     constexpr uint32_t clear_mask = 0b11u << shift;
@@ -240,6 +241,7 @@ public:
     explicit Gpio(GpioRegs* regs) : regs_(regs) {}
 
     void set_mode(int pin, GpioMode mode) {
+        if (static_cast<uint32_t>(mode) > 3u) return;
         if (pin < 0 || pin >= 16) return;
         uint32_t v = regs_->MODER;
         v &= ~(0b11u << (pin * 2));
@@ -276,6 +278,7 @@ struct GpioPort {
 
     template<int Pin>
     static void set_mode(GpioMode mode) {
+    if (static_cast<uint32_t>(mode) > 3u) return;
         static_assert(Pin >= 0 && Pin < 16, "pin out of range");
         constexpr uint32_t shift = Pin * 2;
         constexpr uint32_t mask = 0b11u << shift;

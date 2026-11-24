@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SPSC는 atomic 변수 두 개면 끝납니다."** MPMC는 복잡하므로 검증된 라이브러리를 권장합니다.
+> **SPSC는 단일 producer·consumer와 slot 게시·재사용 순서가 핵심입니다.** atomic index 두 개 외에도 payload 수명·full/empty·타깃 atomic 지원을 확인합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -79,6 +79,12 @@ public:
 - Producer는 head만, Consumer는 tail만 수정합니다.
 - 서로의 변수는 `acquire`로 읽고 자기 것은 `release`로 씁니다.
 - target의 destructive-interference 간격이 64바이트 이하인 경우 이 정렬로 두 index를 분리할 수 있습니다. 대가는 RAM입니다. `SpscQueue<int, 4>`는 데이터 16바이트짜리인데 `sizeof`가 192바이트(g++-16·Clang 23.1.5, 64비트 호스트)였습니다.
+
+### 두 release/acquire 관계
+
+producer의 payload 대입은 head의 release보다 먼저이고, consumer가 그 게시를 acquire로 관찰한 뒤 해당 slot을 읽습니다. 반대 방향에서는 consumer의 payload 읽기가 tail의 release보다 먼저이며, producer가 tail을 acquire로 관찰한 뒤 그 slot을 다시 씁니다. 첫 관계는 미완성 payload 읽기를, 두 번째 관계는 consumer가 읽는 동안의 덮어쓰기를 막는 계약입니다. index 값이 원형으로 반복되더라도 각 slot의 접근 순서를 이 두 관계로 설명해야 합니다.
+
+이 구현의 실제 수용량은 N−1개입니다. push의 false는 full 관측이며 자동 재시도나 drop 기록이 없으므로 호출자가 정책을 정합니다. reset·파괴·consumer 추가는 동작 중 허용하지 않으며, producer/consumer가 멈추고 외부 참조도 끝난 뒤 저장소를 회수합니다. atomic index의 lock-free 여부와 T의 처리 비용이 전체 호출의 진행 보장·ISR 적합성을 제한합니다.
 
 ## False Sharing — `alignas(64)`의 의의
 
@@ -324,7 +330,7 @@ Producer 둘이 push하면 race가 발생합니다. SPSC는 producer가 정확�
 std::atomic<HugeStruct> obj;   // lock-free 여부와 runtime helper 제공 확인
 ```
 
-pointer를 atomic swap하는 방식으로 우회합니다.
+pointer 게시를 atomic으로 바꿔도 pointee 수명·동시 접근·회수는 별도 protocol이 필요합니다.
 
 ### 4. ABA problem 무시
 Treiber stack 같은 복잡한 lock-free에는 tagged pointer를 적용하거나 전문 라이브러리를 사용합니다.

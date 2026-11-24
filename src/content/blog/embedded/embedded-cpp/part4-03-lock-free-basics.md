@@ -105,6 +105,8 @@ top.compare_exchange_weak(old_top, old_top->next);
 // CAS 성공 — 그러나 old_top->next는 잘못된 값
 ```
 
+`old_top->next`를 읽는 동안 node가 살아 있고, 다른 thread의 `next` 변경과 data race가 없어야 합니다. CAS 실패 여부만으로 이미 해제된 node를 역참조해도 안전해지는 것은 아닙니다. hazard pointer나 epoch 방식은 이 수명·회수 계약까지 구현해야 합니다.
+
 해결책은 다음과 같습니다.
 
 - Tagged pointer — pointer + counter를 묶어 64-bit으로 다룹니다.

@@ -93,6 +93,12 @@ Call trace:
 
 [`commit_store()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c)(353행)는 385행에서 `cxl_region_invalidate_memregion()`을 먼저 부르고, 성공해야 390행에서 `cxl_region_decode_commit()`으로 넘어갑니다. 이 함수(226-243행)는 `cpu_cache_has_invalidate_memregion()`이 거짓이고 `CONFIG_CXL_REGION_INVALIDATION_TEST`가 꺼져 있으면 경고를 찍고 `-ENXIO`를 돌려줍니다. v6.12에서 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`을 select하는 곳은 `arch/x86/Kconfig:76` 하나라서 arm64에서는 이 경로를 통과할 수 없습니다. 이 함수와 행 번호는 6.12.116에서도 같습니다.
 
+### 실제로 막힌 지점 — cache 무효화
+
+[Ch 12의 arm64 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)에서는 memdev 등록과 region의 target·DPA 설정까지 성공했지만 commit은 실패했습니다. Kernel log는 `Failed to synchronize CPU cache state`, Python의 sysfs write 결과는 `OSError: [Errno 6] No such device or address`였고 `commit`을 다시 읽으면 0이었습니다. 이 결과는 Linux **6.12.116+deb13-arm64**에서 얻은 것이며 위 v6.12 함수 설명과 실행 patch 판을 구분합니다.
+
+고정한 v6.12의 `commit_store()`는 decoder hardware commit 전에 `cxl_region_invalidate_memregion()`을 호출합니다. CPU cache 무효화 기능이 없고 테스트 우회 옵션도 꺼져 있으면 여기서 `-ENXIO`로 반환합니다. 따라서 이 사례는 decoder의 Committed bit를 기다리다 생긴 `-ETIMEDOUT`과 다릅니다. 실제 guest에서 `CONFIG_CXL_REGION_INVALIDATION_TEST`는 꺼져 있었고, 이 안전 검사를 우회해 RAM 노출 성공으로 바꾸지 않았습니다. 같은 경로는 [Linux v6.12.116 region.c](https://github.com/gregkh/linux/blob/v6.12.116/drivers/cxl/core/region.c)에서도 확인할 수 있습니다.
+
 ## Mailbox: transport 성공과 명령 성공
 
 mailbox 명령은 세 겹의 검사를 지납니다. 커널이 사용자 요청을 받아들일지, 장치가 명령을 성공시켰는지, 돌아온 데이터 크기가 맞는지입니다. 다음은 v6.12 `core/mbox.c:244-283`의 `cxl_internal_send_cmd()`에서 주석·빈 줄만 줄인 발췌입니다(6.12.116에서도 같은 위치·내용).
@@ -127,6 +133,8 @@ int cxl_internal_send_cmd(struct cxl_mailbox *cxl_mbox,
 ```
 
 입출력 크기가 payload보다 크면 transport를 호출하기 전에 `-E2BIG`, transport가 성공해도 장치 return code가 성공·background가 아니면 오류, 출력이 요구한 최소보다 짧으면 `-EIO`입니다.
+
+`CXL_MBOX_CMD_RC_BACKGROUND`도 이 함수에서 성공 반환으로 처리되지만, 이는 명령이 백그라운드 작업으로 접수됐다는 뜻이지 sanitize나 firmware 작업의 완료가 아닙니다. 명령별 상태·완료 event·오류를 후속 경로에서 확인해야 합니다.
 
 사용자 공간에서 보내는 명령은 그보다 앞에서 걸러질 수 있습니다. 게스트에서 `cxl list -m mem0 -H`는 health 필드 없이 끝났는데, libcxl의 debug 로그(`CXL_LOG=debug`)에 이유가 있었습니다.
 

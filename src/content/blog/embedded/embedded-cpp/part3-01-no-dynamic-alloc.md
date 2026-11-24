@@ -26,7 +26,7 @@ topics: ["embedded"]
 // 위험
 std::vector<Order> orders;
 for (auto& order : input) {
-    orders.push_back(order);   // heap alloc, 크기마다 reallocate
+    orders.push_back(order);   // capacity가 부족할 때 재할당 가능
     if (orders.capacity() > 1000) {
         // 시점 불명, 메모리 부족 가능
     }
@@ -140,10 +140,15 @@ void func() {
 ```cpp
 template<typename T, size_t N>
 class ObjectPool {
+    static_assert(N > 0, "pool capacity must be positive");
+    static_assert(std::is_nothrow_destructible_v<T>);
     alignas(T) std::byte storage_[sizeof(T) * N];
     std::bitset<N> in_use_;
 
 public:
+    ObjectPool() = default;
+    ObjectPool(const ObjectPool&) = delete;
+    ObjectPool& operator=(const ObjectPool&) = delete;
     T* allocate() {
         for (size_t i = 0; i < N; ++i) {
             if (!in_use_[i]) {
@@ -164,7 +169,7 @@ public:
     T* construct(Args&&... args) {
         T* p = allocate();
         static_assert(std::is_nothrow_constructible_v<T, Args...>);
-        if (p) new (p) T(std::forward<Args>(args)...);
+        if (p) p = new (p) T(std::forward<Args>(args)...);
         return p;
     }
 
@@ -208,7 +213,7 @@ heap을 전혀 쓰지 않고 기존 메모리 위에 객체를 construct합니�
 std::optional<Order> current_order;   // Order + 상태·정렬 패딩, 저장 위치는 선언에 따름
 
 void start() {
-    current_order = Order{/* args */};   // emplace
+    current_order.emplace(/* Order의 생성 인자 */);   // 기존 값은 소멸 후 재생성
 }
 
 void process() {

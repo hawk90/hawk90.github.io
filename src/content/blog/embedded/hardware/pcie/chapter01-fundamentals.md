@@ -43,6 +43,20 @@ qemu-system-aarch64 -M virt,iommu=smmuv3 -accel hvf -cpu host -smp 4 -m 4096 \
 
 root port 다섯 개 아래에 NVMe, e1000e(82574L), igb(82576), 그리고 TI XIO3130 모델로 만든 switch를 달았습니다. switch 아래에는 QEMU 교육용 장치 `edu`와 ATS·AER을 켠 virtio-net이 있습니다. rp5는 일부러 비워 두었습니다. 이후 장에서는 이 구성을 "시리즈 VM"이라고 부릅니다. 주소와 버스 번호는 이 VM의 값이고 실제 보드와는 다릅니다.
 
+## 장치 하나를 따라 읽는 순서
+
+처음에는 Linux가 발견한 Endpoint 하나를 기준으로 읽으면 계층과 API가 연결됩니다. 먼저 [Ch 10](/blog/embedded/hardware/pcie/chapter10-linux-basics#장치-하나의-상태를-순서대로-확인하기)에서 같은 BDF의 장치 식별·자원·driver 연결을 확인한 뒤, 아래 질문에 해당하는 장으로 돌아옵니다. 표의 순서는 학습 순서이며 모든 driver의 초기화 호출 순서를 뜻하지 않습니다.
+
+| 질문 | 읽을 장 | 구분해야 할 것 |
+|------|------|------|
+| 어떤 장치가 어느 경로에 발견됐는가? | [Ch 3 Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space), [Ch 10 Linux](/blog/embedded/hardware/pcie/chapter10-linux-basics) | 장치 발견과 driver의 probe 성공 |
+| CPU는 장치의 register를 어디서 읽는가? | [Ch 4 BAR·MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio) | BAR 슬롯, host 자원 주소, kernel의 MMIO 매핑 |
+| 장치는 host의 buffer에 어떻게 접근하는가? | [Ch 11 DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) | CPU 포인터와 장치에 전달할 DMA 주소 |
+| 완료를 CPU에 어떻게 알리는가? | [Ch 5 Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts) | MSI-X 지원, 실제 IRQ 할당, handler 실행 |
+| 왜 기대한 처리량이 나오지 않는가? | [Ch 17 Performance](/blog/embedded/hardware/pcie/chapter17-performance) | 링크 상한, 요청·응답 방향, 애플리케이션 처리량 |
+
+패킷 자체가 궁금하면 Ch 2, 링크의 재전송과 training이 궁금하면 Ch 8·9로 내려갑니다. 오류 복구는 Ch 7·16, 장치 공유와 격리는 Ch 12·13으로 이어집니다. 이렇게 읽으면 개별 capability를 안다는 것과 장치의 I/O 경로가 실제로 동작한다는 것을 구분할 수 있습니다.
+
 ## PCI에서 PCIe로
 
 PCI는 여러 장치가 한 bus를 나눠 쓰는 parallel bus였고, PCIe는 두 포트 사이의 직렬 링크입니다. 그런데 소프트웨어가 보는 bus·device·function 번호와 configuration space는 그대로 남았습니다. Linux v6.12에서 PCI와 PCIe 장치가 같은 `struct pci_dev`로 표현되고, PCIe 여부는 `pci_is_pcie()`(`include/linux/pci.h:2456-2459`)가 PCI Express Capability offset이 있는지로만 판단하는 것이 그 흔적입니다.

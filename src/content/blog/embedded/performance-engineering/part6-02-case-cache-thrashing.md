@@ -184,7 +184,7 @@ C[i * N + j] += vaddvq_f32(acc);   /* AArch64 horizontal add */
 
 intrinsic의 의미는 [Arm ACLE Advanced SIMD 문서](https://developer.arm.com/documentation/101028/0009/Advanced-SIMD--Neon--intrinsics)에 있습니다. 합산 순서가 바뀌므로 결과도 조금 달라집니다. 이 프로그램은 64개 원소를 double 정밀도 기준값과 비교하는데, Mac에서 최대 상대 오차는 naive 1.05e-06, trans 1.11e-06, NEON 변형 1.74e-07이었습니다. 이 입력에서는 순서를 바꾼 쪽이 오히려 기준값에 더 가까웠습니다. 다만 결과가 비트 단위로 같아야 하는 시스템이라면 이런 변경 자체를 검토해야 합니다.
 
-## 검증 — Before / After
+## 검증 — 비교할 항목
 
 여섯 변형 모두 같은 `matmul.c`, 같은 입력(`srand(1)`)입니다. GFLOP/s는 2.15 GFLOP을 중앙값 시간으로 나눈 값입니다.
 

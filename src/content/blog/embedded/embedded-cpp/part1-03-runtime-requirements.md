@@ -80,9 +80,8 @@ C++ 언어 자체의 runtime 지원입니다. 예외 처리, RTTI, type info, vi
 `__cxa_pure_virtual`은 생성자·소멸자 안에서 순수 가상 함수를 부르는 식의 잘못된 호출이 닿는 곳입니다. 순수 가상 함수가 있는 클래스의 생성자를 컴파일하면 vtable 슬롯이 이 심볼을 가리킵니다. arm-none-eabi-g++ 16.2.0은 이 참조를 weak 미정의(`w __cxa_pure_virtual`)로 남겼습니다. GCC 16 libsupc++의 기본 구현(`pure.cc`)은 `"pure virtual method called\n"`을 쓴 뒤 `std::terminate()`를 부릅니다. 직접 정의하면 이 출력·terminate 경로 대신 보드 정책(무한 루프, 리셋)으로 바꿀 수 있지만, 잘못된 가상 호출 자체를 정상 동작으로 바꾸지는 못합니다.
 
 ```cpp
-extern "C" void __cxa_pure_virtual() {
-    // 무한 루프 또는 reset
-    while (1);
+extern "C" [[noreturn]] void __cxa_pure_virtual() {
+    __builtin_trap();   // GCC/Clang 예: 제품에서는 비복귀 fault 정책과 연결
 }
 ```
 
@@ -217,7 +216,7 @@ newlib은 호스트 의존 함수를 syscall로 분리합니다. bare-metal에�
 
 ### 6. static 객체 소멸자에 의존
 
-영구 실행 firmware에서는 정상 종료 경로를 사용하지 않을 수 있지만, 임베디드 Linux·테스트·재시작 정책은 다릅니다. 자동 저장 객체의 scope 종료 소멸과 프로그램 종료 소멸을 구분합니다. destructor에 중요 로직을 두지 않습니다.
+영구 실행 firmware에서는 정상 종료 경로를 사용하지 않을 수 있지만, 임베디드 Linux·테스트·재시작 정책은 다릅니다. 자동 저장 객체의 scope 종료 소멸과 프로그램 종료 소멸을 구분합니다. 정상 scope의 자원 정리는 소멸자로 구현하되 reset·전원 차단 시 필요한 안전 처리는 별도 fault/종료 protocol로 설계합니다.
 
 ## 측정 — 같은 코드, 다른 libc
 

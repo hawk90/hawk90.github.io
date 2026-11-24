@@ -212,6 +212,8 @@ void shared() {
 
 핵심은 이전 상태를 보존하는 데 있습니다. 이미 disabled 상태에서 진입했다면 다시 enable하지 않으므로, 중첩된 critical section에서도 바깥 구역이 끝나기 전에 인터럽트가 켜지지 않습니다.
 
+이 예제의 PRIMASK는 현재 코어의 일반 maskable IRQ를 막습니다. NMI·HardFault, 다른 코어의 실행, DMA 접근까지 막지 않으며 FreeRTOS의 BASEPRI 임계 구역과도 범위가 다릅니다. 공유 자원 보호가 필요한 범위를 먼저 정하고 그 범위에 맞는 동기화 수단을 골라야 합니다.
+
 이 클래스가 손으로 쓴 코드보다 비싼지는 컴파일 결과로 볼 수 있습니다. CMSIS의 `__get_PRIMASK`·`__set_PRIMASK`·`__disable_irq`를 같은 동작의 인라인 어셈블리(`mrs`·`msr`·`cpsid i`)로 정의하고, 이전 상태를 손으로 저장·복원하는 `shared_manual()`과 위 `shared_raii()`(`counter`는 `volatile uint32_t`)를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os`로 컴파일했습니다. 두 함수는 같은 28바이트, 같은 명령열이 나왔습니다.
 
 ```text
@@ -300,7 +302,7 @@ public:
 
 **Rule of Three (C++98)**: 소멸자, 복사 생성자, 복사 대입 중 하나를 정의하면 셋 다 정의합니다.
 
-**Rule of Five (C++11)**: 위 셋에 이동 생성자와 이동 대입을 더해 다섯을 모두 정의합니다.
+**Rule of Five (C++11)**: 위 셋에 이동 생성자와 이동 대입까지 포함해 복사·이동 정책을 함께 검토합니다. 반드시 모두 구현해야 한다는 뜻은 아니며, 자원 특성에 따라 delete하거나 이동도 금지할 수 있습니다.
 
 **Rule of Zero**: 직접 자원을 관리하지 않고 표준 RAII 클래스(`std::unique_ptr` 등)에 위임합니다. C++ Core Guidelines C.20 "기본 연산을 정의하지 않을 수 있다면 정의하지 마라"가 이 규칙입니다.
 
@@ -416,7 +418,7 @@ public:
         if (init_uart(baud) < 0) {
             // 어떻게 실패 처리?
             // 예외 throw → -fno-exceptions에서 불가
-            // return → 안 됨 (생성자)
+            // 값 반환은 불가; 빈 return은 가능하지만 별도 실패 상태가 필요
         }
     }
 };

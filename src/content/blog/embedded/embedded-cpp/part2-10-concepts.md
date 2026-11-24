@@ -198,11 +198,12 @@ concept HasUserDeserialize = requires(T t, const uint8_t* buf, size_t len) {
 
 template<typename T>
 bool decode(T& obj, const uint8_t* buf, size_t len) {
+    if (buf == nullptr) return false;
     if constexpr (HasUserDeserialize<T>) {
         return obj.deserialize(buf, len);
     } else if constexpr (std::is_same_v<T, std::array<std::uint8_t, 4>>) {
-        if (len < sizeof(T)) return false;
-        std::memcpy(&obj, buf, sizeof(T));
+        if (len < obj.size()) return false;
+        std::memcpy(obj.data(), buf, obj.size());
         return true;
     } else {
         static_assert(sizeof(T) == 0,

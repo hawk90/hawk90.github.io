@@ -176,6 +176,19 @@ cxl monitor
 
 `-L`(`--media-errors`)과 `cxl monitor`는 위에서 본 결과를 냈습니다. `-H`는 health 필드 없이 memdev 기본 정보만 출력했습니다. libcxl debug 로그를 보면 Get Health Info 요청이 커널에서 `-ENOTTY`(-25)로 거부됐는데, QEMU 11.1.3이 이 명령을 구현하지 않아 Command Effects Log에 없기 때문입니다([Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)). 문서의 health 예에 있는 필드는 `life_used_percent`, `temperature`, `dirty_shutdowns`, `volatile_errors`, `pmem_errors`, `ext_life_used`, `ext_temperature`, `ext_corrected_volatile` 등입니다.
 
+## 오류가 생긴 층부터 나누기
+
+같은 “CXL 실패”라도 모델 구성, OS 초기화, 메모리 media와 link 오류는 증거가 다릅니다. [Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)은 region commit이 cache 무효화 단계에서 거절된 사례이며, poison이나 PHY 오류를 주입한 결과가 아닙니다.
+
+| 관찰 | 먼저 조사할 범위 | 확대 해석하면 안 되는 것 |
+|------|------|------|
+| QEMU가 잘못된 FMW 크기로 시작 실패 | 모델의 속성·정렬·topology 입력 | 실제 장치의 media 오류 |
+| memdev는 있지만 commit이 실패 | sysfs 반환·kernel log·cache 무효화·decoder 구성 단계 | 즉시 불량 DRAM이나 link 장애로 확정 |
+| event·poison 기록 발생 | 실제 record의 source·주소·범위·수명과 영향받는 사용자 | 로그 삭제나 reset만으로 data 복구 완료 |
+| 지연·대역폭 저하 | 측정 경계·배치·traffic·queue·link와 media | 규격의 권고 목표를 제품의 보장값으로 적용 |
+
+구성 오류를 고쳐 region이 생겼다는 사실과, 손상된 메모리에서 애플리케이션 data를 복구했다는 사실은 별도로 검증합니다. 이 구분을 유지해야 일반적인 설정 실패를 RAS 복구 실적으로 세지 않을 수 있습니다.
+
 ## 오래 지켜볼 지표
 
 | 지표 | 출처 |

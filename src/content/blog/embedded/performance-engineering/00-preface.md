@@ -171,7 +171,7 @@ topics: ["embedded"]
 
 ### Part 6: Real-World Case Studies (5개)
 
-실전 사례를 통해 분석 과정을 보여줍니다.
+분석 시나리오를 통해 가설과 검증 절차를 보여줍니다. Part 6의 가정·계산 예를 실제 보드에서 수집한 성능 보고서로 인용하지 않습니다.
 
 | # | 글 제목 | 핵심 내용 |
 |---|--------|----------|
@@ -197,7 +197,7 @@ topics: ["embedded"]
 
 ### 평균값만 보지 않는다
 
-실시간 시스템에서는 p99, max, jitter가 더 중요합니다.
+서비스 지연은 percentile과 관측 기간을 함께 보고, hard real-time은 deadline·WCET 근거와 jitter를 검토합니다. 표본 최대값은 WCET의 증명이 아닙니다.
 
 ### CPU 사용률만 보지 않는다
 
@@ -219,6 +219,17 @@ CPU 사용률이 낮아도 memory, bus, lock, interrupt를 기다리는 시간�
 | IRQ frequency | 인터럽트 빈도 | 카운터 |
 | lock wait time | 락 대기 시간 | instrumentation |
 | memory bandwidth | 메모리 대역폭 | PMU, 벤치마크 |
+
+## 예제와 측정 근거를 읽는 방법
+
+| 근거 | 확인할 수 있는 범위 |
+|---|---|
+| 수식·합성 입력 | 단위와 계산, 알고리즘의 설명 |
+| 호스트 기능 검사·cross compile | 검사한 입력에서의 결과 또는 타깃 문법; 타깃 성능은 미확인 |
+| 외부 연구 측정 | 인용한 장비·조건에서의 결과 |
+| 타깃 실측 | 원자료와 실행 조건이 있는 해당 환경의 결과 |
+
+재현 기록에는 보드·CPU, OS/kernel, compiler와 옵션, binary revision, 입력과 작업량, affinity·clock·cache 상태, 측정 구간, PMU 이벤트와 원자료를 남깁니다. 편집용 컴퓨터나 에뮬레이터의 시간 값을 실제 임베디드 타깃의 성능으로 대체하지 않습니다.
 
 ## 사전 지식
 

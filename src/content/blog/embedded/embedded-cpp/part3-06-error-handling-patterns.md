@@ -206,10 +206,11 @@ C++23의 monadic chain(`and_then`)으로 표준적으로 대체할 수 있습니
 // 매크로로 자동 file:line 정보
 #define LOG_ERROR_RESULT(result) \
     do { \
-        if (!(result)) { \
+        const auto& logged_result = (result); \
+        if (!logged_result) { \
             log_error("%s:%d: error %s in %s", \
                 __FILE__, __LINE__, \
-                error_name((result).error()), __func__); \
+                error_name(logged_result.error()), __func__); \
         } \
     } while (0)
 
@@ -221,11 +222,12 @@ if (!r) return err(r.error());
 C++20의 `std::source_location`을 함수 매개변수의 default로 두면 위치가 자동으로 채워집니다. default 인자는 호출하는 쪽에서 평가되므로, 아래 함수를 `main`의 13번째 줄에서 부르면 두 컴파일러 모두 `try.cpp:13 in int main()`을 출력했습니다. 매크로 없이 호출 위치가 기록됩니다.
 
 ```cpp
+// <cinttypes>·<source_location>를 포함합니다.
 template<typename T>
 void log_if_error(const Result<T>& r,
                   std::source_location loc = std::source_location::current()) {
     if (!r) {
-        log_error("%s:%d in %s: error %s",
+        log_error("%s:%" PRIuLEAST32 " in %s: error %s",
                   loc.file_name(), loc.line(), loc.function_name(),
                   error_name(r.error()));
     }
@@ -242,7 +244,7 @@ Result<Data> read_with_retry(int max_retries = 3) {
 
         if (result.error() == Error::Timeout) {
             // 잠시 대기 후 재시도
-            sleep_ms(10);
+            if (i + 1 < max_retries) sleep_ms(10);
             continue;
         }
 
@@ -271,7 +273,7 @@ Result<float> read_or_default() {
 상태 머신에서는 에러를 상태 전이 트리거로 사용합니다.
 
 ```cpp
-enum class DeviceState { Idle, Initializing, Ready, Error, Recovering };
+enum class DeviceState { Idle, Ready, Error, Recovering };
 
 void device_loop() {
     static DeviceState state = DeviceState::Idle;
@@ -467,7 +469,7 @@ Homebrew Clang 23.1.5와 g++-16 모두 `-std=c++23 -fno-exceptions -Wall -Wextra
 - Try macro나 `and_then`으로 체인을 단순화합니다.
 - Logging은 `source_location`이나 매크로로 통합합니다.
 - Recovery 패턴은 retry, fallback, state machine 전이로 구성됩니다.
-- Fatal error는 비휘발성 메모리에 정보를 보존한 뒤 reset합니다.
+- Fatal 기록은 선택한 메모리·reset 종류·startup·쓰기 완료 계약으로 보존을 확인하며, .noinit 이름만으로 비휘발성을 가정하지 않습니다.
 
 ## 근거와 검증 범위
 

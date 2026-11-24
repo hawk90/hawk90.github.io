@@ -16,19 +16,19 @@
 \node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 7.6) {2-socket NUMA — local vs remote access};
 
 % Socket 0 column (left)
-\node[sock] (s0) at (1.6, 5.5) {Socket 0 \\[2pt] CPU 0--15};
-\node[dram] (d0) at (1.6, 2.8) {DDR 64 GB \\[2pt] (NUMA node 0)};
+\node[sock] (s0) at (1.6, 5.5) {Socket 0 \\[2pt] CPU group A};
+\node[dram] (d0) at (1.6, 2.8) {System RAM \\[2pt] (NUMA node 0)};
 
 % Socket 1 column (right)
-\node[sock] (s1) at (12.4, 5.5) {Socket 1 \\[2pt] CPU 16--31};
-\node[dram] (d1) at (12.4, 2.8) {DDR 64 GB \\[2pt] (NUMA node 1)};
+\node[sock] (s1) at (12.4, 5.5) {Socket 1 \\[2pt] CPU group B};
+\node[dram] (d1) at (12.4, 2.8) {System RAM \\[2pt] (NUMA node 1)};
 
 % Local access arrows
-\draw[flow, draw=impbord, line width=0.9pt] (s0.south) -- node[midway, right, font=\sffamily\footnotesize, text=impbord, align=left] {local \\[2pt] 80 ns \\[2pt] 100 GB/s} (d0.north);
-\draw[flow, draw=impbord, line width=0.9pt] (s1.south) -- node[midway, left,  font=\sffamily\footnotesize, text=impbord, align=right] {local \\[2pt] 80 ns \\[2pt] 100 GB/s} (d1.north);
+\draw[flow, draw=impbord, line width=0.9pt] (s0.south) -- node[midway, right, font=\sffamily\footnotesize, text=impbord, align=left] {local access} (d0.north);
+\draw[flow, draw=impbord, line width=0.9pt] (s1.south) -- node[midway, left,  font=\sffamily\footnotesize, text=impbord, align=right] {local access} (d1.north);
 
 % QPI/UPI between sockets
-\node[qpi] (qpi) at (7, 5.5) {QPI / UPI};
+\node[qpi] (qpi) at (7, 5.5) {Interconnect};
 \draw[uses, draw=hibord, line width=0.7pt] (s0.east) -- (qpi.west);
 \draw[uses, draw=hibord, line width=0.7pt] (qpi.east) -- (s1.west);
 
@@ -40,13 +40,13 @@
 
 % Remote label — placed below sockets, between the two crossing arcs, away from line paths
 \node[font=\sffamily\footnotesize, text=warnbord, align=center, fill=white, inner sep=2pt]
-  at (7, 3.9) {remote 130 ns \\[2pt] 60 GB/s (1.6x slower)};
+  at (7, 3.9) {remote access \\[2pt] 비용은 실제 플랫폼과 부하로 측정};
 
 % Bottom legend
 \node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (0, 0.5) {— local: 같은 node 안 access};
-\node[font=\sffamily\footnotesize, text=warnbord, anchor=west] at (0, -0.1) {-- remote: cross-socket access (QPI 경유)};
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west] at (0, -0.1) {-- remote: cross-socket access (link 경유)};
 \node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm]
-  at (0, -1.0) {NUMA tuning의 기본은 *CPU affinity*와 *memory binding*을 같은 node에 묶는 것};
+  at (0, -1.0) {개념도: CPU affinity · memory policy · 실제 page 위치를 따로 확인};
 
 \end{tikzpicture}
 \end{document}

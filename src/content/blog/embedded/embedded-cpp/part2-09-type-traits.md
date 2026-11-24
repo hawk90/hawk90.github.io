@@ -113,10 +113,10 @@ std::make_unsigned_t<T>
 ```cpp
 template<typename T>
 void write_register(uintptr_t addr, T value) {
-    static_assert(std::is_trivially_copyable_v<T>,
-                  "Only trivially copyable types");
-    static_assert(sizeof(T) <= 4,
-                  "Register write up to 4 bytes only");
+    static_assert(std::is_integral_v<T> && std::is_unsigned_v<T> &&
+                  !std::is_same_v<T, bool>, "unsigned integer register value required");
+    static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
+                  "register width must be 1, 2 or 4 bytes");
     *reinterpret_cast<volatile T*>(addr) = value;
 }
 

@@ -16,6 +16,12 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 1~17](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 각 레지스터의 동작을 봤습니다. 이 장은 `setpci`나 드라이버 코드를 쓸 때 찾아보는 용도입니다. 레지스터 이름 열의 `PCI_` 접두사가 붙은 상수는 [Linux v6.12 `pci_regs.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)에 있습니다.
 
+## 비트 위치를 찾은 뒤 접근 속성 확인하기
+
+이 reference는 비트 위치를 찾는 용도이며, 표에 있다는 이유로 같은 방식으로 읽고 쓸 수 있다는 뜻은 아닙니다. 예를 들어 AER Status에는 기록된 비트를 1로 써서 지우는 W1C(Write One to Clear) 동작이 있습니다. 읽은 값을 수정해 통째로 되쓰면 남기려던 다른 오류 기록까지 지울 수 있습니다. Mask·Severity·Control과 Status의 접근 규칙을 구분해야 합니다.
+
+[Linux v6.12 AER 구현](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/pcie/aer.c)의 status clear와 [Ch 15](/blog/embedded/hardware/pcie/chapter15-tools)의 조회·제어 구분을 함께 봅니다. Capability의 시작 offset, register 폭, 장치 종류와 해당 비트의 접근 속성을 확인한 뒤 driver가 소유한 변경 경로를 사용합니다. 이 표는 오류 기록 보존이나 장치 상태 관리를 대신하는 write recipe가 아닙니다.
+
 ## Type 0 Header (Endpoint)
 
 | Offset | 크기 | `pci_regs.h` | 헤더 주석 / 비고 |

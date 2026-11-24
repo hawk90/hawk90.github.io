@@ -71,7 +71,7 @@ if (s->type() == ShapeType::Circle) {
 }
 ```
 
-`type_` enum이 type을 식별하는 역할을 합니다. `static_cast`는 안전 검증을 해 주지 않으므로 enum 체크와 짝지어 씁니다.
+`type_` enum이 type을 식별하는 역할을 합니다. static_cast는 동적 타입을 검증하지 않습니다. enum 체크가 유효하려면 factory·생성자·상속 제한 등으로 tag와 실제 타입의 일치를 별도로 유지해야 합니다. public base 생성자로 잘못된 tag를 넣을 수 있는 이 스케치는 그 invariant를 언어로 강제하는 완성 checked_cast 구현이 아닙니다.
 
 tag는 인스턴스마다 저장됩니다. arm-none-eabi-g++ 16.2.0에서 vptr만 있는 클래스는 4바이트, `ShapeType`(기본 `int`) tag를 더한 `Shape`는 8바이트였습니다. tag를 `unsigned char` 기반 enum으로 줄여도 정렬 때문에 8바이트 그대로였습니다(`static_assert`로 확인). RTTI의 type_info는 클래스당 한 번, tag는 객체마다 붙는 비용입니다.
 
@@ -201,7 +201,7 @@ class Circle : public ShapeBase<Circle> {
 public:
     float area_impl() const { return 3.14f * r * r; }
 private:
-    float r;
+    float r = 1.0f;
 };
 
 Circle c;

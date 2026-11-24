@@ -71,7 +71,7 @@ DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 uint32_t start = DWT->CYCCNT;
 work();
 uint32_t cycles = DWT->CYCCNT - start;
-uint32_t us = cycles / (SystemCoreClock / 1000000);
+uint64_t us = (uint64_t)cycles * UINT64_C(1000000) / SystemCoreClock;
 ```
 
 32비트 카운터이므로 168 MHz에서는 2³² / 168×10⁶ ≈ 25.6초마다 한 바퀴 돕니다. unsigned 뺄셈은 한 번의 wrap까지는 올바른 차이를 주므로, 측정 구간은 이보다 짧아야 합니다.
@@ -188,6 +188,9 @@ void rx_task(void *arg) {
 측정값을 출력하지 않고 메모리에 쌓아 두는 **lightweight tracing**의 예입니다.
 
 ```c
+#define TRACE_SIZE 256u
+_Static_assert((TRACE_SIZE & (TRACE_SIZE - 1u)) == 0u, "power of two");
+
 struct trace_record {
     uint32_t cycles;
     uint16_t event_id;
@@ -199,8 +202,8 @@ static volatile uint32_t trace_idx;
 #define TRACE(id, data) do { \
     uint32_t i = trace_idx++ & (TRACE_SIZE - 1); \
     trace_buf[i].cycles = DWT->CYCCNT; \
-    trace_buf[i].event_id = (id); \
-    trace_buf[i].data = (data); \
+    trace_buf[i].event_id = (event_value); \
+    trace_buf[i].data = (payload_value); \
 } while (0)
 ```
 

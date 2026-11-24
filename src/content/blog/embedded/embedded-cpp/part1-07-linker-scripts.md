@@ -414,6 +414,10 @@ arm-none-eabi-nm --demangle firmware.elf
 - 큰 buffer는 custom 섹션으로 CCM이나 SDRAM에 배치할 수 있습니다. 단 DMA buffer는 일반 SRAM에 두어야 합니다.
 - `-Wl,-Map`으로 완전한 배치 정보를 얻고, CI에는 `--print-memory-usage`를 추가해 영역별 사용량을 추적합니다.
 
+## 추가 확인 — 보드 없이 최종 링크까지
+
+2026-11-19에는 `verify-embedded-cpp-full-review.mjs`로 본문의 memory.ld·placement.cpp·dynamic-init.cpp와 별도 진입 fixture를 실제 GNU ld로 링크했습니다. SRAM/CCM의 NOLOAD, .data의 Flash LMA, init priority 101→10000 정렬, GC 이후 초기화 entry 보존과 RAM 축소 시 링크 거부를 확인했습니다. 최종 ELF/map과 부정 검사의 범위이며 reset 실행·실제 copy/zero·장치 동작을 검증한 결과는 아닙니다.
+
 ## 관련 항목
 
 - [Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code) — Reset_Handler가 사용하는 symbol

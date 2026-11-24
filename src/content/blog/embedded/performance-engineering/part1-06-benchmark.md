@@ -16,13 +16,13 @@ topics: ["embedded"]
 
 ## 좋은 벤치마크의 5 조건
 
-1. **Reproducible** — 같은 결과가 매번 나옵니다.
+1. **Reproducible** — 환경·입력·절차를 기록해 다시 비교할 수 있습니다. 매번 같은 숫자가 나와야 한다는 뜻은 아닙니다.
 2. **Representative** — 실 워크로드를 대표합니다.
 3. **Stable** — 변동 범위와 환경 변화를 기록하고, 판단 기준은 사용 목적에 맞춥니다.
-4. **Isolated** — 외부 영향이 제거됩니다.
+4. **Isolated** — 통제한 영향과 남은 간섭을 기록합니다. 실제 운용의 IRQ·DMA까지 모두 없앤 결과와 구분합니다.
 5. **Measurable** — 명확한 metric이 있습니다.
 
-## Warmup — 첫 측정은 버린다
+## Warmup — 측정할 상태를 먼저 정한다
 
 새로 띄운 프로세스에서 같은 일을 12번 반복하며 반복마다 시간을 재 보았습니다. 일은 `malloc`으로 받은 4 MiB 버퍼 전체에 값을 쓰고 더하는 것이고, 반복마다 똑같은 양입니다. 다른 점은 0번째 반복만 페이지를 처음 건드린다는 것뿐입니다(`bench/warmup.c`, M2 Pro, `clang -O2`, 프로세스 5개).
 
@@ -50,6 +50,8 @@ for (int i = 0; i < N; i++) {
 ## Isolation — 노이즈 제거
 
 ### Linux
+
+먼저 대상 Linux에서 현재 배치·정책을 읽어 기록합니다. 아래는 타깃용 조회 형식이며 이 글에서 실행한 결과가 아닙니다. 속성 부재나 권한 오류를 정상값으로 채우지 않습니다.
 
 ```bash
 # CPU pinning
@@ -85,7 +87,7 @@ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 - DMA를 정지합니다.
 - 캐시가 있는 코어(Cortex-M7 등)라면 캐시 상태를 정해 둡니다. 켠 상태에서 warm으로 잴지, 무효화하고 cold로 잴지를 결과와 함께 적습니다.
 
-## N=1은 거짓말
+## 반복 횟수와 관측 기간
 
 한 번 잰 값이 얼마나 믿을 만한지는 같은 측정을 반복해야 알 수 있습니다. Debian 게스트에서 Google Benchmark(Debian 패키지 `libbenchmark-dev` 1.9.1)로 1 KiB `memcpy`를 쟀습니다. 한 번 실행에 5회 반복(`--benchmark_repetitions=5`)이고, 같은 명령을 세 번 실행했습니다.
 
@@ -99,7 +101,8 @@ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 
 ```c
 struct {
-    uint32_t min, max, sum;
+    uint32_t min, max;
+    uint64_t sum;
     uint32_t hist[64];
 } stats;
 ```
@@ -180,13 +183,17 @@ __asm__ volatile("" : : "r"(buf) : "memory");
 Cortex-M에서 쓰는 최소 패턴입니다. 보드에서 실행하지 않았습니다. 버릴 warmup 횟수는 위처럼 반복별 값을 먼저 찍어 보고 정합니다.
 
 ```c
-void run_bench(const char *name, void (*fn)(void)) {
+/* <stdint.h>, <inttypes.h>, <stdio.h>와 해당 MCU의 DWT 정의가 필요합니다. */
+void run_bench(const char *name, void (*fn)(void),
+               unsigned warmup, unsigned repeats) {
+    if (repeats == 0) return;
     // Warmup
-    for (int i = 0; i < 10; i++) fn();
+    for (unsigned i = 0; i < warmup; i++) fn();
     
     // Measure
-    uint32_t min = UINT32_MAX, max = 0, sum = 0;
-    for (int i = 0; i < 100; i++) {
+    uint32_t min = UINT32_MAX, max = 0;
+    uint64_t sum = 0;
+    for (unsigned i = 0; i < repeats; i++) {
         uint32_t t = DWT->CYCCNT;
         fn();
         uint32_t e = DWT->CYCCNT - t;
@@ -194,9 +201,12 @@ void run_bench(const char *name, void (*fn)(void)) {
         if (e > max) max = e;
         sum += e;
     }
-    printf("%s: avg=%u min=%u max=%u\n", name, sum/100, min, max);
+    printf("%s: avg=%" PRIu64 " min=%" PRIu32 " max=%" PRIu32 "\n",
+           name, sum / repeats, min, max);
 }
 ```
+
+Warmup과 측정 반복 횟수는 호출하는 쪽에서 목적에 맞춰 선택합니다. 이 함수는 DWT가 해당 MCU에서 제공·활성화돼 있고, 한 구간이 32-bit counter 한 주기보다 짧다는 전제입니다. 합계는 64-bit로 누적하지만 개별 구간의 wrap 횟수를 복원해 주는 것은 아닙니다. 출력은 계측 루프 뒤에 두며 타깃의 최소·최대 실행 시간 보장을 대신하지 않습니다.
 
 ## Comparative Benchmark
 

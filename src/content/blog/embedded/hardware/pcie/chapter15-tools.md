@@ -58,6 +58,8 @@ lspci -F nvme-devctl2810.dump -vv | grep -A2 "DevCtl:"
 
 0x2810을 [Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp)의 `pci_regs.h` 정의로 풀면 Relaxed Ordering(0x0010)과 No Snoop(0x0800)이 켜지고, Max_Payload_Size(bit 7:5)는 0이라 128바이트, Max_Read_Request_Size(bit 14:12)는 2라 512바이트입니다. lspci 해석과 같습니다. 마지막 줄은 같은 시각 실제 장치의 DevCtl이 그대로 0000이라는 확인입니다. `-F`로 본 값은 그 파일의 내용일 뿐이고 장치의 현재 상태가 아닙니다.
 
+이 절의 합성 dump 검사는 decoder의 필드 해석을 확인한 것입니다. 별도로 [Ch 10의 QEMU NVMe 실험](/blog/embedded/hardware/pcie/chapter10-linux-basics#qemu-nvme-한-대로-연결해서-확인하기)에서는 guest의 `lspci`·sysfs 결과를 같은 장치의 I/O·IRQ·완료 trace와 대조했습니다. 두 실험 모두 실장치 PHY나 link 오류율 측정은 아닙니다.
+
 ## setpci와 BAR 직접 접근
 
 `setpci`는 config 레지스터를 이름이나 offset으로 읽고 씁니다. 이 시리즈에서 쓴 형태를 모았습니다.

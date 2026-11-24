@@ -191,6 +191,23 @@ firmware인 U-Boot에 entry가 없으니 첫 loadable인 BL31의 `0x920000`이 �
 
 `CONFIG_SPL_ATF`가 꺼져 있는데도 BL31로 가는 점이 흥미롭습니다. `board_init_r()`의 분기(`spl.c:761-763`)는 `spl_image.os`로 갈리는데, 이 값은 loadable이 아니라 *firmware* 이미지(`uboot`)에서 옵니다(`spl_fit.c:771-774`). `uboot`에는 `os`가 없으므로 `IH_OS_U_BOOT`가 되고, `IH_OS_ARM_TRUSTED_FIRMWARE` 분기는 애초에 `CONFIG_IS_ENABLED(ATF)`가 꺼져 있어 쓰이지 않습니다. 그래서 SPL은 "U-Boot로 점프한다"는 분기를 타면서, 실제로는 entry 주소 규칙 때문에 BL31에 도착합니다. 같은 "SPL → BL31" 그림이라도 실제 코드 경로는 FIT 내용에 따라 갈리므로, `mkimage -l`과 `spl_fit.c`를 함께 봅니다.
 
+## 내 빌드에서 주소와 크기 다시 읽기
+
+위 표의 값과 자기 빌드를 비교하려면 U-Boot **빌드 디렉터리**에서 아래 명령을 실행합니다. `O=...`로 빌드했다면 소스 디렉터리가 아니라 그 출력 디렉터리로 이동합니다. `aarch64-elf-nm`은 이 장에서 사용한 도구 이름이며, 다른 cross toolchain을 썼다면 해당 prefix의 `nm`으로 바꿉니다.
+
+```bash
+aarch64-elf-nm -n spl/u-boot-spl | \
+  rg ' (_start|_image_binary_end|__bss_start|__bss_end)$'
+wc -c spl/u-boot-spl.bin spl/u-boot-spl.dtb arch/arm/dts/imx8mm-evk.dtb
+aarch64-elf-nm -S --size-sort spl/u-boot-spl | \
+  awk '$3 ~ /^[TtDdRr]$/' | tail -10
+dtc -I dtb -O dts spl/u-boot-spl.dtb > spl-review.dts
+```
+
+`nm`의 끝 주소에서 시작 주소를 빼면 코드·데이터와 BSS의 크기를 각각 확인할 수 있습니다. `wc -c`는 DTB를 포함한 파일 크기를 읽으므로 링커가 검사한 크기와 구분합니다. 마지막 명령이 만든 `spl-review.dts`에서는 필요한 장치 노드가 남았는지 봅니다. `bootph-*` 속성 자체는 빌드 중 제거되므로 그 문자열이 없다는 이유로 노드가 빠졌다고 판단하지 않습니다([v2024.04 SPL 문서의 DT 필터 설명](https://docs.u-boot.org/en/v2024.04/develop/spl.html#device-tree)).
+
+이 명령 묶음은 앞서 제시한 측정값을 다시 읽는 절차입니다. compiler·설정이 다른 빌드가 같은 바이트 수를 내는지를 통과 기준으로 삼지 않습니다. 장치 누락은 DTB와 드라이버 설정으로, 코드 크기 초과는 ELF 심볼로, 최종 이미지 크기는 바이너리 파일로 각각 좁혀 갑니다.
+
 ## 실기 없이 확인한 것과 못 한 것
 
 이 장의 숫자는 빌드 산출물(`.config`, ELF, `nm`, `objdump`, `mkimage -l`, binman map, 디컴파일한 DTB)과 링커 실패 재현에서 나왔습니다. 실제 i.MX8MM 보드에서 SPL을 실행하지 않았으므로 콘솔 출력은 소스의 문자열 형식으로만 인용했고, DDR training 결과나 부팅 시간은 다루지 않았습니다. QEMU에는 i.MX8MM 머신이 없어서 이전 장처럼 에뮬레이터로 대신 돌릴 수도 없습니다.

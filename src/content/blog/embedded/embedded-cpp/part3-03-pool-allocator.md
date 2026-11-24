@@ -315,6 +315,8 @@ public:
         // ... free list 초기화
     }
 
+    HeapPool(const HeapPool&) = delete;
+    HeapPool& operator=(const HeapPool&) = delete;
     ~HeapPool() { std::free(storage_); }
 };
 ```

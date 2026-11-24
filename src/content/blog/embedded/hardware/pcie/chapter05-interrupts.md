@@ -172,6 +172,8 @@ Linux v6.12 `msi_device_has_isolated_msi()`(`kernel/irq/msi.c:1697-1713`) 주석
 
 x86에서는 위 flag를 세우는 Intel·AMD IOMMU 드라이버가 interrupt remapping을 맡습니다. 이 VM에서는 실행하지 않았고, Linux v6.12 문서로 확인한 범위만 적습니다. `kernel-parameters.txt:2291-2299`의 `intremap=`는 Intel IOMMU에서 기본값 `on`이고, `off`는 remapping을, `nosid`는 "Source ID checking"을 끕니다.
 
+[Ch 10의 QEMU NVMe 실험](/blog/embedded/hardware/pcie/chapter10-linux-basics#qemu-nvme-한-대로-연결해서-확인하기)에서는 MSI-X `Count=65`인 장치에 Linux IRQ 세 개가 할당됐고, 16 KiB 쓰기·읽기 구간에서 `nvme0q1`의 count가 43에서 52로 증가했습니다. 이는 capability의 최대 개수·실제 할당·handler 동작이 서로 다른 관찰이라는 예입니다. 해당 Arm guest에서는 APIC 대신 GICv2m 경로가 표시됐습니다.
+
 ## 자주 하는 실수
 
 ### "PCIe에는 INTx가 없다"

@@ -34,6 +34,14 @@ C HAL도 `UART_HandleTypeDef*`처럼 타입을 가진 handle을 받지만 같은
 ## 기본 — UART class
 
 ```cpp
+// <cstdint> 포함. OVER8=0의 BRR 인코딩을 계산하는 순수 함수입니다.
+constexpr bool uart_brr_over16(uint32_t baud, uint32_t pclk, uint32_t& out) {
+    if (baud == 0 || pclk == 0) return false;
+    const uint64_t divisor = (uint64_t{pclk} + baud / 2u) / baud;
+    if (divisor < 16 || divisor > 0xffffu) return false;
+    out = static_cast<uint32_t>(divisor);
+    return true;
+}
 template<uintptr_t Address>
 class Uart {
     struct Regs {
@@ -45,9 +53,12 @@ class Uart {
     }
 
 public:
-    static void init(uint32_t baud, uint32_t pclk) {
-        regs().BRR = pclk / baud;
-        regs().CR1 = (1 << 13) | (1 << 3) | (1 << 2);   // UE | TE | RE
+    static bool init(uint32_t baud, uint32_t pclk) {
+        uint32_t brr;
+        if (!uart_brr_over16(baud, pclk, brr)) return false;
+        regs().BRR = brr;
+        regs().CR1 = (1 << 13) | (1 << 3) | (1 << 2);   // UE | TE | RE, OVER8=0
+        return true;
     }
 
     // Blocking transmit
@@ -70,8 +81,9 @@ public:
 
 using Uart2 = Uart<0x40004400>;
 
-Uart2::init(115200, 42'000'000);   // 예: APB1이 실제 42MHz인 구성
-Uart2::send(reinterpret_cast<const uint8_t*>("Hello\n"), 6);
+if (Uart2::init(115200, 42'000'000)) {   // 실제 APB1 PCLK를 전달
+    Uart2::send(reinterpret_cast<const uint8_t*>("Hello\n"), 6);
+}
 ```
 
 이 UART 스케치는 STM32F407식 SR/DR/CR1, OVER8=0을 가정하며 실제 APB1 PCLK를 전달해야 합니다. OVER8=0에서 BRR은 USARTDIV를 1/16 단위로 담으므로 `pclk / baud`가 그대로 BRR 값이 되고, 실제 baud는 `pclk / BRR`입니다. 위 예의 42 MHz·115200에서 정수 나눗셈은 BRR 364(0x16C)로 실제 baud 115,384.6(+0.16%), 반올림하면 365(0x16D)로 115,068.5(−0.11%)입니다. 이 예에서는 반올림 쪽 오차가 작습니다. baud=0·오류와 timeout·RCC/AF 핀 설정은 생략했으므로 완전한 드라이버가 아닙니다. Uart2/Uart3는 주소 인자가 다르면 다른 type이지만 자원 독점이나 초기화 완료까지 보장하지 않습니다.
@@ -123,7 +135,7 @@ LogUart::send_dma(big_buffer, 1024);   // 전송 중 CPU는 설정·완료 처�
 ```cpp
 template<typename T>
 concept UartInterface = requires(T t, const uint8_t* data, size_t len) {
-    { T::init(uint32_t{}, uint32_t{}) } -> std::same_as<void>;
+    { T::init(uint32_t{}, uint32_t{}) } -> std::same_as<bool>;
     { T::send(data, len) } -> std::same_as<void>;
     { T::recv_byte() } -> std::convertible_to<uint8_t>;
 };

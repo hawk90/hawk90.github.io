@@ -97,7 +97,8 @@ class FixedVector {
 public:
     bool push_back(const T& value) {
         if (size_ >= N) return false;
-        data_[size_++] = value;
+        data_[size_] = value;
+        ++size_;
         return true;
     }
 
@@ -129,7 +130,7 @@ FixedVector<int, 32> b;
 ```cpp
 template<typename T, size_t N>
 class RingBuffer {
-    static_assert(N > 0 && (N & (N - 1)) == 0,
+    static_assert(N > 1 && (N & (N - 1)) == 0,
                   "N must be power of 2");
 
     T buffer_[N]{};

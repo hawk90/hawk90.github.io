@@ -266,7 +266,7 @@ template<typename State>
 constexpr bool is_in_state();  // 부모 탐색은 여기서 구현하지 않음
 ```
 
-실제 HSM은 event 전파·entry/exit·부모 전이 규칙까지 구현해야 하므로, Boost.SML의 sub-machine이나 `etl::hsm` 같은 library를 쓰고 선택한 판에서 검증합니다.
+실제 HSM은 event 전파·entry/exit·부모 전이 규칙까지 구현해야 하므로, Boost.SML의 sub-machine이나 ETL 20.49.0의 `<etl/hfsm.h>`에 정의된 `etl::hfsm`을 검토하고 선택한 판에서 검증합니다.
 
 ## 재현 — 전이 오류와 cycle을 포함한 도달성 검사
 
@@ -346,7 +346,7 @@ state × event 조합마다 template이 하나씩 인스턴스화되므로 조�
 조건부 전이가 필요한 경우 단순한 from/event/to만으로는 부족합니다. Boost.SML이 guard를 지원합니다.
 
 ### 6. Sub-machine 결합
-큰 시스템에서는 sub-FSM이 필요해집니다. 직접 구현이 어렵다면 Boost.SML이나 `etl::hsm`을 씁니다.
+큰 시스템에서는 sub-FSM이 필요해집니다. 직접 구현이 어렵다면 Boost.SML이나 `etl::hfsm`을 씁니다.
 
 ## 검증 범위와 1차 자료
 
@@ -354,7 +354,7 @@ Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 `compile-fsm.cpp`
 
 - [C++ draft constexpr](https://eel.is/c++draft/dcl.constexpr) — 상수 평가 가능한 함수와 실제 runtime 호출 구분
 - [variant visitation](https://eel.is/c++draft/variant.visit) — 모든 alternative에 대한 호출 유효성
-- [Boost.SML repository](https://github.com/boost-ext/sml) — 외부 library 설명. 이 글에서는 SML 버전을 설치·빌드하지 않았습니다.
+- [Boost.SML v1.1.11](https://github.com/boost-ext/sml/tree/v1.1.11) — 2026-11-19 추가 검사에서 본문 전이 테이블을 실제 헤더로 빌드하고 Start/Pause/Resume/Stop action 순서를 확인했습니다. 보드 I/O와 성능 검사는 포함하지 않습니다.
 
 ## 정리
 

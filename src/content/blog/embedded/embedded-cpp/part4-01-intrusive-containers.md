@@ -316,16 +316,15 @@ void task_make_ready(TaskTcb* t) {
 struct Event : public bi::list_base_hook<> {
     int type;
     uint32_t data;
+    Event(int kind, uint32_t value) noexcept : type(kind), data(value) {}
 };
 
 ObjectPool<Event, 64> event_pool;
 bi::list<Event> event_queue;
 
 void post_event(int type, uint32_t data) {
-    auto* e = event_pool.allocate();
+    auto* e = event_pool.construct(type, data);
     if (e) {
-        e->type = type;
-        e->data = data;
         event_queue.push_back(*e);
     }
 }
@@ -335,7 +334,7 @@ void process_events() {
         auto& e = event_queue.front();
         event_queue.pop_front();
         handle_event(e);
-        event_pool.deallocate(&e);
+        event_pool.destroy(&e);
     }
 }
 ```
@@ -416,6 +415,8 @@ int main() {
 ```
 
 Homebrew Clang 23.1.5와 g++-16에서 C++17·AddressSanitizer·UBSan으로 실행했고 둘 다 `intrusive membership checks passed`를 출력했습니다. `-DBAD_COPY`는 Clang에서 `error: call to deleted constructor of 'IntrusiveList<Task, &Task::pending>'`로 거부됩니다. 보드 cycle 수나 heap 포함 전체 workload의 성능 비교는 측정하지 않았습니다. 객체 저장 공간과 owner/link 메모리도 전체 RAM 예산에 포함합니다.
+
+2026-11-19 추가 검사에서는 Boost 1.87.0의 실제 list hook과 Part 3-03의 pool을 함께 빌드했습니다. Event 64개 생성·고갈·unlink 후 소멸·슬롯 재사용을 ASan/UBSan으로 확인했습니다. 원시 저장소에 hook 생성 없이 enqueue하는 방식은 사용하지 않습니다.
 
 ## 1차 자료
 

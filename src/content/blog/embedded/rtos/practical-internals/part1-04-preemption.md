@@ -54,10 +54,12 @@ task는 명시적 yield 또는 실제 blocking·suspend·delete 등으로 실행
 void taskA(void *arg) {
     while (1) {
         do_work();
-        taskYIELD();    // 다른 task에 양보
+        taskYIELD();    // scheduler 재선택; 호출 task가 계속 선택될 수 있음
     }
 }
 ```
+
+단일 코어의 `taskYIELD()`는 현재 task를 Ready에서 제거하지 않습니다. 자신보다 낮은 priority task만 남아 있으면 자신이 다시 선택됩니다. `configUSE_TIME_SLICING=0`도 tick에 의한 같은 priority 회전을 끄는 설정이지, 명시적 yield나 blocking으로 인한 전환까지 금지하는 설정은 아닙니다.
 
 또는 *blocking API*가 implicit yield 역할을 합니다. 대기 시간이 양수인 delay나 실제 대기 조건이 성립한 queue receive 등이 전환을 유발합니다. 데이터가 이미 있거나 timeout0이면 receive가 즉시 반환할 수 있습니다.
 
@@ -147,7 +149,7 @@ void TIM1_IRQHandler(void) {
        xHigherPriorityTaskWoken = pdTRUE 설정됨 */
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    /* pdTRUE면 ISR 끝나면서 task 전환 발생 */
+    /* 필요한 전환 요청; 실제 PendSV 실행 시점은 예외·mask 상태에 따름 */
 }
 ```
 

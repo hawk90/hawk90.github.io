@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"각 GPIO pin이 고유한 type을 갖습니다."** 두 pin을 섞을 수 없고, 잘못 쓰면 컴파일 에러가 납니다.
+> **Port·Pin 조합을 타입으로 표현합니다.** 숫자 범위는 static_assert로 제한하지만 입력/출력 권한·소유권·보드 연결은 별도 계약입니다.
 
 ## 어떤 문제를 푸는가
 
@@ -65,7 +65,8 @@ class Gpio {
         volatile uint32_t IDR;
         volatile uint32_t ODR;
         volatile uint32_t BSRR;
-        // ...
+        volatile uint32_t LCKR;
+        volatile uint32_t AFR[2];
     };
 
     static PortRegs& port() {
@@ -90,6 +91,7 @@ public:
     }
 
     static void configure(GpioMode mode) {
+        if (static_cast<uint32_t>(mode) > 3u) return;
         constexpr uint32_t shift = Pin * 2;
         uint32_t v = port().MODER;
         v &= ~(0b11u << shift);
@@ -247,6 +249,7 @@ class Gpio {
 public:
     template<AltFn Af>
     static void configure_alt() {
+        static_assert(static_cast<uint8_t>(Af) < 16, "invalid alternate function");
         configure(GpioMode::Alt);
         // AFR[0] for pin 0-7, AFR[1] for pin 8-15
         constexpr int afr_idx = Pin / 8;
@@ -381,6 +384,7 @@ struct Fake {
 };
 template<class Bus, unsigned Pin, Config Cfg> struct Gpio {
     static_assert(Pin < 16, "pin must be below 16");
+    static_assert(static_cast<std::uint32_t>(Cfg.mode) <= 3, "invalid mode");
     static void init() {
         constexpr unsigned shift=Pin*2;
         Bus::mode=(Bus::mode & ~(3u<<shift)) | (static_cast<unsigned>(Cfg.mode)<<shift);

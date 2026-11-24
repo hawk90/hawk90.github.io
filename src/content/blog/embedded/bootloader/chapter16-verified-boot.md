@@ -82,6 +82,18 @@ key-dev {
 
 `required = "conf"`가 `-r` 옵션의 결과이고, 공개키는 PEM이 아니라 U-Boot가 바로 계산에 쓰는 형태(modulus, exponent `0x10001`, 2048 bit)로 들어갑니다.
 
+### 부팅 전에 키 삽입 결과 확인하기
+
+호스트에서도 `dtc` 패키지의 `fdtget`으로 **QEMU에 넘길 바로 그 파일**을 검사합니다. 아래 명령은 앞에서 키를 넣은 `qemu-key.dtb`가 있는 디렉터리에서 실행합니다.
+
+```bash
+fdtget -t s qemu-key.dtb /signature/key-dev required
+fdtget -t s qemu-key.dtb /signature/key-dev algo
+fdtget -t u qemu-key.dtb /signature/key-dev rsa,num-bits
+```
+
+이 장의 설정에서 확인할 값은 차례로 `conf`, `sha256,rsa2048`, `2048`입니다. 첫 명령이 `FDT_ERR_NOTFOUND`로 실패하면 네 가지 FIT 비교에 앞서 `-r`과 키를 넣은 DTB 경로부터 확인합니다. 세 값이 맞는 것은 키 삽입과 필수 검증 설정을 확인한 것이며, 올바른 키 쌍인지는 아래의 정상 서명·다른 키 부팅 결과로 구별합니다. `required`의 의미와 `-K`·`-r` 조합은 [v2024.04 서명 문서](https://docs.u-boot.org/en/v2024.04/usage/fit/signature.html#public-key-storage)에 정의되어 있습니다.
+
 ## 네 가지 FIT으로 시험
 
 같은 키 DTB로 부팅한 뒤 네 FIT을 차례로 `bootm`했습니다.

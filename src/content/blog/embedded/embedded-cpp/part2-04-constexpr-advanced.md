@@ -68,15 +68,16 @@ constexpr auto make_sorted() {
 
 ## 컴파일 타임 binary search
 
-정렬된 테이블에서 컴파일 타임 binary search를 수행합니다. 아래의 int 인덱스 예제는 N이 int로 표현되는 작은 배열을 전제로 합니다. 상수 인자로 상수식 문맥에서 호출하면 검색 결과 자체를 확정합니다. 런타임 인자를 받는 호출도 가능합니다.
+정렬된 테이블에서 컴파일 타임 binary search를 수행합니다. 아래 예제는 <array>·<limits>를 포함하고 N이 int로 표현되는 배열을 받습니다. 중간점은 low+high를 직접 더하지 않아 overflow를 피합니다. 상수 인자로 상수식 문맥에서 호출하면 검색 결과 자체를 확정합니다. 런타임 인자를 받는 호출도 가능합니다.
 
 ```cpp
 template<typename T, size_t N>
 constexpr int binary_search(const std::array<T, N>& arr, T value) {
+    static_assert(N <= static_cast<size_t>(std::numeric_limits<int>::max()));
     int low = 0;
     int high = static_cast<int>(N) - 1;
     while (low <= high) {
-        int mid = (low + high) / 2;
+        int mid = low + (high - low) / 2;
         if (arr[mid] == value) return mid;
         if (arr[mid] < value) low = mid + 1;
         else high = mid - 1;
@@ -198,13 +199,8 @@ constexpr uint32_t pin_mask(int pin) {
     return uint32_t{1} << pin;
 }
 
-constexpr uint32_t pins_mask(std::initializer_list<int> pins) {
-    uint32_t mask = 0;
-    for (int p : pins) mask |= pin_mask(p);
-    return mask;
-}
-
-constexpr uint32_t kLedMask = pins_mask({13, 14, 15});   // 0xE000
+constexpr uint32_t kLedMask = pins_mask<13, 14, 15>();   // 0xE000
+// pins_mask<32>();   // ERROR — static_assert
 
 GPIOA->ODR |= kLedMask;   // 런타임에 그냥 상수 OR
 ```
@@ -290,7 +286,7 @@ constexpr int find_irq(const char* name) {
 }
 ```
 
-런타임 device tree 파싱이 불필요하며, 모든 정보가 Flash에 박힙니다.
+이처럼 고정된 구성은 런타임 device tree 파싱 없이 조회할 수 있습니다. 주소·IRQ는 STM32F407용 예시이며 다른 MCU에 그대로 적용하지 않습니다. 배열과 문자열의 실제 저장 위치·미사용 데이터 제거는 최종 ELF로 확인합니다.
 
 ## 자주 보는 함정과 안티패턴
 

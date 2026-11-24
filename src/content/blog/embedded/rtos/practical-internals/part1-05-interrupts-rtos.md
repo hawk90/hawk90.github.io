@@ -141,7 +141,7 @@ xQueueSendFromISR(q, &data, &xHigherPriorityTaskWoken);
 // 위 호출이 higher-priority task를 ready로 만들면 pdTRUE
 
 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-// pdTRUE면 ISR 끝나면서 task 전환
+// 필요한 전환 요청; 실제 실행은 mask·예외 priority·중첩 상태에 따름
 ```
 
 ## ISR Priority 설정 — Cortex-M

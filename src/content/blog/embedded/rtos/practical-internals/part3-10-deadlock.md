@@ -73,7 +73,7 @@ wait-for graph는 지금 이 순간의 상태라 deadlock이 이미 일어난 �
 규칙은 간단합니다. 모든 mutex에 전역 순서를 부여하고, 항상 낮은 순서부터 take합니다.
 
 ```c
-/* Convention — 알파벳/주소/ID 기준 */
+/* Convention — application이 정한 전역 rank/ID 기준 */
 #define MTX_ORDER_A  0
 #define MTX_ORDER_B  1
 #define MTX_ORDER_C  2
@@ -234,7 +234,7 @@ xSemaphoreTake(mtx, portMAX_DELAY);   // ✗ deadlock 감지 불가
 ```c
 xSemaphoreTake(mtx, ...);
 /* ... */
-xSemaphoreTake(mtx, ...);   // ✗ Self-deadlock (mutex 아닌 binary semaphore)
+xSemaphoreTake(mtx, ...);   // 비재귀 mutex 자기 재취득; 무한 대기 설정이면 self-deadlock 가능
 ```
 
 주석과 달리 이 실수는 binary semaphore만의 문제가 아닙니다. 일반 mutex도 같은 task가 두 번 잡으면 자기 자신을 기다립니다. 5 tick timeout으로 세 종류를 각각 두 번씩 take한 결과입니다.

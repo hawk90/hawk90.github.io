@@ -273,13 +273,15 @@ register_callback([](int event) {
 
 static 멤버와 capture 없는 lambda의 변환 결과는 C++ linkage 함수입니다. 표준은 "언어 linkage가 다른 두 함수 타입은 다른 점이 없어도 서로 다른 타입"이라고 정합니다([dcl.link]/1). 그런데 `callback_t`를 `extern "C"` 블록 안에 선언한 헤더로 두 호출을 컴파일하면 g++-16과 Clang 23.1.5 모두 `-Wall -Wextra -pedantic`에서 경고 없이 받아들입니다. 두 컴파일러가 이 타입 구분을 구현하지 않기 때문입니다. 이식 가능한 경계에는 첫 예처럼 명시적인 `extern "C"` free function을 둡니다. capture 있는 lambda는 일반 함수 포인터로 변환할 수 없습니다. 그런 경우에는 `user_data` 포인터 인자가 있는 C API를 쓰거나 trampoline 패턴을 사용합니다.
 
+등록된 callback의 대상은 마지막 호출이 끝날 때까지 살아 있어야 합니다. 위 static 대상은 종료 시점을 제외하면 수명이 유지되지만, instance를 바꾸거나 대상을 해제하는 구현에는 등록 해제와 실행 중 호출의 종료를 기다리는 절차가 필요합니다. 포인터를 null로 바꾸는 것만으로 이미 진입한 호출과의 race가 해결되지는 않습니다.
+
 ## Calling Convention — ARM 예시
 
 함수 호출 시 인자가 어디로 전달되는지, 반환값이 어디로 가는지, 어느 레지스터를 보존하는지를 정한 규약입니다.
 
 ARM AAPCS(ARM Architecture Procedure Call Standard)의 규칙은 다음과 같습니다.
 
-- r0-r3: 인자 1-4(정수, 포인터)
+- r0-r3: 기본 규약의 argument word 전달에 사용합니다. 64-bit 값·정렬·복합 인자·숨은 반환 포인터 때문에 첫 네 인자와 단순 일대일 대응하지는 않습니다.
 - r0-r1: 반환값(64-bit는 r0-r1, 작으면 r0)
 - r4-r8, r10-r11과 sp: callee-saved. r9의 역할과 보존 의무는 플랫폼 변형을 확인합니다
 - r12(ip): scratch
@@ -297,7 +299,7 @@ FPU 존재와 인자 전달 규약은 별개입니다. `-mfloat-abi=hard`의 AAP
    2:	bx	lr
 ```
 
-C++의 멤버 함수는 암묵 `this`를 r0에 받습니다. 실제 인자는 r1부터 들어갑니다.
+아래처럼 int를 반환하는 단순 비정적 멤버 함수는 this를 r0, int 인자를 r1에 받습니다. 복합 반환값의 숨은 인자와 가변 인자·VFP 규약은 별도로 확인합니다.
 
 ```cpp
 class Counter {

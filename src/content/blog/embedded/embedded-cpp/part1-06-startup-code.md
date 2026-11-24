@@ -127,7 +127,7 @@ extern "C" void Reset_Handler(void) {
 
     // 6. main return 시
     __libc_fini_array();
-    while (1);   // 또는 exit(rc)
+    for (;;) __asm volatile ("wfi" ::: "memory");   // Cortex-M 정지 정책의 한 예
 }
 ```
 
@@ -175,7 +175,7 @@ newlib의 ARM crt0(`libgloss/arm/crt0.S`)는 이 함수를 부르기 전에 `ate
 /* 링커 스크립트 (예: STM32F4) */
 .init_array : {
     PROVIDE_HIDDEN(__init_array_start = .);
-    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
     KEEP(*(.init_array))
     PROVIDE_HIDDEN(__init_array_end = .);
 } >FLASH
@@ -328,7 +328,7 @@ int main() { return counter.count; }
 ```ld
 /* Flash에 배치: 실행 중 바뀌지 않는 함수 포인터 표 */
 .init_array : {
-    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
     KEEP(*(.init_array))
 } >FLASH
 ```
@@ -428,7 +428,7 @@ void Reset_Handler(void) {
     extern int main(void);
     main();
 
-    while (1);
+    for (;;) __asm volatile ("wfi" ::: "memory");
 }
 
 }   // extern "C"
@@ -453,6 +453,10 @@ void Reset_Handler(void) {
 - [C++ draft: static initialization](https://eel.is/c++draft/basic.start.static)와 [dynamic initialization](https://eel.is/c++draft/basic.start.dynamic) — 언어 규칙
 
 2026-11-16 확인은 QEMU `mps2-an386`(Cortex-M4) 부팅 실험(링크 순서, `KEEP` 누락, `.data` 복사 누락), ARM ELF 오브젝트의 .init_array·relocation 검사, host의 상수 초기화 예제 실행입니다. FPU 설정, newlib 링크와 실제 보드 부팅은 하지 않았습니다.
+
+## 추가 확인 — 보드 없이 최종 링크까지
+
+2026-11-19에는 `verify-embedded-cpp-full-review.mjs`로 본문의 memory.ld·placement.cpp·dynamic-init.cpp와 별도 진입 fixture를 실제 GNU ld로 링크했습니다. SRAM/CCM의 NOLOAD, .data의 Flash LMA, init priority 101→10000 정렬, GC 이후 초기화 entry 보존과 RAM 축소 시 링크 거부를 확인했습니다. 최종 ELF/map과 부정 검사의 범위이며 reset 실행·실제 copy/zero·장치 동작을 검증한 결과는 아닙니다.
 
 ## 관련 항목
 

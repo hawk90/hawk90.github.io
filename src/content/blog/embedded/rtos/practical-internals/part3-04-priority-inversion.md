@@ -25,7 +25,7 @@ topics: ["embedded", "embedded/rtos"]
 | Bounded | L이 자원을 쥔 남은 시간. 자원 보유 시간으로 정해짐 |
 | Unbounded | L의 남은 시간 + L보다 높고 H보다 낮은 **모든** task의 실행 시간 |
 
-"unbounded"는 무한하다는 뜻이 아니라, 상한이 자원 보유 시간이 아니라 M들의 실행 시간에 묶인다는 뜻입니다. M이 하나 더 생기면 H의 대기도 그만큼 늘어납니다.
+"unbounded"는 무한하다는 뜻이 아니라, 상한이 자원 보유 시간이 아니라 M들의 실행 시간에 묶인다는 뜻입니다. M이 하나 더 생기면 H의 대기도 그만큼 늘어납니다. 반대로 priority inheritance만 켰다고 제품의 blocking 상한이 자동으로 생기지는 않습니다. owner의 남은 임계 구역 실행량, 중첩 자원 대기, IRQ 간섭과 재진입을 함께 제한해야 합니다.
 
 ### QEMU에서 inversion 만들기
 

@@ -161,7 +161,16 @@ Static queue도 *storage buffer를 별도로 할당*해야 합니다. `xQueueCre
 
 > ⚠️ Pointer queue 후 free
 
-수신자가 read하기 전에 sender가 free하면 dangling pointer가 됩니다.포인터를 보낸 뒤에는 그 버퍼의 소유권이 수신자에게 넘어갔다고 정하고, 수신자가 처리한 뒤 반납하는 규칙을 둡니다.
+pointer queue는 포인터 값만 복사하고 payload는 복사하지 않습니다. send가 성공한 뒤 누가 payload를 수정·반납하는지 정하고, send가 실패하면 producer가 소유권을 유지하도록 합니다. pool도 consumer가 처리를 마치기 전에 재사용하면 같은 dangling pointer 문제가 생깁니다.
+
+| 단계 | 소유권 계약의 한 예 |
+|---|---|
+| pool에서 할당 | producer가 payload를 작성 |
+| send 성공 | consumer에게 이전; producer는 수정·반납하지 않음 |
+| send 실패 | producer가 유지하고 재시도하거나 pool에 반환 |
+| consumer 처리 완료 | consumer가 pool에 한 번 반환 |
+
+queue API는 payload 수명이나 DMA 완료를 자동 관리하지 않습니다. 이 표의 handoff 규칙은 애플리케이션이 정해야 합니다.
 
 > ⚠️ Queue 크기 underestimate
 

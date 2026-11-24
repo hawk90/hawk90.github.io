@@ -33,7 +33,7 @@ public:
 };
 
 class Circle : public Shape {
-    int r;
+    int r = 1;
 public:
     int area() const override { return 3 * r * r; }
 };
@@ -48,7 +48,7 @@ public:
 };
 
 class Circle : public Shape<Circle> {
-    int r;
+    int r = 1;
 public:
     int area_impl() const { return 3 * r * r; }
 };

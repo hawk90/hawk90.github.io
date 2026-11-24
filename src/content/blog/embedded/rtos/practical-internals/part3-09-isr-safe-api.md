@@ -94,6 +94,8 @@ ARM_CM4F 포트는 이 실수를 잡는 assert를 둡니다. `vPortEnterCritical
 
 **규칙은 단순합니다.** ISR은 비동기 신호 송신만 담당하고, 실제 처리는 task에 위임합니다.
 
+binary semaphore는 “처리할 일이 있다”는 wake 신호라서 여러 give가 하나의 pending 상태로 합쳐질 수 있습니다. UART byte나 packet 자체는 별도 queue·FIFO·ring buffer에 저장하고, worker는 깨어난 뒤 저장된 항목을 비울 때까지 처리해야 합니다. 신호 전달이 성공해도 payload 저장 공간의 고갈은 별도로 처리합니다.
+
 ## Deferred Interrupt Pattern
 
 ```c

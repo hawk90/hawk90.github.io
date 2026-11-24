@@ -322,3 +322,9 @@
   correction: 'esp_mesh_set_max_layer: tree 최대 25, chain 최대 1000. 6은 예제 CONFIG_MESH_MAX_LAYER 기본값'
   source: 'ESP-IDF v5.4.2 components/esp_wifi/include/esp_mesh.h:890-895, examples/mesh/internal_communication/main/Kconfig.projbuild:94-98'
   fixed_in: 0ef84672
+
+- id: etl-hsm-nonexistent
+  pattern: '\betl::hsm\b'
+  correction: 'ETL 20.49.0의 계층 상태 기계는 etl::hfsm이며 <etl/hfsm.h>에 정의된다'
+  source: 'https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/hfsm.h'
+  fixed_in: review-fixes-1124

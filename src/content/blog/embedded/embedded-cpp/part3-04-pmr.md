@@ -219,6 +219,14 @@ public:
 };
 ```
 
+## 복사·대입·swap의 resource 계약
+
+같은 `std::pmr::vector<int>` 타입이어도 메모리 출처가 자동 전파되지는 않습니다. 일반 복사 생성 `auto copy = original;`은 polymorphic allocator의 copy-selection 규칙에 따라 **현재 default resource**를 사용합니다. 복사본도 특정 pool을 사용해야 한다면 `std::pmr::vector<int> copy(original, &pool);`처럼 allocator를 명시합니다.
+
+복사 대입과 이동 대입에서는 대상 allocator가 유지됩니다. resource가 서로 같지 않은 이동 대입은 원소 이동과 추가 할당이 필요할 수 있으며, 단순 포인터 교환으로 가정하면 안 됩니다. PMR allocator는 swap에도 전파되지 않으므로 allocator가 서로 같지 않은 컨테이너를 swap하면 사용 계약을 위반합니다. resource 주소가 다르다는 사실과 `is_equal()` 결과가 false라는 사실도 구분합니다.
+
+근거는 [polymorphic allocator의 copy selection](https://eel.is/c++draft/mem.poly.allocator.mem)과 [allocator-aware container의 전파·swap 조건](https://eel.is/c++draft/container.alloc.reqmts)입니다. 따라서 null upstream 하나를 설정한 것만으로 복사본·중첩 원소·전체 호출 경로의 무할당까지 보장하지 않습니다.
+
 ## 함수 매개변수에 pmr
 
 `std::pmr::vector`는 type이 통일되므로 함수 매개변수에 자연스럽게 들어갑니다.
@@ -297,7 +305,7 @@ std::pmr::deque<T>
 
 ### 1. Default resource 사용
 ```cpp
-std::pmr::vector<int> v;   // default resource = heap
+std::pmr::vector<int> v;   // 현재 default resource; 초기 기본값은 new_delete_resource
 ```
 명시적으로 resource를 지정해 heap을 회피합니다.
 
@@ -355,6 +363,12 @@ int main() {
         std::pmr::vector<int> values(&a);
         values.reserve(4); values.push_back(42);
         assert(values[0] == 42);
+        auto default_copy = values;
+        assert(default_copy.get_allocator().resource() ==
+               std::pmr::get_default_resource());
+        std::pmr::vector<int> explicit_copy(values, &b);
+        assert(explicit_copy.get_allocator().resource() == &b);
+        assert(default_copy[0] == 42 && explicit_copy[0] == 42);
     }
 
 #ifndef IDENTITY_ONLY

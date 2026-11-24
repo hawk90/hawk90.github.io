@@ -16,6 +16,18 @@ topics: ["embedded", "embedded/hardware"]
 
 이 시리즈는 CXL의 개념·프로토콜·소프트웨어 관찰을 15편으로 정리합니다. PCIe enumeration과 물리 주소·캐시의 기본 개념을 아는 독자를 대상으로 합니다. 규격 본문은 컨소시엄이 공개한 CXL 3.1 평가판(Revision 3.1, 2023년 8월)을 절·표 번호로 인용합니다. CXL 4.0 규격 평가판은 내려받으려면 신청자 이름·이메일·회사를 제출해야 해서 열람하지 않았습니다. 그래서 4.0 내용은 컨소시엄의 발표문·백서·공식 Q&A에 적힌 범위만 씁니다. 실행 결과는 Debian 13 arm64 게스트(커널 6.12.116)를 QEMU 11.1.3의 CXL Type 3 에뮬레이션 위에서 돌려 얻었습니다.
 
+## 세 가지 질문으로 읽기
+
+이 시리즈는 프로토콜 정의와 OS에서 사용할 수 있는 메모리의 상태를 나눠 읽으면 연결이 쉽습니다. 특히 Type 3 장치가 발견됐다는 사실과 CPU가 그 메모리를 사용할 수 있다는 사실은 다릅니다.
+
+| 질문 | 읽을 장 | 확인할 경계 |
+|------|------|------|
+| PCIe 장치와 CXL 메모리는 어디서 갈라지는가? | [Ch 6 CXL.io](/blog/embedded/hardware/cxl/chapter06-cxl-io), [Ch 8 CXL.mem](/blog/embedded/hardware/cxl/chapter08-cxl-mem) | config·MMIO·DMA와 HDM의 CPU 메모리 접근 |
+| 장치 메모리가 Linux에서 사용 가능해지려면? | [Ch 11 driver](/blog/embedded/hardware/cxl/chapter11-linux-driver), [Ch 12 guest 실습](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위) | window·memdev·region commit·DAX/System RAM의 단계 |
+| 여러 host나 가속기가 공유하면 무엇이 더 필요한가? | [Ch 3 일관성](/blog/embedded/hardware/cxl/chapter03-coherency-model), [Ch 4 pooling](/blog/embedded/hardware/cxl/chapter04-pooling-gfam), [Ch 13 fabric](/blog/embedded/hardware/cxl/chapter13-switching-fabric) | 영역 할당·coherency·소유권·반납 |
+
+Linux·QEMU 실습은 Type 3의 발견과 구성 경계를 다룹니다. CXL.cache·BISnp의 wire 동작이나 CXL 4.0의 128 GT/s·Bundled Port를 같은 실험으로 검증한 것은 아닙니다. 먼저 guest에서 어디까지 성공했는지 확인하고, 그 단계에 필요한 프로토콜 설명으로 돌아오는 순서도 가능합니다.
+
 ## CXL이 푸는 문제 — PCIe만으로는 부족했던 것
 
 PCIe 장치는 DMA로 host 메모리를 읽고 쓰지만, 그 사본을 host CPU 캐시와 같은 규칙으로 관리하지는 않습니다. host 쪽에서 장치 메모리를 보는 길도 MMIO여서 일반 메모리처럼 캐시하며 쓰는 대상이 아닙니다. CXL 3.1 §1.4.1은 CXL의 이점을 *가속기가 시스템에 접근하고, 시스템이 CXL 장치에 붙은 메모리에 접근하는 저지연·고대역폭 경로*로 정의합니다. 도서관에 비유하면 PCIe DMA는 책을 복사해 오는 대출 창구이고, CXL.cache는 서가의 책을 직접 빌려 두되 도서관이 그 책의 행방을 추적하는 방식입니다.

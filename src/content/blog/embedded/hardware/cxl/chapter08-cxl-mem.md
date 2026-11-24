@@ -82,7 +82,7 @@ RwD는 write 명령과 데이터를 함께 전달하고 NDR의 Cmp가 해당 트
 
 ## HDM Decoder — 주소 매핑의 핵심
 
-CPU가 *0x80000000*에 load 했을 때, 그 주소가 *어느 CXL 디바이스의 어느 DRAM*에 해당하는지 결정하는 곳이 *HDM Decoder*입니다.
+CPU의 가상 주소 변환 뒤 host 물리 주소가 `0x80000000`일 때, 그 주소가 어느 CXL target의 어느 DPA에 대응하는지 decoder 구성으로 결정합니다. 아래 표는 HPA 범위이며 애플리케이션이 그대로 포인터로 쓸 가상 주소 표가 아닙니다.
 
 | 항목 | 의미 |
 |------|------|
@@ -202,6 +202,10 @@ bash: line 17: echo: write error: No such device or address
 
 자세한 driver 경로는 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver), 실습 구성은 [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 다룹니다.
 
+### Window·장치 용량·region 크기가 다른 실제 예
+
+[Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)에서는 root decoder의 window가 4 GiB이고 memdev의 volatile 용량은 256 MiB였습니다. 그 안에 256 MiB region을 구성했지만 commit이 실패해 사용 가능한 RAM으로 노출되지 않았습니다. Window는 대상 주소 공간의 경계이며, 그 크기 전체가 물리 장치 용량이나 online RAM을 뜻하지 않습니다.
+
 ## 자주 하는 실수
 
 ### "CPU load마다 CXL.mem 요청 하나가 나간다"
@@ -222,7 +226,7 @@ QEMU 게스트에서 `region0`은 sysfs에 생겼고 경로의 decoder 값도 �
 
 ## 정리
 
-- CXL.mem은 *host load/store가 64 B cache line 단위 메시지*로 변환되는 프로토콜입니다.
+- CXL.mem은 host의 device memory 접근을 전달합니다. CPU cache hit·prefetch·writeback을 구분하며 명령 수와 wire 요청 수를 일대일로 대응시키지 않습니다.
 - *M2S Req·RwD*가 명령, *S2M NDR·DRS*가 응답. 응답은 *Tag*로 요청과 짝지음.
 - *HDM Decoder*가 *SPA → DPA + target device* 매핑. *interleave* 설정 가능.
 - Linux v6.12는 interleave granularity를 256 B~16 KiB의 2의 거듭제곱으로 인코딩합니다(`cxl.h:108-115`).

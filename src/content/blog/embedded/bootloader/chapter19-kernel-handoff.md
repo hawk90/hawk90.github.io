@@ -73,6 +73,28 @@ DTB도 옮겨졌습니다. U-Boot는 DTB를 RAM 위쪽 `0x7d485000`으로 복사
 
 gdb를 QEMU에 붙여 kernel 첫 명령어 주소 `0x40600000`에 hardware breakpoint를 걸고 위의 `booti`를 실행했습니다.
 
+같은 지점을 관찰하려면 기존 QEMU 실행 명령에 `-gdb tcp:127.0.0.1:1234`를 추가하고, U-Boot 자동 부팅을 중단해 프롬프트에서 기다립니다. 별도 터미널에서 GDB를 실행한 뒤 다음 순서로 연결합니다. 아래는 본문의 관찰 지점에 맞춘 재현 절차이며, 디스크 이미지와 U-Boot 빌드 준비는 앞 장과 같습니다.
+
+```bash
+aarch64-elf-gdb
+```
+
+```text
+(gdb) target remote 127.0.0.1:1234
+(gdb) hbreak *0x40600000
+(gdb) continue
+```
+
+이제 QEMU의 U-Boot 콘솔에서 앞의 `load`와 `booti` 명령을 실행합니다. GDB가 멈추면 레지스터와 첫 두 명령어를 읽습니다.
+
+```text
+(gdb) info registers x0 x1 x2 x3 pc cpsr
+(gdb) x/2i $pc
+(gdb) p/x ($cpsr >> 6) & 0xf
+```
+
+마지막 값은 DAIF 네 비트를 하위 4 bit로 모은 것으로, 모두 마스크됐으면 `0xf`, 본문의 `0x600002c5`에서는 `0xb`입니다. kernel을 올릴 주소나 Image 헤더가 달라졌다면 breakpoint도 `booti`가 선택할 진입 주소에 맞춥니다. QEMU 연결·레지스터 확인 방법은 [공식 GDB 사용 문서](https://www.qemu.org/docs/master/system/gdb.html)에 설명되어 있습니다.
+
 ```text
 Breakpoint 1, 0x0000000040600000 in ?? ()
 x0             0x7d485000          2101891072

@@ -108,6 +108,12 @@ control block은 객체와 수명이 다른 관리 정보입니다. `make_shared
 
 공유 수명 관리가 필요한지 먼저 확인합니다. control block의 thread safety는 pointee 데이터의 thread safety가 아니며, 같은 shared_ptr 객체의 동시 변경도 별도 동기화가 필요합니다.
 
+### 마지막 소유권을 놓는 실행 문맥
+
+일반적인 `shared_ptr`의 마지막 strong owner를 해제하는 경로에서 deleter가 실행됩니다. 생성한 task와 같은 task에서 소멸한다고 가정하면 안 됩니다. 소멸자·custom deleter의 lock·할당 해제·장치 종료 비용과 허용 문맥을 확인하고, 실시간 task나 ISR에서 마지막 owner가 사라질 수 있는 설계는 별도로 검토합니다. reference count가 안전하다는 사실은 이 정리 비용의 상한이나 ISR 안전성을 보장하지 않습니다.
+
+`weak_ptr::expired()`를 확인한 뒤 raw pointer를 쓰는 것은 수명 확보가 아닙니다. 아래처럼 `lock()`으로 얻은 strong owner를 실제 사용이 끝날 때까지 유지합니다. 별도 동기화가 없는 pointee의 동시 변경도 여전히 금지됩니다.
+
 ### shared_ptr이 정말 필요한 경우
 
 - 여러 owner가 진짜로 필요해서 한 명의 owner로 표현이 어려운 경우
@@ -242,7 +248,7 @@ logger가 있을 수도 없을 수도 있는 상황에서 동적으로 활성화
 
 ```cpp
 class System {
-    std::optional<Logger> logger_;   // 더 좋음 (heap 없음)
+    std::optional<Logger> logger_;   // Logger 내부 저장; Logger 자체 할당은 별도
 
 public:
     void enable_logging() {
@@ -345,7 +351,7 @@ copy는 add_ref, move는 증가 없이 이전, 소멸은 release이며 대입·�
 - `shared_ptr`은 회피합니다. atomic 카운터와 heap 위의 control block이 부담입니다.
 - raw pointer는 non-owning에만 쓰고 소유권은 항상 unique나 shared로 표현합니다.
 - Custom deleter(struct나 lambda)로 pool, FD, 비-heap 자원을 관리합니다.
-- Optional 멤버는 `std::optional<T>`(heap 0)를 우선합니다.
+- `std::optional<T>`는 T를 내부에 저장하지만 T가 만드는 추가 할당까지 없애지는 않습니다.
 
 ## 근거와 검증 범위
 

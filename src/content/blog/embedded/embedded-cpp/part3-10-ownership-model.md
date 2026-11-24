@@ -23,7 +23,7 @@ topics: ["embedded"]
 - **Memory leak** — owner가 미정이라 delete를 누가 할지 모릅니다.
 - **Dangling pointer** — owner는 소멸했는데 참조가 살아 있습니다.
 
-해결책은 명시적인 소유권 모델입니다. 각 객체에 정확히 한 owner를 두고 나머지는 non-owning 참조로 다룹니다.
+해결책은 명시적인 소유권 모델입니다. 단일 owner로 표현할 수 있으면 우선 사용하고, 여러 owner가 수명을 연장해야 한다면 공유 소유를 선택합니다. 어느 모델도 비소유 참조의 dangling이나 pointee의 data race를 자동으로 막지는 않습니다.
 
 Rust는 이를 컴파일러 차원에서 강제하지만, C++는 프로그래머의 규율에 맡깁니다.
 
@@ -124,10 +124,14 @@ class System {
 
 public:
     System() : display_(bus_) {}   // bus_ 참조 전달
+    System(const System&) = delete;
+    System& operator=(const System&) = delete;
+    System(System&&) = delete;
+    System& operator=(System&&) = delete;
 };
 ```
 
-`System`이 bus와 display를 모두 소유하고 `Display`는 bus를 빌립니다. cyclic ownership이 발생하지 않습니다.
+`System`이 bus와 display를 모두 소유하고 `Display`는 bus를 빌립니다. 멤버는 선언 순서로 생성되고 역순으로 소멸하므로 bus를 display보다 먼저 선언합니다. 기본 복사·이동 생성은 display의 참조를 새 System의 bus로 자동 재연결하지 않습니다. 여기서는 복사·이동을 금지해 원래 System의 bus를 계속 가리키는 문제를 피합니다. 이동이 필요하면 참조 재구성과 외부 observer까지 포함한 별도 수명 설계가 필요합니다.
 
 ## 함수 매개변수 — 결정
 
@@ -171,7 +175,7 @@ bool match(std::string_view pattern, std::string_view text);
 | --- | --- |
 | 객체 owner | `T` 또는 `unique_ptr<T>` |
 | Optional owner | `unique_ptr<T>` (nullable) |
-| Optional 값 | `std::optional<T>` (heap 없음) |
+| Optional 값 | `std::optional<T>` (T를 내부 저장; T 자체 할당은 별도) |
 | Non-owning ref | `T*` (nullable) 또는 `T&` (non-null) |
 | 다중 owner (드물게) | `shared_ptr<T>` |
 | 외부 owner의 weak ref | `weak_ptr<T>` |
@@ -180,7 +184,7 @@ bool match(std::string_view pattern, std::string_view text);
 class Service {
     Database db_;                       // owner, value
     std::unique_ptr<Logger> logger_;    // owner, optional (nullable)
-    std::optional<Config> config_;      // optional value (heap 0)
+    std::optional<Config> config_;      // Config 내부 저장; Config의 추가 할당은 별도
     Bus* bus_;                          // non-owning, nullable
     EventLoop& loop_;                   // non-owning, non-null (참조 멤버)
 };
@@ -193,10 +197,12 @@ multi-task RTOS에서는 객체 공유가 복잡해집니다. 자주 쓰는 패�
 ### 1. Message passing — 소유권 이전
 
 ```cpp
+// <type_traits>와 FreeRTOS queue 선언이 필요한 API 조각입니다.
 struct Event {
     int type;
     uint32_t data;
 };
+static_assert(std::is_trivially_copyable_v<Event>);
 
 QueueHandle_t event_queue;
 
@@ -212,6 +218,8 @@ void consumer() {
     }
 }
 ```
+
+FreeRTOS queue는 설정한 크기만큼 byte를 복사하며 C++ 복사·이동 생성자나 소멸자를 호출하지 않습니다. `std::string`·`unique_ptr`·`shared_ptr` 같은 객체를 그대로 byte 복사해 소유권을 전달하면 안 됩니다. 이 Event처럼 trivially copyable인 값의 표현을 전달하거나 별도 소유권 계약의 pointer/handle을 사용합니다. trivially copyable이라도 내부 포인터의 대상 수명이나 장치 주소까지 검증되는 것은 아닙니다.
 
 이벤트 값은 queue가 복사하며 producer의 원본 소유권은 이전되지 않습니다. queue item size가 sizeof(Event)로 설정되어 있고 send가 성공해야 합니다. 포인터가 없는 이 Event payload는 별도 복사본이므로 payload 자체의 공유 race를 피하지만 task가 접근하는 다른 전역 상태까지 보호하지는 않습니다.
 
@@ -381,7 +389,7 @@ void process(const Data& data) {
 ```cpp
 void register_callback(void* ctx, void (*cb)(void*));
 ```
-type 정보가 사라집니다. C 인터페이스에서만 쓰고, C++에서는 template이나 std::function을 활용합니다.
+void* 경계에서는 대상 type을 복원할 계약이 필요합니다. C++ 내부에서는 typed callback이나 template으로 이 계약을 표현할 수 있습니다. std::function을 선택하면 callable의 소유·할당 정책과 캡처 대상의 수명을 함께 확인하며, 고정 메모리 환경에서는 함수 포인터나 delegate도 고려합니다.
 
 ## 실행 확인 — 전달 성공·실패와 보관 참조
 
@@ -435,7 +443,7 @@ Homebrew Clang 23.1.5와 g++-16 모두 ASan·UBSan으로 exit 0이었습니다. 
 
 ## 정리
 
-- 객체마다 owner는 한 명이고 나머지는 non-owning reference로 다룹니다.
+- 단일 소유와 공유 소유를 구분하고, non-owning reference의 사용 기간도 제한합니다.
 - 도구는 owner로 `unique_ptr`, non-owning으로 `T*`/`T&`, 드물게 `shared_ptr`을 씁니다.
 - 함수 매개변수는 의도에 맞게 value, `const&`, `&`, pointer, span, string_view를 선택합니다.
 - 멤버 변수는 value, `unique_ptr`, optional, pointer 중에서 고릅니다.

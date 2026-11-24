@@ -74,7 +74,6 @@ public:
 
 class FreeRtosLockGuard {
     SemaphoreHandle_t handle_;
-public:
     bool locked_ = false;
 public:
     bool owns_lock() const noexcept { return locked_; }
@@ -104,6 +103,14 @@ void increment() {
 ```
 
 이 FreeRTOS 스케치는 mutex 생성·획득 실패를 호출자가 확인하는 구조입니다. mutex의 수명은 guard보다 길어야 하고 ISR에서는 사용할 수 없습니다. FreeRTOS-Kernel `semphr.h`의 `xSemaphoreTake` 주석은 `portMAX_DELAY`가 "`INCLUDE_vTaskSuspend`가 1일 때" 무기한 대기라고 적습니다. 이 설정이 0이면 `portMAX_DELAY`는 가장 긴 유한 대기 시간일 뿐이라 `owns_lock()`이 false로 돌아올 수 있고, 위 사용 예는 그 경우를 처리합니다.
+
+### RTOS task 종료와 scope 이탈
+
+RAII 정리는 C++ scope 이탈 규칙에 따라 실행됩니다. FreeRTOS의 `vTaskDelete()`는 C++ exception unwinding이나 일반 함수 반환이 아니므로 task stack 위의 자동 객체 소멸자를 호출해 주지 않습니다. task를 강제로 삭제하면 이 guard의 mutex 해제·메시지 반환·장치 종료가 자동 수행된다고 기대할 수 없습니다.
+
+종료 요청을 task가 받아서 신규 작업을 멈추고, 보유 자원과 진행 중 DMA를 정리한 뒤 RAII scope를 빠져나오도록 설계합니다. FreeRTOS task entry는 그냥 return하지 않고, 자동 객체가 남지 않은 바깥 단계에서 자기 삭제 같은 포트의 종료 계약을 따릅니다. 다른 task가 삭제할 수 있다면 정리 완료 확인과 객체 수명까지 종료 protocol에 포함합니다.
+
+근거는 [FreeRTOS V11.2.0 vTaskDelete](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c)와 [C++ scope 이탈 규칙](https://eel.is/c++draft/stmt.dcl)입니다.
 
 ## 패턴 2 — `std::scoped_lock` (C++17)
 
@@ -264,6 +271,7 @@ ScopeGuard<F> make_scope_guard(F f) { return ScopeGuard<F>(std::move(f)); }
 ```cpp
 void process() {
     char* buf = (char*)malloc(1024);
+    if (!buf) return;
     FINALLY(free(buf));   // 함수 끝에서 자동 free
 
     if (validate(buf) < 0) return;   // 정상 free
@@ -398,7 +406,7 @@ public:
 };
 ```
 
-nested critical section에서도 안전합니다. 이전 상태가 enabled였다면 enable로, disabled였다면 그대로 복원됩니다.
+해당 코어의 PRIMASK 상태를 중첩 진입 전 값으로 복원합니다. NMI·HardFault·다른 코어·DMA까지 배제하지 않으며, RTOS의 BASEPRI 임계 구역과 같은 범위도 아닙니다. 이전 상태가 enabled였다면 enable로, disabled였다면 그대로 복원됩니다.
 
 ```cpp
 void outer() {
@@ -424,7 +432,7 @@ void inner() {
 | `lock_guard` | 단일 mutex | 단순, 복사·이동 불가 | 단일 mutex 보호 구역 |
 | `scoped_lock` | 여러 mutex | deadlock 회피 | 2개+ mutex |
 | `unique_lock` | 단일 mutex | unlock/relock | cv.wait |
-| `unique_ptr` + custom deleter | generic | heap pointer | 동적 자원 |
+| `unique_ptr` + custom deleter | generic | deleter·포인터의 소유 계약 | heap·pool·장치 자원 |
 | `ScopeGuard` | 임의 코드 | lambda 기반 | 일회성 cleanup |
 | `Scoped<>` | enable/disable | 함수 포인터 template | 반복 패턴 |
 | Move-only handle | 자원 ownership | 함수 간 이전 | FD, peripheral handle |
@@ -518,7 +526,7 @@ int main() {
 
 - 여기서 다룬 RAII 도구와 패턴은 `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr+deleter`, `ScopeGuard`.
 - 임베디드에서는 Scoped enable/disable, Move-only handle, Critical section with preservation 패턴이 추가됩니다.
-- Custom deleter는 struct나 lambda로 작성해 empty class optimization을 받으며, 함수 포인터는 sizeof를 늘립니다.
+- 상태 없는 deleter는 구현이 압축할 수 있으며, 실제 unique_ptr 크기는 deleter·포인터 타입·ABI에서 확인합니다.
 - ScopeGuard는 일회성 cleanup의 보편 패턴이며 `gsl::finally`도 같은 역할을 합니다.
 - 객체 크기는 deleter·guard가 들고 있는 상태가 정합니다. 빈 deleter는 0바이트, 함수 포인터·`Pool*` deleter와 `unique_lock`의 소유 플래그는 그만큼 더합니다.
 

@@ -134,6 +134,22 @@ B=2 for A,B,C : 3 6! 10 10
 
 U = 0.752로 n = 4의 RM bound(0.757) 안에 있던 task set인데, 두 번째 task의 응답 시간이 3에서 6으로 늘어 deadline 5를 넘었습니다(`!`). D가 거의 CPU를 쓰지 않는데도 그렇습니다. utilization은 그대로인데 blocking 2 단위만으로 실패한 것입니다. 그래서 critical section과 mutex 보유 시간은 WCET만큼 중요한 분석 입력입니다.
 
+### Blocking을 넣으면 결론이 달라집니다
+
+단일 CPU·서로 다른 고정 우선순위·완전 선점·$D_i \leq T_i$이며 release jitter·자기 중단·전환 오버헤드가 없는 모델에서, 별도로 근거를 갖춘 blocking 상한 $B_i$를 포함하는 응답시간 반복식은 다음과 같습니다.
+
+$$R_i^{(k+1)} = C_i + B_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i^{(k)}}{T_j} \right\rceil C_j$$
+
+초깃값은 $R_i^{(0)}=C_i+B_i$입니다. 아래는 분석 대상 task의 $C=2$, $D=T=5$와 상위 task 하나의 $C=1$, $T=4$를 가정한 정수 시간 모델입니다. 낮은 priority 자원 보유자 등으로 인한 blocking을 가정하며, 그 값은 실제 보드 측정이 아닙니다.
+
+| 가정한 blocking 상한 | 반복값 | 판정 |
+|---|---|---|
+| 0 | 2 → 3 → 3 | R=3, deadline 만족 |
+| 1 | 3 → 4 → 4 | R=4, deadline 만족 |
+| 2 | 4 → 5 → 6 | deadline 5 초과, 이 상한 모델로 보장하지 못함 |
+
+CPU 실행량이 같아도 blocking 예산에 따라 보장 가능한 범위가 달라집니다. 보수적인 상한을 넣은 분석이 deadline을 넘었다고 실제 실행의 miss가 곧 증명되지는 않습니다. PI를 켰다는 사실만으로 $B_i=0$이나 유한한 상한이 자동 성립하지 않습니다. mutex protocol·임계 구역·중첩 lock과 owner의 진행 조건으로 상한을 따로 구하고, IRQ·전환 비용도 모델에 빠짐없이 반영해야 합니다. 여러 독립 지연을 이미 $C_i$에 포함했다면 다시 $B_i$에 더하지 않습니다.
+
 ## Latency 원인 분석
 
 ### Source 1: Interrupt Disable

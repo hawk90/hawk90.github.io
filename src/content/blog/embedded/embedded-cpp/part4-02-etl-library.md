@@ -318,6 +318,8 @@ clang++ -std=c++17 -I /path/to/etl-20.49.0/include etl-fsm-check.cpp -o etl-fsm-
 
 ETL_ASSERT를 애플리케이션에서 임의로 재정의하는 대신 이 판의 공식 설정과 handler API를 사용합니다. capacity N의 RAM은 저장 기간에 따라 stack·static 영역 등에 놓이며 항상 .bss인 것은 아닙니다. .text·RAM·worst-case 동작은 실제 target 산출물과 workload로 비교해야 하며 이 host 검증은 STM32 코드 크기 개선 측정이 아닙니다.
 
+2026-11-19에는 ETL 20.49.0의 observer 등록·알림·해제, message_router의 두 메시지 전달, 예외 비활성 vector의 full 사전 검사와 hfsm 타입도 실제 헤더로 확인했습니다. no-check 모드의 계약 위반을 실행해도 안전하다고 주장하는 검사는 아닙니다.
+
 ## 1차 자료
 
 - [ETL 20.49.0 release](https://github.com/ETLCPP/etl/releases/tag/20.49.0)

@@ -121,7 +121,7 @@ dma_async_issue_pending(chan);                     /* start */
 
 **Step 3: Double buffer.** DMA가 다음 frame을 채우는 동안 CPU가 이전 frame을 처리하게 합니다. 시뮬레이션에서는 `nbuf`가 이 개수입니다.
 
-## 검증 — Before / After
+## 검증 — 비교할 항목
 
 `dblbuf.c`로 buffer 개수(1·2·3)와 frame당 처리 시간을 바꿔 가며 300 frame(60 fps, 5초)씩 돌렸습니다. 각 조합 5회의 drop률 중앙값입니다. 30 fps 조건은 150 frame입니다.
 

@@ -268,7 +268,7 @@ ETL 20.49.0에서 세 상태를 모두 정의하고 상태 ID와 배열 순서�
 
 ![HSM 계층 — Operating 하위에 Idle, Working(Reading/Writing), Error](/images/blog/embedded-cpp/diagrams/part4-06-hsm-hierarchy.svg)
 
-`etl::hsm`이나 Boost.SML을 사용합니다. 이 글에서는 둘 다 빌드하지 않았습니다. 여러 상태가 같은 이벤트를 같은 방식으로 처리할 때(위 그림의 Error 전이처럼) 계층이 중복을 줄이고, 그런 공유 전이가 없으면 flat FSM으로 충분합니다.
+ETL 20.49.0의 계층 상태 기계는 `<etl/hfsm.h>`의 `etl::hfsm`입니다. Boost.SML도 계층 상태를 표현할 수 있습니다. 이 글에서는 두 라이브러리를 빌드하지 않았으므로 entry/exit와 부모 상태 event 처리 계약은 해당 버전의 문서·헤더에서 확인해야 합니다. 여러 상태가 같은 이벤트를 처리할 때 계층이 중복을 줄이고, 공유 전이가 없으면 flat FSM으로 충분합니다.
 
 ## 임베디드 — Compile-time FSM
 

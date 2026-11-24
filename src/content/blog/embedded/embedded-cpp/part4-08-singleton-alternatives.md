@@ -259,6 +259,8 @@ public:
 
 private:
     Uart0() { /* hw init */ }
+    Uart0(const Uart0&) = delete;
+    Uart0& operator=(const Uart0&) = delete;
 };
 ```
 
@@ -273,6 +275,8 @@ public:
 
 class Uart0 : public IUart {
     Uart0() = default;
+    Uart0(const Uart0&) = delete;
+    Uart0& operator=(const Uart0&) = delete;
 public:
     static IUart& instance() {
         static Uart0 inst;
@@ -334,6 +338,8 @@ public:
 // 2. Concrete impl
 class Uart0 : public IUart {
     Uart0() { init_hw(); }
+    Uart0(const Uart0&) = delete;
+    Uart0& operator=(const Uart0&) = delete;
 public:
     static Uart0& get() {
         static Uart0 inst;

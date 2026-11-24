@@ -112,6 +112,12 @@ QEMU의 hot-plug는 Attention Button 이벤트로 오고, pciehp는 5초를 기�
 
 NVMe MSI-X table의 주소 0xfffff040은 GICv2m 물리 주소가 아니라 IOMMU가 매핑한 IOVA였고, 같은 IOVA 0xfffff040이 igb(sid 0x300)의 MSI 쓰기에서 0x8020040으로 바뀌는 것이 QEMU SMMU trace에 남았습니다([Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts), [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)). CPU 2에서만 읽기를 내자 CPU 2에 고정된 queue의 인터럽트만 정확히 2000 늘었습니다. NVMe 드라이버의 managed affinity 때문입니다.
 
+## 실제로 확인한 실패 — block 경계에서 거절된 쓰기
+
+[Ch 10의 전용 QEMU NVMe](/blog/embedded/hardware/pcie/chapter10-linux-basics#용량-밖-요청의-실패도-확인하기)에서 64 MiB namespace의 끝에 4 KiB를 쓰는 요청을 실행했습니다. `dd`는 `No space left on device`와 종료 코드 1을 반환했고, 그 구간의 `nvme_setup_cmd`는 0개였습니다. 이후 유효 범위의 data 비교는 성공했습니다.
+
+이 사례의 원인은 요청 범위이며, controller의 Completion Timeout·AER fatal·link 장애를 재현한 것이 아닙니다. 사용자 명령이 실패했다면 먼저 장치까지 명령이 제출됐는지 구분해야 합니다. 반대로 tracepoint의 기록 누락·비활성 상태도 확인하지 않고 “기록이 없으니 제출되지 않았다”고 단정해서는 안 됩니다. 이 실험은 정상 I/O에서 trace가 동작함을 먼저 확인한 같은 환경에서 수행했습니다.
+
 ## 증거를 보존하고 다음 단계로 넘어가기
 
 이 시리즈에서 원인을 찾을 수 있었던 공통 패턴은 세 가지였습니다. 커널 로그를 믿기 전에 레지스터를 다시 읽었고(시나리오 3·5), 같은 증상을 다른 경로로 재현했고(QEMU 주입과 `aer_inject`), 원인 후보마다 소스의 해당 줄을 찾았습니다. reset이나 rescan은 증상을 지우므로, 하기 전에 `lspci -vv -xxxx`, `dmesg`, sysfs `aer_dev_*`를 먼저 저장합니다.

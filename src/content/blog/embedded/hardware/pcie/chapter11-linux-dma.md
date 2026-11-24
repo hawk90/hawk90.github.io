@@ -89,6 +89,20 @@ SMMU가 stage 1 page table을 level 0→1→2로 내려가다 level 2 entry가 0
 
 한 가지는 설명하지 못했습니다. QEMU trace에는 event queue 인터럽트 발생(`smmuv3_trigger_irq irq=0`)이 1024번 찍혔지만, 게스트의 `/proc/interrupts`에서 `arm-smmu-v3-evtq` 카운트는 실험 전후 344로 같았고 `arm-smmu-v3 ... event 0x10 received` 로그도 없었습니다. Linux v6.12 `arm_smmu_evtq_thread()`(`drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c:1820-`)는 stall이 아닌 translation fault를 rate limit 안에서 로그로 남기게 되어 있으므로, 이 VM에서 event가 커널까지 전달되지 않은 원인은 확인하지 못했습니다. 실제 시스템에서 IOMMU fault를 찾을 때 게스트 로그가 비어 있다는 사실만으로 fault가 없었다고 판단하면 안 된다는 예로 남깁니다.
 
+## BAR 매핑과 DMA 매핑은 반대쪽 접근을 준비한다
+
+[Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio)의 BAR 매핑은 **CPU가 장치 register에 접근할 경로**이고, 이 장의 DMA 매핑은 **장치가 host buffer에 접근할 경로**입니다. 둘 다 주소를 다루지만 반환값을 서로 바꿔 쓸 수 없습니다. 앞에서 연결한 같은 장치를 기준으로 다음 세 값을 구분합니다.
+
+| 값 | 누가 사용하는가 | 용도 |
+|------|------|------|
+| `pci_iomap()`이 반환한 `__iomem` 포인터 | CPU의 MMIO accessor | 장치가 정의한 register·doorbell 접근 |
+| host buffer의 CPU 포인터 | CPU | 전송 data 준비·완료 data 처리 |
+| DMA API가 반환한 `dma_addr_t` | 장치 | descriptor 등 장치 protocol에 따라 host buffer 주소 전달 |
+
+Streaming 전송에서 CPU가 data를 준비하고 mapping에 성공하면, driver는 반환된 DMA 주소를 장치가 정한 방식으로 전달합니다. Descriptor·doorbell을 알리는 순서는 장치 protocol과 ordering 계약을 따릅니다. 그 뒤 완료 IRQ나 polling 결과를 확인하고, CPU가 buffer를 다시 사용하기 전에 unmap 또는 해당 sync를 수행합니다. [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts)의 IRQ 할당 성공은 이 전송 완료 자체를 증명하지 않습니다.
+
+이 주소 구분은 [DMA HOWTO의 CPU virtual·physical·bus address 설명](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/core-api/dma-api-howto.rst)을 따릅니다. 특정 장치의 register offset이나 descriptor 형식을 가정하지 않으므로, 이 순서를 그대로 복사해 동작하는 driver로 사용하지 않습니다.
+
 ## Coherent와 Streaming DMA
 
 위 실험은 coherent DMA입니다. DMA API HOWTO의 두 모델과 실패 확인 방법을 정리합니다.
@@ -116,6 +130,12 @@ streaming DMA의 방향은 장치가 메모리를 읽는지 쓰는지로 정합�
 DMA API HOWTO(600-621행)는 `dma_map_sg()`가 연속된 entry를 합칠 수 있어 반환 count가 `nents`보다 작을 수 있다고 적습니다. 장치에는 count개의 segment를 `sg_dma_address()`·`sg_dma_len()`으로 알리고, unmap에는 처음 넘긴 `nents`를 그대로 넘겨야 합니다. 문서는 이 부분을 "should _NOT_ be the 'count' value"라고 강조합니다. sync 함수도 같은 규칙입니다(657행).
 
 mapping이 성공했다는 것은 DMA가 끝났다는 뜻이 아닙니다. HOWTO도 unmap 앞에 "make sure DMA activity has already finished"를 반복합니다. 장치가 아직 쓰고 있는 메모리를 풀면, 위 bad DMA 실험과 반대로 IOMMU 매핑이 이미 다른 용도로 바뀐 주소에 장치가 쓰게 됩니다.
+
+### 완료와 data를 함께 확인한 예
+
+[Ch 10의 QEMU NVMe 실험](/blog/embedded/hardware/pcie/chapter10-linux-basics#dma-해제와-명령-완료를-trace로-대조하기)에서는 16 KiB를 전용 가상 namespace에 쓰고 direct I/O로 다시 읽어 `cmp`가 성공했습니다. 같은 구간에서 `nvme_unmap_data` 호출과 `nvme_complete_rq status=0`도 관찰했습니다. API 계약 설명만으로 끝내지 않고, driver의 완료·해제 경로와 실제 buffer 내용이 일치하는지를 따로 확인한 것입니다.
+
+이 trace는 DMA 주소 값·IOMMU page table이나 cache 유지보수 자체를 관찰한 결과는 아닙니다. 또한 이 실험의 NVMe PCI transport 경로를 모든 장치가 같은 mapping 함수·완료 순서로 구현한다는 예로 쓰지 않습니다. 장치별 descriptor protocol과 DMA API 계약을 기준으로 시험 범위를 정합니다.
 
 ## DMA mask와 bounce buffer
 

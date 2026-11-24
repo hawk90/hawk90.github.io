@@ -205,7 +205,7 @@ task가 yield하거나, 대기·suspend·delete 등으로 실행 가능 상태�
 void taskA(void *arg) {
     while (1) {
         do_stuff();
-        taskYIELD();   // 다른 task에 양보
+        taskYIELD();   // 재선택 요청; 자신이 계속 선택될 수도 있음
     }
 }
 ```
@@ -232,7 +232,7 @@ Mars Pathfinder는 1997년 7월 4일 착륙 며칠 뒤부터 *total system reset
 
 bus management task가 제때 돌지 못하자 watchdog이 이를 감지해 시스템 전체를 reset했습니다. 수정은 VxWorks mutex 생성 인자의 priority inheritance 옵션을 켜는 것이었습니다.
 
-해결책은 **Priority Inheritance**입니다 (3-04, 3-05 챕터에서 자세히 다룹니다).
+위 세 task는 priority inversion의 설명 모델입니다. 실제 Pathfinder의 경로와 수정은 [3-04](/blog/embedded/rtos/practical-internals/part3-04-priority-inversion)에서 구분합니다. **Priority Inheritance**는 중간 task의 간섭을 제한하지만 owner의 I/O 대기·교착이나 WCET 문제를 자동 해결하지 않습니다.
 
 ## SMP — Multi-Core 스케줄링
 
@@ -270,7 +270,7 @@ xTaskCreate(sensor_10ms,"SENS",   256, NULL, 4, NULL);  // 10 ms
 xTaskCreate(log_100ms,  "LOG",    256, NULL, 3, NULL);  // 100 ms
 xTaskCreate(ui_1000ms,  "UI",     512, NULL, 2, NULL);  // 1 s
 
-// 같은 priority면 RR 자동
+// 이 절의 선점형 + time slicing 활성 구성에서 같은 priority 간 tick 회전
 xTaskCreate(net_handler1,"NET1",  256, NULL, 3, NULL);  // log와 RR
 xTaskCreate(net_handler2,"NET2",  256, NULL, 3, NULL);
 ```

@@ -241,7 +241,11 @@ constexpr uintptr_t kGpioBOdrAddr = gpio_base(1) + 0x14;
 
 ```cpp
 template<typename T>
-void serialize(uint8_t* buf, T value) {
+void serialize(uint8_t (&buf)[sizeof(T)], T value) {
+    static_assert(std::is_integral_v<T> && std::is_unsigned_v<T> &&
+                  !std::is_same_v<T, bool>, "unsigned integer except bool required");
+    static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4,
+                  "only 1, 2 or 4 byte integers supported");
     if constexpr (sizeof(T) == 1) {
         buf[0] = value;
     } else if constexpr (sizeof(T) == 2) {
@@ -256,7 +260,7 @@ void serialize(uint8_t* buf, T value) {
 }
 
 // 사용
-uint8_t buf[4];
+uint8_t buf[sizeof(uint16_t)];
 serialize(buf, uint16_t(0x1234));   // 2바이트 분기만 컴파일됨
 ```
 
@@ -311,7 +315,7 @@ constinit int counter = compute_initial();   // 컴파일 타임에 초기화
 constinit int x = read_register();
 ```
 
-[Part 1-06 — Static Initialization Order Fiasco](/blog/embedded/embedded-cpp/part1-06-startup-code)를 관련 변수의 동적 초기화를 거부하는 기능입니다. 다른 전역 객체의 초기화·사용 순서까지 모두 해결하지는 않습니다.
+constinit은 [Part 1-06의 초기화 순서 문제](/blog/embedded/embedded-cpp/part1-06-startup-code)와 관련해 해당 변수의 동적 초기화를 거부하는 기능입니다. 다른 전역 객체의 초기화·사용 순서까지 모두 해결하지는 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 

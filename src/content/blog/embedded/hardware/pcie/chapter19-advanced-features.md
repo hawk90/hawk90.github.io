@@ -14,7 +14,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"다섯 기능은 각자 진단·성능·격리·전력의 한 문제를 풀지만, 시리즈 VM에서는 ACS만 실제로 동작하고 나머지는 capability가 없거나 커널 지원이 없습니다."** 그래서 이 장은 공개 매뉴얼·Linux 문서로 기능을 설명하고, VM에서는 '없다'는 사실까지 증거로 남깁니다.
+> **다섯 기능은 서로 다른 문제를 풉니다.** Lane Margining은 receiver 내부의 시간·전압 마진을 관찰하고, 10-bit Tag는 사용 가능한 요청 식별자 공간을 넓힙니다. TPH는 처리 위치 힌트, ACS는 우회 경로 제어, L0p는 부분폭 절전에 쓰입니다. 지원 비트만으로 성능·격리·전력 효과까지 확인된 것은 아닙니다.
 
 ## Lane Margining — 신호 마진을 소프트웨어로
 
@@ -59,6 +59,8 @@ DMA로 들어온 데이터를 곧바로 처리해야 하는 장치는, 그 데�
 
 [Linux 커널 TPH 문서](https://docs.kernel.org/PCI/tph.html)(2026-11-16 열람)는 이 힌트를 Steering Tag(ST)라는 형식으로 TLP에 싣는다고 설명합니다. 드라이버는 대상 메모리의 ST를 API로 얻어 장치의 ST table에 쓰고, `pcie_enable_tph()`의 모드로 Interrupt Vector Mode(`PCI_TPH_ST_IV_MODE`)와 Device Specific Mode(`PCI_TPH_ST_DS_MODE`)를 고릅니다. ST table은 MSI-X table이나 TPH Extended Capability 안에 있을 수 있습니다. 문서는 Steering Tag가 플랫폼마다 다르며, PCIe 규격은 ST를 어디서 얻는지 정하지 않고 PCI Firmware Specification의 ACPI `_DSM`이 그 방법을 정한다고도 적습니다. 커널 지원은 `CONFIG_PCIE_TPH` 옵션이 필요합니다.
 
+TPH는 placement hint이지 DMA 데이터가 반드시 특정 cache에 놓인다는 보장은 아닙니다. 실제 배치와 locality는 root complex·IOMMU·장치·플랫폼의 I/O 경로에 따라 달라집니다.
+
 시리즈 VM에서는 두 가지가 모두 없었습니다. Linux v6.12 소스에는 `drivers/pci/tph.c`가 없고 Debian 커널 config에 `CONFIG_PCIE_TPH`가 없습니다. 장치 쪽도 `TPHComp- ExtTPHComp-`였습니다. 위 문서는 v6.12보다 뒤의 커널을 설명합니다.
 
 ## ACS — 격리와 P2P 리다이렉트 제어
@@ -66,6 +68,8 @@ DMA로 들어온 데이터를 곧바로 처리해야 하는 장치는, 그 데�
 같은 switch 아래 두 장치가 IOMMU를 거치지 않고 직접 주고받으면, IOMMU는 그 트래픽을 보지 못합니다. ACS(Access Control Services)는 downstream port가 그런 요청을 그대로 보낼지, 막을지, 위로 올려 IOMMU를 거치게 할지 정하는 기능입니다. [Linux v6.12 VFIO 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/driver-api/vfio.rst)(55-65행)도 ACS가 없는 bridge에서 redirection이 IOMMU에 닿지 않을 수 있다고 설명합니다.
 
 시리즈 VM에서 이 차이가 IOMMU group으로 드러났습니다([Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)). ACS가 있는 QEMU root port 아래 장치는 혼자 group을 가졌고(group 10·12), ACS가 없는 XIO3130 downstream port 아래 장치는 port와 같은 group(6·7)이었습니다. root port의 ACS 비트는 [Ch 18](/blog/embedded/hardware/pcie/chapter18-register-maps)에 있습니다(`ACSCtl: SrcValid+ TransBlk- ReqRedir+ CmpltRedir+ UpstreamFwd+ EgressCtrl- DirectTrans-`).
+
+IOMMU group은 ACS 외에도 topology, DMA alias, 장치 내부 경로, kernel quirk의 영향을 받습니다. ACS 하나만으로 group 경계를 계산할 수 없고, 같은 group의 장치를 별도 신뢰 domain에 나눌 수 있는지도 group 전체를 기준으로 판단해야 합니다.
 
 ACS 설정을 바꾸는 Linux v6.12 커널 인자는 `kernel-parameters.txt:4636-4672`의 `pci=disable_acs_redir=`와 `pci=config_acs=`입니다. 문서는 앞의 것이 P2P 트래픽을 위로 올리지 않게 해 "removes isolation between devices and may put more devices in an IOMMU group"이라고 경고하고, 뒤의 것은 ACS 비트 일곱 개(Source Validation부터 Direct Translated P2P까지)를 장치별로 켜고 끄는 형식입니다. 이전 판이 언급한 `pcie_acs_override`는 v6.12 `kernel-parameters.txt`에 없습니다(`grep -n acs_override` 결과 없음). ACS 기능이 없는 경로에서 group 표시만 바꾸는 것은 하드웨어 격리를 만들지 않습니다.
 

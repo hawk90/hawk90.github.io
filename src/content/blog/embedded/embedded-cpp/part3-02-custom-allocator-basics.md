@@ -48,7 +48,9 @@ public:
     MyAllocator(const MyAllocator<U>&) noexcept {}
 
     T* allocate(std::size_t n) {
-        // 메모리 할당 (n * sizeof(T) 바이트)
+        static_assert(alignof(T) <= alignof(std::max_align_t), "alignment unsupported");
+        if (n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            throw std::bad_alloc();
         return static_cast<T*>(::operator new(n * sizeof(T)));
     }
 
@@ -71,7 +73,7 @@ bool operator!=(const MyAllocator<T>&, const MyAllocator<U>&) { return false; }
 - `deallocate(p, n)`으로 메모리를 돌려줍니다.
 - `operator==`, `operator!=`로 컨테이너끼리 비교가 가능합니다.
 
-할당자는 n개 원소의 연속 저장소·정렬·고갈 처리와 동등성 계약을 만족해야 합니다. 객체 생성은 별도이며 컨테이너가 allocator_traits를 통해 처리합니다.
+위 예는 <cstddef>·<limits>·<new>를 포함하며 기본 new 정렬보다 큰 T는 거부합니다. 할당자는 n개 원소의 연속 저장소·정렬·고갈 처리와 동등성 계약을 만족해야 합니다. 객체 생성은 별도이며 컨테이너가 allocator_traits를 통해 처리합니다.
 
 ## 가장 단순한 예 — Pool Allocator
 
@@ -248,6 +250,7 @@ public:
     template<typename U> TaskArenaAllocator(const TaskArenaAllocator<U>&) {}
 
     T* allocate(std::size_t n) noexcept {
+        if (n > std::numeric_limits<std::size_t>::max() / sizeof(T)) std::abort();
         auto* p = arena_.allocate(n * sizeof(T), alignof(T));
         if (!p) std::abort();
         return static_cast<T*>(p);

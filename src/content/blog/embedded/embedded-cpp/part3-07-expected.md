@@ -239,7 +239,12 @@ Result<HugeData> create_data() {
 }
 
 auto r = create_data();
-HugeData d = std::move(*r);   // owner 이전
+if (r) {
+    HugeData d = std::move(*r);   // 성공 상태 확인 후 이동
+    process(d);
+} else {
+    handle_error(r.error());
+}
 ```
 
 `return d;`는 `HugeData`에서 `Result<HugeData>`로의 변환이라 복사 생략 대상이 아니지만, 지역 변수 반환이므로 이동 생성자로 옮겨집니다. 값은 expected 객체 안에 있으므로 이 크기가 반환값 자리를 차지합니다.

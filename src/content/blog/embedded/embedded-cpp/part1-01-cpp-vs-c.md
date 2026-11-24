@@ -231,7 +231,7 @@ STM32F4의 빈 main·UART·RTOS 등에 일률적인 바이트 수를 붙이려�
 
 ### 2. `std::vector`를 무심코 사용
 
-`vector`는 heap 할당을 합니다. 자유 메모리가 없는 환경에서는 런타임 실패로 이어집니다. `std::array`, `etl::vector`(고정 크기)로 대체합니다.
+기본 allocator의 vector는 저장 공간이 부족해지면 동적으로 할당합니다. 매 push마다 할당하는 것은 아니며, custom allocator로 출처를 바꿀 수도 있습니다. 운용 중 할당을 금지한다면 capacity·원소 자체의 할당·고갈 정책까지 확인합니다. `std::array`, `etl::vector`(고정 크기)로 대체합니다.
 
 ### 3. virtual을 모든 곳에 적용
 

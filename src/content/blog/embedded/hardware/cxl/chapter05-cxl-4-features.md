@@ -156,7 +156,7 @@ host가 PPR을 요청하는 *Perform Maintenance*는 3.1에도 있습니다(§8.
 
 ## 다음 편
 
-[Ch 6: CXL.io — PCIe와의 차이·DOE·DVSEC](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 *CXL.io 프로토콜의 PCIe 호환성*과 *CXL 고유 확장*(DVSEC·DOE)을 본격적으로 분해합니다.
+[Ch 6: CXL.io — PCIe와의 차이·DOE·DVSEC](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서는 PCIe가 정의한 DVSEC·DOE를 CXL이 기능 발견과 객체 교환에 어떻게 사용하는지 살펴봅니다. DVSEC·DOE 자체가 CXL 전용 메커니즘인 것은 아닙니다.
 
 ## 관련 항목
 
