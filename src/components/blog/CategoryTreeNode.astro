@@ -23,7 +23,7 @@ const isLeaf = node.children.length === 0;
 const rowClass = [
   'cat-row flex items-center gap-1 rounded-lg text-sm transition-colors',
   node.isActive
-    ? 'text-[var(--color-accent)] font-medium shadow-[inset_2px_0_0_0_var(--color-accent)]'
+    ? 'text-[var(--color-accent)] font-medium bg-[color:color-mix(in_oklab,var(--color-accent)_9%,transparent)]'
     : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
 ];
 const toggleClass = isNested
