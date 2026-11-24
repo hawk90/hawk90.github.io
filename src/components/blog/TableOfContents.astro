@@ -14,8 +14,9 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 ---
 
 {filteredHeadings.length > 0 && (
-  <nav class="toc text-sm" aria-label="Table of contents">
+  <nav class="toc text-sm flex flex-col min-h-0" aria-label="Table of contents">
     <h2 class="sidebar-section-title mb-3">On this page</h2>
+    <div class="toc-scroll min-h-0 overflow-y-auto overscroll-contain pr-1 sidebar-panel-scroll" data-toc-scroll>
     <ul class="toc-list" id="toc-list" role="list">
       {filteredHeadings.map((heading) => (
         <li class:list={['toc-item', `toc-depth-${heading.depth}`]}>
@@ -29,6 +30,7 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
         </li>
       ))}
     </ul>
+    </div>
   </nav>
 )}
 
@@ -86,6 +88,9 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       }
     });
 
+    const scroller = document.querySelector<HTMLElement>('[data-toc-scroll]');
+    let lastActive: HTMLAnchorElement | null = null;
+
     const update = () => {
       const OFFSET = 120;
       const bodyHeight = document.body.offsetHeight;
@@ -98,10 +103,28 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
           else break;
         }
       }
+      let activeLink: HTMLAnchorElement | null = null;
       tocLinks.forEach((link) => {
         const isActive = link.dataset.heading === currentId;
         link.classList.toggle('is-active', isActive);
+        if (isActive) activeLink = link;
       });
+      // Keep the active entry visible inside the TOC's own scroll area.
+      // Scroll the container directly: scrollIntoView would move the page.
+      if (activeLink && scroller && activeLink !== lastActive) {
+        const link = activeLink as HTMLAnchorElement;
+        // Rects, not offsetTop: each <li> is position:relative, so the
+        // link's offsetTop is measured from its own list item.
+        const top = link.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+        const bottom = top + link.offsetHeight;
+        const margin = 48;
+        if (top < scroller.scrollTop + margin) {
+          scroller.scrollTop = Math.max(0, top - margin);
+        } else if (bottom > scroller.scrollTop + scroller.clientHeight - margin) {
+          scroller.scrollTop = bottom - scroller.clientHeight + margin;
+        }
+      }
+      lastActive = activeLink;
     };
 
     let ticking = false;
