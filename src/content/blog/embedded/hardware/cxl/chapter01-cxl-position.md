@@ -23,7 +23,7 @@ topics: ["embedded", "embedded/hardware"]
 | 질문 | 읽을 장 | 확인할 경계 |
 |------|------|------|
 | PCIe 장치와 CXL 메모리는 어디서 갈라지는가? | [Ch 6 CXL.io](/blog/embedded/hardware/cxl/chapter06-cxl-io), [Ch 8 CXL.mem](/blog/embedded/hardware/cxl/chapter08-cxl-mem) | config·MMIO·DMA와 HDM의 CPU 메모리 접근 |
-| 장치 메모리가 Linux에서 사용 가능해지려면? | [Ch 11 driver](/blog/embedded/hardware/cxl/chapter11-linux-driver), [Ch 12 guest 실습](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위) | window·memdev·region commit·DAX/System RAM의 단계 |
+| 장치 메모리가 Linux에서 사용 가능해지려면? | [Ch 11 driver](/blog/embedded/hardware/cxl/chapter11-linux-driver), [Ch 12 guest 실습](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest-linux에서-확인한-것) | window·memdev·region commit·DAX/System RAM의 단계 |
 | 여러 host나 가속기가 공유하면 무엇이 더 필요한가? | [Ch 3 일관성](/blog/embedded/hardware/cxl/chapter03-coherency-model), [Ch 4 pooling](/blog/embedded/hardware/cxl/chapter04-pooling-gfam), [Ch 13 fabric](/blog/embedded/hardware/cxl/chapter13-switching-fabric) | 영역 할당·coherency·소유권·반납 |
 
 Linux·QEMU 실습은 Type 3의 발견과 구성 경계를 다룹니다. CXL.cache·BISnp의 wire 동작이나 CXL 4.0의 128 GT/s·Bundled Port를 같은 실험으로 검증한 것은 아닙니다. 먼저 guest에서 어디까지 성공했는지 확인하고, 그 단계에 필요한 프로토콜 설명으로 돌아오는 순서도 가능합니다.

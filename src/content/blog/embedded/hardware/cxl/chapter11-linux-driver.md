@@ -95,7 +95,7 @@ Call trace:
 
 ### 실제로 막힌 지점 — cache 무효화
 
-[Ch 12의 arm64 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)에서는 memdev 등록과 region의 target·DPA 설정까지 성공했지만 commit은 실패했습니다. Kernel log는 `Failed to synchronize CPU cache state`, Python의 sysfs write 결과는 `OSError: [Errno 6] No such device or address`였고 `commit`을 다시 읽으면 0이었습니다. 이 결과는 Linux **6.12.116+deb13-arm64**에서 얻은 것이며 위 v6.12 함수 설명과 실행 patch 판을 구분합니다.
+[Ch 12의 arm64 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest-linux에서-확인한-것)에서는 memdev 등록과 region의 target·DPA 설정까지 성공했지만 commit은 실패했습니다. Kernel log는 `Failed to synchronize CPU cache state`, Python의 sysfs write 결과는 `OSError: [Errno 6] No such device or address`였고 `commit`을 다시 읽으면 0이었습니다. 이 결과는 Linux **6.12.116+deb13-arm64**에서 얻은 것이며 위 v6.12 함수 설명과 실행 patch 판을 구분합니다.
 
 고정한 v6.12의 `commit_store()`는 decoder hardware commit 전에 `cxl_region_invalidate_memregion()`을 호출합니다. CPU cache 무효화 기능이 없고 테스트 우회 옵션도 꺼져 있으면 여기서 `-ENXIO`로 반환합니다. 따라서 이 사례는 decoder의 Committed bit를 기다리다 생긴 `-ETIMEDOUT`과 다릅니다. 실제 guest에서 `CONFIG_CXL_REGION_INVALIDATION_TEST`는 꺼져 있었고, 이 안전 검사를 우회해 RAM 노출 성공으로 바꾸지 않았습니다. 같은 경로는 [Linux v6.12.116 region.c](https://github.com/gregkh/linux/blob/v6.12.116/drivers/cxl/core/region.c)에서도 확인할 수 있습니다.
 

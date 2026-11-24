@@ -79,7 +79,7 @@ Capabilities: [17c v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len
 
 같은 게스트에서 switch upstream port `0d:00.0`과 root port `0c:00.0`에는 ID 0003h(CXL Extensions DVSEC for Ports)가 있었고, endpoint에는 없었습니다. Table 8-2의 필수·금지 열과 그대로 맞습니다.
 
-실제 guest에서의 반례는 [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)에 있습니다. QEMU Type 3가 `cxl_pci`에 연결되고 256 MiB memdev가 등록됐지만 region commit은 실패했습니다. DVSEC 해석·PCI binding 성공을 CPU 메모리 접근 성공으로 바꿔 읽을 수 없는 이유입니다.
+실제 guest에서의 반례는 [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest-linux에서-확인한-것)에 있습니다. QEMU Type 3가 `cxl_pci`에 연결되고 256 MiB memdev가 등록됐지만 region commit은 실패했습니다. DVSEC 해석·PCI binding 성공을 CPU 메모리 접근 성공으로 바꿔 읽을 수 없는 이유입니다.
 
 따라서 DVSEC는 기능 광고를 읽는 출발점이지 driver binding이나 메모리 사용 가능 상태를 뜻하지 않습니다. Vendor ID와 함께 DVSEC ID·revision·length를 해석한 뒤, OS의 driver matching·mailbox 초기화와 host window·decoder 설정을 각각 확인해야 합니다.
 

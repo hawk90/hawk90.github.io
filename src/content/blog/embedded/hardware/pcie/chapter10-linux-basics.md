@@ -241,7 +241,7 @@ Linux host에서 `lspci -D`로 대상 장치의 domain을 포함한 BDF를 찾�
 
 `msi_irqs`가 없거나 비어 있다고 바로 장치 고장으로 판단하지 않습니다. 아직 vector를 할당하지 않았거나 INTx·polling 경로를 사용할 수 있습니다. IRQ가 실제로 증가하는지는 장치의 workload를 실행하며 `/proc/interrupts`와 driver의 완료 경로를 함께 봅니다. IRQ 증가만으로 DMA buffer 내용까지 올바르다는 결론도 낼 수 없습니다.
 
-자원 행의 범위·길이는 [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio#bar-mapping--linux-측), MSI/MSI-X 할당과 handler 수명은 [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts#linux-pci-irq-api), buffer의 주소와 소유권은 [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)에서 이어집니다. 파일의 의미는 [v6.12 PCI sysfs 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/sysfs-pci.rst)와 [`msi_irqs` ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci)를 기준으로 합니다.
+자원 행의 범위·길이는 [Ch 4의 BAR 자원 열거](/blog/embedded/hardware/pcie/chapter04-bar-mmio#resource-enumeration--누가-주소를-정하나), MSI/MSI-X 할당과 handler 수명은 [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts#linux-pci-irq-api), buffer의 주소와 소유권은 [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)에서 이어집니다. 파일의 의미는 [v6.12 PCI sysfs 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/sysfs-pci.rst)와 [`msi_irqs` ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci)를 기준으로 합니다.
 
 ## QEMU NVMe 한 대로 연결해서 확인하기
 

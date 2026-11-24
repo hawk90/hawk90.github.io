@@ -178,7 +178,7 @@ cxl monitor
 
 ## 오류가 생긴 층부터 나누기
 
-같은 “CXL 실패”라도 모델 구성, OS 초기화, 메모리 media와 link 오류는 증거가 다릅니다. [Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)은 region commit이 cache 무효화 단계에서 거절된 사례이며, poison이나 PHY 오류를 주입한 결과가 아닙니다.
+같은 “CXL 실패”라도 모델 구성, OS 초기화, 메모리 media와 link 오류는 증거가 다릅니다. [Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest-linux에서-확인한-것)은 region commit이 cache 무효화 단계에서 거절된 사례이며, poison이나 PHY 오류를 주입한 결과가 아닙니다.
 
 | 관찰 | 먼저 조사할 범위 | 확대 해석하면 안 되는 것 |
 |------|------|------|

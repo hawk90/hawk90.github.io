@@ -204,7 +204,7 @@ bash: line 17: echo: write error: No such device or address
 
 ### Window·장치 용량·region 크기가 다른 실제 예
 
-[Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest를-실제로-부팅해-확인한-범위)에서는 root decoder의 window가 4 GiB이고 memdev의 volatile 용량은 256 MiB였습니다. 그 안에 256 MiB region을 구성했지만 commit이 실패해 사용 가능한 RAM으로 노출되지 않았습니다. Window는 대상 주소 공간의 경계이며, 그 크기 전체가 물리 장치 용량이나 online RAM을 뜻하지 않습니다.
+[Ch 12의 guest 실험](/blog/embedded/hardware/cxl/chapter12-qemu-emulation#guest-linux에서-확인한-것)에서는 root decoder의 window가 4 GiB이고 memdev의 volatile 용량은 256 MiB였습니다. 그 안에 256 MiB region을 구성했지만 commit이 실패해 사용 가능한 RAM으로 노출되지 않았습니다. Window는 대상 주소 공간의 경계이며, 그 크기 전체가 물리 장치 용량이나 online RAM을 뜻하지 않습니다.
 
 ## 자주 하는 실수
 
