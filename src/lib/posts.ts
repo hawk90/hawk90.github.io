@@ -6,7 +6,6 @@ import { formatDate } from './utils';
 
 export type BlogPost = CollectionEntry<'blog'>;
 const postMetaCache = new WeakMap<BlogPost, PostMeta>();
-const backlinkIndexCache = new WeakMap<readonly BlogPost[], Map<string, BlogPost[]>>();
 let publishedPostsPromise: Promise<BlogPost[]> | null = null;
 export interface PostMeta {
   formattedDate: string;
@@ -404,57 +403,3 @@ export function getRelatedPosts(
   return [...selected, ...fallback];
 }
 
-/**
- * 백링크 조회
- * 전체 본문 스캔 인덱스를 1회만 만들고 재사용한다.
- *
- * Siblings sink. Across the 726 published pages, 82% of backlinks came from
- * the same series as the post itself — and that series' full chapter list is
- * already in the sidebar and again under the article, so a reader met the same
- * neighbours a third time here. The 18% that arrive from another series are
- * the ones no other block on the page shows, so they are what this block leads
- * with. Nothing is dropped; a backlink is evidence someone linked here, and
- * that stays true whichever series it came from.
- */
-export function getBacklinks(currentId: string, posts: BlogPost[]): BlogPost[] {
-  let index = backlinkIndexCache.get(posts);
-  if (!index) {
-    index = buildBacklinkIndex(posts);
-    backlinkIndexCache.set(posts, index);
-  }
-  const refs = index.get(currentId) ?? [];
-  const currentSeries = posts.find((post) => post.id === currentId)?.data.series ?? null;
-  if (!currentSeries) return refs;
-  // Chapters of one series share a date by convention, so the date sort below
-  // decides nothing within a series; this is what gives the block an order.
-  return [
-    ...refs.filter((post) => post.data.series !== currentSeries),
-    ...refs.filter((post) => post.data.series === currentSeries),
-  ];
-}
-
-function buildBacklinkIndex(posts: BlogPost[]): Map<string, BlogPost[]> {
-  const index = new Map<string, BlogPost[]>();
-  const blogLinkPattern = /\/blog\/([^\s)"'#<]+)/g;
-
-  for (const post of posts) {
-    const body = post.body ?? '';
-    const seen = new Set<string>();
-    let match: RegExpExecArray | null;
-
-    while ((match = blogLinkPattern.exec(body)) !== null) {
-      const rawSlug = match[1]?.replace(/\/$/, '');
-      if (!rawSlug || rawSlug === post.id || seen.has(rawSlug)) continue;
-      seen.add(rawSlug);
-      const bucket = index.get(rawSlug);
-      if (bucket) bucket.push(post);
-      else index.set(rawSlug, [post]);
-    }
-  }
-
-  for (const [, refs] of index) {
-    refs.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  }
-
-  return index;
-}

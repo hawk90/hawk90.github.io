@@ -4,10 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagBadge from '../../components/blog/TagBadge.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import SeriesNav from '../../components/blog/SeriesNav.astro';
-import SeriesSidebar from '../../components/blog/SeriesSidebar.astro';
 import Comments from '../../components/blog/Comments.astro';
 import RelatedPosts from '../../components/blog/RelatedPosts.astro';
-import Backlinks from '../../components/blog/Backlinks.astro';
 import ShareButtons from '../../components/blog/ShareButtons.astro';
 import StickyTitle from '../../components/blog/StickyTitle.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
@@ -30,7 +28,15 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const { Content, headings: rawHeadings, remarkPluginFrontmatter } = await render(post);
+// rehype-autolink-headings prepends a "#" text node to every heading, and
+// Astro's collected heading text includes it, so the TOC read "#정리".
+// Closing navigation sections ("다음 편", "관련 항목", ...) are links out of
+// the post, not its content, so they stay in the body but not in the TOC.
+const NAV_HEADING = /^(다음(\s+(장|편|글|절|항목|단계|확인|Rule|Reminder|Unit|시리즈 추천|추천 시리즈))?(\s+예고)?(\s*(\(.*\)|—.*))?|관련\s+(항목|시리즈|글)(\s*\(.*\))?|(참고|근거)\s*자료|참고|출처|References)$/;
+const headings = rawHeadings
+  .map((h) => ({ ...h, text: h.text.replace(/^#\s*/, '').trim() }))
+  .filter((h) => !NAV_HEADING.test(h.text));
 // Which of this post's tags have a page to link to (see getRoutableTagKeys).
 const routableTags = await getRoutableTagKeys();
 // An article is where search and external links land, and it was the one page
@@ -225,11 +231,6 @@ const hasMath = remarkPluginFrontmatter?.hasMath === true;
             </div>
           )}
 
-          <!-- Backlinks (posts that reference this one) -->
-          <div class="container-narrow measure-left">
-            <Backlinks currentId={post.id} posts={allPosts} />
-          </div>
-
           <!-- Comments -->
           <div class="container-narrow measure-left mt-16">
             <Comments />
@@ -240,19 +241,19 @@ const hasMath = remarkPluginFrontmatter?.hasMath === true;
              sidebar a second scrolling surface. Only long sub-sections
              should scroll independently. -->
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="sticky top-24 space-y-6">
-            {seriesPosts.length > 1 && (
-              <div>
-                <SeriesSidebar
-                  seriesName={post.data.series!}
-                  posts={seriesPosts}
-                  currentSlug={post.id}
-                />
-              </div>
-            )}
-            {seriesPosts.length > 1 && headings.length > 0 && <div class="sidebar-divider"></div>}
-            <TableOfContents headings={headings} />
-          </div>
+          {/* The column holds only the TOC. The series list used to sit here
+              too, but it repeats the series box at the end of the article,
+              and the two lists could not share one screen-high column: in
+              most posts one of them got clipped to a sliver.
+              `top` equals where the column already sits (header 4rem+1px,
+              then the article's lg:py-24), so it pins in place instead of
+              jumping up on the first scroll; max-h keeps it inside the
+              viewport, and only a TOC taller than that scrolls. */}
+          {headings.length > 0 && (
+            <div class="sticky top-[calc(4rem+1px+6rem)] max-h-[calc(100vh-4rem-1px-6rem-1.5rem)] flex flex-col">
+              <TableOfContents headings={headings} />
+            </div>
+          )}
         </aside>
       </div>
     </div>
