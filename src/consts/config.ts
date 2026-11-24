@@ -129,8 +129,11 @@ export const SHARE_CONFIG = {
 };
 
 // --- Related Posts ---
+// Off: the post's own "## 관련 항목" section already links hand-picked posts
+// with a reason for each, and the tag-scored cards repeated that list less
+// accurately, under the series block that covers the same series.
 export const RELATED_POSTS_CONFIG = {
-  enabled: true,
+  enabled: false,
   maxPosts: 3,
 };
 
