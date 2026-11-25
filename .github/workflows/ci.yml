@@ -32,9 +32,11 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24.22.3"
-          # No `cache: npm`: setup-node runs `npm config get cache` with Node's
-          # bundled npm 11, which devEngines rejects. ~/.npm is cached below,
-          # after npm 12 is installed.
+          # No npm cache here: setup-node runs `npm config get cache` with Node's
+          # bundled npm 11, which devEngines rejects. It also turns the cache on
+          # by itself from packageManager, hence the explicit false. ~/.npm is
+          # cached below, after npm 12 is installed.
+          package-manager-cache: false
 
       - name: Cache OG images
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
