@@ -150,11 +150,17 @@ post-merge:
   commands:
     sync-deps:
       run: scripts/sync-deps.sh
+# post-checkout: branch checkouts only ({3} = 1). A rebase checks out <onto> first;
+# post-rewrite syncs once when it finishes, so skip while a rebase is in progress.
 post-checkout:
   commands:
     sync-deps:
-      run: scripts/sync-deps.sh --since {1}
+      skip:
+        - rebase
+      run: '[ "{3}" = 1 ] || exit 0; scripts/sync-deps.sh --since {1}'
+# post-rewrite: rebase only ({1} = rebase). `commit --amend` does not move ORIG_HEAD,
+# so the ORIG_HEAD..HEAD range would be stale.
 post-rewrite:
   commands:
     sync-deps:
-      run: scripts/sync-deps.sh
+      run: '[ "{1}" = rebase ] || exit 0; scripts/sync-deps.sh'

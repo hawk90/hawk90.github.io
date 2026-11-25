@@ -73,6 +73,15 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
 
+      - name: Install npm from packageManager
+        # setup-node ships the npm bundled with Node; devEngines in package.json
+        # rejects anything but npm 12, so install the pinned one. Run outside the
+        # checkout so the global install itself is not checked against devEngines.
+        run: |
+          v=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          (cd "$RUNNER_TEMP" && npm install -g "npm@$v" --no-fund --no-audit)
+          npm -v
+
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 

@@ -12,8 +12,12 @@ fi
 if [ -f rust-toolchain.toml ] && command -v rustup >/dev/null 2>&1; then
   rustup show active-toolchain >/dev/null   # installs the pinned toolchain on first use
 fi
-if command -v corepack >/dev/null 2>&1; then
-  corepack enable >/dev/null 2>&1 || true   # honours "packageManager" in package.json
+# npm is not managed by corepack (and `corepack enable` would replace a global pnpm).
+# devEngines in package.json makes npm itself refuse to run on the wrong version.
+want_npm=$(node -p 'require("./package.json").packageManager?.match(/^npm@(.+)$/)?.[1] ?? ""' 2>/dev/null || true)
+have_npm=$(cd / && npm -v 2>/dev/null || true)
+if [ -n "$want_npm" ] && [ "${have_npm%%.*}" != "${want_npm%%.*}" ]; then
+  echo "bootstrap: npm ${have_npm:-not found}, package.json wants npm@$want_npm — run: (cd / && npm i -g npm@$want_npm)" >&2
 fi
 
 scripts/sync-deps.sh --all
